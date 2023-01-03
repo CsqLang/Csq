@@ -3,8 +3,7 @@
     #include "array.h"
     //This class stores data in the form of key-value pair same as map.
     template<typename K,typename V>
-    class dict{
-        public:
+    struct dict{
             array<K> keys;
             array<V> values;
             //Constructors
