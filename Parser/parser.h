@@ -6,12 +6,15 @@
     #endif // Tokenizer_Csq4
     #include "bytecode.h"
     //This is the one which is responsible for parsing in Csq4's code and it's conversion to Bytecodes.
-    struct Parser{
-        str code;
-        array<str> lines;
-        Parser(str code){
-            lines = split(code,"\n");
-        }
+    //This is the one which is responsible for parsing in Csq4's code and it's conversion to Bytecodes.
+    class Parser{
+        public:
+            array<str> token;
+            void Parse(){
+                for(auto i : token){
+                    printf("%s",i.Str);
+                }
+            }
     };
 
 #endif // Parser_Csq4
