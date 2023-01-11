@@ -5,6 +5,7 @@
 #define FUNCTIONS(name,args,code) auto name args LBRACE code RBRACE SEMI
 #define CALL(name, args) name args
 #define REFERENCE(name,type, refr) SmartPointer<type> name = SmartPointer<type>(refr)
+#define FORREF(name,type) SmartPointer<type> name
 #define ID_REF(name) AMPER name
 #define FOR for(
 #define WHILE while(
