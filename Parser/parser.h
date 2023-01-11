@@ -1,20 +1,327 @@
-#if !defined(Parser_Csq4)
-#define Parser_Csq4
-    #if !defined(Tokenizer_Csq4)
-    // #define Tokenizer_Csq4
-        #include "tokenizer.h"
-    #endif // Tokenizer_Csq4
-    #include "bytecode.h"
-    //This is the one which is responsible for parsing in Csq4's code and it's conversion to Bytecodes.
-    //This is the one which is responsible for parsing in Csq4's code and it's conversion to Bytecodes.
-    class Parser{
-        public:
-            array<str> token;
-            void Parse(){
-                for(auto i : token){
-                    printf("%s",i.Str);
-                }
+/***                FEATURES SHALL BE THERE IN CSQ4
+ * REFERENCE COUNTING (DONE)
+ * OBJECT ORIENTED PROGRAMMING (PENDING)
+ * FUNCTIONAL PROGRAMMING (DONE)
+ * GENERATION OF EXECUTABLE BUT WILL BE RUNNED AT RUNTIME (PENDING, AND WILL BE DONE BY CODE GENERATOR)
+ * 
+ * **/
+#if !defined(PARSER_CSQ4_H)
+#define PARSER_CSQ4_H
+#include "lexer.h"
+//Some Utilities
+bool CheckIF(array<str> tokens){
+    return in(tokens,"if");
+}
+bool isIdentifier(str tok){
+    return Regex(identifier,tok);
+}
+bool CheckElse(array<str> tokens){
+    return in(tokens,"else");
+}
+bool CheckElif(array<str> tokens){
+    return in(tokens,"elif");
+}
+bool CheckFor(array<str> tokens){
+    return in(tokens,"for");
+}
+bool CheckWhile(array<str> tokens){
+    return in(tokens,"while");
+}
+bool CheckFunctionDefination(array<str> tokens){
+    return in(tokens,"def");
+}
+bool CheckClassDefination(array<str> tokens){
+    return in(tokens,"class");
+}
+bool CheckEnd(array<str> tokens){
+    return in(tokens,"ends");
+}
+array<str> IfTokManagement(array<str> tok){
+    array<str> s;
+    if(CheckIF(tok) == 1){
+        for(auto i : tok)
+            if(i == "if")
+                s.add("IF");
+            else
+                s.add(i);
+        s.add("LBRACE");
+    }
+    else{
+        s = tok;
+    }
+    return s;
+}
+array<str> ElifTokManagement(array<str> tok){
+    array<str> s;
+    if(CheckIF(tok) == 1){
+        for(auto i : tok)
+            if(i == "elif")
+                s.add("ELIF");
+            else
+                s.add(i);
+        s.add("LBRACE");
+    }
+    else{
+        s = tok;
+    }
+    return s;
+}
+array<str> ElseTokManagement(array<str> tok){
+    array<str> s;
+    if(CheckIF(tok) == 1){
+        for(auto i : tok)
+            if(i == "else")
+                s.add("ELSE");
+            else
+                s.add(i);
+    }
+    else{
+        s = tok;
+    }
+    return s;
+}
+array<str> EndTokManagement(array<str> tok){
+    array<str> s;
+    if(CheckEnd(tok) == 1)
+        for(auto i : tok)
+            if(i == "ends")
+                s.add("ENDS");
+            else
+                s.add(i);
+    else
+        s = tok;
+    return s;
+}
+str Rep(str s){
+    str code;
+    code = replaceStr(s.Str,"= =","==");
+    code = replaceStr(code.Str,"+ +","++");
+    code = replaceStr(code.Str,"- -","--");
+    code = replaceStr(code.Str,"+ =","+=");
+    code = replaceStr(code.Str,"- =","-=");
+    code = replaceStr(code.Str,"* =","*=");
+    code = replaceStr(code.Str,"/ =","/=");
+    code = replaceStr(code.Str,"! =","!=");
+    code = replaceStr(code.Str,"> =",">=");
+    code = replaceStr(code.Str,"< =","<=");
+    code = replaceStr(code.Str,"& &","&&");
+    return code;
+}
+bool CheckVariableAssignment(array<str> tokens){
+    bool colon, equal;
+    for(auto op : tokens){
+        if(op == ":"){
+            colon = true;
+        }
+        else if(op == "="){
+            equal = true;
+        }
+    }
+    bool state = false;
+    if(colon == true && equal == true){
+        state = true;
+    }
+    return state;
+}
+#define ignore NULL;
+//Variable call implementation
+auto CheckVariableCall(array<str> instructions){
+    array<str> newop;
+    for(auto op : instructions){
+        if(Regex(identifier,op) == true && in(Stack::Variables,op) == true && in(ReservedTokens.keys,op) == false){
+            newop.add(str("* ")+op);
+        }
+        else{
+            newop.add(op);
+        }
+    }
+    return newop;
+}
+//Variable assignment shuffle function will produce 3 new tokens of name,type and assignment.
+auto TokenVariableAssignShuffle(array<str> tokens){
+    str type,name,assign;
+    bool varname = true;
+    bool typepos;
+    bool valpos;
+    //Example:
+    /*
+        a:int = 387
+        ["a","COLON","int","EQUAL","387"]
+    */
+    //Getting positions of all main identities...
+    for(int i=0;i<tokens.len();i++){
+        if(varname == true && tokens[i] != ":"){
+            name += tokens[i];
+        }
+        else if(tokens[i] == ":"){
+            valpos = false;
+            typepos = true;
+            varname = false;
+        }
+        else if(tokens[i] == "="){
+            valpos = true;
+            typepos = false;
+            varname = false;
+        }
+        else if(typepos == true && valpos == false){
+            type += tokens[i]+" ";
+        }
+        else if(valpos == true){
+            assign += tokens[i]+" ";
+        }
+    }
+    return array<str>({name,type,assign});
+}
+//Variable call implementation
+auto VariableCall(array<str> instructions){
+    array<str> newop;
+    for(auto op : instructions){
+        if(Regex(identifier,op) == true && in(Stack::Variables,op) == true && in(ReservedTokens.keys,op) == false){
+            newop.add(str("*")+op);
+        }
+        else{
+            newop.add(op);
+        }
+    }
+    return newop;
+}
+//Variable assignment shuffle function will produce 3 new tokens of name,type and assignment.
+auto TokenVariableInAssignShuffle(array<str> tokens){
+    str type,name,assign;
+    bool varname = true;
+    bool typepos;
+    bool valpos;
+    //Example:
+    /*
+        a:int = 387
+        ["a","COLON","int","EQUAL","387"]
+    */
+    //Getting positions of all main identities...
+    for(int i=1;i<tokens.len();i++){
+        if(varname == true && tokens[i] != ":"){
+            name += tokens[i];
+        }
+        else if(tokens[i] == ":"){
+            valpos = false;
+            typepos = true;
+            varname = false;
+        }
+        else if(tokens[i] == "in"){
+            valpos = true;
+            typepos = false;
+            varname = false;
+        }
+        else if(typepos == true && valpos == false){
+            type += tokens[i]+" ";
+        }
+        else if(valpos == true){
+            assign += tokens[i]+" ";
+        }
+    }
+    return array<str>({name,type,assign});
+}
+array<str> ForTokManagement(array<str> tok){
+    // array<str> t;
+    array<str> code;
+    if(CheckFor(tok) == true){
+        str n = TokenVariableInAssignShuffle(tok)[0];
+        str t = TokenVariableInAssignShuffle(tok)[1];
+        str a = TokenVariableInAssignShuffle(tok)[2];
+        code = {"FOR FORREF(",n+",",t+",) IN",a+" DO"};
+    }
+    else{
+        code = tok;
+    }
+    return code;
+}
+/*This is the class which is basiclly the implementation of parser for Csq4.
+How it will work:
+input: tokens
+output: Csq4 bytecodes instead of AST.
+*/
+class Parser{
+    public:
+        //Declaration of Parse function.
+        auto Parse(array<array<str>> tokens);
+};
+//Defination of Parse function in Parser class
+/*This function needs all tokens present in the code.*/
+auto Parser::Parse(array<array<str>> tokens){
+    //Declare states and some needed variables.
+    str nominal_code, fn_code, imports, fn_name;
+    bool fn_state = false;
+    //Applying for range loop to get tokenized tokens present in each line.
+    for(array<str> rawline : tokens){
+        array<str> line = EndTokManagement(ForTokManagement(ElseTokManagement(ElifTokManagement(IfTokManagement(rawline)))));
+        //Evalute when Variable assignment is there and it's not inside functions body.
+        if(CheckVariableAssignment(line) == true and fn_state == false && CheckFunctionDefination(line) == false){
+            str name = TokenVariableAssignShuffle(line)[0];
+            str type = TokenVariableAssignShuffle(line)[1];
+            str val = TokenVariableAssignShuffle(line)[2];
+            //Producing bytecodes.
+            str bytecode = "REFERENCE(";bytecode += name + ",";
+            bytecode += type + ",";bytecode += val + ")\n";
+            //Adding the bytecode to the code string.
+            nominal_code += bytecode;
+            //Add the variable to stack.
+            Stack::Variables.add(name);
+        }
+        //Evalute when Variable assignment is there in the body of a function.
+        else if(CheckVariableAssignment(line) == true and fn_state == true && CheckFunctionDefination(line) == false){
+            str name = TokenVariableAssignShuffle(line)[0];
+            str type = TokenVariableAssignShuffle(line)[1];
+            str val = TokenVariableAssignShuffle(line)[2];
+            //Producing bytecodes.
+            str bytecode = "REFERENCE(";bytecode += name + ",";
+            bytecode += type + ",";bytecode += val + ")\n";
+            //Adding the bytecode to the code string.
+            fn_code += bytecode;
+            //Add the variable to stack.
+            Stack::Variables.add(name);
+        }
+        //When function defination found so:
+        else if(CheckFunctionDefination(line) == true and fn_state == false){
+            //Some needed informations about function::
+            str fnname,args,bytecode_arg;bool argstate = false;
+            //Extracting name of the function and the arguments.
+            for(int i = 0;i<line.len();i++){
+                if(line[i] == "(")
+                    argstate = true;
+                // else if(line[i] == "def " && i==0){}
+                else if(argstate == false && i>0)
+                    fnname+=line[i]+" ";
+                else if(argstate == true)
+                    args += line[i];
+            }args.pop_bk();
+            fn_name = replaceStr(fnname.Str," ","");
+            //Rechanging the state because the function is defined and it's body hasn't ended.
+            fn_state = true;
+            //Transform the function's arguments in bytecode representation.
+            if(args == ""){bytecode_arg = "";}
+            else{
+                //Stage one split the arguments via ','
+                auto splitted = split(args,",");
+                //Apply for range loop over splitted arguments.
+                for(auto i : splitted){
+                    str n = TokenVariableAssignShuffle(Lexer(i).GetTokens())[0];
+                    str t = TokenVariableAssignShuffle(Lexer(i).GetTokens())[1];
+                    str e = TokenVariableAssignShuffle(Lexer(i).GetTokens())[2];
+                    bytecode_arg += str("REFERENCE(") + n + str(",")+t+str(",")+e+"),";
+                    Stack::Variables.add(n);
+                }bytecode_arg.pop_bk();
             }
-    };
-
-#endif // Parser_Csq4
+            fn_code += str("def ")+fn_name+str("(")+bytecode_arg+str(") LBRACE\n");
+        }
+        else if(fn_state == true && tostr(line) != fn_name + " ENDS")
+            fn_code += tostr(line)+"\n";
+        else if(tostr(line) == (fn_name + " ENDS") && fn_state == true){
+            fn_code += "ENDS\n";fn_state = false;
+        }
+        //If none of the above condition matched with tokens.
+        else if(fn_state == false){
+            nominal_code += tostr(line) + "\n";
+        }
+    }
+    return array<str>({imports,Rep(fn_code),Rep(nominal_code)});
+}
+#endif // PARSER_CSQ4_H
