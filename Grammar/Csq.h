@@ -12,20 +12,14 @@ str negative_integers = "-[0-9]";
 str negative_floats = "-.[0-9]";
 str positive_floats = ".[0-9]";
 /////////////////////////////////
-dict<str,str> Grammar = {
-{"(",")","[","]",":",",",";","+","-","*","/",
-"|","&","&&","||","<",">","=",".","%","{","}","==",
-"!=","<=",">=","~","+=","-=","*=","/=","%=","&=",
-"++","--"},
-{"LPAR","RPAR","LSQB","RSQB","COLON","COMMA","SEMI",
-"PLUS","MINUS","STAR","SLASH","VBAR","AMPER","AND",
-"OR","LESS","GREATER","EQUAL","DOT","PERCENT","LBRACE",
-"RBRACE","EQEQUAL","NOTEQUAL","LESSEQUAL","GREATEREQUAL",
-"TILDE","POW","PLUSEQUAL","MINEQUAL","STAREQUAL","SLASHEQUAL",
-"PERCENTEQUAL","AMPEREQUAL","INCREMENT","DECREMENT"}
-};
+//Types of operators
+array<str> Arithmentic_Operators = {"+","-","*","/","%","^"};
+array<str> Logical_Operators = {"or","and","not"};
+array<str> Comparison_Operators = {"==","!=","<",">","<=","<"};
+array<str> Assignment_Operators = {"=","+=","-=","*=","/="};
+array<str> AllOperators = {"||","&&","==","!=","<=","<","+=","-=","*=","/="};
 //////////////////////////////////
-// Reserved Tokens
+// Reserved Tokens | Keywords
 dict<str,str> ReservedTokens = {
 {"if","else","elif","def","class","const","meth","public","private","inherit","ends","for","delete",
 "new","import","in"
@@ -33,5 +27,18 @@ dict<str,str> ReservedTokens = {
 {"IF","ELSE","ELIF","DEF","CLASS","const","DEF","public:","private:",":","ENDS","FOR","delete",
 "new","import","IN"
 }
+};
+//Bytecode grammar
+dict<str,str> BytecodeGrammar = {
+{"(",")","\"","[","]",":",",",";","+","-","*","/",
+"|","&","&&","||","<",">","=",".","{","}","==",
+"!=","<=",">=","~","+=","-=","*=","/=","%=","&=",
+"++","--","\""},
+{"LPAR","RPAR","LSQB","RSQB","COLON","COMMA","SEMI",
+"PLUS","MINUS","STAR","SLASH","VBAR","AMPER","AND",
+"OR","LESS","GREATER","EQUAL","DOT","LBRACE",
+"RBRACE","EQEQUAL","NOTEQUAL","LESSEQUAL","GREATEREQUAL",
+"TILDE","POW","PLUSEQUAL","MINEQUAL","STAREQUAL","SLASHEQUAL",
+"PERCENTEQUAL","AMPEREQUAL","INCREMENT","DECREMENT"}
 };
 #endif // Csq_Grammar_h
