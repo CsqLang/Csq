@@ -61,4 +61,12 @@
                 this->values.pop();
             }
     };
+
+    str tostr(array<str> s){
+        str r;
+        for(auto i : s)
+            r += i + " ";
+        r.pop_bk();
+        return r;
+    }
 #endif // DICT_UTILS_H
