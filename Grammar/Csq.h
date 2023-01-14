@@ -30,12 +30,12 @@ dict<str,str> ReservedTokens = {
 };
 //Bytecode grammar
 dict<str,str> BytecodeGrammar = {
-{"(",")","\"","[","]",":",",",";","+","-","*","/",
+{"(",")","\"","[","]",":",",",";","+","-","*",
 "|","&","&&","||","<",">","=",".","{","}","==",
 "!=","<=",">=","~","+=","-=","*=","/=","%=","&=",
 "++","--","\""},
 {"LPAR","RPAR","LSQB","RSQB","COLON","COMMA","SEMI",
-"PLUS","MINUS","STAR","SLASH","VBAR","AMPER","AND",
+"PLUS","MINUS","STAR","VBAR","AMPER","AND",
 "OR","LESS","GREATER","EQUAL","DOT","LBRACE",
 "RBRACE","EQEQUAL","NOTEQUAL","LESSEQUAL","GREATEREQUAL",
 "TILDE","POW","PLUSEQUAL","MINEQUAL","STAREQUAL","SLASHEQUAL",
