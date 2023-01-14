@@ -1,9 +1,9 @@
 /***                FEATURES SHALL BE THERE IN CSQ4
  * REFERENCE COUNTING (DONE)
- * OBJECT ORIENTED PROGRAMMING (PENDING)
+ * OBJECT ORIENTED PROGRAMMING (DONE)
  * FUNCTIONAL PROGRAMMING (DONE)
  * GENERATION OF EXECUTABLE BUT WILL BE RUNNED AT RUNTIME (PENDING, AND WILL BE DONE BY CODE GENERATOR)
- * 
+ * IMPORTS (PENDING)
  * **/
 #if !defined(PARSER_CSQ4_H)
 #define PARSER_CSQ4_H
@@ -35,6 +35,36 @@ bool CheckClassDefination(array<str> tokens){
 }
 bool CheckEnd(array<str> tokens){
     return in(tokens,"ends");
+}
+bool CheckImport(array<str> tokens){
+    return in(tokens,"import");
+}
+bool file_exists(str filename){
+    FILE *fp = fopen(filename.Str, "r");
+    bool is_exist = false;
+    if (fp != NULL)
+    {
+        is_exist = true;
+        fclose(fp); // close the file
+    }
+    return is_exist;
+}
+
+
+array<str> ImportsManagement(array<str> tok){
+    /*Sample input: import m1.m2 m3
+    Tokens: ['m1','.','m2']
+    */
+    array<str> imp;
+    str s;
+    bool dir = false;
+    for(auto i : tok){
+        if(i == "import"){}
+        else{
+            imp.add(str("#include \"")+i+".csqm\"");
+        }
+    }
+    return imp;
 }
 array<str> IfTokManagement(array<str> tok){
     array<str> s;
@@ -80,18 +110,18 @@ array<str> ElseTokManagement(array<str> tok){
     }
     return s;
 }
-array<str> EndTokManagement(array<str> tok){
-    array<str> s;
-    if(CheckEnd(tok) == 1)
-        for(auto i : tok)
-            if(i == "ends")
-                s.add("ENDS");
-            else
-                s.add(i);
-    else
-        s = tok;
-    return s;
-}
+// array<str> EndTokManagement(array<str> tok){
+//     array<str> s;
+//     if(CheckEnd(tok) == 1)
+//         for(auto i : tok)
+//             if(i == "ends")
+//                 s.add("ENDS");
+//             else
+//                 s.add(i);
+//     else
+//         s = tok;
+//     return s;
+// }
 str Rep(str s){
     str code;
     code = replaceStr(s.Str,"= =","==");
@@ -185,6 +215,18 @@ auto VariableCall(array<str> instructions){
     }
     return newop;
 }
+auto SemiColanManagement(array<str> tok){
+    array<str> newt;
+    if(in(tok,"ends") == false && in(tok,"for") == false && in(tok,"def") == false && in(tok,"class") == false
+    && in(tok,"if") == false && in(tok,"else") == false && in(tok,"elif") == false && in(tok,"import") == false){
+        newt = tok;
+        newt.add("SEMI");
+    }
+    else{
+        newt = tok;
+    }
+    return newt;
+}
 //Variable assignment shuffle function will produce 3 new tokens of name,type and assignment.
 auto TokenVariableInAssignShuffle(array<str> tokens){
     str type,name,assign;
@@ -249,10 +291,11 @@ class Parser{
 auto Parser::Parse(array<array<str>> tokens){
     //Declare states and some needed variables.
     str nominal_code, fn_code, imports, fn_name;
-    bool fn_state = false;
+    bool fn_state = false;bool class_state = false;
     //Applying for range loop to get tokenized tokens present in each line.
     for(array<str> rawline : tokens){
-        array<str> line = EndTokManagement(ForTokManagement(ElseTokManagement(ElifTokManagement(IfTokManagement(rawline)))));
+        array<str> line = SemiColanManagement((ForTokManagement(ElseTokManagement(ElifTokManagement(IfTokManagement(rawline))))));
+        // printf("\n%s\n",tostr(line).Str);
         //Evalute when Variable assignment is there and it's not inside functions body.
         if(CheckVariableAssignment(line) == true and fn_state == false && CheckFunctionDefination(line) == false){
             str name = TokenVariableAssignShuffle(line)[0];
@@ -266,6 +309,28 @@ auto Parser::Parse(array<array<str>> tokens){
             //Add the variable to stack.
             Stack::Variables.add(name);
         }
+        else if(CheckImport(line) == true){
+            for(auto i : ImportsManagement(line)){
+                imports+=i+"\n";
+            }
+        }
+        else if(CheckClassDefination(line) == true){
+            nominal_code += tostr(line) + " LBRACE\n";
+            class_state = true;
+        }
+        //Evalute when Variable assignment is there in the body of a function.
+        else if(CheckVariableAssignment(line) == true and fn_state == true && CheckFunctionDefination(line) == false && class_state == false){
+            str name = TokenVariableAssignShuffle(line)[0];
+            str type = TokenVariableAssignShuffle(line)[1];
+            str val = TokenVariableAssignShuffle(line)[2];
+            //Producing bytecodes.
+            str bytecode = "REFERENCE(";bytecode += name + ",";
+            bytecode += type + ",";bytecode += val + ")\n";
+            //Adding the bytecode to the code string.
+            fn_code += bytecode;
+            //Add the variable to stack.
+            Stack::Variables.add(name);
+        }
         //Evalute when Variable assignment is there in the body of a function.
         else if(CheckVariableAssignment(line) == true and fn_state == true && CheckFunctionDefination(line) == false){
             str name = TokenVariableAssignShuffle(line)[0];
@@ -275,7 +340,7 @@ auto Parser::Parse(array<array<str>> tokens){
             str bytecode = "REFERENCE(";bytecode += name + ",";
             bytecode += type + ",";bytecode += val + ")\n";
             //Adding the bytecode to the code string.
-            fn_code += bytecode;
+            nominal_code += bytecode;
             //Add the variable to stack.
             Stack::Variables.add(name);
         }
@@ -312,11 +377,57 @@ auto Parser::Parse(array<array<str>> tokens){
             }
             fn_code += str("def ")+fn_name+str("(")+bytecode_arg+str(") LBRACE\n");
         }
-        else if(fn_state == true && tostr(line) != fn_name + " ENDS")
-            fn_code += tostr(line)+"\n";
-        else if(tostr(line) == (fn_name + " ENDS") && fn_state == true){
-            fn_code += "ENDS\n";fn_state = false;
+        //When function defination found so:
+        else if(CheckFunctionDefination(line) == true && class_state == true){
+            //Some needed informations about function::
+            str fnname,args,bytecode_arg;bool argstate = false;
+            //Extracting name of the function and the arguments.
+            for(int i = 0;i<line.len();i++){
+                if(line[i] == "(")
+                    argstate = true;
+                // else if(line[i] == "def " && i==0){}
+                else if(argstate == false && i>0)
+                    fnname+=line[i]+" ";
+                else if(argstate == true)
+                    args += line[i];
+            }args.pop_bk();
+            fn_name = replaceStr(fnname.Str," ","");
+            //Rechanging the state because the function is defined and it's body hasn't ended.
+            fn_state = true;
+            //Transform the function's arguments in bytecode representation.
+            if(args == ""){bytecode_arg = "";}
+            else{
+                //Stage one split the arguments via ','
+                auto splitted = split(args,",");
+                //Apply for range loop over splitted arguments.
+                for(auto i : splitted){
+                    str n = TokenVariableAssignShuffle(Lexer(i).GetTokens())[0];
+                    str t = TokenVariableAssignShuffle(Lexer(i).GetTokens())[1];
+                    str e = TokenVariableAssignShuffle(Lexer(i).GetTokens())[2];
+                    bytecode_arg += str("REFERENCE(") + n + str(",")+t+str(",")+e+"),";
+                    Stack::Variables.add(n);
+                }bytecode_arg.pop_bk();
+            }
+            nominal_code += str("def ")+fn_name+str("(")+bytecode_arg+str(") LBRACE\n");
         }
+        else if(fn_state == true && tostr(line) != (fn_name + " ends") && class_state == false){
+            fn_code += tostr(line)+"\n";
+            // printf("TRIG : 1\n");
+        }
+        
+        else if(fn_state == true && tostr(line) !=( fn_name + " ends" )&& class_state == true){
+            nominal_code += tostr(line)+"\n";
+            // nominal_code += "ENDS\n";
+        }
+        else if(tostr(line) == (fn_name + " ends") && (fn_state == true) && (class_state==false)){
+            fn_code += "ENDS\n";
+            fn_state = false;
+        }
+        else if(tostr(line) == (fn_name + " ends") && (fn_state == true) && (class_state==true)){
+            nominal_code += "ENDS\n";
+            fn_state = false;
+        }
+        else if(tostr(line) == "endc"){nominal_code += "ENDCLASS\n";}
         //If none of the above condition matched with tokens.
         else if(fn_state == false){
             nominal_code += tostr(line) + "\n";
