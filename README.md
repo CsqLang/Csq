@@ -1,8 +1,8 @@
 # Csq4
 Hello there👋,
-This is the upcoming and safe version of Csq which is in development to solve memory related problems in Csq3 such as memory leak.
+This is the new and safe version of Csq which is developed to solve memory related problems in Csq3 such as memory leak.
 
-## Features (Planned to be Developed)
+## Features
 <li>Object Oriented Programming </li>
 <li>Functional Programming features</li>
 <li>Reference Counting for memory safety</li>
