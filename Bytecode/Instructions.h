@@ -21,4 +21,7 @@
 #define gtequal >=
 #define ltequal <=
 #define modequal %=
+#define MAIN int main(int argc, char const *argv[]){
+#define ENDMAIN return 0;}
+
 #endif // Csq4_Instruction_H
