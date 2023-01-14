@@ -11,7 +11,7 @@ This is the upcoming and safe version of Csq which is in development to solve me
 <li>Platform independency of code</li>
 
 ## Requirements
-<li>GCC | Clang</li>
+<li>G++ | Clang++</li>
 
 ## Syntax inspirations
 <li>Python</li>
