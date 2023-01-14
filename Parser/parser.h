@@ -294,7 +294,7 @@ auto Parser::Parse(array<array<str>> tokens){
     bool fn_state = false;bool class_state = false;
     //Applying for range loop to get tokenized tokens present in each line.
     for(array<str> rawline : tokens){
-        array<str> line = SemiColanManagement((ForTokManagement(ElseTokManagement(ElifTokManagement(IfTokManagement(rawline))))));
+        array<str> line = ((ForTokManagement(ElseTokManagement(ElifTokManagement(IfTokManagement(rawline))))));
         // printf("\n%s\n",tostr(line).Str);
         //Evalute when Variable assignment is there and it's not inside functions body.
         if(CheckVariableAssignment(line) == true and fn_state == false && CheckFunctionDefination(line) == false){
