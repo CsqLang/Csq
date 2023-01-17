@@ -6,14 +6,17 @@
 #define CALL(name, args) name args
 #define REFERENCE(name,type, refr) SmartPointer<type> name = SmartPointer<type>(refr)
 #define FORREF(name,type) SmartPointer<type> name
+bool __main__;
 #define ID_REF(name) AMPER name
 #define FOR for(
 #define WHILE while(
+#define ends }
 #define DO ){
 #define IF if(
 #define ELIF else if(
-#define ELSE else{
+#define else else{
 #define ENDS }
+#define ENDCLASS };
 #define def auto
 #define equals ==
 #define is ==
@@ -22,6 +25,6 @@
 #define ltequal <=
 #define modequal %=
 #define MAIN int main(int argc, char const *argv[]){
-#define ENDMAIN return 0;}
+#define ENDMAIN ;}
 
 #endif // Csq4_Instruction_H
