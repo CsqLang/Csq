@@ -9,7 +9,7 @@ class SmartPointer {
       ptr_(other.ptr_), ref_count_(other.ref_count_) {
     ++(*ref_count_);
   }
-
+SmartPointer(){}
   SmartPointer<T>& operator=(const SmartPointer<T>& other) {
     if (this != &other) {
       if (--(*ref_count_) == 0) {
