@@ -25,6 +25,6 @@ bool __main__;
 #define ltequal <=
 #define modequal %=
 #define MAIN int main(int argc, char const *argv[]){
-#define ENDMAIN ;}
+#define ENDMAIN ;return 0;}
 
 #endif // Csq4_Instruction_H
