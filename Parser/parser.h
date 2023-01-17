@@ -3,7 +3,7 @@
  * OBJECT ORIENTED PROGRAMMING (DONE)
  * FUNCTIONAL PROGRAMMING (DONE)
  * GENERATION OF EXECUTABLE BUT WILL BE RUNNED AT RUNTIME (PENDING, AND WILL BE DONE BY CODE GENERATOR)
- * IMPORTS (PENDING)
+ * IMPORTS (DONE)
  * **/
 #if !defined(PARSER_CSQ4_H)
 #define PARSER_CSQ4_H
@@ -61,7 +61,11 @@ array<str> ImportsManagement(array<str> tok){
     for(auto i : tok){
         if(i == "import"){}
         else{
-            imp.add(str("#include \"")+i+".csqm\"");
+            str name_module = split(i,"/")[split(i,"/").len()-1];
+            imp.add(
+                str("class ")+name_module+str("mod LBRACE\npublic:\n")+read(i+".csqm")+str("\nENDCLASS\n")+
+                name_module + str("mod ")+name_module+";\n"
+            );
         }
     }
     return imp;
@@ -74,7 +78,7 @@ array<str> IfTokManagement(array<str> tok){
                 s.add("IF");
             else
                 s.add(i);
-        s.add("LBRACE");
+        s.add("DO");
     }
     else{
         s = tok;
@@ -89,7 +93,7 @@ array<str> ElifTokManagement(array<str> tok){
                 s.add("ELIF");
             else
                 s.add(i);
-        s.add("LBRACE");
+        s.add("DO");
     }
     else{
         s = tok;
@@ -196,7 +200,7 @@ auto TokenVariableAssignShuffle(array<str> tokens){
         else if(typepos == true && valpos == false){
             type += tokens[i]+" ";
         }
-        else if(valpos == true){
+        else if(valpos == true && tokens[i] !=";"){
             assign += tokens[i]+" ";
         }
     }
@@ -256,11 +260,23 @@ auto TokenVariableInAssignShuffle(array<str> tokens){
         else if(typepos == true && valpos == false){
             type += tokens[i]+" ";
         }
-        else if(valpos == true){
+        else if(valpos == true && tokens[i] !=";"){
             assign += tokens[i]+" ";
         }
     }
     return array<str>({name,type,assign});
+}
+str addSemi(str s){
+    array<str> lines = split(s,"\n");
+    str r;
+    for(auto l : lines){
+        if(find_str(l.Str,str("def").Str) == 1 || find_str(l.Str,str("ends").Str)==1){
+            r += l + "\n";
+        }
+        else{
+            r += l + ";\n";
+        }
+    }return r;
 }
 array<str> ForTokManagement(array<str> tok){
     // array<str> t;
@@ -294,7 +310,7 @@ auto Parser::Parse(array<array<str>> tokens){
     bool fn_state = false;bool class_state = false;
     //Applying for range loop to get tokenized tokens present in each line.
     for(array<str> rawline : tokens){
-        array<str> line = SemiColanManagement((ForTokManagement(ElseTokManagement(ElifTokManagement(IfTokManagement(rawline))))));
+        array<str> line = ((ForTokManagement(ElseTokManagement(ElifTokManagement(IfTokManagement(rawline))))));
         // printf("\n%s\n",tostr(line).Str);
         //Evalute when Variable assignment is there and it's not inside functions body.
         if(CheckVariableAssignment(line) == true and fn_state == false && CheckFunctionDefination(line) == false){
@@ -332,7 +348,7 @@ auto Parser::Parse(array<array<str>> tokens){
             Stack::Variables.add(name);
         }
         //Evalute when Variable assignment is there in the body of a function.
-        else if(CheckVariableAssignment(line) == true and fn_state == true && CheckFunctionDefination(line) == false){
+        else if(CheckVariableAssignment(line) == true and fn_state == true && CheckFunctionDefination(line) == false && class_state == true){
             str name = TokenVariableAssignShuffle(line)[0];
             str type = TokenVariableAssignShuffle(line)[1];
             str val = TokenVariableAssignShuffle(line)[2];
@@ -345,7 +361,7 @@ auto Parser::Parse(array<array<str>> tokens){
             Stack::Variables.add(name);
         }
         //When function defination found so:
-        else if(CheckFunctionDefination(line) == true and fn_state == false){
+        else if(CheckFunctionDefination(line) == true and fn_state == false && class_state == false){
             //Some needed informations about function::
             str fnname,args,bytecode_arg;bool argstate = false;
             //Extracting name of the function and the arguments.
@@ -433,6 +449,6 @@ auto Parser::Parse(array<array<str>> tokens){
             nominal_code += tostr(line) + "\n";
         }
     }
-    return array<str>({imports,Rep(fn_code),Rep(nominal_code)});
+    return array<str>({imports,addSemi(Rep(fn_code)),addSemi(Rep(nominal_code))});
 }
 #endif // PARSER_CSQ4_H
