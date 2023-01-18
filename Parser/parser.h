@@ -285,9 +285,25 @@ array<str> ForTokManagement(array<str> tok){
         str n = TokenVariableInAssignShuffle(tok)[0];
         str t = TokenVariableInAssignShuffle(tok)[1];
         str a = TokenVariableInAssignShuffle(tok)[2];
-        code = {"FOR FORREF(",n+",",t+",) IN",a+" DO"};
+        code = {"FOR FORREF(",n+",",t+") IN",a+" DO"};
     }
     else{
+        code = tok;
+    }
+    return code;
+}
+array<str> WhileTokManagement(array<str> tok){
+    array<str> code;
+    if(CheckWhile(tok) == 1){
+        for(auto i : tok){
+            if(i == "while"){
+                code += "WHILE";
+            }
+            else{
+                code += i;
+            }
+        }code += "DO";
+    }else{
         code = tok;
     }
     return code;
@@ -310,7 +326,7 @@ auto Parser::Parse(array<array<str>> tokens){
     bool fn_state = false;bool class_state = false;
     //Applying for range loop to get tokenized tokens present in each line.
     for(array<str> rawline : tokens){
-        array<str> line = ((ForTokManagement(ElseTokManagement(ElifTokManagement(IfTokManagement(rawline))))));
+        array<str> line = (WhileTokManagement(ForTokManagement(ElseTokManagement(ElifTokManagement(IfTokManagement(rawline))))));
         // printf("\n%s\n",tostr(line).Str);
         //Evalute when Variable assignment is there and it's not inside functions body.
         if(CheckVariableAssignment(line) == true and fn_state == false && CheckFunctionDefination(line) == false){
