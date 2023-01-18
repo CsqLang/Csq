@@ -2,6 +2,8 @@
 #define Csq4_Instruction_H
 #include "../Grammar/Token_bytecode.h"
 #include "../Memory/Reference_Counter.h"
+#include "../Builtins/builtins.h"
+#include <stdio.h>
 #define FUNCTIONS(name,args,code) auto name args LBRACE code RBRACE SEMI
 #define CALL(name, args) name args
 #define REFERENCE(name,type, refr) SmartPointer<type> name = SmartPointer<type>(refr)
