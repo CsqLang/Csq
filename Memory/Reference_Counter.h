@@ -1,7 +1,7 @@
 #if !defined(Reference_Counter_H)
 #define Reference_Counter_H
 template <typename T>
-class SmartPointer {
+class SmartPointer{
  public:
   SmartPointer(T* ptr) : ptr_(ptr), ref_count_(new int(1)) {}
   SmartPointer(T v) : ptr_(new T(v)), ref_count_(new int(1)) {}
