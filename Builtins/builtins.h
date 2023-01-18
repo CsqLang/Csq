@@ -533,4 +533,66 @@ auto to_double(int i)
             const T* end() const { return &this->arr[this->current];}
             // ~basic_array(){delete[] arr;}
     };//basic_array
+//List datatype
+template<typename T>
+class list{
+    public:
+        basic_array<T> items;
+        list(){}
+        list(const list<T> &ls){this->items = ls.items;}
+        list(std::initializer_list<T> l){
+            for(auto i : l){
+                this->items.push(i);
+            }
+        }
+        //Iterators for for each loop.
+        T* begin() { return &this->items.arr[0];}
+        const T* begin() const { return &this->items.arr[0];}
+        T* end() { return &this->items.arr[this->items.current]; }
+        const T* end() const { return &this->items.arr[this->items.current];}
+        //This method returns the length of the array.
+        auto len(){return this->items.current;}
+        auto add(T element){items.push(element);}
+        template<typename... Args>
+        auto add(T e1,Args... args){
+            items.push(e1);
+            add(args...);
+        }
+        //Reading data
+        auto operator[](int index){
+            T ret;
+            if(index<items.current){
+                ret = items[index];
+            }
+            return ret;
+        }
+        auto operator+=(T element){items.push(element);}
+        auto operator=(list<T> arr){
+            for(int i = 0; i<arr.len();i++){
+                this->items.push(arr[i]);
+            }
+        }
+        auto operator==(list<T> arr){
+            bool state = 1;
+            for(int i=0;i<arr.len();i++){
+                if(this->items[i]!=arr[i]){state = 0;}
+            }
+            return state;
+        }
+        //Operator for slicing
+        auto operator()(int from,int till,int steps=1){
+            list<T> n;
+            for(int i=from-1;i<till;i+=steps){
+                n.add(this->items[i]);
+            }
+            return n;
+        }
+        auto operator()(int till,int steps=1){
+            list<T> n;
+            for(int i=0;i<till;i+=steps){
+                n.add(this->items[i]);
+            }
+            return n;
+        }
+};
 #endif // Builtins_CSQ4
