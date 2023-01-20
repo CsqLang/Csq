@@ -22,14 +22,17 @@ SmartPointer(){}
     }
     return *this;
   }
-  void operator+=(T v){
-    this->ptr_ =  new int(*ptr_+v);
+  void operator+=(SmartPointer<T> v){
+    this->ptr_ =  new int(*ptr_+(*v));
   }
   void operator++(int){
     this->ptr_ =  new int(*ptr_+1);
   }
   void operator--(int){
     this->ptr_ =  new int(*ptr_-1);
+  }
+  SmartPointer<T> operator+(SmartPointer<T> v){
+      return SmartPointer<T>((*ptr_)+(*v));
   }
   // void operator:(array<T> arr){
   //   for(T v : arr){
