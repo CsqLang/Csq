@@ -2,7 +2,7 @@
  * REFERENCE COUNTING (DONE)
  * OBJECT ORIENTED PROGRAMMING (DONE)
  * FUNCTIONAL PROGRAMMING (DONE)
- * GENERATION OF EXECUTABLE BUT WILL BE RUNNED AT RUNTIME (DONE, AND WILL BE DONE BY CODE GENERATOR)
+ * GENERATION OF EXECUTABLE BUT WILL BE RUNNED AT RUNTIME (PENDING, AND WILL BE DONE BY CODE GENERATOR)
  * IMPORTS (DONE)
  * **/
 #if !defined(PARSER_CSQ4_H)
@@ -38,6 +38,9 @@ bool CheckEnd(array<str> tokens){
 }
 bool CheckImport(array<str> tokens){
     return in(tokens,"import");
+}
+bool CheckConstructor(array<str> tokens){
+    return in(tokens,"init");
 }
 bool file_exists(str filename){
     FILE *fp = fopen(filename.Str, "r");
@@ -138,6 +141,7 @@ str Rep(str s){
     code = replaceStr(code.Str,"! =","!=");
     code = replaceStr(code.Str,"> =",">=");
     code = replaceStr(code.Str,"< =","<=");
+    code = replaceStr(code.Str,"- >","->");
     code = replaceStr(code.Str,"& &","&&");
     return code;
 }
@@ -206,6 +210,10 @@ auto TokenVariableAssignShuffle(array<str> tokens){
     }
     return array<str>({name,type,assign});
 }
+// //Implementation of constructor
+// auto Constructor(array<str> tok){
+
+// }
 //Variable call implementation
 auto VariableCall(array<str> instructions){
     array<str> newop;
@@ -308,6 +316,7 @@ array<str> WhileTokManagement(array<str> tok){
     }
     return code;
 }
+
 /*This is the class which is basiclly the implementation of parser for Csq4.
 How it will work:
 input: tokens
@@ -322,7 +331,7 @@ class Parser{
 /*This function needs all tokens present in the code.*/
 auto Parser::Parse(array<array<str>> tokens){
     //Declare states and some needed variables.
-    str nominal_code, fn_code, imports, fn_name;
+    str nominal_code, fn_code, imports, fn_name,class_name;
     bool fn_state = false;bool class_state = false;
     //Applying for range loop to get tokenized tokens present in each line.
     for(array<str> rawline : tokens){
@@ -349,6 +358,38 @@ auto Parser::Parse(array<array<str>> tokens){
         else if(CheckClassDefination(line) == true){
             nominal_code += tostr(line) + " LBRACE\n";
             class_state = true;
+        }
+        else if(class_state == true && CheckConstructor(line) == true){
+            //Some needed informations about function::
+            str fnname,args,bytecode_arg;bool argstate = false;
+            //Extracting name of the function and the arguments.
+            for(int i = 0;i<line.len();i++){
+                if(line[i] == "(")
+                    argstate = true;
+                // else if(line[i] == "def " && i==0){}
+                else if(argstate == false && i>0)
+                    fnname+=line[i]+" ";
+                else if(argstate == true)
+                    args += line[i];
+            }args.pop_bk();
+            fn_name = replaceStr(fnname.Str," ","");
+            //Rechanging the state because the function is defined and it's body hasn't ended.
+            fn_state = true;
+            //Transform the function's arguments in bytecode representation.
+            if(args == ""){bytecode_arg = "";}
+            else{
+                //Stage one split the arguments via ','
+                auto splitted = split(args,",");
+                //Apply for range loop over splitted arguments.
+                for(auto i : splitted){
+                    str n = TokenVariableAssignShuffle(Lexer(i).GetTokens())[0];
+                    str t = TokenVariableAssignShuffle(Lexer(i).GetTokens())[1];
+                    str e = TokenVariableAssignShuffle(Lexer(i).GetTokens())[2];
+                    bytecode_arg += str("REFERENCE(") + n + str(",")+t+str(",")+e+"),";
+                    Stack::Variables.add(n);
+                }bytecode_arg.pop_bk();
+            }
+            nominal_code += str("init ")+fn_name+str("(")+bytecode_arg+str(") LBRACE\n");
         }
         //Evalute when Variable assignment is there in the body of a function.
         else if(CheckVariableAssignment(line) == true and fn_state == true && CheckFunctionDefination(line) == false && class_state == false){
