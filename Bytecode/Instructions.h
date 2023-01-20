@@ -28,5 +28,6 @@ bool __main__;
 #define modequal %=
 #define MAIN int main(int argc, char const *argv[]){
 #define ENDMAIN ;return 0;}
+#define init 
 
 #endif // Csq4_Instruction_H
