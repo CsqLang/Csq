@@ -17,5 +17,4 @@ But built-in facilities are still in development.
 
 ## Syntax inspirations
 <li>Python</li>
-<li>Lisp</li>
-
+<li>Go</li>
