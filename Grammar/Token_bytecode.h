@@ -27,7 +27,7 @@
 #define LESSEQUAL <=
 #define GREATEREQUAL >=
 #define TILDE  ~
-#define IN :
+#define IN :*
 #define POW ^
 #define PLUSEQUAL +=
 #define MINEQUAL -=
