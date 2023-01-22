@@ -53,5 +53,53 @@ class i64{
             this->val = v->val;
         }
 };
+class i16{
+    public:
+        int16_t val;
+        i16(){}
+        i16(SmartPointer<int16_t> v){this->val=(*v);}
+        i16(SmartPointer<i16> v){this->val =(v->val);}
+        i16(const i16& v){this->val =(v.val);}
+        i16(const int16_t& v){this->val =v;}
+        auto operator+(SmartPointer<i16> v){
+            return SmartPointer<i16>(v->val + this->val);
+        }
+        auto operator-(SmartPointer<i16> v){
+            return SmartPointer<i16>(v->val - this->val);
+        }
+        auto operator*(SmartPointer<i16> v){
+            return SmartPointer<i16>(v->val * this->val);
+        }
+        auto operator/(SmartPointer<i16> v){
+            return SmartPointer<i16>(v->val / this->val);
+        }
+        auto operator=(SmartPointer<i16> v){
+            this->val = v->val;
+        }
+};
+class i8{
+    public:
+        int8_t val;
+        i8(){}
+        i8(SmartPointer<int8_t> v){this->val=(*v);}
+        i8(SmartPointer<i8> v){this->val =(v->val);}
+        i8(const i8& v){this->val =(v.val);}
+        i8(const int8_t& v){this->val =v;}
+        auto operator+(SmartPointer<i8> v){
+            return SmartPointer<i8>(v->val + this->val);
+        }
+        auto operator-(SmartPointer<i8> v){
+            return SmartPointer<i8>(v->val - this->val);
+        }
+        auto operator*(SmartPointer<i8> v){
+            return SmartPointer<i8>(v->val * this->val);
+        }
+        auto operator/(SmartPointer<i8> v){
+            return SmartPointer<i8>(v->val / this->val);
+        }
+        auto operator=(SmartPointer<i8> v){
+            this->val = v->val;
+        }
+};
 
 #endif // builtins_csq4
