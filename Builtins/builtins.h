@@ -204,7 +204,7 @@ class ui8{
         u_int8_t val;
         ui8(){}
         ui8(SmartPointer<u_int8_t> v){this->val=(*v);}
-        ui8(SmartPointer<i8> v){this->val =(v->val);}
+        ui8(SmartPointer<ui8> v){this->val =(v->val);}
         ui8(const ui8& v){this->val =(v.val);}
         ui8(const u_int8_t& v){this->val =v;}
         auto operator+(SmartPointer<ui8> v){
@@ -223,5 +223,425 @@ class ui8{
             this->val = v->val;
         }
 };
+class f32{
+    public:
+        _Float32 val;
+        f32(){}
+        f32(SmartPointer<_Float32> v){this->val=(*v);}
+        f32(SmartPointer<f32> v){this->val =(v->val);}
+        f32(const f32& v){this->val =(v.val);}
+        f32(const _Float32& v){this->val =v;}
+        auto operator+(SmartPointer<f32> v){
+            return SmartPointer<f32>(v->val + this->val);
+        }
+        auto operator-(SmartPointer<f32> v){
+            return SmartPointer<f32>(v->val - this->val);
+        }
+        auto operator*(SmartPointer<f32> v){
+            return SmartPointer<f32>(v->val * this->val);
+        }
+        auto operator/(SmartPointer<f32> v){
+            return SmartPointer<f32>(v->val / this->val);
+        }
+        auto operator=(SmartPointer<f32> v){
+            this->val = v->val;
+        }
+};
+class f64{
+    public:
+        double val;
+        f64(){}
+        f64(SmartPointer<_Float64> v){this->val=(*v);}
+        f64(SmartPointer<f64> v){this->val =(v->val);}
+        f64(const f64& v){this->val =(v.val);}
+        f64(const double& v){this->val =v;}
+        auto operator+(SmartPointer<f64> v){
+            return SmartPointer<f64>(v->val + this->val);
+        }
+        auto operator-(SmartPointer<f64> v){
+            return SmartPointer<f64>(v->val - this->val);
+        }
+        auto operator*(SmartPointer<f64> v){
+            return SmartPointer<f64>(v->val * this->val);
+        }
+        auto operator/(SmartPointer<f64> v){
+            return SmartPointer<f64>(v->val / this->val);
+        }
+        auto operator=(SmartPointer<f64> v){
+            this->val = v->val;
+        }
+};
+
+        double val = 0;
+        float64(){}
+        float64(double val){this->val = val;}
+};
+/////////////////////////////////////////////////////////////////////////////////////
+// Class str
+class Bytes
+{
+    // Prototype for '+'
+    // operator overloading
+    friend Bytes operator+(
+        const Bytes &lhs,
+        const Bytes &rhs);
+
+public:
+    char *Str;
+    // No arguments constructor
+    Bytes();
+    // pop_back() function
+    void pop_bk();
+
+    // push_back() function
+    void push_bk(char a);
+
+    // To get the length
+    int len();
+    // This is used to store the result of concatination.
+    auto operator+=(const Bytes &rhs);
+    // This is used to get the element at the given index.
+    auto operator[](int index) { return Str[index]; }
+    // This will return 1 if given str is equal to this->Str.
+    // This will return 1 if given str is equal to this->Str.
+    auto operator==(const Bytes &s)
+    {
+        bool state = 1;
+        for (int i = 0; i < strlen(Str); i++)
+        {
+            if (this->Str[i] != s.Str[i])
+            {
+                state = 0;
+                break;
+            }
+        }
+        if(strlen(s.Str) != this->len()){
+            state = 0;
+        }
+        return state;
+    }
+    // This will return 1 if given str is equal to this->Str.
+    auto operator!=(const Bytes &s)
+    {
+        bool state = 0;
+        for (int i = 0; i < strlen(Str); i++)
+        {
+            if (this->Str[i] != s.Str[i])
+            {
+                state = 1;
+                break;
+            }
+        }
+        return state;
+    }
+    auto operator!()
+    {
+        return Bytes(Str);
+    }
+    auto operator*(int s);
+    // Function to copy the String
+    // of length len from position pos
+    void copy(char s[], int len, int pos);
+    // Swap Strings function
+    void swp(Bytes &rhs);
+
+    // ConStructor with 1 arguments
+    Bytes(char *val);
+    Bytes(const char *val);
+
+    // Copy ConStructor
+    Bytes(const Bytes &source);
+
+    // Move ConStructor
+    Bytes(Bytes &&source);
+
+    // Overloading the assignment
+    // operator
+    Bytes &operator=(
+        const Bytes &rhs);
+    // This method converts the str into double.
+    auto todouble()
+    {
+        char *ptr;
+        double ret;
+        ret = strtod(Str, &ptr);
+        return ret;
+    }
+    auto replace(char sub[], char new_str[])
+    {
+        char *Str = this->Str;
+        int stringLen, subLen, newLen;
+        int i = 0, j, k;
+        int flag = 0, start, end;
+        stringLen = strlen(Str);
+        subLen = strlen(sub);
+        newLen = strlen(new_str);
+
+        for (i = 0; i < stringLen; i++)
+        {
+            flag = 0;
+            start = i;
+            for (j = 0; Str[i] == sub[j]; j++, i++)
+                if (j == subLen - 1)
+                    flag = 1;
+            end = i;
+            if (flag == 0)
+                i -= j;
+            else
+            {
+                for (j = start; j < end; j++)
+                {
+                    for (k = start; k < stringLen; k++)
+                        Str[k] = Str[k + 1];
+                    stringLen--;
+                    i--;
+                }
+
+                for (j = start; j < start + newLen; j++)
+                {
+                    for (k = stringLen; k >= j; k--)
+                        Str[k + 1] = Str[k];
+                    Str[j] = new_str[j - start];
+                    stringLen++;
+                    i++;
+                }
+            }
+        }
+        return Str;
+    }
+    // DeStructor
+    ~Bytes() { delete Str; }
+};
+
+// Overloading the assignment operator
+Bytes &Bytes::operator=(
+    const Bytes &rhs)
+{
+    if (this == &rhs)
+        return *this;
+    delete[] Str;
+    Str = new char[strlen(rhs.Str) + 1];
+    strcpy(Str, rhs.Str);
+    return *this;
+}
+
+// Overloading the plus operator
+Bytes operator+(const Bytes &lhs,
+              const Bytes &rhs)
+{
+    int length = strlen(lhs.Str) + strlen(rhs.Str);
+
+    char *buff = new char[length + 1];
+
+    // Copy the Strings to buff[]
+    strcpy(buff, lhs.Str);
+    strcat(buff, rhs.Str);
+    buff[length] = '\0';
+
+    // String temp
+    Bytes temp{buff};
+
+    // delete the buff[]
+    delete[] buff;
+
+    // Return the concatenated String
+    return temp;
+}
+auto Bytes::operator+=(const Bytes &rhs)
+{
+    int length = strlen(this->Str) + strlen(rhs.Str);
+
+    char *buff = new char[length + 1];
+
+    // Copy the Strings to buff[]
+    strcpy(buff, this->Str);
+    strcat(buff, rhs.Str);
+    buff[length] = '\0';
+
+    // String temp
+    // str temp{ buff };
+    delete Str;
+    Str = new char[length + 1];
+    strcpy(Str, buff);
+}
+auto Bytes::operator*(int s)
+{
+    Bytes n;
+    for (int i = 0; i < s; i++)
+    {
+        n += Bytes(this->Str);
+    }
+    return n;
+}
+// Function to copy the String
+void Bytes::copy(char s[], int len,
+               int pos)
+{
+    for (int i = 0; i < len; i++)
+    {
+        s[i] = Str[pos + i];
+    }
+    s[len] = '\0';
+}
+
+// Function to implement push_bk
+void Bytes::push_bk(char a)
+{
+    // Find length of String
+    int length = strlen(Str);
+
+    char *buff = new char[length + 2];
+
+    // Copy character from Str
+    // to buff[]
+    for (int i = 0; i < length; i++)
+    {
+        buff[i] = Str[i];
+    }
+    buff[length] = a;
+    buff[length + 1] = '\0';
+
+    // Assign the new String with
+    // char a to String Str
+    *this = Bytes{buff};
+
+    // Delete the temp buff[]
+    delete[] buff;
+}
+
+// Function to implement pop_bk
+void Bytes::pop_bk()
+{
+    int length = strlen(Str);
+    char *buff = new char[length];
+
+    // Copy character from Str
+    // to buff[]
+    for (int i = 0; i < length - 1; i++)
+        buff[i] = Str[i];
+    buff[length - 1] = '\0';
+
+    // Assign the new String with
+    // char a to String Str
+    *this = Bytes{buff};
+
+    // delete the buff[]
+    delete[] buff;
+}
+
+// Function to implement get_length
+int Bytes::len()
+{
+    return strlen(Str);
+}
+
+// Function to illuStrate ConStructor
+// with no arguments
+Bytes::Bytes()
+    : Str{nullptr}
+{
+    Str = new char[1];
+    Str[0] = '\0';
+}
+
+// Function to illuStrate ConStructor
+// with one arguments
+Bytes::Bytes(char *val)
+{
+    if (val == nullptr)
+    {
+        Str = new char[1];
+        Str[0] = '\0';
+    }
+
+    else
+    {
+
+        Str = new char[strlen(val) + 1];
+
+        // Copy character of val[]
+        // using strcpy
+        strcpy(Str, val);
+        Str[strlen(val)] = '\0';
+    }
+}
+Bytes::Bytes(const char *ch)
+{
+    if (ch == nullptr)
+    {
+        Str = new char[1];
+        Str[0] = '\0';
+    }
+
+    else
+    {
+
+        Str = new char[strlen(ch) + 1];
+
+        // Copy character of val[]
+        // using strcpy
+        strcpy(Str, ch);
+        Str[strlen(ch)] = '\0';
+    }
+}
+// Function to illuStrate
+// Copy ConStructor
+Bytes::Bytes(const Bytes &source)
+{
+    Str = new char[strlen(source.Str) + 1];
+    strcpy(Str, source.Str);
+}
+// Function to illuStrate
+// Move ConStructor
+Bytes::Bytes(Bytes &&source)
+{
+    Str = source.Str;
+    source.Str = nullptr;
+}
+
+// This function converts int to str.
+auto to_str(int num)
+{
+    char *num_ = new char[2500];
+    sprintf(num_, "%d", num);
+    return Bytes(num_);
+}
+// This function converts double to str.
+auto to_str(double num)
+{
+    char *num_ = new char[20];
+    sprintf(num_, "%lf", num);
+    return Bytes(num_);
+}
+// This function converts double to str.
+auto to_str(long double num)
+{
+    char *num_ = new char[2000];
+    sprintf(num_, "%Lf", num);
+    return Bytes(num_);
+}
+auto to_str(long unsigned int num)
+{
+    char *num_ = new char[2000];
+    sprintf(num_, "%lu", num);
+    return Bytes(num_);
+}
+auto to_str(Bytes s)
+{
+    return s;
+}
+auto to_double(Bytes s)
+{
+    // char* ptr; 
+    double d = atof(s.Str);
+    // delete[] ptr;
+    return d;
+}
+auto to_double(int i)
+{
+    return double(i);
+}
+
+
 
 #endif // builtins_csq4
