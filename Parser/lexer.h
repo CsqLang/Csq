@@ -1,7 +1,6 @@
 #if !defined(LEXER_CSQ4)
 #define LEXER_CSQ4
 #include "../Grammar/Csq.h"
-#include "../Memory/StackManager.h"
 /*
 This is the class which will do lexial analysis of Csq4 code.
 */
