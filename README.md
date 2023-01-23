@@ -13,7 +13,7 @@ But built-in facilities are still in development.
 <li>Platform independency of code</li>
 
 ## Requirements
-<li>G++ | Clang++</li>
+<li>G++</li>
 
 ## Syntax inspirations
 <li>Python</li>
