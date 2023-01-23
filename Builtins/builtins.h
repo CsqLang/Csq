@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
+#include "../Memory/Reference_Counter.h"
 //Datatypes:
 class i32{
     public:
@@ -25,6 +25,7 @@ class i32{
         auto operator/(SmartPointer<i32> v){
             return SmartPointer<i32>(v->val / this->val);
         }
+        
         auto operator=(SmartPointer<i32> v){
             this->val = v->val;
         }
@@ -272,10 +273,7 @@ class f64{
         }
 };
 
-        double val = 0;
-        float64(){}
-        float64(double val){this->val = val;}
-};
+
 /////////////////////////////////////////////////////////////////////////////////////
 // Class str
 class Bytes
@@ -642,6 +640,91 @@ auto to_double(int i)
     return double(i);
 }
 
+//This is the class which have the features of dynamic sequence.
+template<typename T>
+class DynamicSequence{
+     public:
+        T* arr;
+        // capacity is the total storage
+        int capacity;
+        // current is the number of elements
+        int current;
+     public:
+        (DynamicSequence)(){
+            arr = new T[1];
+            capacity = 1;
+            current = 0;
+        }
+        auto update(int index, T value){
+            arr[index] = value;
+        }
+        auto push(T data){
+            // if the number of elements is equal to the
+            // capacity, that means we don't have space to
+            // accommodate more elements. We need to double the
+            // capacity
+            if (current == capacity) {
+                T* temp = new T[2 * capacity];
+    
+                // copying old array elements to new array
+                for (int i = 0; i < capacity; i++){
+                    temp[i] = arr[i];
+                }
+    
+                // deleting previous array
+                delete[] arr;
+                capacity *= 2;
+                arr = temp;
+            }
+            // Inserting data
+            arr[current] = data;
+            current++;
+        }
+        auto operator[](int index){
+            return this->arr[index];
+        }
+        auto erase(T e){
+            int i;
+            for (i=0; i<this->current; i++)
+                if (this->arr[i] == e)
+                    break;
+            // If element found in array
+            if (i < this->current)
+            {
+                // reduce size of array and move all
+                // elements on space ahead
+                this->current = this->current - 1;
+                for (int j=i; j<this->current; j++)
+                    arr[j] = arr[j+1];
+            }
+        }
+        auto pop(){current--;}
+        T* begin() { return &this->arr[0];}
+        const T* begin() const { return &this->arr[0];}
+        T* end() { return &this->arr[this->current]; }
+        const T* end() const { return &this->arr[this->current];}
+};
+template<typename T>
+class StaticSequence{
+    public:
+        T* seq;
+        i32 current = 0;
+        StaticSequence(){}
+        StaticSequence(int size){
+            seq = new T[size];
+        }
+        void push(T element){
+            seq[current] = element;
+            current = current+1;
+        }
+        void pop(){
+            seq[current-1] = T();
+        }
+        T* begin() { return &this->seq[0];}
+        const T* begin() const { return &this->seq[0];}
+        T* end() { return &this->seq[this->current]; }
+        const T* end() const { return &this->seq[this->current];}
+};
 
 
 #endif // builtins_csq4
