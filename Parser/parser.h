@@ -8,6 +8,7 @@
 #if !defined(PARSER_CSQ4_H)
 #define PARSER_CSQ4_H
 #include "lexer.h"
+#include "../Memory/Stack.h"
 //Some Utilities
 bool CheckIF(array<str> tokens){
     return in(tokens,"if");
