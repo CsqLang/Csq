@@ -1,7 +1,7 @@
 #if !defined(compile_csq4)
 #define compile_csq4
 #include "writeBytecodes.h"
-//This function will compile IR code via g++
+//This function will compile IR code via g++ __
 void compile_IR(str current_path, str path, str name){
     str code = read(path);
     write((current_path+name+".cpp").Str,code);
