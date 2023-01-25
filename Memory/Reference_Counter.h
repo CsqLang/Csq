@@ -1,58 +1,36 @@
 #if !defined(Reference_Counter_H)
 #define Reference_Counter_H
-template <typename T>
+
+template<class T>
 class SmartPointer{
- public:
-  SmartPointer(T* ptr) : ptr_(ptr), ref_count_(new int(1)) {}
-  SmartPointer(T v) : ptr_(new T(v)), ref_count_(new int(1)) {}
-  SmartPointer(const SmartPointer<T>& other) :
-      ptr_(other.ptr_), ref_count_(other.ref_count_) {
-    ++(*ref_count_);
-  }
-SmartPointer(){}
-  SmartPointer<T>& operator=(const SmartPointer<T>& other) {
-    if (this != &other) {
-      if (--(*ref_count_) == 0) {
-        delete ptr_;
-        delete ref_count_;
+  public:
+    T* ptr;
+    int ref_count = 0;
+  public:
+    SmartPointer(){}
+    SmartPointer(const SmartPointer<T>& inc){
+      ptr = new T(*(inc.ptr));
+      ref_count++;
+    }
+    SmartPointer(T t){
+      ptr = new T(t);
+      ref_count++;
+    }
+    auto operator=(const SmartPointer<T>& op ){
+      if(ref_count == 0){
+        ptr = new T(*(op.ptr));
+        ref_count++;
       }
-      ptr_ = other.ptr_;
-      ref_count_ = other.ref_count_;
-      ++(*ref_count_);
+      else if(ref_count != 0){
+        delete ptr;
+        ref_count = 0;
+        ptr = new T(*(op.ptr));
+        ref_count++;
+      }
     }
-    return *this;
-  }
-  void operator+=(SmartPointer<T> v){
-    this->ptr_ =  new int(*ptr_+(*v));
-  }
-  void operator++(int){
-    this->ptr_ =  new int(*ptr_+1);
-  }
-  void operator--(int){
-    this->ptr_ =  new int(*ptr_-1);
-  }
-  SmartPointer<T> operator+(SmartPointer<T> v){
-      return SmartPointer<T>((*ptr_)+(*v));
-  }
-  // void operator:(array<T> arr){
-  //   for(T v : arr){
-
-  //   }
-  // }
-
-  ~SmartPointer() {
-    if (--(*ref_count_) == 0) {
-      delete ptr_;
-      delete ref_count_;
+    T& operator*() const { return *ptr; }
+    T* operator->() const { return ptr; }
+    ~SmartPointer() {
+      delete ptr;
     }
-  }
-
-  T& operator*() const { return *ptr_; }
-  T* operator->() const { return ptr_; }
-
- private:
-  T* ptr_;
-  int* ref_count_;
 };
-
-#endif // Reference_Counter_H
