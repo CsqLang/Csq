@@ -2,8 +2,8 @@
 #define Reference_Counter_H
 
 template<class T>
-class SmartPointer{
-  public:
+class SmartPointer : T{
+  private:
     T* ptr;
     int ref_count = 0;
   public:
@@ -27,6 +27,21 @@ class SmartPointer{
         ptr = new T(*(op.ptr));
         ref_count++;
       }
+    }
+    auto operator+(SmartPointer<T> op){
+      return this->op_add(op);
+    }
+    auto operator-(SmartPointer<T> op){
+      return this->op_sub(op);
+    }
+    auto operator*(SmartPointer<T> op){
+      return this->op_mul(op);
+    }
+    auto operator/(SmartPointer<T> op){
+      return this->op_div(op);
+    }
+    auto operator%(SmartPointer<T> op){
+      return this->op_mod(op);
     }
     T& operator*() const { return *ptr; }
     T* operator->() const { return ptr; }
