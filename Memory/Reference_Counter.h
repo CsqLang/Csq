@@ -4,7 +4,7 @@
 template<class T>
 class SmartPointer : T{
   private:
-    T* ptr;
+    T* ptr = nullptr;
     int ref_count = 0;
   public:
     SmartPointer(){}
@@ -18,7 +18,8 @@ class SmartPointer : T{
     }
     auto operator=(const SmartPointer<T>& op ){
       if(ref_count == 0){
-        ptr = new T(*(op.ptr));
+        ptr = new T();
+        ptr = op.ptr;
         ref_count++;
       }
       else if(ref_count != 0){
@@ -29,7 +30,7 @@ class SmartPointer : T{
       }
     }
     auto operator+(SmartPointer<T> op){
-      return this->op_add(op);
+      return (*ptr).val;
     }
     auto operator-(SmartPointer<T> op){
       return this->op_sub(op);
