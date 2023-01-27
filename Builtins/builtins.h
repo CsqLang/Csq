@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "exceptions.h"
 #include "../Memory/Reference_Counter.h"
 
 
@@ -271,6 +272,35 @@ class f64{
             if(v1->val <= v2->val)
                 state = true;
             return state;
+        }
+};
+template<typename T>
+class StaticSequence{
+    private:
+        int current = 0;
+    public:
+        T* seq;
+        int len = 0;
+        
+        StaticSequence(){}
+        StaticSequence(SmartPointer<i32> size){
+            seq = new T[size->val];
+            len = size->val;
+        }
+        void push(SmartPointer<T> e){
+            if(current+1 > len){
+                MemoryOverflowException();
+            }
+            else{
+                seq[current] = *e;
+                current++;
+            }
+        }
+        SmartPointer<T> read(SmartPointer<i32> index){
+            if(index->val > len-1){
+                MemoryOverflowException();
+            }
+            return seq[index->val];
         }
 };
 
