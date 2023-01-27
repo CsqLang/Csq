@@ -22,39 +22,67 @@
 
 //Providing int data types
 
-// This class will proivide int8 data type.
-class i8{
-    public:
-        //public member to store data.
-        int8_t val;
-        i8(){}
-        i8(int8_t val){this->val = val;}
-        i8(const i8& val){this->val = val.val;}
-        //Operators
-
-};
-
-//This class will proivide int32 data type.
 class i32{
     public:
-        //public member to store data.
-        int val;
+        int32_t val;
+        i32(int n){
+            val = n;
+        }
+        i32(const i32& n){
+            val = n.val;
+        }
         i32(){}
-        i32(int val){this->val = val;}
-        i32(const i32& val){this->val = val.val;}
-        //Operators
-        SmartPointer<i32> op_add(SmartPointer<i32> v){
-            return SmartPointer<i32>(v->val + val);
+       
+        auto op_add( SmartPointer<i32> v1, SmartPointer<i32> v2){
+            return SmartPointer<i32>((v1->val)+(v2->val));
+        }
+        auto op_sub( SmartPointer<i32> v1, SmartPointer<i32> v2){
+            return SmartPointer<i32>((v1->val)-(v2->val));
+        }
+        auto op_mul( SmartPointer<i32> v1, SmartPointer<i32> v2){
+            return SmartPointer<i32>((v1->val)*(v2->val));
+        }
+        auto op_div( SmartPointer<i32> v1, SmartPointer<i32> v2){
+            return SmartPointer<i32>((v1->val)/(v2->val));
+        }
+        auto op_mod( SmartPointer<i32> v1, SmartPointer<i32> v2){
+            return SmartPointer<i32>((v1->val)%(v2->val));
+        }
+        auto op_equal( SmartPointer<i32> v1, SmartPointer<i32> v2){
+            bool state = false;
+            if(v1->val == v2->val)
+                state = true;
+            return state;
+        }
+        auto op_notEqual( SmartPointer<i32> v1, SmartPointer<i32> v2){
+            bool state = false;
+            if(v1->val != v2->val)
+                state = true;
+            return state;
+        }
+        auto op_lesser( SmartPointer<i32> v1, SmartPointer<i32> v2){
+            bool state = false;
+            if(v1->val < v2->val)
+                state = true;
+            return state;
+        }
+        auto op_greater( SmartPointer<i32> v1, SmartPointer<i32> v2){
+            bool state = false;
+            if(v1->val > v2->val)
+                state = true;
+            return state;
+        }
+        auto op_greaterEqual( SmartPointer<i32> v1, SmartPointer<i32> v2){
+            bool state = false;
+            if(v1->val >= v2->val)
+                state = true;
+            return state;
+        }
+        auto op_lesserEqual( SmartPointer<i32> v1, SmartPointer<i32> v2){
+            bool state = false;
+            if(v1->val <= v2->val)
+                state = true;
+            return state;
         }
 };
-
-//This function can be used to test a condition
-void assert(bool cond, i32 ident){
-    if(cond == 1){
-        printf("Test passed by %d\n",ident.val);
-    }
-    else{
-        printf("Assertion Error: While testing %d\n",ident.val);
-    }
-}
 #endif // BUILTINS_CSQ4
