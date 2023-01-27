@@ -7,7 +7,12 @@ void Trackback(){
 }
 
 void MemoryOverflowException(){
-    printf("Trackback:\n an object is trying to use memory which it doesn't owns\n");
+    printf("Trackback:\n An object is trying to use memory which it doesn't owns\n");
+    Trackback();
+}
+
+void DivisonByZeroException(){
+    printf("Trackback:\n Couldn't divide by zero\n");
     Trackback();
 }
 
