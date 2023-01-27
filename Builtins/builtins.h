@@ -274,6 +274,14 @@ class f64{
             return state;
         }
 };
+void assert(bool cond, int id_){
+    if(cond == 1){
+        printf("%d Passed\n",id_);
+    }else{
+        AssertionFailureException(id_);
+    }
+}
+
 template<typename T>
 class StaticSequence{
     private:
