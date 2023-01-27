@@ -150,6 +150,128 @@ class i64{
         }
 };
 
+//FLoat types
 
+class f32{
+    public:
+        double val;
+        f32(double n){
+            val = n;
+        }
+        f32(const f32& n){
+            val = n.val;
+        }
+        f32(){}
+       
+        auto op_add( SmartPointer<f32> v1, SmartPointer<f32> v2){
+            return SmartPointer<f32>((v1->val)+(v2->val));
+        }
+        auto op_sub( SmartPointer<f32> v1, SmartPointer<f32> v2){
+            return SmartPointer<f32>((v1->val)-(v2->val));
+        }
+        auto op_mul( SmartPointer<f32> v1, SmartPointer<f32> v2){
+            return SmartPointer<f32>((v1->val)*(v2->val));
+        }
+        auto op_div( SmartPointer<f32> v1, SmartPointer<f32> v2){
+            return SmartPointer<f32>((v1->val)/(v2->val));
+        }
+        auto op_equal( SmartPointer<f32> v1, SmartPointer<f32> v2){
+            bool state = false;
+            if(v1->val == v2->val)
+                state = true;
+            return state;
+        }
+        auto op_notEqual( SmartPointer<f32> v1, SmartPointer<f32> v2){
+            bool state = false;
+            if(v1->val != v2->val)
+                state = true;
+            return state;
+        }
+        auto op_lesser( SmartPointer<f32> v1, SmartPointer<f32> v2){
+            bool state = false;
+            if(v1->val < v2->val)
+                state = true;
+            return state;
+        }
+        auto op_greater( SmartPointer<f32> v1, SmartPointer<f32> v2){
+            bool state = false;
+            if(v1->val > v2->val)
+                state = true;
+            return state;
+        }
+        auto op_greaterEqual( SmartPointer<f32> v1, SmartPointer<f32> v2){
+            bool state = false;
+            if(v1->val >= v2->val)
+                state = true;
+            return state;
+        }
+        auto op_lesserEqual( SmartPointer<f32> v1, SmartPointer<f32> v2){
+            bool state = false;
+            if(v1->val <= v2->val)
+                state = true;
+            return state;
+        }
+};
+
+class f64{
+    public:
+        double val;
+        f64(double n){
+            val = n;
+        }
+        f64(const f64& n){
+            val = n.val;
+        }
+        f64(){}
+       
+        auto op_add( SmartPointer<f64> v1, SmartPointer<f64> v2){
+            return SmartPointer<f64>((v1->val)+(v2->val));
+        }
+        auto op_sub( SmartPointer<f64> v1, SmartPointer<f64> v2){
+            return SmartPointer<f64>((v1->val)-(v2->val));
+        }
+        auto op_mul( SmartPointer<f64> v1, SmartPointer<f64> v2){
+            return SmartPointer<f64>((v1->val)*(v2->val));
+        }
+        auto op_div( SmartPointer<f64> v1, SmartPointer<f64> v2){
+            return SmartPointer<f64>((v1->val)/(v2->val));
+        }
+        auto op_equal( SmartPointer<f64> v1, SmartPointer<f64> v2){
+            bool state = false;
+            if(v1->val == v2->val)
+                state = true;
+            return state;
+        }
+        auto op_notEqual( SmartPointer<f64> v1, SmartPointer<f64> v2){
+            bool state = false;
+            if(v1->val != v2->val)
+                state = true;
+            return state;
+        }
+        auto op_lesser( SmartPointer<f64> v1, SmartPointer<f64> v2){
+            bool state = false;
+            if(v1->val < v2->val)
+                state = true;
+            return state;
+        }
+        auto op_greater( SmartPointer<f64> v1, SmartPointer<f64> v2){
+            bool state = false;
+            if(v1->val > v2->val)
+                state = true;
+            return state;
+        }
+        auto op_greaterEqual( SmartPointer<f64> v1, SmartPointer<f64> v2){
+            bool state = false;
+            if(v1->val >= v2->val)
+                state = true;
+            return state;
+        }
+        auto op_lesserEqual( SmartPointer<f32> v1, SmartPointer<f32> v2){
+            bool state = false;
+            if(v1->val <= v2->val)
+                state = true;
+            return state;
+        }
+};
 
 #endif // BUILTINS_CSQ4
