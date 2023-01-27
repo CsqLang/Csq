@@ -16,4 +16,9 @@ void DivisonByZeroException(){
     Trackback();
 }
 
+void AssertionFailureException(int id_){
+    printf("Trackback:\n Assertion Failure by assertion id : %d\n",id_);
+    Trackback();
+}
+
 #endif // 
