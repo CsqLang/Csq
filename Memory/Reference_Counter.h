@@ -1,6 +1,7 @@
 #if !defined(Reference_Counter_H)
 #define Reference_Counter_H
 
+#define op_assign operator=
 template<class T>
 class SmartPointer : T{
   private:
@@ -12,6 +13,7 @@ class SmartPointer : T{
       ptr = new T(*(inc.ptr));
       ref_count++;
     }
+    SmartPointer(T* ptr){this->ptr = new T(*(ptr));ref_count++;}
     SmartPointer(T t){
       ptr = new T(t);
       ref_count++;
@@ -30,19 +32,37 @@ class SmartPointer : T{
       }
     }
     auto operator+(SmartPointer<T> op){
-      return (*ptr).val;
+      return this->op_add((ptr),op);
     }
     auto operator-(SmartPointer<T> op){
-      return this->op_sub(op);
+      return this->op_sub((ptr),op);
     }
     auto operator*(SmartPointer<T> op){
-      return this->op_mul(op);
+      return this->op_mul((ptr),op);
     }
     auto operator/(SmartPointer<T> op){
-      return this->op_div(op);
+      return this->op_div((ptr),op);
     }
     auto operator%(SmartPointer<T> op){
-      return this->op_mod(op);
+      return this->op_mod((ptr),op);
+    }
+    auto operator>(SmartPointer<T> op){
+      return this->op_greater((ptr),op);
+    }
+    auto operator<(SmartPointer<T> op){
+      return this->op_lesser((ptr),op);
+    }
+    auto operator>=(SmartPointer<T> op){
+      return this->op_greaterEqual((ptr),op);
+    }
+    auto operator<=(SmartPointer<T> op){
+      return this->op_lesserEqual((ptr),op);
+    }
+    auto operator !=(SmartPointer<T> op){
+      return this->op_notEqual((ptr),op);
+    }
+    auto operator ==(SmartPointer<T> op){
+      return this->op_equal((ptr),op);
     }
     T& operator*() const { return *ptr; }
     T* operator->() const { return ptr; }
@@ -50,61 +70,4 @@ class SmartPointer : T{
       delete ptr;
     }
 };
-
-// template <typename T>
-// class SmartPointer:T{
-//  public:
-//   SmartPointer(T* ptr) : ptr_(ptr), ref_count_(new int(1)) {}
-//   SmartPointer(T v) : ptr_(new T(v)), ref_count_(new int(1)) {}
-//   SmartPointer(const SmartPointer<T>& other) :
-//       ptr_(other.ptr_), ref_count_(other.ref_count_) {
-//     ++(*ref_count_);
-//   }
-// SmartPointer(){}
-//   SmartPointer<T>& operator=(const SmartPointer<T>& other) {
-//     if (this != &other) {
-//       if (--(*ref_count_) == 0) {
-//         delete ptr_;
-//         delete ref_count_;
-//       }
-//       ptr_ = &((T)(*other.ptr_));
-//       ref_count_ = other.ref_count_;
-//       ++(*ref_count_);
-//     }
-//     return *this;
-//   }
-//   void operator++(int){
-//     this->ptr_ =  new int(*ptr_+1);
-//   }
-//   void operator--(int){
-//     this->ptr_ =  new int(*ptr_-1);
-//   }
-//   auto operator+(SmartPointer<T> v){
-//     return this->op_add(v);
-//   }
-//   auto operator-(SmartPointer<T> v){
-//     return this->op_sub(v);
-//   }
-//   auto operator*(SmartPointer<T> v){
-//     return this->op_mul(v);
-//   }
-//   auto operator/(SmartPointer<T> v){
-//     return this->op_div(v);
-//   }
-
-//   ~SmartPointer() {
-//     if (--(*ref_count_) == 0) {
-//       delete ptr_;
-//       delete ref_count_;
-//     }
-//   }
-
-//   T& operator*() const { return *ptr_; }
-//   T* operator->() const { return ptr_; }
-
-//  private:
-//   T* ptr_;
-//   int* ref_count_;
-// };
-
 #endif // Reference_Counter_H
