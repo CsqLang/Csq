@@ -312,4 +312,44 @@ class StaticSequence{
         }
 };
 
+template<typename T>
+class DynamicSequence{
+    public:
+        T* arr;
+        // capacity is the total storage
+        int capacity;
+        // current is the number of elements
+        int current;
+        (DynamicSequence)(){
+            arr = new T[1];
+            capacity = 1;
+            current = 0;
+        }
+        auto update(SmartPointer<i32> index, SmartPointer<T> value){
+            arr[index->val] = *value;
+        }
+        auto push(SmartPointer<T> data){
+            // if the number of elements is equal to the
+            // capacity, that means we don't have space to
+            // accommodate more elements. We need to double the
+            // capacity
+            if (current == capacity) {
+                T* temp = new T[2 * capacity];
+    
+                // copying old array elements to new array
+                for (int i = 0; i < capacity; i++){
+                    temp[i] = arr[i];
+                }
+    
+                // deleting previous array
+                delete[] arr;
+                capacity *= 2;
+                arr = temp;
+            }
+            // Inserting data
+            arr[current] = *data;
+            current++;
+        }
+};
+
 #endif // BUILTINS_CSQ4
