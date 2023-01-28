@@ -64,7 +64,10 @@ class SmartPointer : T{
     auto operator ==(SmartPointer<T> op){
       return this->op_equal((ptr),op);
     }
-    T& operator*() const { return *ptr; }
+    auto operator[](int index){
+      return this->op_brac(*this, index);
+    }
+    T operator*() const { return *ptr; }
     T* operator->() const { return ptr; }
     ~SmartPointer() {
       delete ptr;
