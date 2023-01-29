@@ -1,6 +1,5 @@
 #if !defined(Reference_Counter_H)
 #define Reference_Counter_H
-
 #define op_assign operator=
 template<class T>
 class SmartPointer : T{
@@ -64,9 +63,7 @@ class SmartPointer : T{
     auto operator ==(SmartPointer<T> op){
       return this->op_equal((ptr),op);
     }
-    auto operator[](int index){
-      return this->op_brac(*this, index);
-    }
+    auto operator[](int index);
     T operator*() const { return *ptr; }
     T* operator->() const { return ptr; }
     ~SmartPointer() {
