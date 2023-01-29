@@ -288,6 +288,8 @@ auto SmartPointer<T>::operator[](int index){
     return this->op_brac(ptr, i32(index));
 }
 
+//Getting initializer list
+#include <initializer_list>
 template<typename T>
 class StaticSequence{
     private:
@@ -382,6 +384,27 @@ class DynamicSequence{
         const T* begin() const { return &this->arr[0];}
         T* end() { return &this->arr[this->current]; }
         const T* end() const { return &this->arr[this->current];}
+};
+
+/*
+This is the class which stores elements in the allocated memory.
+*/
+template<typename T>
+class array{
+    public:
+        T* arr;
+        array(){}
+        array(SmartPointer<i32> size, std::initializer_list<T> list_){
+            arr = new T[size->val];
+            int i = 0;
+            if(size->val < list_.size()){
+                MemoryOverflowException();
+            }
+            for(auto e : list_){
+                arr[i] = e;
+                i++;
+            }
+        }
 };
 
 #endif // BUILTINS_CSQ4
