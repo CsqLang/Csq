@@ -282,6 +282,12 @@ void assert(bool cond, int id_){
     }
 }
 
+//Some Definitions
+template<typename T>
+auto SmartPointer<T>::operator[](int index){
+    return this->op_brac(ptr, i32(index));
+}
+
 template<typename T>
 class StaticSequence{
     private:
@@ -350,6 +356,29 @@ class DynamicSequence{
             arr[current] = *data;
             current++;
         }
+        auto op_brac(SmartPointer<DynamicSequence<T>> s, SmartPointer<i32> index){
+            return s->arr[index->val];
+        }
+        auto erase(SmartPointer<T> e){
+            int i;
+            for (i=0; i<this->current; i++)
+                if (this->arr[i] == *e)
+                    break;
+            // If element found in array
+            if (i < this->current)
+            {
+                // reduce size of array and move all
+                // elements on space ahead
+                this->current = this->current - 1;
+                for (int j=i; j<this->current; j++)
+                    arr[j] = arr[j+1];
+            }
+        }
+        auto pop(){current--;}
+        T* begin() { return &this->arr[0];}
+        const T* begin() const { return &this->arr[0];}
+        T* end() { return &this->arr[this->current]; }
+        const T* end() const { return &this->arr[this->current];}
 };
 
 #endif // BUILTINS_CSQ4
