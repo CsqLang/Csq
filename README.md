@@ -15,6 +15,10 @@ But built-in facilities are still in development.
 ## Requirements
 <li>G++</li>
 
+## The Principles of Csq code
+<li>Every Csq code shall ends with an extention .csq</li>
+<li>Every variable is an object of SmartPointer class which inherits the datatype of that variable</li>
+<li>All operators overloaded are the methods starting from op_ example: def op_div()</li>
 ## Syntax inspirations
 <li>Python</li>
 <li>Go</li>

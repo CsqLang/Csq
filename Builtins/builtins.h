@@ -282,6 +282,14 @@ void assert(bool cond, int id_){
     }
 }
 
+//Some Definitions
+template<typename T>
+auto SmartPointer<T>::operator[](int index){
+    return this->op_brac(ptr, i32(index));
+}
+
+//Getting initializer list
+#include <initializer_list>
 template<typename T>
 class StaticSequence{
     private:
@@ -309,6 +317,93 @@ class StaticSequence{
                 MemoryOverflowException();
             }
             return seq[index->val];
+        }
+};
+
+/*
+This class is made to allocate memory dynamically and to create series of items.
+*/
+template<typename T>
+class DynamicSequence{
+    public:
+        T* arr;
+        // capacity is the total storage
+        int capacity;
+        // current is the number of elements
+        int current;
+        (DynamicSequence)(){
+            arr = new T[1];
+            capacity = 1;
+            current = 0;
+        }
+        auto update(SmartPointer<i32> index, SmartPointer<T> value){
+            arr[index->val] = *value;
+        }
+        auto push(SmartPointer<T> data){
+            // if the number of elements is equal to the
+            // capacity, that means we don't have space to
+            // accommodate more elements. We need to double the
+            // capacity
+            if (current == capacity) {
+                T* temp = new T[2 * capacity];
+    
+                // copying old array elements to new array
+                for (int i = 0; i < capacity; i++){
+                    temp[i] = arr[i];
+                }
+    
+                // deleting previous array
+                delete[] arr;
+                capacity *= 2;
+                arr = temp;
+            }
+            // Inserting data
+            arr[current] = *data;
+            current++;
+        }
+        auto op_brac(SmartPointer<DynamicSequence<T>> s, SmartPointer<i32> index){
+            return s->arr[index->val];
+        }
+        auto erase(SmartPointer<T> e){
+            int i;
+            for (i=0; i<this->current; i++)
+                if (this->arr[i] == *e)
+                    break;
+            // If element found in array
+            if (i < this->current)
+            {
+                // reduce size of array and move all
+                // elements on space ahead
+                this->current = this->current - 1;
+                for (int j=i; j<this->current; j++)
+                    arr[j] = arr[j+1];
+            }
+        }
+        auto pop(){current--;}
+        T* begin() { return &this->arr[0];}
+        const T* begin() const { return &this->arr[0];}
+        T* end() { return &this->arr[this->current]; }
+        const T* end() const { return &this->arr[this->current];}
+};
+
+/*
+This is the class which stores elements in the allocated memory.
+*/
+template<typename T>
+class array{
+    public:
+        T* arr;
+        array(){}
+        array(SmartPointer<i32> size, std::initializer_list<T> list_){
+            arr = new T[size->val];
+            int i = 0;
+            if(size->val < list_.size()){
+                MemoryOverflowException();
+            }
+            for(auto e : list_){
+                arr[i] = e;
+                i++;
+            }
         }
 };
 
