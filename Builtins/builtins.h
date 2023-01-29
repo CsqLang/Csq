@@ -391,8 +391,11 @@ This is the class which stores elements in the allocated memory.
 */
 template<typename T>
 class array{
+    private:
+        int current;
     public:
         T* arr;
+        i32 len=(0);
         array(){}
         array(SmartPointer<i32> size, std::initializer_list<T> list_){
             arr = new T[size->val];
@@ -400,11 +403,34 @@ class array{
             if(size->val < list_.size()){
                 MemoryOverflowException();
             }
+            len = *size;
             for(auto e : list_){
                 arr[i] = e;
                 i++;
             }
+            current = i;
         }
+        auto op_brac(SmartPointer<array<T>> inst, SmartPointer<i32> index){
+            return SmartPointer<T>(inst->arr[index->val]);
+        }
+
+        auto sum(){
+            SmartPointer<T> res;
+            for(int i = 0;i<this->len.val;i++){
+                SmartPointer<T> sum(arr[i].op_add(arr[i],i32(res->val)));
+                res = sum;
+            }
+            return SmartPointer<T>(res);
+        }
+        f64 mean(){
+            return f64();
+        }
+
+        auto pop(){current--;}
+        T* begin() { return &this->arr[0];}
+        const T* begin() const { return &this->arr[0];}
+        T* end() { return &this->arr[this->current]; }
+        const T* end() const { return &this->arr[this->current];}
 };
 
 #endif // BUILTINS_CSQ4
