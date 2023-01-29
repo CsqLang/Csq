@@ -318,6 +318,9 @@ class StaticSequence{
         }
 };
 
+/*
+This class is made to allocate memory dynamically and to create series of items.
+*/
 template<typename T>
 class DynamicSequence{
     public:
