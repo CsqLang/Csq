@@ -413,17 +413,26 @@ class array{
         auto op_brac(SmartPointer<array<T>> inst, SmartPointer<i32> index){
             return SmartPointer<T>(inst->arr[index->val]);
         }
-
+        auto add(SmartPointer<T> elem){
+            if(current+1 > len.val){
+                MemoryOverflowException();
+            }
+            else{
+                arr[current] = *elem;
+                current++;
+            }
+        }
         auto sum(){
-            SmartPointer<T> res;
-            for(int i = 0;i<this->len.val;i++){
-                SmartPointer<T> sum(arr[i].op_add(arr[i],i32(res->val)));
-                res = sum;
+            SmartPointer<T> res = T(0);
+            for(int i = 0;i<this->current;i++){
+                res = res+(SmartPointer<T>(T(arr[i])));
             }
             return SmartPointer<T>(res);
         }
-        f64 mean(){
-            return f64();
+        auto mean(){
+            //Converting sum to f64
+            f64 sm = f64(double(sum()->val));
+            return SmartPointer<f64>((SmartPointer<f64>(sm)/f64(double(len.val))));
         }
 
         auto pop(){current--;}
