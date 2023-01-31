@@ -529,6 +529,12 @@ class str{
         auto tof64(){
             return SmartPointer<f64>(atof(__str__));
         }
+
+        //Operators
+        auto op_add(SmartPointer<str> self, SmartPointer<str> arg){
+            char* s = strcat(self->__str__,arg->__str__);
+            return SmartPointer<str>(s);
+        }
 };
 
 #endif // BUILTINS_CSQ4
