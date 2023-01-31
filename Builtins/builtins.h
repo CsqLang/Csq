@@ -521,7 +521,14 @@ class str{
             return SmartPointer<i32>(strlen(__str__));
         }
         // toint32
-        
+        auto toi32(){
+            int i = atoi(__str__);
+            return SmartPointer<i32>(i);
+        }
+        //tof32
+        auto tof64(){
+            return SmartPointer<f64>(atof(__str__));
+        }
 };
 
 #endif // BUILTINS_CSQ4
