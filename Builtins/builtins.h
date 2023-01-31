@@ -516,19 +516,12 @@ class str{
             }
             return SmartPointer<str>(st);
         }
-
-        //To Title case
-        auto title(){
-            char* st = new char[strlen(__str__)+1];
-            st = __str__;
-            for(int i=0;i<strlen(__str__);i++){
-                if(int(st[i]) >= 65 && int(st[i]) <=90){
-                    st[i] = char(int(__str__[i])+32);
-                }
-                else{}
-            }
-            return SmartPointer<str>(st);
+        //Length of the string
+        auto len(){
+            return SmartPointer<i32>(strlen(__str__));
         }
+        // toint32
+        
 };
 
 #endif // BUILTINS_CSQ4
