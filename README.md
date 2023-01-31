@@ -22,4 +22,5 @@ But built-in facilities are still in development.
 
 ## Syntax inspirations
 <li>Python</li>
-<li>Go</li>
+<li>Ruby</li>
+
