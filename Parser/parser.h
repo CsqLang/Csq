@@ -8,6 +8,7 @@
 #if !defined(PARSER_CSQ4_H)
 #define PARSER_CSQ4_H
 #include "lexer.h"
+#include "../libs/utils/filehand.h"
 #include "../Memory/Stack.h"
 //Some Utilities
 bool CheckIF(array<str> tokens){
@@ -133,6 +134,7 @@ array<str> ElseTokManagement(array<str> tok){
 str Rep(str s){
     str code;
     code = replaceStr(s.Str,"= =","==");
+    code = replaceStr(s.Str,"!s"," ");
     code = replaceStr(code.Str,"+ +","++");
     code = replaceStr(code.Str,"- -","--");
     code = replaceStr(code.Str,"+ =","+=");
