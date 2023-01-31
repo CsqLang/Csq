@@ -274,6 +274,8 @@ class f64{
             return state;
         }
 };
+
+
 void assert(bool cond, int id_){
     if(cond == 1){
         printf("%d Passed\n",id_);
@@ -395,6 +397,7 @@ class array{
         int current;
     public:
         T* arr;
+        
         i32 len=(0);
         array(){}
         array(SmartPointer<i32> size, std::initializer_list<T> list_){
@@ -434,12 +437,85 @@ class array{
             f64 sm = f64(double(sum()->val));
             return SmartPointer<f64>((SmartPointer<f64>(sm)/f64(double(len.val))));
         }
-
+        auto min(){
+            SmartPointer<T> elem = T(arr[0]);
+            for(int i = 0;i<this->current;i++){
+                if(arr[i].val < elem->val){
+                    elem = arr[i];
+                }
+            }
+            return SmartPointer<T>(elem);
+        }
+        auto max(){
+            SmartPointer<T> elem = T(0);
+            for(int i = 0;i<this->current;i++){
+                if(arr[i].val > elem->val){
+                    elem = arr[i];
+                }
+            }
+            return SmartPointer<T>(elem);
+        }
+        auto count(SmartPointer<T> elem){
+            SmartPointer<i32> count = T(0);
+            for(int i = 0;i<this->current;i++){
+                if(elem == arr[i]){
+                    count = count + i32(1);
+                }
+            }
+            return SmartPointer<i32>(count);
+        }
         auto pop(){current--;}
         T* begin() { return &this->arr[0];}
         const T* begin() const { return &this->arr[0];}
         T* end() { return &this->arr[this->current]; }
         const T* end() const { return &this->arr[this->current];}
+};
+
+/*
+This class is the implementation of strings. To increase security
+the string stored are immutable
+*/
+class str{
+    public:
+        char* __str__;
+        str(){}
+        str(const char* __str){
+            this->__str__ = new char[strlen(__str) + 1];
+            // this->__str = __str;
+            for(int i = 0;i<strlen(__str);i++){
+                this->__str__[i] = __str[i];
+            }
+        }
+        str(SmartPointer<str> str_){
+            this->__str__ = new char[strlen(str_->__str__) + 1];
+            __str__ = str_->__str__;
+        }
+        
+        //Touppercase
+        auto toupper(){
+            char* st = new char[strlen(__str__)+1];
+            st = __str__;
+            for(int i=0;i<strlen(__str__);i++){
+                if(int(st[i]) >= 97 && int(st[i]) <=122){
+                    st[i] = char(int(__str__[i])-32);
+                }
+                else{}
+            }
+            return SmartPointer<str>(st);
+        }
+
+        //Tolowercase
+        auto tolower(){
+            char* st = new char[strlen(__str__)+1];
+            st = __str__;
+            for(int i=0;i<strlen(__str__);i++){
+                if(int(st[i]) >= 65 && int(st[i]) <=90){
+                    st[i] = char(int(__str__[i])+32);
+                }
+                else{}
+            }
+            return SmartPointer<str>(st);
+        }
 };
 
 #endif // BUILTINS_CSQ4
