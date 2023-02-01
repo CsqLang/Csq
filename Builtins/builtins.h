@@ -557,6 +557,12 @@ class list{
         auto op_brac(SmartPointer<list<T>> inst, SmartPointer<i32> index){
             return SmartPointer<T>(inst->seq.arr[index->val]);
         }
+        SmartPointer<T> sum(){
+            T i2 = T();
+            for(auto e : seq){
+                i2 = (i2.val) + (e.val);
+            }return i2;
+        }
 };
 
 #endif // BUILTINS_CSQ4
