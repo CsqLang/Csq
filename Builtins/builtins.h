@@ -537,4 +537,26 @@ class str{
         }
 };
 
+template<typename T>
+class list{
+    public:
+        DynamicSequence<T> seq;
+        list(){}
+        list(std::initializer_list<T> seq_){
+            for(auto e : seq_){
+                seq.push(e);
+            }
+        }
+
+        void add(SmartPointer<T> elem){
+            seq.push(*elem);
+        }
+        SmartPointer<i32> len(){
+            return i32(seq.current);
+        }
+        auto op_brac(SmartPointer<list<T>> inst, SmartPointer<i32> index){
+            return SmartPointer<T>(inst->seq.arr[index->val]);
+        }
+};
+
 #endif // BUILTINS_CSQ4
