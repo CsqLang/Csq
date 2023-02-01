@@ -563,6 +563,12 @@ class list{
                 i2 = (i2.val) + (e.val);
             }return i2;
         }
+        SmartPointer<T> product(){
+            T i2 = T();
+            for(auto e : seq){
+                i2 = (i2.val) * (e.val);
+            }return i2;
+        }
 };
 
 #endif // BUILTINS_CSQ4
