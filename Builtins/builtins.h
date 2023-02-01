@@ -569,6 +569,16 @@ class list{
                 i2 = (i2.val) * (e.val);
             }return i2;
         }
+        auto min(){
+            SmartPointer<T> elem = T(seq.arr[0]);
+            for(int i = 0;i<this->len()->val;i++){
+                if(seq.arr[i].val < elem->val){
+                    elem = seq.arr[i];
+                    ######
+                }
+            }
+            return SmartPointer<T>(elem);
+        }
 };
 
 #endif // BUILTINS_CSQ4
