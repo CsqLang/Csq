@@ -587,6 +587,12 @@ class list{
             }
             return SmartPointer<T>(elem);
         }
+        void pop(){
+            seq.pop();
+        }
+        void erase(SmartPointer<T> elem){
+            seq.erase(elem);
+        }
 };
 
 #endif // BUILTINS_CSQ4
