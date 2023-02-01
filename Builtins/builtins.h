@@ -578,6 +578,15 @@ class list{
             }
             return SmartPointer<T>(elem);
         }
+        auto max(){
+            SmartPointer<T> elem = T(seq.arr[0]);
+            for(int i = 0;i<this->len()->val;i++){
+                if(seq.arr[i].val < elem->val){
+                    elem = seq.arr[i];
+                }
+            }
+            return SmartPointer<T>(elem);
+        }
 };
 
 #endif // BUILTINS_CSQ4
