@@ -336,7 +336,7 @@ class Parser{
 auto Parser::Parse(array<array<str>> tokens){
     //Declare states and some needed variables.
     str nominal_code, fn_code, imports, fn_name,class_name;
-    bool fn_state = false;bool class_state = false;
+    bool fn_state = false;bool class_state = false;str main_state = "true";
     //Applying for range loop to get tokenized tokens present in each line.
     for(array<str> rawline : tokens){
         array<str> line = (WhileTokManagement(ForTokManagement(ElseTokManagement(ElifTokManagement(IfTokManagement(rawline))))));
@@ -353,6 +353,9 @@ auto Parser::Parse(array<array<str>> tokens){
             nominal_code += bytecode;
             //Add the variable to stack.
             Stack::Variables.add(name);
+        }
+        else if(tostr(line) == "main = false"){
+            main_state = "false";
         }
         else if(CheckImport(line) == true){
             for(auto i : ImportsManagement(line)){
@@ -510,6 +513,6 @@ auto Parser::Parse(array<array<str>> tokens){
             nominal_code += tostr(line) + "\n";
         }
     }
-    return array<str>({imports,addSemi(Rep(fn_code)),addSemi(Rep(nominal_code))});
+    return array<str>({imports,addSemi(Rep(fn_code)),addSemi(Rep(nominal_code)),main_state});
 }
 #endif // PARSER_CSQ4_H
