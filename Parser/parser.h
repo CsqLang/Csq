@@ -130,6 +130,7 @@ array<str> ElseTokManagement(array<str> tok){
 //         s = tok;
 //     return s;
 // }
+//This function will replace uncleared tokens to make it usable.
 str Rep(str s){
     str code;
     code = replaceStr(s.Str,"= =","==");
