@@ -68,8 +68,7 @@ array<str> ImportsManagement(array<str> tok){
         else{
             str name_module = split(i,"/")[split(i,"/").len()-1];
             imp.add(
-                str("class ")+name_module+str("mod LBRACE\npublic:\n")+read(i+".csqm")+str("\nENDCLASS\n")+
-                name_module + str("mod ")+name_module+";\n"
+                str("namespace ")+name_module+str(" LBRACE\n")+read(i+".csqm")+str("\nRBRACE\n")
             );
         }
     }
@@ -147,6 +146,7 @@ str Rep(str s){
     code = replaceStr(code.Str,"- >","->");
     code = replaceStr(code.Str,"& &","&&");
     code = replaceStr(code.Str," . ",".");
+    code = replaceStr(code.Str,": :","::");
     return code;
 }
 bool CheckVariableAssignment(array<str> tokens){
