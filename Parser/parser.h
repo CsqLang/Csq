@@ -68,8 +68,7 @@ array<str> ImportsManagement(array<str> tok){
         else{
             str name_module = split(i,"/")[split(i,"/").len()-1];
             imp.add(
-                str("class ")+name_module+str("mod LBRACE\npublic:\n")+read(i+".csqm")+str("\nENDCLASS\n")+
-                name_module + str("mod ")+name_module+";\n"
+                str("namespace ")+name_module+str(" LBRACE\n")+read(i+".csqm")+str("\nRBRACE\n")
             );
         }
     }
@@ -131,6 +130,7 @@ array<str> ElseTokManagement(array<str> tok){
 //         s = tok;
 //     return s;
 // }
+//This function will replace uncleared tokens to make it usable.
 str Rep(str s){
     str code;
     code = replaceStr(s.Str,"= =","==");
@@ -147,6 +147,7 @@ str Rep(str s){
     code = replaceStr(code.Str,"- >","->");
     code = replaceStr(code.Str,"& &","&&");
     code = replaceStr(code.Str," . ",".");
+    code = replaceStr(code.Str,": :","::");
     return code;
 }
 bool CheckVariableAssignment(array<str> tokens){
@@ -336,7 +337,7 @@ class Parser{
 auto Parser::Parse(array<array<str>> tokens){
     //Declare states and some needed variables.
     str nominal_code, fn_code, imports, fn_name,class_name;
-    bool fn_state = false;bool class_state = false;
+    bool fn_state = false;bool class_state = false;str main_state = "true";
     //Applying for range loop to get tokenized tokens present in each line.
     for(array<str> rawline : tokens){
         array<str> line = (WhileTokManagement(ForTokManagement(ElseTokManagement(ElifTokManagement(IfTokManagement(rawline))))));
@@ -353,6 +354,9 @@ auto Parser::Parse(array<array<str>> tokens){
             nominal_code += bytecode;
             //Add the variable to stack.
             Stack::Variables.add(name);
+        }
+        else if(tostr(line) == "main = false"){
+            main_state = "false";
         }
         else if(CheckImport(line) == true){
             for(auto i : ImportsManagement(line)){
@@ -510,6 +514,6 @@ auto Parser::Parse(array<array<str>> tokens){
             nominal_code += tostr(line) + "\n";
         }
     }
-    return array<str>({imports,addSemi(Rep(fn_code)),addSemi(Rep(nominal_code))});
+    return array<str>({imports,addSemi(Rep(fn_code)),addSemi(Rep(nominal_code)),main_state});
 }
 #endif // PARSER_CSQ4_H

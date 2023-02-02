@@ -366,6 +366,21 @@ class DynamicSequence{
         auto op_brac(SmartPointer<DynamicSequence<T>> s, SmartPointer<i32> index){
             return s->arr[index->val];
         }
+        auto erase(SmartPointer<T> e){
+            int i;
+            for (i=0; i<this->current; i++)
+                if (this->arr[i] == *e)
+                    break;
+            // If element found in array
+            if (i < this->current)
+            {
+                // reduce size of array and move all
+                // elements on space ahead
+                this->current = this->current - 1;
+                for (int j=i; j<this->current; j++)
+                    arr[j] = arr[j+1];
+            }
+        }
         auto pop(){current--;}
         T* begin() { return &this->arr[0];}
         const T* begin() const { return &this->arr[0];}
@@ -576,5 +591,6 @@ class list{
             seq.pop();
         }
 };
+
 
 #endif // BUILTINS_CSQ4
