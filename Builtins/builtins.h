@@ -671,7 +671,7 @@ void print(SmartPointer<T> t){
 }
 template<typename T, typename... More>
 void print(SmartPointer<T> t, SmartPointer<More>... more){
-    printf("%s\n",tostr(*t).__str__);
+    printf("%s",tostr(*t).__str__);
     print(more...);
 }
 
