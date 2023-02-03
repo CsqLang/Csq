@@ -590,7 +590,89 @@ class list{
         void pop(){
             seq.pop();
         }
+        T* begin() { return &this->seq.arr[0];}
+        const T* begin() const { return &this->seq.arr[0];}
+        T* end() { return &this->seq.arr[this->seq.current]; }
+        const T* end() const { return &this->seq.arr[seq.current];}
 };
 
+template<typename T>
+class tuple{
+    public:
+        DynamicSequence<T> seq;
+        tuple(){}
+        tuple(std::initializer_list<T> seq_){
+            for(auto e : seq_){
+                seq.push(e);
+            }
+        }
+        SmartPointer<i32> len(){
+            return i32(seq.current);
+        }
+        auto op_brac(SmartPointer<tuple<T>> inst, SmartPointer<i32> index){
+            return SmartPointer<T>(inst->seq.arr[index->val]);
+        }
+        SmartPointer<T> sum(){
+            T i2 = T();
+            for(auto e : seq){
+                i2 = (i2.val) + (e.val);
+            }return i2;
+        }
+        SmartPointer<T> product(){
+            T i2 = T();
+            for(auto e : seq){
+                i2 = (i2.val) * (e.val);
+            }return i2;
+        }
+        auto min(){
+            SmartPointer<T> elem = T(seq.arr[0]);
+            for(int i = 0;i<this->len()->val;i++){
+                if(seq.arr[i].val < elem->val){
+                    elem = seq.arr[i];
+                }
+            }
+            return SmartPointer<T>(elem);
+        }
+        auto max(){
+            SmartPointer<T> elem = T(seq.arr[0]);
+            for(int i = 0;i<this->len()->val;i++){
+                if(seq.arr[i].val < elem->val){
+                    elem = seq.arr[i];
+                }
+            }
+            return SmartPointer<T>(elem);
+        }
+};
+
+//The dictionary datatype.
+template<typename K, typename V>
+class dict{
+    public:
+    list<K> keys;
+    list<V> values;
+    dict(){}
+    dict(std::initializer_list<K> keys, std::initializer_list<V> values){
+        for(auto k : keys){
+            this->keys.add(k);
+        }
+    }
+};
+
+str tostr(SmartPointer<i32> data){
+    str s;
+    sprintf(s.__str__, "%d", data->val);
+    return s;
+}
+
+
+template<typename T>
+void print(SmartPointer<T> t){
+    printf("%s\n",tostr(*t).__str__);
+}
+template<typename T, typename... More>
+void print(SmartPointer<T> t, SmartPointer<More>... more){
+    printf("%s\n",tostr(*t).__str__);
+    print(more...);
+}
 
 #endif // BUILTINS_CSQ4
