@@ -65,6 +65,8 @@ public:
         return *ptr;
     }
 
+    
+
     void reset(T *ptr) {
         if (refCounter->removeReference() == 0) {
             delete this->ptr;
