@@ -2,7 +2,8 @@
 #define REFERENCECOUNT_H_CSQ4
 #include <stdio.h>
 #include <stdlib.h>
-class ReferenceCounter {
+#include "../Builtins/builtins.h"
+class ReferenceCounter{
 private:
     int count;
 
@@ -23,26 +24,26 @@ public:
 };
 
 template <typename T>
-class SmartPointer {
+class ref : T{
 private:
     T *ptr;
     ReferenceCounter *refCounter;
 
 public:
-    SmartPointer(T *ptr) : ptr(ptr), refCounter(new ReferenceCounter()) {}
-    SmartPointer(const SmartPointer<T> &sp) :
+    ref(T *ptr) : ptr(ptr), refCounter(new ReferenceCounter()) {}
+    ref(const ref<T> &sp) :
         ptr(sp.ptr), refCounter(sp.refCounter) {
         refCounter->addReference();
     }
 
-    ~SmartPointer() {
+    ~ref() {
         if (refCounter->removeReference() == 0) {
             delete ptr;
             delete refCounter;
         }
     }
 
-    SmartPointer<T> &operator=(const SmartPointer<T> &sp) {
+    ref<T> &operator=(const ref<T> &sp) {
         if (this != &sp) {
             if (refCounter->removeReference() == 0) {
                 delete ptr;
@@ -65,7 +66,7 @@ public:
         return *ptr;
     }
 
-    
+
 
     void reset(T *ptr) {
         if (refCounter->removeReference() == 0) {
