@@ -20,7 +20,6 @@
 #define ENDCLASS };
 #define def auto
 #define equals ==
-#define is ==
 #define noteq !=
 #define gtequal >=
 #define ltequal <=
