@@ -42,6 +42,42 @@ class i32{
             ref<i32> __val = new i32(v->val * v2->val);
             return __val;
         }
+        auto op_equal( ref<i32> v1, ref<i32> v2){
+            bool state = false;
+            if(v1->val == v2->val)
+                state = true;
+            return state;
+        }
+        auto op_notEqual( ref<i32> v1, ref<i32> v2){
+            bool state = false;
+            if(v1->val != v2->val)
+                state = true;
+            return state;
+        }
+        auto op_lesser( ref<i32> v1, ref<i32> v2){
+            bool state = false;
+            if(v1->val < v2->val)
+                state = true;
+            return state;
+        }
+        auto op_greater( ref<i32> v1, ref<i32> v2){
+            bool state = false;
+            if(v1->val > v2->val)
+                state = true;
+            return state;
+        }
+        auto op_greaterEqual( ref<i32> v1, ref<i32> v2){
+            bool state = false;
+            if(v1->val >= v2->val)
+                state = true;
+            return state;
+        }
+        auto op_lesserEqual( ref<i32> v1, ref<i32> v2){
+            bool state = false;
+            if(v1->val <= v2->val)
+                state = true;
+            return state;
+        }
 };
 
 #endif
