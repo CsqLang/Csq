@@ -1,16 +1,22 @@
-/***                FEATURES SHALL BE THERE IN CSQ4
- * REFERENCE COUNTING (DONE)
- * OBJECT ORIENTED PROGRAMMING (DONE)
- * FUNCTIONAL PROGRAMMING (DONE)
- * GENERATION OF EXECUTABLE BUT WILL BE RUNNED AT RUNTIME (PENDING, AND WILL BE DONE BY CODE GENERATOR)
- * IMPORTS (DONE)
+/*:::::::::::::::::::::::::::::::FEATURES SHALL BE THERE IN CSQ4:::::::::::::::::::::::::::::::::::::
+ (1) REFERENCE COUNTING (DONE)
+ (2) OBJECT ORIENTED PROGRAMMING (DONE)
+ (3) FUNCTIONAL PROGRAMMING (DONE)
+ (4) GENERATION OF EXECUTABLE BUT WILL BE RUNNED AT RUNTIME (PENDING, AND WILL BE DONE BY CODE GENERATOR)
+ (5) IMPORTS (DONE)
+
+    Source : @anchor https://www.github.com/CsqLang/Csq4
+    Last modified by Aniket Kumar
  * **/
 #if !defined(PARSER_CSQ4_H)
 #define PARSER_CSQ4_H
 #include "lexer.h"
 #include "../libs/utils/filehand.h"
 #include "../Memory/Stack.h"
-//Some Utilities
+//::::::::::::::::::::::::::::::::Some Utilities::::::::::::::::::::::::::::::::
+/*
+    To know that the folowing tokens are matching with any statement or not.
+*/
 bool CheckIF(array<str> tokens){
     return in(tokens,"if");
 }
@@ -55,7 +61,7 @@ bool file_exists(str filename){
     return is_exist;
 }
 
-
+//This function will manage the imports.
 array<str> ImportsManagement(array<str> tok){
     /*Sample input: import m1.m2 m3
     Tokens: ['m1','.','m2']
