@@ -513,7 +513,7 @@ auto Parser::Parse(array<array<str>> tokens){
             nominal_code += "ENDS\n";
             fn_state = false;
         }
-        else if(tostr(line) == "endc"){nominal_code += "ENDCLASS\n";}
+        else if(tostr(line) == "endc"){nominal_code += "ENDCLASS\n";class_state = false;}
         //If none of the above condition matched with tokens.
         else if(fn_state == false){
             nominal_code += tostr(line) + "\n";
