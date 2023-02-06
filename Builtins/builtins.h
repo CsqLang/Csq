@@ -80,4 +80,68 @@ class i32{
         }
 };
 
+class i64{
+    public:
+        long int val;
+        i64(long int n){
+            val = n;
+        }
+        i64(const i64& n){
+            val = n.val;
+        }
+        i64(){}
+        auto op_add(ref<i64> v, ref<i64> v2){
+            ref<i64> __val = new i64(v->val + v2->val);
+            return __val;
+        }
+        auto op_sub(ref<i64> v, ref<i64> v2){
+            ref<i64> __val = new i64(v->val - v2->val);
+            return __val;
+        }
+        auto op_div(ref<i64> v, ref<i64> v2){
+            ref<i64> __val = new i64(v->val / v2->val);
+            return __val;
+        }
+        auto op_mul(ref<i64> v, ref<i64> v2){
+            ref<i64> __val = new i64(v->val * v2->val);
+            return __val;
+        }
+        auto op_equal( ref<i64> v1, ref<i64> v2){
+            bool state = false;
+            if(v1->val == v2->val)
+                state = true;
+            return state;
+        }
+        auto op_notEqual( ref<i64> v1, ref<i64> v2){
+            bool state = false;
+            if(v1->val != v2->val)
+                state = true;
+            return state;
+        }
+        auto op_lesser( ref<i64> v1, ref<i64> v2){
+            bool state = false;
+            if(v1->val < v2->val)
+                state = true;
+            return state;
+        }
+        auto op_greater( ref<i64> v1, ref<i64> v2){
+            bool state = false;
+            if(v1->val > v2->val)
+                state = true;
+            return state;
+        }
+        auto op_greaterEqual( ref<i64> v1, ref<i64> v2){
+            bool state = false;
+            if(v1->val >= v2->val)
+                state = true;
+            return state;
+        }
+        auto op_lesserEqual( ref<i64> v1, ref<i64> v2){
+            bool state = false;
+            if(v1->val <= v2->val)
+                state = true;
+            return state;
+        }
+};
+
 #endif
