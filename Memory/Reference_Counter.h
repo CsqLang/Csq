@@ -32,6 +32,7 @@ private:
 public:
     ref(){}
     ref(T *ptr) : ptr(ptr), refCounter(new ReferenceCounter()) {}
+    ref(T ptr) : ptr(new T(ptr)), refCounter(new ReferenceCounter()) {}
     ref(const ref<T> &sp) :
         ptr(sp.ptr), refCounter(sp.refCounter) {
         refCounter->addReference();
