@@ -26,6 +26,7 @@
 #define modequal %=
 #define MAIN int main(int argc, char const *argv[]){
 #define ENDMAIN ;return 0;}
-#define init 
+#define init
+#define inherits :
 
 #endif // Csq4_Instruction_H
