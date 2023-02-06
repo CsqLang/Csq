@@ -1,8 +1,8 @@
-#if !defined(REFERENCECOUNT_H_CSQ4)
+#ifndef REFERENCECOUNT_H_CSQ4
 #define REFERENCECOUNT_H_CSQ4
 #include <stdio.h>
 #include <stdlib.h>
-#include "../Builtins/builtins.h"
+
 class ReferenceCounter{
 private:
     int count;
@@ -24,7 +24,7 @@ public:
 };
 
 template <typename T>
-class ref : T{
+class ref  : T {
 private:
     T *ptr;
     ReferenceCounter *refCounter;
@@ -65,9 +65,6 @@ public:
     T &operator*() const {
         return *ptr;
     }
-
-
-
     void reset(T *ptr) {
         if (refCounter->removeReference() == 0) {
             delete this->ptr;
@@ -77,7 +74,18 @@ public:
         this->ptr = ptr;
         refCounter = new ReferenceCounter();
     }
+    ref<T> operator+(const ref<T> &rhs) {
+        return ref<T>(new T((this->op_add(new T(*ptr),new T(*rhs)))));
+    }
+    ref<T> operator-(const ref<T> &rhs) {
+        return ref<T>(new T((this->op_sub(new T(*ptr),new T(*rhs)))));
+    }
+    ref<T> operator*(const ref<T> &rhs) {
+        return ref<T>(new T((this->op_mul(new T(*ptr),new T(*rhs)))));
+    }
+    ref<T> operator/(const ref<T> &rhs) {
+        return ref<T>(new T((this->op_div(new T(*ptr),new T(*rhs)))));
+    }
 };
-
 
 #endif // REFERENCECOUNT_H_CSQ4
