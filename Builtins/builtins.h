@@ -440,7 +440,16 @@ class array{
                 current++;
             }
         }
+        auto read(ref<i32> ind){
+            if(ind->val+1 > this->current){
+                IndexError();
+            }
+            return arr[ind->val];
+        }
         auto read(int ind){
+            if(ind+1 > this->current){
+                IndexError();
+            }
             return arr[ind];
         }
         auto sum(){
