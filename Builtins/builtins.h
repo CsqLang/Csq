@@ -444,13 +444,13 @@ class array{
             if(ind->val+1 > this->current){
                 IndexError();
             }
-            return arr[ind->val];
+            return ref<T>(arr[ind->val]);
         }
         auto read(int ind){
             if(ind+1 > this->current){
                 IndexError();
             }
-            return arr[ind];
+            return ref<T>(arr[ind]);
         }
         auto sum(){
             ref<T> res = T(0);
@@ -460,9 +460,10 @@ class array{
             return ref<T>(res);
         }
         auto mean(){
-            //Converting sum to f64
-            f64 sm = f64(double(sum()->val));
-            return ref<f64>((ref<f64>(sm)/f64(double(len.val))));
+            double sm = double(sum()->val);
+            int len = this->len.val;
+            f64 mean_ = sm/len;
+            return ref<f64>(new f64(mean_));
         }
         auto min(){
             ref<T> elem = T(arr[0]);
@@ -518,13 +519,20 @@ auto tostr(ref<i32> i32_){
     return ref<str>((s));
 }
 
+//Overloading the tostr function to print arrays
+auto tostr(ref<array<str>> arr_str){
+    ref<str> s = new str("{ ");
+    for(auto e : *arr_str){
+        s = s + e;
+    }return s;
+}
 template<typename T>
 void print(T arg1){
-    printf("%s\n",tostr(arg1)->__str__);
+    printf("%s\n",tostr(*arg1)->__str__);
 }
 template<typename T, typename... Args>
 void print(T arg1,Args... more){
-    printf("%s\n",tostr(arg1)->__str__);
+    printf("%s\n",tostr(*arg1)->__str__);
     print(more...);
 }
 #endif
