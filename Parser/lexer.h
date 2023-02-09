@@ -4,8 +4,7 @@
 /*
 This is the class which will do lexial analysis of Csq4 code.
 */
-class Lexer
-{
+class Lexer{
     public:
         //Some public members
         str code;
@@ -56,5 +55,10 @@ class Lexer
             return ntok;
         } 
 };
+
+/*
+Motive of last edit: It was edited by Aniket Kumar on 9/feb/2023 to make Csq space sensative because in the previous lexer space was skipped
+due to which it became space insensative so to make it sensative lexer was improved.
+*/
 
 #endif // LEXER_CSQ4
