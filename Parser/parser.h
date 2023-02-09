@@ -18,37 +18,37 @@
     To know that the folowing tokens are matching with any statement or not.
 */
 bool CheckIF(array<str> tokens){
-    return in(tokens,"if");
+    return in(tokens,IF);
 }
 bool isIdentifier(str tok){
     return Regex(identifier,tok);
 }
 bool CheckElse(array<str> tokens){
-    return in(tokens,"else");
+    return in(tokens,ELSE);
 }
 bool CheckElif(array<str> tokens){
-    return in(tokens,"elif");
+    return in(tokens,ELIF);
 }
 bool CheckFor(array<str> tokens){
-    return in(tokens,"for");
+    return in(tokens,FOR);
 }
 bool CheckWhile(array<str> tokens){
-    return in(tokens,"while");
+    return in(tokens,WHILE);
 }
 bool CheckFunctionDefination(array<str> tokens){
-    return in(tokens,"def");
+    return in(tokens,DEF);
 }
 bool CheckClassDefination(array<str> tokens){
-    return in(tokens,"class");
+    return in(tokens,CLASS);
 }
 bool CheckEnd(array<str> tokens){
-    return in(tokens,"ends");
+    return in(tokens,ENDS);
 }
 bool CheckImport(array<str> tokens){
-    return in(tokens,"import");
+    return in(tokens,IMPORT);
 }
 bool CheckConstructor(array<str> tokens){
-    return in(tokens,"init");
+    return in(tokens,INIT);
 }
 bool file_exists(str filename){
     FILE *fp = fopen(filename.Str, "r");
@@ -70,7 +70,7 @@ array<str> ImportsManagement(array<str> tok){
     str s;
     bool dir = false;
     for(auto i : tok){
-        if(i == "import"){}
+        if(i == IMPORT){}
         else{
             str name_module = split(i,"/")[split(i,"/").len()-1];
             imp.add(
