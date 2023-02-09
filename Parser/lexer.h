@@ -1,6 +1,7 @@
 #if !defined(LEXER_CSQ4)
 #define LEXER_CSQ4
 #include "../Grammar/Csq.h"
+
 /*
 This is the class which will do lexial analysis of Csq4 code.
 */
@@ -16,7 +17,7 @@ class Lexer
         //This function is stage one which will split everything on the basis of tokens
         array<str> SplitViaGrammar(str statement){
             for(auto t : BytecodeGrammar.keys){
-                statement = replaceStr(statement.Str,t.Str,(str(" ")+t+" ").Str);
+                statement = replaceStr(statement.Str,t.Str,(" "+t+" ").Str);
             }
             return split(statement," ");
         }
@@ -38,24 +39,23 @@ class Lexer
             str strlat;
             for(auto t : tokens){
                 if(t == "\"" && strended == true){
-                    strlat += t;
+                    strlat = "\"";
                     strended = false;
                 }
                 else if(t == "\"" && strended == false){
-                    ntok.add(strlat+t);
+                    strlat += "\"";
+                    ntok.add(strlat);
                     strended = true;
                 }
                 else if(t != "\"" && strended == true){
                     ntok.add(t);
                 }
                 else if(t != "\"" && strended == false){
-                    strlat += t;
+                    strlat += " " + t;
                 }
             }
             return ntok;
         } 
 };
-
-
 
 #endif // LEXER_CSQ4
