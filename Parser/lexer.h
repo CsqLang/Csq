@@ -1,7 +1,6 @@
 #if !defined(LEXER_CSQ4)
 #define LEXER_CSQ4
 #include "../Grammar/Csq.h"
-
 /*
 This is the class which will do lexial analysis of Csq4 code.
 */
@@ -19,7 +18,7 @@ class Lexer
             for(auto t : BytecodeGrammar.keys){
                 statement = replaceStr(statement.Str,t.Str,(" "+t+" ").Str);
             }
-            return split(statement," ");
+            return split(statement," \t");
         }
         //Reset function will clear all previous data inside token and code array to move on to next statement.
         void Reset(){
@@ -51,7 +50,7 @@ class Lexer
                     ntok.add(t);
                 }
                 else if(t != "\"" && strended == false){
-                    strlat += " " + t;
+                    strlat +=  t;
                 }
             }
             return ntok;
