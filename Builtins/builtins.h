@@ -488,4 +488,18 @@ class array{
         T* end() { return &this->arr[this->current]; }
         const T* end() const { return &this->arr[this->current];}
 };
+
+ref<str> tostr(str s){
+    return ref<str>(new str(s));
+}
+template<typename T>
+void print(T arg1){
+    printf("%s\n",tostr(*arg1)->__str__);
+}
+template<typename T, typename... Args>
+void print(T arg1,Args... more){
+    printf("%s\n",tostr(*arg1)->__str__);
+    print(more...);
+}
+
 #endif
