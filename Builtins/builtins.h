@@ -400,5 +400,92 @@ class str{
             return ref<str>(new str(s));
         }
 };
-
+/*-------------------------------------------------------------------------------------------------*/
+#include <initializer_list>
+/*
+This is the class which stores elements in the allocated memory.
+*/
+template<typename T>
+class array{
+    private:
+        int current;
+    public:
+        T* arr;
+        
+        i32 len=(0);
+        array(){}
+        array(ref<i32> size, std::initializer_list<T> list_){
+            arr = new T[size->val];
+            int i = 0;
+            if(size->val < list_.size()){
+                MemoryOverflowException();
+            }
+            len = *size;
+            for(auto e : list_){
+                arr[i] = e;
+                i++;
+            }
+            current = i;
+        }
+        auto op_brac(ref<array<T>> inst, ref<i32> index){
+            return (inst->arr[index->val]);
+        }
+        auto add(ref<T> elem){
+            if(current+1 > len.val){
+                MemoryOverflowException();
+            }
+            else{
+                arr[current] = *elem;
+                current++;
+            }
+        }
+        auto read(ref<i32> ind){
+            if(ind->val+1 > this->current){
+                IndexError();
+            }
+            return ref<T>(arr[ind->val]);
+        }
+        auto read(int ind){
+            if(ind+1 > this->current){
+                IndexError();
+            }
+            return ref<T>(arr[ind]);
+        }
+        auto sum(){
+            ref<T> res = T(0);
+            for(int i = 0;i<this->current;i++){
+                res = res+(ref<T>(T(arr[i])));
+            }
+            return ref<T>(res);
+        }
+        auto mean(){
+            double sm = double(sum()->val);
+            int len = this->len.val;
+            f64 mean_ = sm/len;
+            return ref<f64>(new f64(mean_));
+        }
+        auto min(){
+            ref<T> elem = T(arr[0]);
+            for(int i = 0;i<this->current;i++){
+                if(arr[i].val < elem->val){
+                    elem = arr[i];
+                }
+            }
+            return ref<T>(elem);
+        }
+        auto max(){
+            ref<T> elem = T(0);
+            for(int i = 0;i<this->current;i++){
+                if(arr[i].val > elem->val){
+                    elem = arr[i];
+                }
+            }
+            return ref<T>(elem);
+        }
+        auto pop(){current--;}
+        T* begin() { return &this->arr[0];}
+        const T* begin() const { return &this->arr[0];}
+        T* end() { return &this->arr[this->current]; }
+        const T* end() const { return &this->arr[this->current];}
+};
 #endif
