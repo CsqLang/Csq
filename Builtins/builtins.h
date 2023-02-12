@@ -14,6 +14,19 @@
 #include <stdio.h>
 #include <string.h>
 #include "../Memory/Reference_Counter.h"
+
+
+//Memory manager
+//These functions are made to directly contact with memory without being automatically collected.
+template<typename T>
+auto allocate(T val){
+    return new T(val);
+}
+template<typename T>
+auto deallocate(T* val){
+    delete val;
+}
+
 //Basic Datatypes such as int, float, bytes etc..
 
 //Providing int data types
