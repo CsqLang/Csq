@@ -28,5 +28,5 @@
 #define ENDMAIN ;return 0;}
 #define init
 #define inherits :
-
+#define plus +
 #endif // Csq4_Instruction_H
