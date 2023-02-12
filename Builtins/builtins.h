@@ -335,7 +335,7 @@ class f64{
 //Defination for [] operator
 template<typename T>
 auto ref<T>::operator[](int index){
-    return ref<T>(new T(this->op_brac(ptr, new i32(index))));
+    return ref<T>(new T(this->op_brac(this->get(), new i32(index))));
 }
 
 //String class
@@ -414,13 +414,13 @@ class array{
         
         i32 len=(0);
         array(){}
-        array(ref<i32> size, std::initializer_list<T> list_){
-            arr = new T[size->val];
+        array(std::initializer_list<T> list_){
+            arr = new T[list_.size()];
             int i = 0;
-            if(size->val < list_.size()){
+            if(list_.size() < list_.size()){
                 MemoryOverflowException();
             }
-            len = *size;
+            len = i32(list_.size());
             for(auto e : list_){
                 arr[i] = e;
                 i++;
@@ -489,17 +489,36 @@ class array{
         const T* end() const { return &this->arr[this->current];}
 };
 
-ref<str> tostr(str s){
+ref<str> tostr(ref<str> s){
+    return ref<str>(new str(s->__str__));
+}
+
+auto tostr(ref<f32> f32_){
+    str s("");
+    sprintf(s.__str__,"%f",f32_->val);
     return ref<str>(new str(s));
 }
+auto tostr(ref<f64> f64_){
+    str s("");
+    sprintf(s.__str__,"%lf",f64_->val);
+    return ref<str>(new str(s));
+}
+auto tostr(ref<i32> i32_){
+    str s("");
+    sprintf(s.__str__,"%d",i32_->val);
+    return ref<str>(new str(s));
+}
+
+
 template<typename T>
 void print(T arg1){
-    printf("%s\n",tostr(*arg1)->__str__);
+    printf("%s\n",tostr((*arg1))->__str__);
 }
 template<typename T, typename... Args>
 void print(T arg1,Args... more){
-    printf("%s\n",tostr(*arg1)->__str__);
+    printf("%s\n",tostr((*arg1))->__str__);
     print(more...);
 }
+
 
 #endif
