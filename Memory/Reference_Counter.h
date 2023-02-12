@@ -1,119 +1,68 @@
 #ifndef REFERENCECOUNT_H_CSQ4
 #define REFERENCECOUNT_H_CSQ4
-#include <stdio.h>
-#include <stdlib.h>
-#include <atomic>
-
-class ReferenceCounter{
-private:
-    std::atomic<int> count;
-
-public:
-    ReferenceCounter() : count(1) {}
-
-    void addReference() {
-        count++;
-    }
-
-    int removeReference() {
-        return --count;
-    }
-
-    int getCount() const {
-        return count.load();
-    }
-};
+#include <memory>
 
 template <typename T>
-class ref : T{
-private:
-    T *ptr;
-    ReferenceCounter *refCounter;
+class ref : std::shared_ptr<T> {
 public:
-    ref() : ptr(nullptr), refCounter(new ReferenceCounter()) {}
-    ref(T *ptr = nullptr) : ptr(ptr), refCounter(new ReferenceCounter()) {}
-    ref(T &obj) : ptr(new T(obj)), refCounter(new ReferenceCounter()) {}
-    ref(const ref<T> &sp) :
-        ptr(sp.ptr), refCounter(sp.refCounter) {
-        refCounter->addReference();
-    }
+    ref() : std::shared_ptr<T>(nullptr) {}
+    inline ref(T *ptr) : std::shared_ptr<T>(ptr) {}
+    inline ref(T &obj) : std::shared_ptr<T>(std::make_shared<T>(obj)) {}
+    inline ref(const ref<T> &sp) : std::shared_ptr<T>(sp) {}
 
-    ~ref() {
-        if (refCounter->removeReference() == 0) {
-            delete ptr;
-            delete refCounter;
-        }
-    }
-
-    ref<T> &operator=(const ref<T> &sp) {
-        if (this != &sp) {
-            if (refCounter->removeReference() == 0) {
-                delete ptr;
-                delete refCounter;
-            }
-
-            ptr = sp.ptr;
-            refCounter = sp.refCounter;
-            refCounter->addReference();
-        }
-
+    inline ref<T> &operator=(const ref<T> &sp) {
+        this->std::shared_ptr<T>::operator=(sp);
         return *this;
     }
 
-    T *operator->() const {
-        return ptr;
+    inline T *operator->() const {
+        return this->get();
     }
 
-    T &operator*() const {
-        return *ptr;
+    inline T &operator*() const {
+        return *(this->get());
     }
 
-    void reset(T *ptr) {
-        if (refCounter->removeReference() == 0) {
-            delete this->ptr;
-            delete refCounter;
-        }
-
-        this->ptr = ptr;
-        refCounter = new ReferenceCounter();
+    inline void reset(T *ptr) {
+        this->reset(ptr);
     }
 
-    ref<T> operator+(const ref<T> &rhs) {
-        return this->op_add(*ptr, *rhs.ptr);
+    inline ref<T> operator+(const ref<T> &rhs) {
+        return this->op_add(this->get(), rhs.get());
     }
-    ref<T> operator-(const ref<T> &rhs) {
-        return this->op_sub(*ptr, *rhs.ptr);
+    inline ref<T> operator-(const ref<T> &rhs) {
+        return this->op_sub(this->get(), rhs.get());
     }
-    ref<T> operator*(const ref<T> &rhs) {
-        return this->op_mul(*ptr, *rhs.ptr);
+    inline ref<T> operator*(const ref<T> &rhs) {
+        return this->op_mul(this->get(), rhs.get());
     }
-    ref<T> operator/(const ref<T> &rhs) {
-        return this->op_div(*ptr, *rhs.ptr);
+    inline ref<T> operator/(const ref<T> &rhs) {
+        return this->op_div(this->get(), rhs.get());
+    
     }
-    auto operator%(ref<T> op){
-    return this->op_mod(*ptr, *op.ptr);
+    inline auto operator%(ref<T> op){
+    return this->op_mod(this->get(), op.get());
     }
-    auto operator>(ref<T> op){
-    return this->op_greater(*ptr, *op.ptr);
+    inline auto operator>(ref<T> op){
+    return this->op_greater(this->get(), op.get());
     }
-    auto operator<(ref<T> op){
-    return this->op_lesser(*ptr, *op.ptr);
+    inline auto operator<(ref<T> op){
+    return this->op_lesser(this->get(), op.get());
     }
-    auto operator>=(ref<T> op){
-    return this->op_greaterEqual(*ptr, *op.ptr);
+    inline auto operator>=(ref<T> op){
+    return this->op_greaterEqual(this->get(), op.get());
     }
-    auto operator<=(ref<T> op){
-    return this->op_lesserEqual(*ptr, *op.ptr);
+    inline auto operator<=(ref<T> op){
+    return this->op_lesserEqual(this->get(), op.get());
     }
-    auto operator !=(ref<T> op){
-    return this->op_notEqual(*ptr, *op.ptr);
+    inline auto operator !=(ref<T> op){
+    return this->op_notEqual(this->get(), op.get());
     }
-    auto operator ==(ref<T> op){
-    return this->op_equal(*ptr, *op.ptr);
+    inline auto operator ==(ref<T> op){
+    return this->op_equal(this->get(), op.get());
     }
 
     auto operator[](int index);
-
 };
 
 #endif // REFERENCECOUNT_H_CSQ4
