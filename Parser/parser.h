@@ -61,7 +61,6 @@ bool file_exists(str filename){
     return is_exist;
 }
 
-
 //This function will manage the imports.
 array<str> ImportsManagement(array<str> tok){
     /*Sample input: import m1.m2 m3
@@ -355,7 +354,7 @@ auto Parser::Parse(array<array<str>> tokens){
             str val = TokenVariableAssignShuffle(line)[2];
             //Producing bytecodes.
             str bytecode = "REFERENCE(";bytecode += name + ",";
-            bytecode += type + ",";bytecode += val + ")\n";
+            bytecode += type + ",";bytecode += type + str("(") + val + "))\n";
             //Adding the bytecode to the code string.
             nominal_code += bytecode;
             //Add the variable to stack.
@@ -412,7 +411,7 @@ auto Parser::Parse(array<array<str>> tokens){
             str val = TokenVariableAssignShuffle(line)[2];
             //Producing bytecodes.
             str bytecode = "REFERENCE(";bytecode += name + ",";
-            bytecode += type + ",";bytecode += val + ")\n";
+            bytecode += type + ",";bytecode += type + str("(") + val + "))\n";
             //Adding the bytecode to the code string.
             fn_code += bytecode;
             //Add the variable to stack.
@@ -425,7 +424,7 @@ auto Parser::Parse(array<array<str>> tokens){
             str val = TokenVariableAssignShuffle(line)[2];
             //Producing bytecodes.
             str bytecode = "REFERENCE(";bytecode += name + ",";
-            bytecode += type + ",";bytecode += val + ")\n";
+            bytecode += type + ",";bytecode += type + str("(") + val + "))\n";
             //Adding the bytecode to the code string.
             nominal_code += bytecode;
             //Add the variable to stack.
