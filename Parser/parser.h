@@ -50,6 +50,9 @@ bool CheckImport(array<str> tokens){
 bool CheckConstructor(array<str> tokens){
     return in(tokens,INIT);
 }
+bool CheckMacro(array<str> tokens){
+    return in(tokens,MACRO);
+}
 bool file_exists(str filename){
     FILE *fp = fopen(filename.Str, "r");
     bool is_exist = false;
@@ -136,6 +139,19 @@ array<str> ElseTokManagement(array<str> tok){
 //         s = tok;
 //     return s;
 // }
+array<str> MacroManagement(array<str> tok){
+    array<str> newtokens;
+    if(CheckMacro(tok)){
+        for(auto e : tok)
+            if(e == MACRO)
+                newtokens.add("#define");
+            else
+                newtokens.add(e);
+    }
+    else
+        newtokens = tok;
+    return newtokens;
+}
 str Rep(str s){
     str code;
     code = replaceStr(s.Str," = = ","==");
@@ -359,6 +375,12 @@ auto Parser::Parse(array<array<str>> tokens){
             nominal_code += bytecode;
             //Add the variable to stack.
             Stack::Variables.add(name);
+        }
+        else if(CheckMacro(line) == 1 && CheckFunctionDefination(line) == 0){
+            auto tokens_ = MacroManagement(line);
+            for(auto t : tokens_){
+                nominal_code += t + " ";
+            }nominal_code += "\n";
         }
         else if(tostr(line) == "main = false"){
             main_state = "false";
