@@ -15,9 +15,7 @@
 #include <string.h>
 #include "../Memory/Reference_Counter.h"
 
-
 //Memory manager
-//These functions are made to directly contact with memory without being automatically collected.
 template<typename T>
 auto allocate(T val){
     return new T(val);
@@ -27,73 +25,83 @@ auto deallocate(T* val){
     delete val;
 }
 
+
 //Basic Datatypes such as int, float, bytes etc..
 
 //Providing int data types
 
-class i32{
-    public:
-        int val;
-        i32(int n){
-            val = n;
-        }
-        i32(const i32& n){
-            val = n.val;
-        }
-        i32(){}
-        auto op_add(ref<i32> v, ref<i32> v2){
-            ref<i32> __val = new i32(v->val + v2->val);
-            return __val;
-        }
-        auto op_sub(ref<i32> v, ref<i32> v2){
-            ref<i32> __val = new i32(v->val - v2->val);
-            return __val;
-        }
-        auto op_div(ref<i32> v, ref<i32> v2){
-            ref<i32> __val = new i32(v->val / v2->val);
-            return __val;
-        }
-        auto op_mul(ref<i32> v, ref<i32> v2){
-            ref<i32> __val = new i32(v->val * v2->val);
-            return __val;
-        }
-        auto op_equal( ref<i32> v1, ref<i32> v2){
-            bool state = false;
-            if(v1->val == v2->val)
-                state = true;
-            return state;
-        }
-        auto op_notEqual( ref<i32> v1, ref<i32> v2){
-            bool state = false;
-            if(v1->val != v2->val)
-                state = true;
-            return state;
-        }
-        auto op_lesser( ref<i32> v1, ref<i32> v2){
-            bool state = false;
-            if(v1->val < v2->val)
-                state = true;
-            return state;
-        }
-        auto op_greater( ref<i32> v1, ref<i32> v2){
-            bool state = false;
-            if(v1->val > v2->val)
-                state = true;
-            return state;
-        }
-        auto op_greaterEqual( ref<i32> v1, ref<i32> v2){
-            bool state = false;
-            if(v1->val >= v2->val)
-                state = true;
-            return state;
-        }
-        auto op_lesserEqual( ref<i32> v1, ref<i32> v2){
-            bool state = false;
-            if(v1->val <= v2->val)
-                state = true;
-            return state;
-        }
+class i32 {
+public:
+int val;
+i32(int n){
+val = n;
+}
+i32(const i32& n){
+val = n.val;
+}
+i32(){}
+auto op_add(i32 v, i32 v2){
+    return i32(v.val + v2.val);
+}
+
+ref<i32> op_sub(ref<i32> v, ref<i32> v2){
+    ref<i32> __val = new i32(v->val - v2->val);
+    return __val;
+}
+
+auto op_div(ref<i32> v, ref<i32> v2){
+    ref<i32> __val = new i32(v->val / v2->val);
+    return __val;
+}
+
+ref<i32> op_mul(ref<i32> v, ref<i32> v2) {
+    return ref<i32>(new i32(v->val * v2->val));
+}
+
+bool op_equal( ref<i32> v1, ref<i32> v2){
+    bool state = false;
+    if(v1->val == v2->val)
+        state = true;
+    return state;
+}
+
+bool op_notEqual( ref<i32> v1, ref<i32> v2){
+    bool state = false;
+    if(v1->val != v2->val)
+        state = true;
+    return state;
+}
+
+bool op_lesser( ref<i32> v1, ref<i32> v2){
+    bool state = false;
+    if(v1->val < v2->val)
+        state = true;
+    return state;
+}
+
+bool op_greater( ref<i32> v1, ref<i32> v2){
+    bool state = false;
+    if(v1->val > v2->val)
+        state = true;
+    return state;
+}
+
+bool op_greaterEqual( ref<i32> v1, ref<i32> v2){
+    bool state = false;
+    if(v1->val >= v2->val)
+        state = true;
+    return state;
+}
+
+bool op_lesserEqual( ref<i32> v1, ref<i32> v2){
+    bool state = false;
+    if(v1->val <= v2->val)
+        state = true;
+    return state;
+}
 };
+
+
 
 class i64{
     public:
@@ -367,6 +375,44 @@ class str{
             this->__str__ = new char[strlen(str_->__str__) + 1];
             __str__ = str_->__str__;
         }
+
+        auto operator+(const str &rhs)
+        {
+            int length = strlen(this->__str__) + strlen(rhs.__str__);
+
+            char *buff = new char[length + 1];
+
+            // Copy the Strings to buff[]
+            strcpy(buff, this->__str__);
+            strcat(buff, rhs.__str__);
+            buff[length] = '\0';
+
+            // String temp
+            str temp{buff};
+
+            // delete the buff[]
+            delete[] buff;
+
+            // Return the concatenated String
+            return temp;
+        }
+        auto operator+=(const str &rhs)
+        {
+            int length = strlen(this->__str__) + strlen(rhs.__str__);
+
+            char *buff = new char[length + 1];
+
+            // Copy the Strings to buff[]
+            strcpy(buff, this->__str__);
+            strcat(buff, rhs.__str__);
+            buff[length] = '\0';
+
+            // String temp
+            // str temp{ buff };
+            delete __str__;
+            __str__ = new char[length + 1];
+            strcpy(__str__, buff);
+        }
         
         //Touppercase
         auto upper(){
@@ -453,16 +499,10 @@ class array{
             }
         }
         auto read(ref<i32> ind){
-            if(ind->val+1 > this->current){
+            if((ind->val)+1 > this->current){
                 IndexError();
             }
             return ref<T>(arr[ind->val]);
-        }
-        auto read(int ind){
-            if(ind+1 > this->current){
-                IndexError();
-            }
-            return ref<T>(arr[ind]);
         }
         auto sum(){
             ref<T> res = T(0);
@@ -475,7 +515,7 @@ class array{
             double sm = double(sum()->val);
             int len = this->len.val;
             f64 mean_ = sm/len;
-            return ref<f64>(new f64(mean_));
+            return ref<f64>(f64(mean_));
         }
         auto min(){
             ref<T> elem = T(arr[0]);
@@ -511,6 +551,7 @@ auto tostr(ref<f32> f32_){
     sprintf(s.__str__,"%f",f32_->val);
     return ref<str>(new str(s));
 }
+
 auto tostr(ref<f64> f64_){
     str s("");
     sprintf(s.__str__,"%lf",f64_->val);
@@ -521,7 +562,22 @@ auto tostr(ref<i32> i32_){
     sprintf(s.__str__,"%d",i32_->val);
     return ref<str>(new str(s));
 }
+auto to_str(int num)
+{
+    char *num_ = new char[2500];
+    sprintf(num_, "%d", num);
+    return str(num_);
+}
+auto tostr(ref<array<i32>> arr){
+    str s("{ ");
+    for(auto i : *arr){
 
+        s += str(to_str((i.val)));
+        s += ", ";
+    }
+    s += "}";
+    return ref<str>(s);
+}
 
 template<typename T>
 void print(T arg1){
@@ -532,6 +588,9 @@ void print(T arg1,Args... more){
     printf("%s\n",tostr((*arg1))->__str__);
     print(more...);
 }
+
+
+/********************************MATH FIELD***********************/
 
 
 #endif
