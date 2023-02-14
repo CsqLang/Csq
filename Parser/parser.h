@@ -457,7 +457,7 @@ auto Parser::Parse(array<array<str>> tokens){
                     str n = TokenVariableAssignShuffle(Lexer(i).GetTokens())[0];
                     str t = TokenVariableAssignShuffle(Lexer(i).GetTokens())[1];
                     str e = TokenVariableAssignShuffle(Lexer(i).GetTokens())[2];
-                    bytecode_arg += str("REFERENCE(") + n + str(",")+t+str(",")+e+"),";
+                    bytecode_arg += str("PARAM(") + n + str(",")+t+str(",")+e+"),";
                     Stack::Variables.add(n);
                 }bytecode_arg.pop_bk();
             }
@@ -490,7 +490,7 @@ auto Parser::Parse(array<array<str>> tokens){
                     str n = TokenVariableAssignShuffle(Lexer(i).GetTokens())[0];
                     str t = TokenVariableAssignShuffle(Lexer(i).GetTokens())[1];
                     str e = TokenVariableAssignShuffle(Lexer(i).GetTokens())[2];
-                    bytecode_arg += str("REFERENCE(") + n + str(",")+t+str(",")+e+"),";
+                    bytecode_arg += str("PARAM(") + n + str(",")+t+str(",")+e+"),";
                     Stack::Variables.add(n);
                 }bytecode_arg.pop_bk();
             }
