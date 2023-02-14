@@ -7,7 +7,8 @@ class ref : std::shared_ptr<T> {
 public:
     ref() : std::shared_ptr<T>(nullptr) {}
     inline ref(T *ptr) : std::shared_ptr<T>(ptr) {}
-    inline ref(T &obj) : std::shared_ptr<T>(std::make_shared<T>(obj)) {}
+    inline ref(T val) : std::shared_ptr<T>(new T(val)) {}
+    inline ref(std::shared_ptr<T> ptr) : std::shared_ptr<T>(ptr) {}
     inline ref(const ref<T> &sp) : std::shared_ptr<T>(sp) {}
 
     inline ref<T> &operator=(const ref<T> &sp) {
@@ -28,38 +29,36 @@ public:
     }
 
     inline ref<T> operator+(const ref<T> &rhs) {
-        return this->op_add(this->get(), rhs.get());
+        return ref<T>(new T(this->get()->op_add(*this->get(),rhs.get())));
     }
+
+
     inline ref<T> operator-(const ref<T> &rhs) {
-        return this->op_sub(this->get(), rhs.get());
+        return ref<T>(new T(this->get()->op_sub(*this->get(),rhs.get())));
     }
     inline ref<T> operator*(const ref<T> &rhs) {
-        return this->op_mul(this->get(), rhs.get());
+        return ref<T>(new T(this->get()->op_mul(*this->get(),rhs.get())));
     }
     inline ref<T> operator/(const ref<T> &rhs) {
-        return this->op_div(this->get(), rhs.get());
-    
+        return ref<T>(new T(this->get()->op_div(*this->get(),rhs.get())));
     }
-    inline auto operator%(ref<T> op){
-    return this->op_mod(this->get(), op.get());
+    inline bool operator>(const ref<T> &rhs) {
+        return ((this->get()->op_greater(*this->get(),rhs.get())));
     }
-    inline auto operator>(ref<T> op){
-    return this->op_greater(this->get(), op.get());
+    inline bool operator<(const ref<T> &rhs) {
+        return ((this->get()->op_less(*this->get(),rhs.get())));
     }
-    inline auto operator<(ref<T> op){
-    return this->op_lesser(this->get(), op.get());
+    inline bool operator>=(const ref<T> &rhs) {
+        return ((this->get()->op_greaterEqual(*this->get(),rhs.get())));
     }
-    inline auto operator>=(ref<T> op){
-    return this->op_greaterEqual(this->get(), op.get());
+    inline bool operator<=(const ref<T> &rhs) {
+        return ((this->get()->op_lessEqual(*this->get(),rhs.get())));
     }
-    inline auto operator<=(ref<T> op){
-    return this->op_lesserEqual(this->get(), op.get());
+    inline bool operator!=(const ref<T> &rhs) {
+        return ((this->get()->op_notEqual(*this->get(),rhs.get())));
     }
-    inline auto operator !=(ref<T> op){
-    return this->op_notEqual(this->get(), op.get());
-    }
-    inline auto operator ==(ref<T> op){
-    return this->op_equal(this->get(), op.get());
+    inline bool operator==(const ref<T> &rhs) {
+        return (this->get()->op_Equal(*this->get(),rhs.get()));
     }
 
     auto operator[](int index);
