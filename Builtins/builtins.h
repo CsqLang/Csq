@@ -697,7 +697,7 @@ void print(T arg1){
 }
 template<typename T, typename... Args>
 void print(T arg1,Args... more){
-    printf("%s\n",tostr((*arg1))->__str__);
+    printf("%s",tostr((*arg1))->__str__);
     print(more...);
 }
 
