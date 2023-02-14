@@ -562,23 +562,32 @@ auto tostr(ref<i32> i32_){
     sprintf(s.__str__,"%d",i32_->val);
     return ref<str>(new str(s));
 }
-auto to_str(int num)
+auto to_str(i32 num)
 {
     char *num_ = new char[2500];
-    sprintf(num_, "%d", num);
+    sprintf(num_, "%d", num.val);
     return str(num_);
 }
 auto tostr(ref<array<i32>> arr){
     str s("{ ");
     for(auto i : *arr){
 
-        s += str(to_str((i.val)));
+        s += str(to_str((i)));
         s += ", ";
     }
     s += "}";
     return ref<str>(s);
 }
+auto tostr(ref<array<str>> arr){
+    str s("{ ");
+    for(auto i : *arr){
 
+        s += str(i);
+        s += ", ";
+    }
+    s += "}";
+    return ref<str>(s);
+}
 template<typename T>
 void print(T arg1){
     printf("%s\n",tostr((*arg1))->__str__);
@@ -588,9 +597,6 @@ void print(T arg1,Args... more){
     printf("%s\n",tostr((*arg1))->__str__);
     print(more...);
 }
-
-
-/********************************MATH FIELD***********************/
 
 
 #endif
