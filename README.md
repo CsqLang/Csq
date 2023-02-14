@@ -23,4 +23,5 @@ But built-in facilities are still in development.
 ## Syntax inspirations
 <li>Python</li>
 <li>Ruby</li>
+<li>Nim</li>
 
