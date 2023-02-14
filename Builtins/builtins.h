@@ -542,6 +542,70 @@ class array{
         const T* end() const { return &this->arr[this->current];}
 };
 
+
+template<typename T>
+class DynamicSequence{
+    public:
+        T* arr;
+        // capacity is the total storage
+        int capacity;
+        // current is the number of elements
+        int current;
+        (DynamicSequence)(){
+            arr = new T[1];
+            capacity = 1;
+            current = 0;
+        }
+        auto update(ref<i32> index, ref<T> value){
+            arr[index->val] = *value;
+        }
+        auto push(ref<T> data){
+            // if the number of elements is equal to the
+            // capacity, that means we don't have space to
+            // accommodate more elements. We need to double the
+            // capacity
+            if (current == capacity) {
+                T* temp = new T[2 * capacity];
+    
+                // copying old array elements to new array
+                for (int i = 0; i < capacity; i++){
+                    temp[i] = arr[i];
+                }
+    
+                // deleting previous array
+                delete[] arr;
+                capacity *= 2;
+                arr = temp;
+            }
+            // Inserting data
+            arr[current] = *data;
+            current++;
+        }
+        auto read(ref<i32> index){
+            return ref<T>(arr[index->val]);
+        }
+        auto erase(ref<T> e){
+            int i;
+            for (i=0; i<this->current; i++)
+                if (this->arr[i] == *e)
+                    break;
+            // If element found in array
+            if (i < this->current)
+            {
+                // reduce size of array and move all
+                // elements on space ahead
+                this->current = this->current - 1;
+                for (int j=i; j<this->current; j++)
+                    arr[j] = arr[j+1];
+            }
+        }
+        auto pop(){current--;}
+        T* begin() { return &this->arr[0];}
+        const T* begin() const { return &this->arr[0];}
+        T* end() { return &this->arr[this->current]; }
+        const T* end() const { return &this->arr[this->current];}
+};
+
 ref<str> tostr(ref<str> s){
     return ref<str>(new str(s->__str__));
 }
@@ -597,6 +661,9 @@ void print(T arg1,Args... more){
     printf("%s\n",tostr((*arg1))->__str__);
     print(more...);
 }
+
+
+/********************************MATH FIELD***********************/
 
 
 #endif
