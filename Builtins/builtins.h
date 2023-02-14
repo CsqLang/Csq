@@ -64,7 +64,10 @@ bool op_equal( ref<i32> v1, ref<i32> v2){
         state = true;
     return state;
 }
+i32 operator+(i32 v){
 
+    return i32(this->val+v.val);
+}
 bool op_notEqual( ref<i32> v1, ref<i32> v2){
     bool state = false;
     if(v1->val != v2->val)
@@ -458,6 +461,7 @@ class str{
             char* s = strcat(self->__str__,arg->__str__);
             return ref<str>(new str(s));
         }
+        
 };
 /*-------------------------------------------------------------------------------------------------*/
 #include <initializer_list>
@@ -488,15 +492,6 @@ class array{
         }
         auto op_brac(ref<array<T>> inst, ref<i32> index){
             return (inst->arr[index->val]);
-        }
-        auto add(ref<T> elem){
-            if(current+1 > len.val){
-                MemoryOverflowException();
-            }
-            else{
-                arr[current] = *elem;
-                current++;
-            }
         }
         auto read(ref<i32> ind){
             if((ind->val)+1 > this->current){
@@ -605,6 +600,50 @@ class DynamicSequence{
         T* end() { return &this->arr[this->current]; }
         const T* end() const { return &this->arr[this->current];}
 };
+
+template<typename T>
+class list{
+    public:
+        DynamicSequence<T> seq;
+        list(){}
+        list(std::initializer_list<T> ls){
+            for(auto i : ls){
+                seq.push(i);
+            }
+        }
+        list(ref<list<T>> newls){
+            this->seq = (*newls).seq;
+        }
+        void add(ref<T> elem){
+            seq.push(elem);
+        }
+        auto read(ref<i32> index){
+            return seq.read(index);
+        }
+        void update(ref<i32> index, ref<T> val){
+            seq.update(index,val);
+        }
+        ref<i32> len(){
+            return new i32(this->seq.current);
+        }
+        auto pop(){seq.pop();}
+        auto iter(){
+            T* ref_[4] = {};
+        }
+        T* begin() { return seq.begin();}
+        const T* begin() const { return seq.begin();}
+        T* end() { return seq.end(); }
+        const T* end() const { return seq.end();}
+};
+
+//Range function for iter feature in for loop
+ref<list<i32>> range(ref<i32> end_){
+    list<i32> ls;
+    for(int i=0;i<end_->val;i++){
+        ls.add(i32(i));
+    }
+    return new list<i32>(ls);
+}
 
 ref<str> tostr(ref<str> s){
     return ref<str>(new str(s->__str__));
