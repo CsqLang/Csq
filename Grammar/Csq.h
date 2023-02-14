@@ -67,6 +67,7 @@ str IN = "in";
 str ENDC = "endc";
 str INIT = "init";
 str IMPORT = "import";
+str MACRO = "macro";
 /*
 #Functions in Csq Syntax
 def <name>()
