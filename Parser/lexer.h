@@ -49,7 +49,7 @@ class Lexer{
                     ntok.add(t);
                 }
                 else if(t != "\"" && strended == false){
-                    strlat +=  t;
+                    strlat +=  t + " ";
                 }
             }
             return ntok;
