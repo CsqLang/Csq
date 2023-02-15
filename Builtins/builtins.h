@@ -691,6 +691,16 @@ auto tostr(ref<array<str>> arr){
     s += "}";
     return ref<str>(s);
 }
+auto tostr(ref<list<str>> arr){
+    str s("{ ");
+    for(auto i : *arr){
+
+        s += str(i);
+        s += ", ";
+    }
+    s += "}";
+    return ref<str>(s);
+}
 template<typename T>
 void print(T arg1){
     printf("%s\n",tostr((*arg1))->__str__);
