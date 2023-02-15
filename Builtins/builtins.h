@@ -611,6 +611,12 @@ class list{
                 seq.push(i);
             }
         }
+        list(T data[]){
+            int size = *(&data + 1) - data;
+            delete seq.arr;
+            seq.arr = new T[size];
+            seq.arr = data;
+        }
         list(ref<list<T>> newls){
             this->seq = (*newls).seq;
         }
@@ -637,14 +643,25 @@ class list{
 };
 
 //Range function for iter feature in for loop
-ref<list<i32>> range(ref<i32> end_){
+auto range(ref<i32> end_){
     list<i32> ls;
-    for(int i=0;i<end_->val;i++){
-        ls.add(i32(i));
+    int lim = 0;
+    while(lim <= end_->val){
+        ls.seq.push(i32(lim));
+        lim++;
     }
-    return new list<i32>(ls);
+    return ls;
 }
-
+//Range function for iter feature in for loop
+auto range(ref<i32> start, ref<i32> end_){
+    list<i32> ls;
+    int lim = start->val;
+    while(lim <= end_->val){
+        ls.seq.push(i32(lim));
+        lim++;
+    }
+    return ls;
+}
 ref<str> tostr(ref<str> s){
     return ref<str>(new str(s->__str__));
 }
