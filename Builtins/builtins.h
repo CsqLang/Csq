@@ -1,95 +1,114 @@
-#if !defined(BUILTINS_CSQ4)
-#define BUILTINS_CSQ4
+// /*
+//     BUILTIN support for CSQ4 provided by the utilities built through C/C++
+//     ::::::::::::::::::::::::::::CORE UTILITIES::::::::::::::::::::::::::::
+//     (1) DATATYPES
+//     (2) INPUT OUTPUT FUNCTIONS
+//     (3) AND MANY MORE UTILITIES
 
-/*
-    BUILTIN support for CSQ4 provided by the utilities built through C/C++
-    ::::::::::::::::::::::::::::CORE UTILITIES::::::::::::::::::::::::::::
-    (1) DATATYPES
-    (2) INPUT OUTPUT FUNCTIONS
-    (3) AND MANY MORE UTILITIES
-
-    Source : @anchor https://www.github.com/CsqLang/Csq4
-*/
-/*******************************Importing C libraries & Reference counter *********************************/
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+//     Source : @anchor https://www.github.com/CsqLang/Csq4
+// */
+#if !defined(builtins_h)
+#define builtins_h
+// /*******************************Importing C libraries & Reference counter *********************************/
 #include "exceptions.h"
+#include <stdio.h>
+#include <string.h>
 #include "../Memory/Reference_Counter.h"
 
+//Memory manager
+template<typename T>
+auto allocate(T val){
+    return new T(val);
+}
+template<typename T>
+auto deallocate(T* val){
+    delete val;
+}
 
 
 //Basic Datatypes such as int, float, bytes etc..
 
 //Providing int data types
 
-class i32{
-    public:
-        int32_t val;
-        i32(int n){
-            val = n;
-        }
-        i32(const i32& n){
-            val = n.val;
-        }
-        i32(){}
-       
-        auto op_add( SmartPointer<i32> v1, SmartPointer<i32> v2){
-            return SmartPointer<i32>((v1->val)+(v2->val));
-        }
-        auto op_sub( SmartPointer<i32> v1, SmartPointer<i32> v2){
-            return SmartPointer<i32>((v1->val)-(v2->val));
-        }
-        auto op_mul( SmartPointer<i32> v1, SmartPointer<i32> v2){
-            return SmartPointer<i32>((v1->val)*(v2->val));
-        }
-        auto op_div( SmartPointer<i32> v1, SmartPointer<i32> v2){
-            return SmartPointer<i32>((v1->val)/(v2->val));
-        }
-        auto op_mod( SmartPointer<i32> v1, SmartPointer<i32> v2){
-            return SmartPointer<i32>((v1->val)%(v2->val));
-        }
-        auto op_equal( SmartPointer<i32> v1, SmartPointer<i32> v2){
-            bool state = false;
-            if(v1->val == v2->val)
-                state = true;
-            return state;
-        }
-        auto op_notEqual( SmartPointer<i32> v1, SmartPointer<i32> v2){
-            bool state = false;
-            if(v1->val != v2->val)
-                state = true;
-            return state;
-        }
-        auto op_lesser( SmartPointer<i32> v1, SmartPointer<i32> v2){
-            bool state = false;
-            if(v1->val < v2->val)
-                state = true;
-            return state;
-        }
-        auto op_greater( SmartPointer<i32> v1, SmartPointer<i32> v2){
-            bool state = false;
-            if(v1->val > v2->val)
-                state = true;
-            return state;
-        }
-        auto op_greaterEqual( SmartPointer<i32> v1, SmartPointer<i32> v2){
-            bool state = false;
-            if(v1->val >= v2->val)
-                state = true;
-            return state;
-        }
-        auto op_lesserEqual( SmartPointer<i32> v1, SmartPointer<i32> v2){
-            bool state = false;
-            if(v1->val <= v2->val)
-                state = true;
-            return state;
-        }
+class i32 {
+public:
+int val;
+i32(int n){
+val = n;
+}
+i32(const i32& n){
+val = n.val;
+}
+i32(){}
+auto op_add(i32 v, i32 v2){
+    return i32(v.val + v2.val);
+}
+
+ref<i32> op_sub(ref<i32> v, ref<i32> v2){
+    ref<i32> __val = new i32(v->val - v2->val);
+    return __val;
+}
+
+auto op_div(ref<i32> v, ref<i32> v2){
+    ref<i32> __val = new i32(v->val / v2->val);
+    return __val;
+}
+
+ref<i32> op_mul(ref<i32> v, ref<i32> v2) {
+    return ref<i32>(new i32(v->val * v2->val));
+}
+
+bool op_equal( ref<i32> v1, ref<i32> v2){
+    bool state = false;
+    if(v1->val == v2->val)
+        state = true;
+    return state;
+}
+i32 operator+(i32 v){
+
+    return i32(this->val+v.val);
+}
+bool op_notEqual( ref<i32> v1, ref<i32> v2){
+    bool state = false;
+    if(v1->val != v2->val)
+        state = true;
+    return state;
+}
+
+bool op_lesser( ref<i32> v1, ref<i32> v2){
+    bool state = false;
+    if(v1->val < v2->val)
+        state = true;
+    return state;
+}
+
+bool op_greater( ref<i32> v1, ref<i32> v2){
+    bool state = false;
+    if(v1->val > v2->val)
+        state = true;
+    return state;
+}
+
+bool op_greaterEqual( ref<i32> v1, ref<i32> v2){
+    bool state = false;
+    if(v1->val >= v2->val)
+        state = true;
+    return state;
+}
+
+bool op_lesserEqual( ref<i32> v1, ref<i32> v2){
+    bool state = false;
+    if(v1->val <= v2->val)
+        state = true;
+    return state;
+}
 };
+
+
 
 class i64{
     public:
-        int64_t val;
+        long int val;
         i64(long int n){
             val = n;
         }
@@ -97,53 +116,53 @@ class i64{
             val = n.val;
         }
         i64(){}
-       
-        auto op_add( SmartPointer<i64> v1, SmartPointer<i64> v2){
-            return SmartPointer<i64>((v1->val)+(v2->val));
+        auto op_add(ref<i64> v, ref<i64> v2){
+            ref<i64> __val = new i64(v->val + v2->val);
+            return __val;
         }
-        auto op_sub( SmartPointer<i64> v1, SmartPointer<i64> v2){
-            return SmartPointer<i64>((v1->val)-(v2->val));
+        auto op_sub(ref<i64> v, ref<i64> v2){
+            ref<i64> __val = new i64(v->val - v2->val);
+            return __val;
         }
-        auto op_mul( SmartPointer<i64> v1, SmartPointer<i64> v2){
-            return SmartPointer<i64>((v1->val)*(v2->val));
+        auto op_div(ref<i64> v, ref<i64> v2){
+            ref<i64> __val = new i64(v->val / v2->val);
+            return __val;
         }
-        auto op_div( SmartPointer<i64> v1, SmartPointer<i64> v2){
-            return SmartPointer<i64>((v1->val)/(v2->val));
+        auto op_mul(ref<i64> v, ref<i64> v2){
+            ref<i64> __val = new i64(v->val * v2->val);
+            return __val;
         }
-        auto op_mod( SmartPointer<i64> v1, SmartPointer<i64> v2){
-            return SmartPointer<i64>((v1->val)%(v2->val));
-        }
-        auto op_equal( SmartPointer<i64> v1, SmartPointer<i64> v2){
+        auto op_equal( ref<i64> v1, ref<i64> v2){
             bool state = false;
             if(v1->val == v2->val)
                 state = true;
             return state;
         }
-        auto op_notEqual( SmartPointer<i64> v1, SmartPointer<i64> v2){
+        auto op_notEqual( ref<i64> v1, ref<i64> v2){
             bool state = false;
             if(v1->val != v2->val)
                 state = true;
             return state;
         }
-        auto op_lesser( SmartPointer<i64> v1, SmartPointer<i64> v2){
+        auto op_lesser( ref<i64> v1, ref<i64> v2){
             bool state = false;
             if(v1->val < v2->val)
                 state = true;
             return state;
         }
-        auto op_greater( SmartPointer<i64> v1, SmartPointer<i64> v2){
+        auto op_greater( ref<i64> v1, ref<i64> v2){
             bool state = false;
             if(v1->val > v2->val)
                 state = true;
             return state;
         }
-        auto op_greaterEqual( SmartPointer<i64> v1, SmartPointer<i64> v2){
+        auto op_greaterEqual( ref<i64> v1, ref<i64> v2){
             bool state = false;
             if(v1->val >= v2->val)
                 state = true;
             return state;
         }
-        auto op_lesserEqual( SmartPointer<i64> v1, SmartPointer<i64> v2){
+        auto op_lesserEqual( ref<i64> v1, ref<i64> v2){
             bool state = false;
             if(v1->val <= v2->val)
                 state = true;
@@ -151,6 +170,69 @@ class i64{
         }
 };
 
+class i128{
+    public:
+        long long int val;
+        i128(long long int n){
+            val = n;
+        }
+        i128(const i128& n){
+            val = n.val;
+        }
+        i128(){}
+        auto op_add(ref<i128> v, ref<i128> v2){
+            ref<i128> __val = new i128(v->val + v2->val);
+            return __val;
+        }
+        auto op_sub(ref<i128> v, ref<i128> v2){
+            ref<i128> __val = new i128(v->val - v2->val);
+            return __val;
+        }
+        auto op_div(ref<i128> v, ref<i128> v2){
+            ref<i128> __val = new i128(v->val / v2->val);
+            return __val;
+        }
+        auto op_mul(ref<i128> v, ref<i128> v2){
+            ref<i128> __val = new i128(v->val * v2->val);
+            return __val;
+        }
+        auto op_equal( ref<i128> v1, ref<i128> v2){
+            bool state = false;
+            if(v1->val == v2->val)
+                state = true;
+            return state;
+        }
+        auto op_notEqual( ref<i128> v1, ref<i128> v2){
+            bool state = false;
+            if(v1->val != v2->val)
+                state = true;
+            return state;
+        }
+        auto op_lesser( ref<i128> v1, ref<i128> v2){
+            bool state = false;
+            if(v1->val < v2->val)
+                state = true;
+            return state;
+        }
+        auto op_greater( ref<i128> v1, ref<i128> v2){
+            bool state = false;
+            if(v1->val > v2->val)
+                state = true;
+            return state;
+        }
+        auto op_greaterEqual( ref<i128> v1, ref<i128> v2){
+            bool state = false;
+            if(v1->val >= v2->val)
+                state = true;
+            return state;
+        }
+        auto op_lesserEqual( ref<i128> v1, ref<i128> v2){
+            bool state = false;
+            if(v1->val <= v2->val)
+                state = true;
+            return state;
+        }
+};
 //FLoat types
 
 class f32{
@@ -164,49 +246,49 @@ class f32{
         }
         f32(){}
        
-        auto op_add( SmartPointer<f32> v1, SmartPointer<f32> v2){
-            return SmartPointer<f32>((v1->val)+(v2->val));
+        auto op_add(ref<f32> v1, ref<f32> v2){
+            return ref<f32>(new f32((v1->val)+(v2->val)));
         }
-        auto op_sub( SmartPointer<f32> v1, SmartPointer<f32> v2){
-            return SmartPointer<f32>((v1->val)-(v2->val));
+        auto op_sub( ref<f32> v1, ref<f32> v2){
+            return ref<f32>(new f32((v1->val)-(v2->val)));
         }
-        auto op_mul( SmartPointer<f32> v1, SmartPointer<f32> v2){
-            return SmartPointer<f32>((v1->val)*(v2->val));
+        auto op_mul( ref<f32> v1, ref<f32> v2){
+            return ref<f32>(new f32((v1->val)*(v2->val)));
         }
-        auto op_div( SmartPointer<f32> v1, SmartPointer<f32> v2){
-            return SmartPointer<f32>((v1->val)/(v2->val));
+        auto op_div( ref<f32> v1, ref<f32> v2){
+            return ref<f32>(new f32((v1->val)/(v2->val)));
         }
-        auto op_equal( SmartPointer<f32> v1, SmartPointer<f32> v2){
+        auto op_equal( ref<f32> v1, ref<f32> v2){
             bool state = false;
             if(v1->val == v2->val)
                 state = true;
             return state;
         }
-        auto op_notEqual( SmartPointer<f32> v1, SmartPointer<f32> v2){
+        auto op_notEqual( ref<f32> v1, ref<f32> v2){
             bool state = false;
             if(v1->val != v2->val)
                 state = true;
             return state;
         }
-        auto op_lesser( SmartPointer<f32> v1, SmartPointer<f32> v2){
+        auto op_lesser( ref<f32> v1, ref<f32> v2){
             bool state = false;
             if(v1->val < v2->val)
                 state = true;
             return state;
         }
-        auto op_greater( SmartPointer<f32> v1, SmartPointer<f32> v2){
+        auto op_greater( ref<f32> v1, ref<f32> v2){
             bool state = false;
             if(v1->val > v2->val)
                 state = true;
             return state;
         }
-        auto op_greaterEqual( SmartPointer<f32> v1, SmartPointer<f32> v2){
+        auto op_greaterEqual( ref<f32> v1, ref<f32> v2){
             bool state = false;
             if(v1->val >= v2->val)
                 state = true;
             return state;
         }
-        auto op_lesserEqual( SmartPointer<f32> v1, SmartPointer<f32> v2){
+        auto op_lesserEqual( ref<f32> v1, ref<f32> v2){
             bool state = false;
             if(v1->val <= v2->val)
                 state = true;
@@ -225,106 +307,237 @@ class f64{
         }
         f64(){}
        
-        auto op_add( SmartPointer<f64> v1, SmartPointer<f64> v2){
-            return SmartPointer<f64>((v1->val)+(v2->val));
+        auto op_add( ref<f64> v1, ref<f64> v2){
+            return ref<f64>(new f64((v1->val)+(v2->val)));
         }
-        auto op_sub( SmartPointer<f64> v1, SmartPointer<f64> v2){
-            return SmartPointer<f64>((v1->val)-(v2->val));
+        auto op_sub( ref<f64> v1, ref<f64> v2){
+            return ref<f64>(new f64((v1->val)-(v2->val)));
         }
-        auto op_mul( SmartPointer<f64> v1, SmartPointer<f64> v2){
-            return SmartPointer<f64>((v1->val)*(v2->val));
+        auto op_mul( ref<f64> v1, ref<f64> v2){
+            return ref<f64>(new f64((v1->val)*(v2->val)));
         }
-        auto op_div( SmartPointer<f64> v1, SmartPointer<f64> v2){
-            return SmartPointer<f64>((v1->val)/(v2->val));
+        auto op_div( ref<f64> v1, ref<f64> v2){
+            return ref<f64>(new f64((v1->val)/(v2->val)));
         }
-        auto op_equal( SmartPointer<f64> v1, SmartPointer<f64> v2){
+        auto op_equal( ref<f64> v1, ref<f64> v2){
             bool state = false;
             if(v1->val == v2->val)
                 state = true;
             return state;
         }
-        auto op_notEqual( SmartPointer<f64> v1, SmartPointer<f64> v2){
+        auto op_notEqual( ref<f64> v1, ref<f64> v2){
             bool state = false;
             if(v1->val != v2->val)
                 state = true;
             return state;
         }
-        auto op_lesser( SmartPointer<f64> v1, SmartPointer<f64> v2){
+        auto op_lesser( ref<f64> v1, ref<f64> v2){
             bool state = false;
             if(v1->val < v2->val)
                 state = true;
             return state;
         }
-        auto op_greater( SmartPointer<f64> v1, SmartPointer<f64> v2){
+        auto op_greater( ref<f64> v1, ref<f64> v2){
             bool state = false;
             if(v1->val > v2->val)
                 state = true;
             return state;
         }
-        auto op_greaterEqual( SmartPointer<f64> v1, SmartPointer<f64> v2){
+        auto op_greaterEqual( ref<f64> v1, ref<f64> v2){
             bool state = false;
             if(v1->val >= v2->val)
                 state = true;
             return state;
         }
-        auto op_lesserEqual( SmartPointer<f32> v1, SmartPointer<f32> v2){
+        auto op_lesserEqual( ref<f32> v1, ref<f32> v2){
             bool state = false;
             if(v1->val <= v2->val)
                 state = true;
             return state;
         }
 };
-
-
-void assert(bool cond, int id_){
-    if(cond == 1){
-        printf("%d Passed\n",id_);
-    }else{
-        AssertionFailureException(id_);
-    }
+//Defination for [] operator
+template<typename T>
+auto ref<T>::operator[](int index){
+    return ref<T>(new T(this->op_brac(this->get(), new i32(index))));
 }
 
-//Some Definitions
-template<typename T>
-auto SmartPointer<T>::operator[](int index){
-    return this->op_brac(ptr, i32(index));
-}
-
-//Getting initializer list
-#include <initializer_list>
-template<typename T>
-class StaticSequence{
-    private:
-        int current = 0;
+//String class
+class str{
     public:
-        T* seq;
-        int len = 0;
+        char* __str__;
+        str(){}
+        str(const char* __str){
+            this->__str__ = new char[strlen(__str) + 1];
+            // this->__str = __str;
+            for(int i = 0;i<strlen(__str);i++){
+                this->__str__[i] = __str[i];
+            }
+        }
+        str(ref<str> str_){
+            this->__str__ = new char[strlen(str_->__str__) + 1];
+            __str__ = str_->__str__;
+        }
+
+        auto operator+(const str &rhs)
+        {
+            int length = strlen(this->__str__) + strlen(rhs.__str__);
+
+            char *buff = new char[length + 1];
+
+            // Copy the Strings to buff[]
+            strcpy(buff, this->__str__);
+            strcat(buff, rhs.__str__);
+            buff[length] = '\0';
+
+            // String temp
+            str temp{buff};
+
+            // delete the buff[]
+            delete[] buff;
+
+            // Return the concatenated String
+            return temp;
+        }
+        auto operator+=(const str &rhs)
+        {
+            int length = strlen(this->__str__) + strlen(rhs.__str__);
+
+            char *buff = new char[length + 1];
+
+            // Copy the Strings to buff[]
+            strcpy(buff, this->__str__);
+            strcat(buff, rhs.__str__);
+            buff[length] = '\0';
+
+            // String temp
+            // str temp{ buff };
+            delete __str__;
+            __str__ = new char[length + 1];
+            strcpy(__str__, buff);
+        }
         
-        StaticSequence(){}
-        StaticSequence(SmartPointer<i32> size){
-            seq = new T[size->val];
-            len = size->val;
+        //Touppercase
+        auto upper(){
+            char* st = new char[strlen(__str__)+1];
+            st = __str__;
+            for(int i=0;i<strlen(__str__);i++){
+                if(int(st[i]) >= 97 && int(st[i]) <=122){
+                    st[i] = char(int(__str__[i])-32);
+                }
+                else{}
+            }
+            return ref<str>(new str(st));
         }
-        void push(SmartPointer<T> e){
-            if(current+1 > len){
+
+        //Tolowercase
+        auto lower(){
+            char* st = new char[strlen(__str__)+1];
+            st = __str__;
+            for(int i=0;i<strlen(__str__);i++){
+                if(int(st[i]) >= 65 && int(st[i]) <=90){
+                    st[i] = char(int(__str__[i])+32);
+                }
+                else{}
+            }
+            return ref<str>(new str(st));
+        }
+        //Length of the string
+        auto len(){
+            return ref<i32>(new i32(strlen(__str__)));
+        }
+        // toint32
+        auto toi32(){
+            int i = atoi(__str__);
+            return ref<i32>(new i32(i));
+        }
+        //tof32
+        auto tof64(){
+            return ref<f64>(new f64(atof(__str__)));
+        }
+
+        //Operators
+        auto op_add(ref<str> self, ref<str> arg){
+            char* s = strcat(self->__str__,arg->__str__);
+            return ref<str>(new str(s));
+        }
+        
+};
+/*-------------------------------------------------------------------------------------------------*/
+#include <initializer_list>
+/*
+This is the class which stores elements in the allocated memory.
+*/
+template<typename T>
+class array{
+    private:
+        int current;
+    public:
+        T* arr;
+        
+        i32 len=(0);
+        array(){}
+        array(std::initializer_list<T> list_){
+            arr = new T[list_.size()];
+            int i = 0;
+            if(list_.size() < list_.size()){
                 MemoryOverflowException();
             }
-            else{
-                seq[current] = *e;
-                current++;
+            len = i32(list_.size());
+            for(auto e : list_){
+                arr[i] = e;
+                i++;
             }
+            current = i;
         }
-        SmartPointer<T> read(SmartPointer<i32> index){
-            if(index->val > len-1){
-                MemoryOverflowException();
+        auto op_brac(ref<array<T>> inst, ref<i32> index){
+            return (inst->arr[index->val]);
+        }
+        auto read(ref<i32> ind){
+            if((ind->val)+1 > this->current){
+                IndexError();
             }
-            return seq[index->val];
+            return ref<T>(arr[ind->val]);
         }
+        auto sum(){
+            ref<T> res = T(0);
+            for(int i = 0;i<this->current;i++){
+                res = res+(ref<T>(T(arr[i])));
+            }
+            return ref<T>(res);
+        }
+        auto mean(){
+            double sm = double(sum()->val);
+            int len = this->len.val;
+            f64 mean_ = sm/len;
+            return ref<f64>(f64(mean_));
+        }
+        auto min(){
+            ref<T> elem = T(arr[0]);
+            for(int i = 0;i<this->current;i++){
+                if(arr[i].val < elem->val){
+                    elem = arr[i];
+                }
+            }
+            return ref<T>(elem);
+        }
+        auto max(){
+            ref<T> elem = T(0);
+            for(int i = 0;i<this->current;i++){
+                if(arr[i].val > elem->val){
+                    elem = arr[i];
+                }
+            }
+            return ref<T>(elem);
+        }
+        auto pop(){current--;}
+        T* begin() { return &this->arr[0];}
+        const T* begin() const { return &this->arr[0];}
+        T* end() { return &this->arr[this->current]; }
+        const T* end() const { return &this->arr[this->current];}
 };
 
-/*
-This class is made to allocate memory dynamically and to create series of items.
-*/
+
 template<typename T>
 class DynamicSequence{
     public:
@@ -338,10 +551,10 @@ class DynamicSequence{
             capacity = 1;
             current = 0;
         }
-        auto update(SmartPointer<i32> index, SmartPointer<T> value){
+        auto update(ref<i32> index, ref<T> value){
             arr[index->val] = *value;
         }
-        auto push(SmartPointer<T> data){
+        auto push(ref<T> data){
             // if the number of elements is equal to the
             // capacity, that means we don't have space to
             // accommodate more elements. We need to double the
@@ -363,10 +576,10 @@ class DynamicSequence{
             arr[current] = *data;
             current++;
         }
-        auto op_brac(SmartPointer<DynamicSequence<T>> s, SmartPointer<i32> index){
-            return s->arr[index->val];
+        auto read(ref<i32> index){
+            return ref<T>(arr[index->val]);
         }
-        auto erase(SmartPointer<T> e){
+        auto erase(ref<T> e){
             int i;
             for (i=0; i<this->current; i++)
                 if (this->arr[i] == *e)
@@ -388,291 +601,118 @@ class DynamicSequence{
         const T* end() const { return &this->arr[this->current];}
 };
 
-/*
-This is the class which stores elements in the allocated memory.
-*/
-template<typename T>
-class array{
-    private:
-        int current;
-    public:
-        T* arr;
-        
-        i32 len=(0);
-        array(){}
-        array(SmartPointer<i32> size, std::initializer_list<T> list_){
-            arr = new T[size->val];
-            int i = 0;
-            if(size->val < list_.size()){
-                MemoryOverflowException();
-            }
-            len = *size;
-            for(auto e : list_){
-                arr[i] = e;
-                i++;
-            }
-            current = i;
-        }
-        auto op_brac(SmartPointer<array<T>> inst, SmartPointer<i32> index){
-            return SmartPointer<T>(inst->arr[index->val]);
-        }
-        auto add(SmartPointer<T> elem){
-            if(current+1 > len.val){
-                MemoryOverflowException();
-            }
-            else{
-                arr[current] = *elem;
-                current++;
-            }
-        }
-        auto sum(){
-            SmartPointer<T> res = T(0);
-            for(int i = 0;i<this->current;i++){
-                res = res+(SmartPointer<T>(T(arr[i])));
-            }
-            return SmartPointer<T>(res);
-        }
-        auto mean(){
-            //Converting sum to f64
-            f64 sm = f64(double(sum()->val));
-            return SmartPointer<f64>((SmartPointer<f64>(sm)/f64(double(len.val))));
-        }
-        auto min(){
-            SmartPointer<T> elem = T(arr[0]);
-            for(int i = 0;i<this->current;i++){
-                if(arr[i].val < elem->val){
-                    elem = arr[i];
-                }
-            }
-            return SmartPointer<T>(elem);
-        }
-        auto max(){
-            SmartPointer<T> elem = T(0);
-            for(int i = 0;i<this->current;i++){
-                if(arr[i].val > elem->val){
-                    elem = arr[i];
-                }
-            }
-            return SmartPointer<T>(elem);
-        }
-        auto count(SmartPointer<T> elem){
-            SmartPointer<i32> count = T(0);
-            for(int i = 0;i<this->current;i++){
-                if(elem == arr[i]){
-                    count = count + i32(1);
-                }
-            }
-            return SmartPointer<i32>(count);
-        }
-        auto pop(){current--;}
-        T* begin() { return &this->arr[0];}
-        const T* begin() const { return &this->arr[0];}
-        T* end() { return &this->arr[this->current]; }
-        const T* end() const { return &this->arr[this->current];}
-};
-
-/*
-This class is the implementation of strings. To increase security
-the string stored are immutable
-*/
-class str{
-    public:
-        char* __str__;
-        str(){}
-        str(const char* __str){
-            this->__str__ = new char[strlen(__str) + 1];
-            // this->__str = __str;
-            for(int i = 0;i<strlen(__str);i++){
-                this->__str__[i] = __str[i];
-            }
-        }
-        str(SmartPointer<str> str_){
-            this->__str__ = new char[strlen(str_->__str__) + 1];
-            __str__ = str_->__str__;
-        }
-        
-        //Touppercase
-        auto upper(){
-            char* st = new char[strlen(__str__)+1];
-            st = __str__;
-            for(int i=0;i<strlen(__str__);i++){
-                if(int(st[i]) >= 97 && int(st[i]) <=122){
-                    st[i] = char(int(__str__[i])-32);
-                }
-                else{}
-            }
-            return SmartPointer<str>(st);
-        }
-
-        //Tolowercase
-        auto lower(){
-            char* st = new char[strlen(__str__)+1];
-            st = __str__;
-            for(int i=0;i<strlen(__str__);i++){
-                if(int(st[i]) >= 65 && int(st[i]) <=90){
-                    st[i] = char(int(__str__[i])+32);
-                }
-                else{}
-            }
-            return SmartPointer<str>(st);
-        }
-        //Length of the string
-        auto len(){
-            return SmartPointer<i32>(strlen(__str__));
-        }
-        // toint32
-        auto toi32(){
-            int i = atoi(__str__);
-            return SmartPointer<i32>(i);
-        }
-        //tof32
-        auto tof64(){
-            return SmartPointer<f64>(atof(__str__));
-        }
-
-        //Operators
-        auto op_add(SmartPointer<str> self, SmartPointer<str> arg){
-            char* s = strcat(self->__str__,arg->__str__);
-            return SmartPointer<str>(s);
-        }
-};
-
 template<typename T>
 class list{
     public:
         DynamicSequence<T> seq;
         list(){}
-        list(std::initializer_list<T> seq_){
-            for(auto e : seq_){
-                seq.push(e);
+        list(std::initializer_list<T> ls){
+            for(auto i : ls){
+                seq.push(i);
             }
         }
-
-        void add(SmartPointer<T> elem){
-            seq.push(*elem);
+        list(ref<list<T>> newls){
+            this->seq = (*newls).seq;
         }
-        SmartPointer<i32> len(){
-            return i32(seq.current);
+        void add(ref<T> elem){
+            seq.push(elem);
         }
-        auto op_brac(SmartPointer<list<T>> inst, SmartPointer<i32> index){
-            return SmartPointer<T>(inst->seq.arr[index->val]);
+        auto read(ref<i32> index){
+            return seq.read(index);
         }
-        SmartPointer<T> sum(){
-            T i2 = T();
-            for(auto e : seq){
-                i2 = (i2.val) + (e.val);
-            }return i2;
+        void update(ref<i32> index, ref<T> val){
+            seq.update(index,val);
         }
-        SmartPointer<T> product(){
-            T i2 = T();
-            for(auto e : seq){
-                i2 = (i2.val) * (e.val);
-            }return i2;
+        ref<i32> len(){
+            return new i32(this->seq.current);
         }
-        auto min(){
-            SmartPointer<T> elem = T(seq.arr[0]);
-            for(int i = 0;i<this->len()->val;i++){
-                if(seq.arr[i].val < elem->val){
-                    elem = seq.arr[i];
-                }
-            }
-            return SmartPointer<T>(elem);
+        auto pop(){seq.pop();}
+        auto iter(){
+            T* ref_[4] = {};
         }
-        auto max(){
-            SmartPointer<T> elem = T(seq.arr[0]);
-            for(int i = 0;i<this->len()->val;i++){
-                if(seq.arr[i].val < elem->val){
-                    elem = seq.arr[i];
-                }
-            }
-            return SmartPointer<T>(elem);
-        }
-        void pop(){
-            seq.pop();
-        }
-        T* begin() { return &this->seq.arr[0];}
-        const T* begin() const { return &this->seq.arr[0];}
-        T* end() { return &this->seq.arr[this->seq.current]; }
-        const T* end() const { return &this->seq.arr[seq.current];}
+        T* begin() { return seq.begin();}
+        const T* begin() const { return seq.begin();}
+        T* end() { return seq.end(); }
+        const T* end() const { return seq.end();}
 };
 
-template<typename T>
-class tuple{
-    public:
-        DynamicSequence<T> seq;
-        tuple(){}
-        tuple(std::initializer_list<T> seq_){
-            for(auto e : seq_){
-                seq.push(e);
-            }
-        }
-        SmartPointer<i32> len(){
-            return i32(seq.current);
-        }
-        auto op_brac(SmartPointer<tuple<T>> inst, SmartPointer<i32> index){
-            return SmartPointer<T>(inst->seq.arr[index->val]);
-        }
-        SmartPointer<T> sum(){
-            T i2 = T();
-            for(auto e : seq){
-                i2 = (i2.val) + (e.val);
-            }return i2;
-        }
-        SmartPointer<T> product(){
-            T i2 = T();
-            for(auto e : seq){
-                i2 = (i2.val) * (e.val);
-            }return i2;
-        }
-        auto min(){
-            SmartPointer<T> elem = T(seq.arr[0]);
-            for(int i = 0;i<this->len()->val;i++){
-                if(seq.arr[i].val < elem->val){
-                    elem = seq.arr[i];
-                }
-            }
-            return SmartPointer<T>(elem);
-        }
-        auto max(){
-            SmartPointer<T> elem = T(seq.arr[0]);
-            for(int i = 0;i<this->len()->val;i++){
-                if(seq.arr[i].val < elem->val){
-                    elem = seq.arr[i];
-                }
-            }
-            return SmartPointer<T>(elem);
-        }
-};
-
-//The dictionary datatype.
-template<typename K, typename V>
-class dict{
-    public:
-    list<K> keys;
-    list<V> values;
-    dict(){}
-    dict(std::initializer_list<K> keys, std::initializer_list<V> values){
-        for(auto k : keys){
-            this->keys.add(k);
-        }
+//Range function for iter feature in for loop
+ref<list<i32>> range(ref<i32> end_){
+    list<i32> ls;
+    for(int i=0;i<end_->val;i++){
+        ls.add(i32(i));
     }
-};
-
-str tostr(SmartPointer<i32> data){
-    str s;
-    sprintf(s.__str__, "%d", data->val);
-    return s;
+    return new list<i32>(ls);
 }
 
+ref<str> tostr(ref<str> s){
+    return ref<str>(new str(s->__str__));
+}
 
+auto tostr(ref<f32> f32_){
+    str s("");
+    sprintf(s.__str__,"%f",f32_->val);
+    return ref<str>(new str(s));
+}
+
+auto tostr(ref<f64> f64_){
+    str s("");
+    sprintf(s.__str__,"%lf",f64_->val);
+    return ref<str>(new str(s));
+}
+auto tostr(ref<i32> i32_){
+    str s("");
+    sprintf(s.__str__,"%d",i32_->val);
+    return ref<str>(new str(s));
+}
+auto to_str(i32 num)
+{
+    char *num_ = new char[2500];
+    sprintf(num_, "%d", num.val);
+    return str(num_);
+}
+auto tostr(ref<array<i32>> arr){
+    str s("{ ");
+    for(auto i : *arr){
+
+        s += str(to_str((i)));
+        s += ", ";
+    }
+    s += "}";
+    return ref<str>(s);
+}
+auto tostr(ref<array<str>> arr){
+    str s("{ ");
+    for(auto i : *arr){
+
+        s += str(i);
+        s += ", ";
+    }
+    s += "}";
+    return ref<str>(s);
+}
+auto tostr(ref<list<str>> arr){
+    str s("{ ");
+    for(auto i : *arr){
+
+        s += str(i);
+        s += ", ";
+    }
+    s += "}";
+    return ref<str>(s);
+}
 template<typename T>
-void print(SmartPointer<T> t){
-    printf("%s\n",tostr(*t).__str__);
+void print(T arg1){
+    printf("%s\n",tostr((*arg1))->__str__);
 }
-template<typename T, typename... More>
-void print(SmartPointer<T> t, SmartPointer<More>... more){
-    printf("%s",tostr(*t).__str__);
+template<typename T, typename... Args>
+void print(T arg1,Args... more){
+    printf("%s",tostr((*arg1))->__str__);
     print(more...);
 }
 
-#endif // BUILTINS_CSQ4
+
+/********************************MATH FIELD***********************/
+
+
+#endif

@@ -6,9 +6,9 @@
 #include <stdio.h>
 #define FUNCTIONS(name,args,code) auto name args LBRACE code RBRACE SEMI
 #define CALL(name, args) name args
-#define REFERENCE(name,type, refr) SmartPointer<type> name = SmartPointer<type>(refr)
-#define FORREF(name,type) SmartPointer<type> name
-bool __main__;
+#define REFERENCE(name,type, refr) ref<type> name = ref<type>(refr)
+#define PARAM(name,type,refr) type name = type(refr)
+#define FORREF(name,type) ref<type> name
 #define ID_REF(name) AMPER name
 #define FOR for(
 #define WHILE while(
@@ -21,13 +21,13 @@ bool __main__;
 #define ENDCLASS };
 #define def auto
 #define equals ==
-#define is ==
 #define noteq !=
 #define gtequal >=
 #define ltequal <=
 #define modequal %=
 #define MAIN int main(int argc, char const *argv[]){
 #define ENDMAIN ;return 0;}
-#define init 
+#define init
+#define inherits :
 
 #endif // Csq4_Instruction_H

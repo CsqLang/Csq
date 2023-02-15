@@ -41,4 +41,44 @@ dict<str,str> BytecodeGrammar = {
 "TILDE","POW","PLUSEQUAL","MINEQUAL","STAREQUAL","SLASHEQUAL",
 "PERCENTEQUAL","AMPEREQUAL","INCREMENT","DECREMENT"}
 };
+str comment = "#";
+
+/*Token's string reperesentation to increase readability*/
+str COLON = ":";
+str LBRACE = "{";
+str RBRACE = "}";
+str LPAR = "(";
+str RPAR = "(";
+str LSQB = "[";
+str RSQB = "]";
+str SEMI = ";";
+str COMMA = ",";
+
+/*Keyword's string reperesentation*/
+str IF = "if";
+str ELSE = "else";
+str ELIF = "elif";
+str FOR = "for";
+str WHILE = "while";
+str CLASS = "class";
+str DEF = "def";
+str ENDS = "ends";
+str IN = "in";
+str ENDC = "endc";
+str INIT = "init";
+str IMPORT = "import";
+str MACRO = "macro";
+/*
+#Functions in Csq Syntax
+def <name>()
+    ....
+<name> ends
+#Variables in Csq Syntax
+<name>:<type> = <reference>
+#Classes syntax
+class <name>
+    .....
+endc
+*/
+
 #endif // Csq_Grammar_h

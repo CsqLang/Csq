@@ -4,8 +4,7 @@
 /*
 This is the class which will do lexial analysis of Csq4 code.
 */
-class Lexer
-{
+class Lexer{
     public:
         //Some public members
         str code;
@@ -16,9 +15,9 @@ class Lexer
         //This function is stage one which will split everything on the basis of tokens
         array<str> SplitViaGrammar(str statement){
             for(auto t : BytecodeGrammar.keys){
-                statement = replaceStr(statement.Str,t.Str,(str(" ")+t+" ").Str);
+                statement = replaceStr(statement.Str,t.Str,(" "+t+" ").Str);
             }
-            return split(statement," ");
+            return split(statement," \t");
         }
         //Reset function will clear all previous data inside token and code array to move on to next statement.
         void Reset(){
@@ -38,24 +37,28 @@ class Lexer
             str strlat;
             for(auto t : tokens){
                 if(t == "\"" && strended == true){
-                    strlat += t;
+                    strlat = "\"";
                     strended = false;
                 }
                 else if(t == "\"" && strended == false){
-                    ntok.add(strlat+t);
+                    strlat += "\"";
+                    ntok.add(strlat);
                     strended = true;
                 }
                 else if(t != "\"" && strended == true){
                     ntok.add(t);
                 }
                 else if(t != "\"" && strended == false){
-                    strlat += t;
+                    strlat +=  t;
                 }
             }
             return ntok;
         } 
 };
 
-
+/*
+Motive of last edit: It was edited by Aniket Kumar on 9/feb/2023 to make Csq space sensative because in the previous lexer space was skipped
+due to which it became space insensative so to make it sensative lexer was improved.
+*/
 
 #endif // LEXER_CSQ4

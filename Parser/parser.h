@@ -1,48 +1,57 @@
-/***                FEATURES SHALL BE THERE IN CSQ4
- * REFERENCE COUNTING (DONE)
- * OBJECT ORIENTED PROGRAMMING (DONE)
- * FUNCTIONAL PROGRAMMING (DONE)
- * GENERATION OF EXECUTABLE BUT WILL BE RUNNED AT RUNTIME (PENDING, AND WILL BE DONE BY CODE GENERATOR)
- * IMPORTS (DONE)
+/*:::::::::::::::::::::::::::::::FEATURES SHALL BE THERE IN CSQ4:::::::::::::::::::::::::::::::::::::
+ (1) REFERENCE COUNTING (DONE)
+ (2) OBJECT ORIENTED PROGRAMMING (DONE)
+ (3) FUNCTIONAL PROGRAMMING (DONE)
+ (4) GENERATION OF EXECUTABLE BUT WILL BE RUNNED AT RUNTIME (PENDING, AND WILL BE DONE BY CODE GENERATOR)
+ (5) IMPORTS (DONE)
+
+    Source : @anchor https://www.github.com/CsqLang/Csq4
+    Last modified by Aniket Kumar
  * **/
 #if !defined(PARSER_CSQ4_H)
 #define PARSER_CSQ4_H
 #include "lexer.h"
 #include "../libs/utils/filehand.h"
 #include "../Memory/Stack.h"
-//Some Utilities
+//::::::::::::::::::::::::::::::::Some Utilities::::::::::::::::::::::::::::::::
+/*
+    To know that the folowing tokens are matching with any statement or not.
+*/
 bool CheckIF(array<str> tokens){
-    return in(tokens,"if");
+    return in(tokens,IF);
 }
 bool isIdentifier(str tok){
     return Regex(identifier,tok);
 }
 bool CheckElse(array<str> tokens){
-    return in(tokens,"else");
+    return in(tokens,ELSE);
 }
 bool CheckElif(array<str> tokens){
-    return in(tokens,"elif");
+    return in(tokens,ELIF);
 }
 bool CheckFor(array<str> tokens){
-    return in(tokens,"for");
+    return in(tokens,FOR);
 }
 bool CheckWhile(array<str> tokens){
-    return in(tokens,"while");
+    return in(tokens,WHILE);
 }
 bool CheckFunctionDefination(array<str> tokens){
-    return in(tokens,"def");
+    return in(tokens,DEF);
 }
 bool CheckClassDefination(array<str> tokens){
-    return in(tokens,"class");
+    return in(tokens,CLASS);
 }
 bool CheckEnd(array<str> tokens){
-    return in(tokens,"ends");
+    return in(tokens,ENDS);
 }
 bool CheckImport(array<str> tokens){
-    return in(tokens,"import");
+    return in(tokens,IMPORT);
 }
 bool CheckConstructor(array<str> tokens){
-    return in(tokens,"init");
+    return in(tokens,INIT);
+}
+bool CheckMacro(array<str> tokens){
+    return in(tokens,MACRO);
 }
 bool file_exists(str filename){
     FILE *fp = fopen(filename.Str, "r");
@@ -55,7 +64,7 @@ bool file_exists(str filename){
     return is_exist;
 }
 
-
+//This function will manage the imports.
 array<str> ImportsManagement(array<str> tok){
     /*Sample input: import m1.m2 m3
     Tokens: ['m1','.','m2']
@@ -64,7 +73,7 @@ array<str> ImportsManagement(array<str> tok){
     str s;
     bool dir = false;
     for(auto i : tok){
-        if(i == "import"){}
+        if(i == IMPORT){}
         else{
             str name_module = split(i,"/")[split(i,"/").len()-1];
             imp.add(
@@ -130,11 +139,23 @@ array<str> ElseTokManagement(array<str> tok){
 //         s = tok;
 //     return s;
 // }
-//This function will replace uncleared tokens to make it usable.
+array<str> MacroManagement(array<str> tok){
+    array<str> newtokens;
+    if(CheckMacro(tok)){
+        for(auto e : tok)
+            if(e == MACRO)
+                newtokens.add("#define");
+            else
+                newtokens.add(e);
+    }
+    else
+        newtokens = tok;
+    return newtokens;
+}
 str Rep(str s){
     str code;
-    code = replaceStr(s.Str,"= =","==");
-    code = replaceStr(s.Str,"!s"," ");
+    code = replaceStr(s.Str," = = ","==");
+    code = replaceStr(code.Str,"!s"," ");
     code = replaceStr(code.Str,"+ +","++");
     code = replaceStr(code.Str,"- -","--");
     code = replaceStr(code.Str,"+ =","+=");
@@ -349,11 +370,17 @@ auto Parser::Parse(array<array<str>> tokens){
             str val = TokenVariableAssignShuffle(line)[2];
             //Producing bytecodes.
             str bytecode = "REFERENCE(";bytecode += name + ",";
-            bytecode += type + ",";bytecode += val + ")\n";
+            bytecode += type + ",";bytecode += type + str("(") + val + "))\n";
             //Adding the bytecode to the code string.
             nominal_code += bytecode;
             //Add the variable to stack.
             Stack::Variables.add(name);
+        }
+        else if(CheckMacro(line) == 1 && CheckFunctionDefination(line) == 0){
+            auto tokens_ = MacroManagement(line);
+            for(auto t : tokens_){
+                nominal_code += t + " ";
+            }nominal_code += "\n";
         }
         else if(tostr(line) == "main = false"){
             main_state = "false";
@@ -406,7 +433,7 @@ auto Parser::Parse(array<array<str>> tokens){
             str val = TokenVariableAssignShuffle(line)[2];
             //Producing bytecodes.
             str bytecode = "REFERENCE(";bytecode += name + ",";
-            bytecode += type + ",";bytecode += val + ")\n";
+            bytecode += type + ",";bytecode += type + str("(") + val + "))\n";
             //Adding the bytecode to the code string.
             fn_code += bytecode;
             //Add the variable to stack.
@@ -419,7 +446,7 @@ auto Parser::Parse(array<array<str>> tokens){
             str val = TokenVariableAssignShuffle(line)[2];
             //Producing bytecodes.
             str bytecode = "REFERENCE(";bytecode += name + ",";
-            bytecode += type + ",";bytecode += val + ")\n";
+            bytecode += type + ",";bytecode += type + str("(") + val + "))\n";
             //Adding the bytecode to the code string.
             nominal_code += bytecode;
             //Add the variable to stack.
@@ -452,7 +479,7 @@ auto Parser::Parse(array<array<str>> tokens){
                     str n = TokenVariableAssignShuffle(Lexer(i).GetTokens())[0];
                     str t = TokenVariableAssignShuffle(Lexer(i).GetTokens())[1];
                     str e = TokenVariableAssignShuffle(Lexer(i).GetTokens())[2];
-                    bytecode_arg += str("REFERENCE(") + n + str(",")+t+str(",")+e+"),";
+                    bytecode_arg += str("PARAM(") + n + str(",")+t+str(",")+e+"),";
                     Stack::Variables.add(n);
                 }bytecode_arg.pop_bk();
             }
@@ -485,7 +512,7 @@ auto Parser::Parse(array<array<str>> tokens){
                     str n = TokenVariableAssignShuffle(Lexer(i).GetTokens())[0];
                     str t = TokenVariableAssignShuffle(Lexer(i).GetTokens())[1];
                     str e = TokenVariableAssignShuffle(Lexer(i).GetTokens())[2];
-                    bytecode_arg += str("REFERENCE(") + n + str(",")+t+str(",")+e+"),";
+                    bytecode_arg += str("PARAM(") + n + str(",")+t+str(",")+e+"),";
                     Stack::Variables.add(n);
                 }bytecode_arg.pop_bk();
             }
@@ -508,7 +535,7 @@ auto Parser::Parse(array<array<str>> tokens){
             nominal_code += "ENDS\n";
             fn_state = false;
         }
-        else if(tostr(line) == "endc"){nominal_code += "ENDCLASS\n";}
+        else if(tostr(line) == "endc"){nominal_code += "ENDCLASS\n";class_state = false;}
         //If none of the above condition matched with tokens.
         else if(fn_state == false){
             nominal_code += tostr(line) + "\n";
