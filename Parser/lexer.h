@@ -41,6 +41,7 @@ class Lexer{
                     strended = false;
                 }
                 else if(t == "\"" && strended == false){
+                    strlat.pop_bk();
                     strlat += "\"";
                     ntok.add(strlat);
                     strended = true;
@@ -57,7 +58,7 @@ class Lexer{
 };
 
 /*
-Motive of last edit: It was edited by Aniket Kumar on 9/feb/2023 to make Csq space sensative because in the previous lexer space was skipped
+Motive of last edit: It was edited by Aniket Kumar on 17/feb/2023 to make Csq space sensative because in the previous lexer space was skipped
 due to which it became space insensative so to make it sensative lexer was improved.
 */
 
