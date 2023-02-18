@@ -33,13 +33,13 @@ dict<str,str> BytecodeGrammar = {
 {"(",")","\"","[","]",":",",",";","+","-","*",
 "|","&","&&","||","<",">","=",".","{","}","==",
 "!=","<=",">=","~","+=","-=","*=","/=","%=","&=",
-"++","--","\""},
+"++","--","\"","#"},
 {"LPAR","RPAR","LSQB","RSQB","COLON","COMMA","SEMI",
 "PLUS","MINUS","STAR","VBAR","AMPER","AND",
 "OR","LESS","GREATER","EQUAL","DOT","LBRACE",
 "RBRACE","EQEQUAL","NOTEQUAL","LESSEQUAL","GREATEREQUAL",
 "TILDE","POW","PLUSEQUAL","MINEQUAL","STAREQUAL","SLASHEQUAL",
-"PERCENTEQUAL","AMPEREQUAL","INCREMENT","DECREMENT"}
+"PERCENTEQUAL","AMPEREQUAL","INCREMENT","DECREMENT","HASH"}
 };
 str comment = "#";
 
@@ -73,8 +73,12 @@ str MACRO = "macro";
 def <name>()
     ....
 <name> ends
+
+
 #Variables in Csq Syntax
 <name>:<type> = <reference>
+
+
 #Classes syntax
 class <name>
     .....
