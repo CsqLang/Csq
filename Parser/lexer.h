@@ -35,15 +35,27 @@ class Lexer{
             array<str> ntok;
             bool strended = true;
             str strlat;
+            
             for(auto t : tokens){
                 if(t == "\"" && strended == true){
                     strlat = "\"";
                     strended = false;
                 }
+                else if(t == "#"){
+                    break;
+                }
                 else if(t == "\"" && strended == false){
-                    strlat += "\"";
-                    ntok.add(strlat);
-                    strended = true;
+                    if(strlat[strlat.len()-1] != '\"'){
+                        strlat.pop_bk();
+                        strlat += "\"";
+                        ntok.add(strlat);
+                        strended = true;
+                    }
+                    else{
+                        strlat += "\"";
+                        ntok.add(strlat);
+                        strended = true;
+                    }
                 }
                 else if(t != "\"" && strended == true){
                     ntok.add(t);
@@ -55,10 +67,5 @@ class Lexer{
             return ntok;
         } 
 };
-
-/*
-Motive of last edit: It was edited by Aniket Kumar on 9/feb/2023 to make Csq space sensative because in the previous lexer space was skipped
-due to which it became space insensative so to make it sensative lexer was improved.
-*/
 
 #endif // LEXER_CSQ4
