@@ -9,12 +9,13 @@
 // */
 #if !defined(builtins_h)
 #define builtins_h
-// /*******************************Importing C libraries & Reference counter *********************************/
-#include "exceptions.h"
+// /*******************************Importing C/C++ libraries & Reference counter *********************************/
+#include <string>
 #include <stdio.h>
 #include <string.h>
+#include "exceptions.h"
 #include "../Memory/Reference_Counter.h"
-
+using std::string;
 //Memory manager
 template<typename T>
 auto allocate(T val){
@@ -34,39 +35,36 @@ class i32 {
 public:
 int val;
 i32(int n){
-val = n;
+    val = n;
+}
+i32(ref<i32> n){
+    val = n->val;
 }
 i32(const i32& n){
 val = n.val;
 }
 i32(){}
-auto op_add(i32 v, i32 v2){
-    return i32(v.val + v2.val);
+auto op_add(ref<i32> v, ref<i32> v2){
+    return i32(v->val + v2->val);
 }
 
-ref<i32> op_sub(ref<i32> v, ref<i32> v2){
-    ref<i32> __val = new i32(v->val - v2->val);
-    return __val;
+auto op_sub(ref<i32> v, ref<i32> v2){
+    return i32(v->val - v2->val);
 }
 
 auto op_div(ref<i32> v, ref<i32> v2){
-    ref<i32> __val = new i32(v->val / v2->val);
-    return __val;
+    return i32(v->val / v2->val);
 }
 
-ref<i32> op_mul(ref<i32> v, ref<i32> v2) {
-    return ref<i32>(new i32(v->val * v2->val));
+auto op_mul(ref<i32> v, ref<i32> v2){
+    return i32(v->val * v2->val);
 }
 
-bool op_equal( ref<i32> v1, ref<i32> v2){
+bool op_equal(ref<i32> v, ref<i32> v2){
     bool state = false;
-    if(v1->val == v2->val)
+    if(v->val == v2->val)
         state = true;
     return state;
-}
-i32 operator+(i32 v){
-
-    return i32(this->val+v.val);
 }
 bool op_notEqual( ref<i32> v1, ref<i32> v2){
     bool state = false;
@@ -112,57 +110,64 @@ class i64{
         i64(long int n){
             val = n;
         }
+        i64(ref<i64> v){
+            val = v->val;
+        }
         i64(const i64& n){
             val = n.val;
         }
         i64(){}
         auto op_add(ref<i64> v, ref<i64> v2){
-            ref<i64> __val = new i64(v->val + v2->val);
-            return __val;
+            return i64(v->val + v2->val);
         }
+
         auto op_sub(ref<i64> v, ref<i64> v2){
-            ref<i64> __val = new i64(v->val - v2->val);
-            return __val;
+            return i64(v->val - v2->val);
         }
+
         auto op_div(ref<i64> v, ref<i64> v2){
-            ref<i64> __val = new i64(v->val / v2->val);
-            return __val;
+            return i64(v->val / v2->val);
         }
+
         auto op_mul(ref<i64> v, ref<i64> v2){
-            ref<i64> __val = new i64(v->val * v2->val);
-            return __val;
+            return i64(v->val * v2->val);
         }
-        auto op_equal( ref<i64> v1, ref<i64> v2){
+
+        bool op_equal(ref<i64> v, ref<i64> v2){
             bool state = false;
-            if(v1->val == v2->val)
+            if(v->val == v2->val)
                 state = true;
             return state;
         }
-        auto op_notEqual( ref<i64> v1, ref<i64> v2){
+        bool op_notEqual( ref<i64> v1, ref<i64> v2){
             bool state = false;
             if(v1->val != v2->val)
                 state = true;
             return state;
         }
-        auto op_lesser( ref<i64> v1, ref<i64> v2){
+
+        bool op_lesser( ref<i64> v1, ref<i64> v2){
             bool state = false;
             if(v1->val < v2->val)
                 state = true;
             return state;
         }
-        auto op_greater( ref<i64> v1, ref<i64> v2){
+
+        bool op_greater( ref<i64> v1, ref<i64> v2){
             bool state = false;
             if(v1->val > v2->val)
                 state = true;
             return state;
         }
-        auto op_greaterEqual( ref<i64> v1, ref<i64> v2){
+
+        bool op_greaterEqual( ref<i64> v1, ref<i64> v2){
             bool state = false;
             if(v1->val >= v2->val)
                 state = true;
             return state;
         }
-        auto op_lesserEqual( ref<i64> v1, ref<i64> v2){
+
+        bool op_lesserEqual( ref<i64> v1, ref<i64> v2){
             bool state = false;
             if(v1->val <= v2->val)
                 state = true;
@@ -179,116 +184,134 @@ class i128{
         i128(const i128& n){
             val = n.val;
         }
+        i128(ref<i128> v){
+            val = v->val;
+        }
         i128(){}
         auto op_add(ref<i128> v, ref<i128> v2){
-            ref<i128> __val = new i128(v->val + v2->val);
-            return __val;
+            return i128(v->val + v2->val);
         }
+
         auto op_sub(ref<i128> v, ref<i128> v2){
-            ref<i128> __val = new i128(v->val - v2->val);
-            return __val;
+            return i128(v->val - v2->val);
         }
+
         auto op_div(ref<i128> v, ref<i128> v2){
-            ref<i128> __val = new i128(v->val / v2->val);
-            return __val;
+            return i128(v->val / v2->val);
         }
+
         auto op_mul(ref<i128> v, ref<i128> v2){
-            ref<i128> __val = new i128(v->val * v2->val);
-            return __val;
+            return i128(v->val * v2->val);
         }
-        auto op_equal( ref<i128> v1, ref<i128> v2){
+
+        bool op_equal(ref<i128> v, ref<i128> v2){
             bool state = false;
-            if(v1->val == v2->val)
+            if(v->val == v2->val)
                 state = true;
             return state;
         }
-        auto op_notEqual( ref<i128> v1, ref<i128> v2){
+        bool op_notEqual( ref<i128> v1, ref<i128> v2){
             bool state = false;
             if(v1->val != v2->val)
                 state = true;
             return state;
         }
-        auto op_lesser( ref<i128> v1, ref<i128> v2){
+
+        bool op_lesser( ref<i128> v1, ref<i128> v2){
             bool state = false;
             if(v1->val < v2->val)
                 state = true;
             return state;
         }
-        auto op_greater( ref<i128> v1, ref<i128> v2){
+
+        bool op_greater( ref<i128> v1, ref<i128> v2){
             bool state = false;
             if(v1->val > v2->val)
                 state = true;
             return state;
         }
-        auto op_greaterEqual( ref<i128> v1, ref<i128> v2){
+
+        bool op_greaterEqual( ref<i128> v1, ref<i128> v2){
             bool state = false;
             if(v1->val >= v2->val)
                 state = true;
             return state;
         }
-        auto op_lesserEqual( ref<i128> v1, ref<i128> v2){
+
+        bool op_lesserEqual( ref<i128> v1, ref<i128> v2){
             bool state = false;
             if(v1->val <= v2->val)
                 state = true;
             return state;
         }
 };
-//FLoat types
+//FLoat typ128
 
 class f32{
     public:
-        double val;
-        f32(double n){
+        float val;
+        f32(float n){
             val = n;
         }
         f32(const f32& n){
             val = n.val;
         }
+        f32(ref<f32> v){
+            val = v->val;
+        }
         f32(){}
        
-        auto op_add(ref<f32> v1, ref<f32> v2){
-            return ref<f32>(new f32((v1->val)+(v2->val)));
+        auto op_add(ref<f32> v, ref<f32> v2){
+            return f32(v->val + v2->val);
         }
-        auto op_sub( ref<f32> v1, ref<f32> v2){
-            return ref<f32>(new f32((v1->val)-(v2->val)));
+
+        auto op_sub(ref<f32> v, ref<f32> v2){
+            return f32(v->val - v2->val);
         }
-        auto op_mul( ref<f32> v1, ref<f32> v2){
-            return ref<f32>(new f32((v1->val)*(v2->val)));
+
+        auto op_div(ref<f32> v, ref<f32> v2){
+            return f32(v->val / v2->val);
         }
-        auto op_div( ref<f32> v1, ref<f32> v2){
-            return ref<f32>(new f32((v1->val)/(v2->val)));
+
+        auto op_mul(ref<f32> v, ref<f32> v2){
+            return f32(v->val * v2->val);
         }
-        auto op_equal( ref<f32> v1, ref<f32> v2){
+
+        bool op_equal(ref<f32> v, ref<f32> v2){
             bool state = false;
-            if(v1->val == v2->val)
+            if(v->val == v2->val)
                 state = true;
             return state;
         }
-        auto op_notEqual( ref<f32> v1, ref<f32> v2){
+        bool op_notEqual( ref<f32> v1, ref<f32> v2){
             bool state = false;
             if(v1->val != v2->val)
                 state = true;
             return state;
         }
-        auto op_lesser( ref<f32> v1, ref<f32> v2){
+
+        bool op_lesser( ref<f32> v1, ref<f32> v2){
             bool state = false;
             if(v1->val < v2->val)
                 state = true;
             return state;
         }
-        auto op_greater( ref<f32> v1, ref<f32> v2){
+
+        bool op_greater( ref<f32> v1, ref<f32> v2){
             bool state = false;
             if(v1->val > v2->val)
                 state = true;
             return state;
         }
-        auto op_greaterEqual( ref<f32> v1, ref<f32> v2){
+
+        bool op_greaterEqual( ref<f32> v1, ref<f32> v2){
             bool state = false;
             if(v1->val >= v2->val)
                 state = true;
             return state;
         }
-        auto op_lesserEqual( ref<f32> v1, ref<f32> v2){
+
+        bool op_lesserEqual( ref<f32> v1, ref<f32> v2){
             bool state = false;
             if(v1->val <= v2->val)
                 state = true;
@@ -306,50 +329,60 @@ class f64{
             val = n.val;
         }
         f64(){}
-       
-        auto op_add( ref<f64> v1, ref<f64> v2){
-            return ref<f64>(new f64((v1->val)+(v2->val)));
+        f64(ref<f64> v){
+            val = v->val;
         }
-        auto op_sub( ref<f64> v1, ref<f64> v2){
-            return ref<f64>(new f64((v1->val)-(v2->val)));
+        auto op_add(ref<f64> v, ref<f64> v2){
+            return f64(v->val + v2->val);
         }
-        auto op_mul( ref<f64> v1, ref<f64> v2){
-            return ref<f64>(new f64((v1->val)*(v2->val)));
+
+        auto op_sub(ref<f64> v, ref<f64> v2){
+            return f64(v->val - v2->val);
         }
-        auto op_div( ref<f64> v1, ref<f64> v2){
-            return ref<f64>(new f64((v1->val)/(v2->val)));
+
+        auto op_div(ref<f64> v, ref<f64> v2){
+            return f64(v->val / v2->val);
         }
-        auto op_equal( ref<f64> v1, ref<f64> v2){
+
+        auto op_mul(ref<f64> v, ref<f64> v2){
+            return f64(v->val * v2->val);
+        }
+
+        bool op_equal(ref<f64> v, ref<f64> v2){
             bool state = false;
-            if(v1->val == v2->val)
+            if(v->val == v2->val)
                 state = true;
             return state;
         }
-        auto op_notEqual( ref<f64> v1, ref<f64> v2){
+        bool op_notEqual( ref<f64> v1, ref<f64> v2){
             bool state = false;
             if(v1->val != v2->val)
                 state = true;
             return state;
         }
-        auto op_lesser( ref<f64> v1, ref<f64> v2){
+
+        bool op_lesser( ref<f64> v1, ref<f64> v2){
             bool state = false;
             if(v1->val < v2->val)
                 state = true;
             return state;
         }
-        auto op_greater( ref<f64> v1, ref<f64> v2){
+
+        bool op_greater( ref<f64> v1, ref<f64> v2){
             bool state = false;
             if(v1->val > v2->val)
                 state = true;
             return state;
         }
-        auto op_greaterEqual( ref<f64> v1, ref<f64> v2){
+
+        bool op_greaterEqual( ref<f64> v1, ref<f64> v2){
             bool state = false;
             if(v1->val >= v2->val)
                 state = true;
             return state;
         }
-        auto op_lesserEqual( ref<f32> v1, ref<f32> v2){
+
+        bool op_lesserEqual( ref<f64> v1, ref<f64> v2){
             bool state = false;
             if(v1->val <= v2->val)
                 state = true;
@@ -362,106 +395,51 @@ auto ref<T>::operator[](int index){
     return ref<T>(new T(this->op_brac(this->get(), new i32(index))));
 }
 
-//String class
 class str{
     public:
-        char* __str__;
+        string __str__;
         str(){}
         str(const char* __str){
-            this->__str__ = new char[strlen(__str) + 1];
-            // this->__str = __str;
-            for(int i = 0;i<strlen(__str);i++){
-                this->__str__[i] = __str[i];
-            }
+            __str__ = __str;
         }
-        str(ref<str> str_){
-            this->__str__ = new char[strlen(str_->__str__) + 1];
-            __str__ = str_->__str__;
+        str(string __str){
+            __str__ = __str;
         }
-
-        auto operator+(const str &rhs)
-        {
-            int length = strlen(this->__str__) + strlen(rhs.__str__);
-
-            char *buff = new char[length + 1];
-
-            // Copy the Strings to buff[]
-            strcpy(buff, this->__str__);
-            strcat(buff, rhs.__str__);
-            buff[length] = '\0';
-
-            // String temp
-            str temp{buff};
-
-            // delete the buff[]
-            delete[] buff;
-
-            // Return the concatenated String
-            return temp;
+        str(ref<str> __str){
+            __str__ = __str->__str__;
         }
-        auto operator+=(const str &rhs)
-        {
-            int length = strlen(this->__str__) + strlen(rhs.__str__);
-
-            char *buff = new char[length + 1];
-
-            // Copy the Strings to buff[]
-            strcpy(buff, this->__str__);
-            strcat(buff, rhs.__str__);
-            buff[length] = '\0';
-
-            // String temp
-            // str temp{ buff };
-            delete __str__;
-            __str__ = new char[length + 1];
-            strcpy(__str__, buff);
+        str(const str& _str){
+            __str__ = _str.__str__;
         }
-        
-        //Touppercase
-        auto upper(){
-            char* st = new char[strlen(__str__)+1];
-            st = __str__;
-            for(int i=0;i<strlen(__str__);i++){
-                if(int(st[i]) >= 97 && int(st[i]) <=122){
-                    st[i] = char(int(__str__[i])-32);
+        const char* cstr(){return __str__.c_str();}
+        ref<str> upper() {
+            string upper_str = __str__;
+            for (auto& c : upper_str) {
+                if (islower(c)) {
+                    c = toupper(c);
                 }
-                else{}
+            }
+            return ref<str>(new str(upper_str));
+        }
+
+        auto lower() const {
+            string st = __str__;
+            for (auto& c : st) {
+                if (c >= 'A' && c <= 'Z') {
+                    c = tolower(c);
+                }
             }
             return ref<str>(new str(st));
         }
-
-        //Tolowercase
-        auto lower(){
-            char* st = new char[strlen(__str__)+1];
-            st = __str__;
-            for(int i=0;i<strlen(__str__);i++){
-                if(int(st[i]) >= 65 && int(st[i]) <=90){
-                    st[i] = char(int(__str__[i])+32);
-                }
-                else{}
-            }
-            return ref<str>(new str(st));
+        auto op_add(ref<str> lhs, ref<str> rhs){
+            return str(lhs->__str__ + rhs->__str__);
         }
-        //Length of the string
-        auto len(){
-            return ref<i32>(new i32(strlen(__str__)));
+        ref<i32> toi32(){
+            return ref<i32>(i32(atoi(__str__.c_str())));
         }
-        // toint32
-        auto toi32(){
-            int i = atoi(__str__);
-            return ref<i32>(new i32(i));
+        ref<i64> toi64(){
+            return ref<i64>(i64(atol(__str__.c_str())));
         }
-        //tof32
-        auto tof64(){
-            return ref<f64>(new f64(atof(__str__)));
-        }
-
-        //Operators
-        auto op_add(ref<str> self, ref<str> arg){
-            char* s = strcat(self->__str__,arg->__str__);
-            return ref<str>(new str(s));
-        }
-        
 };
 /*-------------------------------------------------------------------------------------------------*/
 #include <initializer_list>
@@ -608,7 +586,7 @@ class list{
         list(){}
         list(std::initializer_list<T> ls){
             for(auto i : ls){
-                seq.push(i);
+                seq.push(T(i));
             }
         }
         list(T data[]){
@@ -663,61 +641,61 @@ auto range(ref<i32> start, ref<i32> end_){
     return ls;
 }
 ref<str> tostr(ref<str> s){
-    return ref<str>(new str(s->__str__));
+    return ref<str>(new str(*s));
 }
 
-auto tostr(ref<f32> f32_){
-    str s("");
-    sprintf(s.__str__,"%f",f32_->val);
-    return ref<str>(new str(s));
-}
+// auto tostr(ref<f32> f32_){
+//     str s("");
+//     sprintf(s.__str__,"%f",f32_->val);
+//     return ref<str>(new str(s));
+// }
 
-auto tostr(ref<f64> f64_){
-    str s("");
-    sprintf(s.__str__,"%lf",f64_->val);
-    return ref<str>(new str(s));
-}
-auto tostr(ref<i32> i32_){
-    str s("");
-    sprintf(s.__str__,"%d",i32_->val);
-    return ref<str>(new str(s));
-}
-auto to_str(i32 num)
-{
-    char *num_ = new char[2500];
-    sprintf(num_, "%d", num.val);
-    return str(num_);
-}
-auto tostr(ref<array<i32>> arr){
-    str s("{ ");
-    for(auto i : *arr){
+// auto tostr(ref<f64> f64_){
+//     str s("");
+//     sprintf(s.__str__,"%lf",f64_->val);
+//     return ref<str>(new str(s));
+// }
+// auto tostr(ref<i32> i32_){
+//     str s("");
+//     sprintf(s.__str__,"%d",i32_->val);
+//     return ref<str>(new str(s));
+// }
+// auto to_str(i32 num)
+// {
+//     char *num_ = new char[2500];
+//     sprintf(num_, "%d", num.val);
+//     return str(num_);
+// }
+// auto tostr(ref<array<i32>> arr){
+//     str s("{ ");
+//     for(auto i : *arr){
 
-        s += str(to_str((i)));
-        s += ", ";
-    }
-    s += "}";
-    return ref<str>(s);
-}
-auto tostr(ref<array<str>> arr){
-    str s("{ ");
-    for(auto i : *arr){
+//         s += str(to_str((i)));
+//         s += ", ";
+//     }
+//     s += "}";
+//     return ref<str>(s);
+// }
+// auto tostr(ref<array<str>> arr){
+//     str s("{ ");
+//     for(auto i : *arr){
 
-        s += str(i);
-        s += ", ";
-    }
-    s += "}";
-    return ref<str>(s);
-}
-auto tostr(ref<list<str>> arr){
-    str s("{ ");
-    for(auto i : *arr){
+//         s += str(i);
+//         s += ", ";
+//     }
+//     s += "}";
+//     return ref<str>(s);
+// }
+// auto tostr(ref<list<str>> arr){
+//     str s("{ ");
+//     for(auto i : *arr){
 
-        s += str(i);
-        s += ", ";
-    }
-    s += "}";
-    return ref<str>(s);
-}
+//         s += str(i);
+//         s += ", ";
+//     }
+//     s += "}";
+//     return ref<str>(s);
+// }
 template<typename T>
 void print(T arg1){
     printf("%s\n",tostr((*arg1))->__str__);
