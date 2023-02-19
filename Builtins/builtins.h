@@ -469,6 +469,46 @@ class list{
         const T* end() const { return &this->data[this->data.size()];}
 };
 
+auto tostr(ref<i32> val){
+    str s = std::to_string(val->val);
+    return ref<str>(s);
+}
 
+auto tostr(ref<str> val){
+    str s = *val;
+    return ref<str>(s);
+}
 
+auto tostr(ref<f32> val){
+    str s = std::to_string(val->val);
+    return ref<str>(s);
+}
+
+auto range(ref<i32> val){
+    list<i32> ls;
+    for(int i=0;i<val->val;i++){
+        ls.add(i32(i));
+    }return ref<list<i32>>(list<i32>(ls));
+}
+
+auto tostr(ref<list<i32>> ls){
+    str s = "{ ";
+    for(auto i : *ls){
+        s.__str__ += tostr(i)->__str__;
+        s.__str__ += ", ";
+    }
+    s.__str__ += "}";
+    return ref<str>(s);
+}
+
+template<typename T>
+void print(T v){
+    printf("%s\n",tostr(v)->cstr());
+}
+
+template<typename T, typename... Args>
+void print(T v, Args... args){
+    printf("%s",tostr(v)->cstr());
+    print(args...);
+}
 #endif
