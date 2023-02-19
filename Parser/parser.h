@@ -169,6 +169,7 @@ str Rep(str s){
     code = replaceStr(code.Str,"& &","&&");
     code = replaceStr(code.Str," . ",".");
     code = replaceStr(code.Str,": :","::");
+    code = replaceStr(code.Str," ,",",");
     return code;
 }
 bool CheckVariableAssignment(array<str> tokens){
@@ -319,7 +320,7 @@ array<str> ForTokManagement(array<str> tok){
         str n = TokenVariableInAssignShuffle(tok)[0];
         str t = TokenVariableInAssignShuffle(tok)[1];
         str a = TokenVariableInAssignShuffle(tok)[2];
-        code = {"FOR FORREF(",n+",",t+") IN",a+" DO"};
+        code = {"FOR FORREF(",n+",",t+") IN",a," DO"};
     }
     else{
         code = tok;

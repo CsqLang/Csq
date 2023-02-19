@@ -10,7 +10,6 @@ But built-in facilities are still in development.
 <li>Reference Counting for memory safety</li>
 <li>Easy syntax</li>
 <li>Fast speed during executions</li>
-<li>Platform independency of code</li>
 
 ## Requirements
 <li>G++</li>
