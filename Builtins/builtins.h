@@ -11,11 +11,15 @@
 #define builtins_h
 // /*******************************Importing C/C++ libraries & Reference counter *********************************/
 #include <string>
+#include <vector>
 #include <stdio.h>
 #include <string.h>
 #include "exceptions.h"
 #include "../Memory/Reference_Counter.h"
 using std::string;
+using std::vector;
+
+
 //Memory manager
 template<typename T>
 auto allocate(T val){
@@ -392,7 +396,7 @@ class f64{
 //Defination for [] operator
 template<typename T>
 auto ref<T>::operator[](int index){
-    return ref<T>(new T(this->op_brac(this->get(), new i32(index))));
+   return ((this->get()->op_brac(*this->get(),i32(index))));
 }
 
 class str{
@@ -441,270 +445,29 @@ class str{
             return ref<i64>(i64(atol(__str__.c_str())));
         }
 };
-/*-------------------------------------------------------------------------------------------------*/
-#include <initializer_list>
-/*
-This is the class which stores elements in the allocated memory.
-*/
-template<typename T>
-class array{
-    private:
-        int current;
-    public:
-        T* arr;
-        
-        i32 len=(0);
-        array(){}
-        array(std::initializer_list<T> list_){
-            arr = new T[list_.size()];
-            int i = 0;
-            if(list_.size() < list_.size()){
-                MemoryOverflowException();
-            }
-            len = i32(list_.size());
-            for(auto e : list_){
-                arr[i] = e;
-                i++;
-            }
-            current = i;
-        }
-        auto op_brac(ref<array<T>> inst, ref<i32> index){
-            return (inst->arr[index->val]);
-        }
-        auto read(ref<i32> ind){
-            if((ind->val)+1 > this->current){
-                IndexError();
-            }
-            return ref<T>(arr[ind->val]);
-        }
-        auto sum(){
-            ref<T> res = T(0);
-            for(int i = 0;i<this->current;i++){
-                res = res+(ref<T>(T(arr[i])));
-            }
-            return ref<T>(res);
-        }
-        auto mean(){
-            double sm = double(sum()->val);
-            int len = this->len.val;
-            f64 mean_ = sm/len;
-            return ref<f64>(f64(mean_));
-        }
-        auto min(){
-            ref<T> elem = T(arr[0]);
-            for(int i = 0;i<this->current;i++){
-                if(arr[i].val < elem->val){
-                    elem = arr[i];
-                }
-            }
-            return ref<T>(elem);
-        }
-        auto max(){
-            ref<T> elem = T(0);
-            for(int i = 0;i<this->current;i++){
-                if(arr[i].val > elem->val){
-                    elem = arr[i];
-                }
-            }
-            return ref<T>(elem);
-        }
-        auto pop(){current--;}
-        T* begin() { return &this->arr[0];}
-        const T* begin() const { return &this->arr[0];}
-        T* end() { return &this->arr[this->current]; }
-        const T* end() const { return &this->arr[this->current];}
-};
-
-
-template<typename T>
-class DynamicSequence{
-    public:
-        T* arr;
-        // capacity is the total storage
-        int capacity;
-        // current is the number of elements
-        int current;
-        (DynamicSequence)(){
-            arr = new T[1];
-            capacity = 1;
-            current = 0;
-        }
-        auto update(ref<i32> index, ref<T> value){
-            arr[index->val] = *value;
-        }
-        auto push(ref<T> data){
-            // if the number of elements is equal to the
-            // capacity, that means we don't have space to
-            // accommodate more elements. We need to double the
-            // capacity
-            if (current == capacity) {
-                T* temp = new T[2 * capacity];
-    
-                // copying old array elements to new array
-                for (int i = 0; i < capacity; i++){
-                    temp[i] = arr[i];
-                }
-    
-                // deleting previous array
-                delete[] arr;
-                capacity *= 2;
-                arr = temp;
-            }
-            // Inserting data
-            arr[current] = *data;
-            current++;
-        }
-        auto read(ref<i32> index){
-            return ref<T>(arr[index->val]);
-        }
-        auto erase(ref<T> e){
-            int i;
-            for (i=0; i<this->current; i++)
-                if (this->arr[i] == *e)
-                    break;
-            // If element found in array
-            if (i < this->current)
-            {
-                // reduce size of array and move all
-                // elements on space ahead
-                this->current = this->current - 1;
-                for (int j=i; j<this->current; j++)
-                    arr[j] = arr[j+1];
-            }
-        }
-        auto pop(){current--;}
-        T* begin() { return &this->arr[0];}
-        const T* begin() const { return &this->arr[0];}
-        T* end() { return &this->arr[this->current]; }
-        const T* end() const { return &this->arr[this->current];}
-};
 
 template<typename T>
 class list{
     public:
-        DynamicSequence<T> seq;
+        vector<T> data;
         list(){}
-        list(std::initializer_list<T> ls){
-            for(auto i : ls){
-                seq.push(T(i));
-            }
-        }
-        list(T data[]){
-            int size = *(&data + 1) - data;
-            delete seq.arr;
-            seq.arr = new T[size];
-            seq.arr = data;
-        }
-        list(ref<list<T>> newls){
-            this->seq = (*newls).seq;
+        list(vector<T> data){this->data = data;}
+        list(const list<T>& data){this->data = data.data;}
+        list(ref<list<T>> data){this->data = data->data;}
+        void pop(){
+            data.pop_back();
         }
         void add(ref<T> elem){
-            seq.push(elem);
+            data.push_back(*elem);
         }
-        auto read(ref<i32> index){
-            return seq.read(index);
+        auto op_brac(ref<list<T>> ls, ref<i32> index){
+            return ref<T>(T(ls->data[index->val]));
         }
-        void update(ref<i32> index, ref<T> val){
-            seq.update(index,val);
-        }
-        ref<i32> len(){
-            return new i32(this->seq.current);
-        }
-        auto pop(){seq.pop();}
-        auto iter(){
-            T* ref_[4] = {};
-        }
-        T* begin() { return seq.begin();}
-        const T* begin() const { return seq.begin();}
-        T* end() { return seq.end(); }
-        const T* end() const { return seq.end();}
+        T* begin() { return &this->data[0];}
+        const T* begin() const { return &this->data[0];}
+        T* end() { return &this->data[this->data.size()]; }
+        const T* end() const { return &this->data[this->data.size()];}
 };
-
-//Range function for iter feature in for loop
-auto range(ref<i32> end_){
-    list<i32> ls;
-    int lim = 0;
-    while(lim <= end_->val){
-        ls.seq.push(i32(lim));
-        lim++;
-    }
-    return ls;
-}
-//Range function for iter feature in for loop
-auto range(ref<i32> start, ref<i32> end_){
-    list<i32> ls;
-    int lim = start->val;
-    while(lim <= end_->val){
-        ls.seq.push(i32(lim));
-        lim++;
-    }
-    return ls;
-}
-ref<str> tostr(ref<str> s){
-    return ref<str>(new str(*s));
-}
-
-// auto tostr(ref<f32> f32_){
-//     str s("");
-//     sprintf(s.__str__,"%f",f32_->val);
-//     return ref<str>(new str(s));
-// }
-
-// auto tostr(ref<f64> f64_){
-//     str s("");
-//     sprintf(s.__str__,"%lf",f64_->val);
-//     return ref<str>(new str(s));
-// }
-// auto tostr(ref<i32> i32_){
-//     str s("");
-//     sprintf(s.__str__,"%d",i32_->val);
-//     return ref<str>(new str(s));
-// }
-// auto to_str(i32 num)
-// {
-//     char *num_ = new char[2500];
-//     sprintf(num_, "%d", num.val);
-//     return str(num_);
-// }
-// auto tostr(ref<array<i32>> arr){
-//     str s("{ ");
-//     for(auto i : *arr){
-
-//         s += str(to_str((i)));
-//         s += ", ";
-//     }
-//     s += "}";
-//     return ref<str>(s);
-// }
-// auto tostr(ref<array<str>> arr){
-//     str s("{ ");
-//     for(auto i : *arr){
-
-//         s += str(i);
-//         s += ", ";
-//     }
-//     s += "}";
-//     return ref<str>(s);
-// }
-// auto tostr(ref<list<str>> arr){
-//     str s("{ ");
-//     for(auto i : *arr){
-
-//         s += str(i);
-//         s += ", ";
-//     }
-//     s += "}";
-//     return ref<str>(s);
-// }
-template<typename T>
-void print(T arg1){
-    printf("%s\n",tostr((*arg1))->__str__);
-}
-template<typename T, typename... Args>
-void print(T arg1,Args... more){
-    printf("%s",tostr((*arg1))->__str__);
-    print(more...);
-}
 
 
 
