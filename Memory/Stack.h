@@ -10,6 +10,8 @@ namespace Stack{
     array<str> Import;
     //This stack represents the names of variables.
     array<str> Variables;
+    //This stack represents the garbage values collected
+    array<str> GarbageValues;
 }
 namespace Scope{
     //This dict represents the function's scope
