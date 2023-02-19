@@ -29,5 +29,9 @@
 #define ENDMAIN ;return 0;}
 #define init
 #define inherits :
+#define TRY try{
+#define CATCH catch(
+#define ASM asm
+#define FINAL final
 
 #endif // Csq4_Instruction_H
