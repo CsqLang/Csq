@@ -575,7 +575,12 @@ auto range(ref<i32> val){
         ls.add(i32(i));
     }return ref<list<i32>>(list<i32>(ls));
 }
-
+auto range(ref<i32> start, ref<i32> end_){
+    list<i32> ls;
+    for(int i=start->val;i<=end_->val;i++){
+        ls.add(i32(i));
+    }return ref<list<i32>>(list<i32>(ls));
+}
 auto tostr(ref<list<i32>> ls){
     str s = "{ ";
     for(auto i : *ls){
@@ -585,7 +590,25 @@ auto tostr(ref<list<i32>> ls){
     s.__str__ += "}";
     return ref<str>(s);
 }
-
+auto tostr(ref<list<f64>> ls){
+    str s = "{ ";
+    for(auto i : *ls){
+        s.__str__ += tostr(i)->__str__;
+        s.__str__ += ", ";
+    }
+    s.__str__ += "}";
+    return ref<str>(s);
+}
+auto tostr(ref<list<str>> ls){
+    str s = "{ ";
+    for(auto i : *ls){
+        s.__str__ += "\"";
+        s.__str__ += tostr(i)->__str__;
+        s.__str__ += "\",";
+    }
+    s.__str__ += "}";
+    return ref<str>(s);
+}
 template<typename T>
 void print(T v){
     printf("%s\n",tostr(v)->cstr());
