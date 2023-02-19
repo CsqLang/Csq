@@ -393,6 +393,77 @@ class f64{
             return state;
         }
 };
+
+class f128{
+    public:
+        long double val;
+        f128(long double n){
+            val = n;
+        }
+        f128(const f128& n){
+            val = n.val;
+        }
+        f128(){}
+        f128(ref<f128> v){
+            val = v->val;
+        }
+        auto op_add(ref<f128> v, ref<f128> v2){
+            return f128(v->val + v2->val);
+        }
+
+        auto op_sub(ref<f128> v, ref<f128> v2){
+            return f128(v->val - v2->val);
+        }
+
+        auto op_div(ref<f128> v, ref<f128> v2){
+            return f128(v->val / v2->val);
+        }
+
+        auto op_mul(ref<f128> v, ref<f128> v2){
+            return f128(v->val * v2->val);
+        }
+
+        bool op_equal(ref<f128> v, ref<f128> v2){
+            bool state = false;
+            if(v->val == v2->val)
+                state = true;
+            return state;
+        }
+        bool op_notEqual( ref<f128> v1, ref<f128> v2){
+            bool state = false;
+            if(v1->val != v2->val)
+                state = true;
+            return state;
+        }
+
+        bool op_lesser( ref<f128> v1, ref<f128> v2){
+            bool state = false;
+            if(v1->val < v2->val)
+                state = true;
+            return state;
+        }
+
+        bool op_greater( ref<f128> v1, ref<f128> v2){
+            bool state = false;
+            if(v1->val > v2->val)
+                state = true;
+            return state;
+        }
+
+        bool op_greaterEqual( ref<f128> v1, ref<f128> v2){
+            bool state = false;
+            if(v1->val >= v2->val)
+                state = true;
+            return state;
+        }
+
+        bool op_lesserEqual( ref<f128> v1, ref<f128> v2){
+            bool state = false;
+            if(v1->val <= v2->val)
+                state = true;
+            return state;
+        }
+};
 //Defination for [] operator
 template<typename T>
 auto ref<T>::operator[](int index){
@@ -478,12 +549,26 @@ auto tostr(ref<str> val){
     str s = *val;
     return ref<str>(s);
 }
-
+auto tostr(str val){
+    str s = val;
+    return ref<str>(s);
+}
+auto tostr(i32 val){
+    str s = std::to_string(val.val);
+    return ref<str>(s);
+}
 auto tostr(ref<f32> val){
     str s = std::to_string(val->val);
     return ref<str>(s);
 }
-
+auto tostr(ref<f64> val){
+    str s = std::to_string(val->val);
+    return ref<str>(s);
+}
+auto tostr(ref<f128> val){
+    str s = std::to_string(val->val);
+    return ref<str>(s);
+}
 auto range(ref<i32> val){
     list<i32> ls;
     for(int i=0;i<val->val;i++){
