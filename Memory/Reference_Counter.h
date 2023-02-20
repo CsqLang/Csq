@@ -27,38 +27,38 @@ public:
     inline void reset(T *ptr) {
         this->reset(ptr);
     }
-
-    inline ref<T> operator+(const ref<T> &rhs) {
-        return ref<T>(new T(this->get()->op_add(*this->get(),rhs.get())));
+    inline ref<T> operator++(int){
+        return ref<T>(T(this->get()+(1)));
     }
-
-
+    inline ref<T> operator+(const ref<T> &rhs) {
+        return ref<T>(new T(this->get()->op_add(*this->get(),*rhs.get())));
+    }
     inline ref<T> operator-(const ref<T> &rhs) {
-        return ref<T>(new T(this->get()->op_sub(*this->get(),rhs.get())));
+        return ref<T>(new T(this->get()->op_sub(*this->get(),*rhs.get())));
     }
     inline ref<T> operator*(const ref<T> &rhs) {
-        return ref<T>(new T(this->get()->op_mul(*this->get(),rhs.get())));
+        return ref<T>(new T(this->get()->op_mul(*this->get(),*rhs.get())));
     }
     inline ref<T> operator/(const ref<T> &rhs) {
-        return ref<T>(new T(this->get()->op_div(*this->get(),rhs.get())));
+        return ref<T>(new T(this->get()->op_div(*this->get(),*rhs.get())));
     }
     inline bool operator>(const ref<T> &rhs) {
-        return ((this->get()->op_greater(*this->get(),rhs.get())));
+        return ((this->get()->op_greater(*this->get(),*rhs.get())));
     }
     inline bool operator<(const ref<T> &rhs) {
-        return ((this->get()->op_less(*this->get(),rhs.get())));
+        return ((this->get()->op_lesser(*this->get(),*rhs.get())));
     }
     inline bool operator>=(const ref<T> &rhs) {
-        return ((this->get()->op_greaterEqual(*this->get(),rhs.get())));
+        return ((this->get()->op_greaterEqual(*this->get(),*rhs.get())));
     }
     inline bool operator<=(const ref<T> &rhs) {
-        return ((this->get()->op_lessEqual(*this->get(),rhs.get())));
+        return ((this->get()->op_lesserEqual(*this->get(),*rhs.get())));
     }
     inline bool operator!=(const ref<T> &rhs) {
-        return ((this->get()->op_notEqual(*this->get(),rhs.get())));
+        return ((this->get()->op_notEqual(*this->get(),*rhs.get())));
     }
     inline bool operator==(const ref<T> &rhs) {
-        return (this->get()->op_Equal(*this->get(),rhs.get()));
+        return (this->get()->op_equal(*this->get(),*rhs.get()));
     }
 
     auto operator[](int index);
