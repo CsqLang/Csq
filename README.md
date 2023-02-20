@@ -20,21 +20,26 @@ But built-in facilities are still in development.
 <li>All operators overloaded are the methods starting from op_ example: def op_div()</li>
 
 ## Examples/Syntax
+
+### Comments
 ```
 # This is a comment
-# Variable declarations
-a:i32 = 1000
-a2:f64 = 3.141592
-a3:str = "Hello World"
-a4:list<i32> = {3,4,6,28,9}
-# Loops
-for i:i32 in a4
-    ...
-ends
-while <condition>
-    ...
-ends
-# Decision making statements
+```
+
+### Variables
+In Csq4 Variables are the pointers pointing to a block of memory.
+Syntax:
+```
+a:<type> = <value>
+```
+Example
+```
+a:i32 = 3954
+b:i32 = a
+```
+### if,elif and else
+Syntax
+```
 if <condition>
     ...
 ends
@@ -44,22 +49,62 @@ ends
 else
     ...
 ends
-# Functions
-def myfun(i:i32)
-    ...
-myfun ends
-#Calling a function
-myfun(i32(34))
-
-#Classes
-class myclass
-    ...
-endc
-#Inheritence 
-class child inherits base
-    ...
-endc
 ```
+Example
+```
+a:i32 = 30
+b:i32 = 23
+if a == b
+    print("They are equal")
+ends
+elif a > b
+    print("a>b")
+ends
+else
+    print("Else")
+ends
+```
+### Loops
+In Csq4 there are 2 types of loop (for and while).
+Syntax
+```
+for i:<type> in <iterator>
+    ...
+ends
+
+while <condition>
+    ...
+ends
+```
+Example
+```
+a:list<i32> = {1,59,5,76}
+for i:i32 in a
+    print(i)
+ends
+```
+```
+i:i32 = 1
+while i<=i32(5)
+    print(i)
+    i = i+i32(1)
+ends
+```
+### Functions
+Syntax
+```
+def <name>(<args>)
+    ...
+<name> ends
+```
+Example:
+```
+def myfun(i:i32)
+    print(i)
+myfun ends
+myfun(i32(44))
+```
+
 
 ## Syntax inspirations
 <li>Python</li>
