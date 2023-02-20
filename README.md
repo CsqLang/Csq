@@ -124,7 +124,24 @@ def myfun(i:i32)
 myfun ends
 myfun(i32(44))
 ```
+### Classes
+Syntax
+```
+class <name>
+    ...
+endc
+```
+Example
+```
+class mytype
+    public:
+        # Constructor
+        init mytype()
+        mytype ends
+endc
 
+x:mytype = mytype()
+```
 
 ## Syntax inspirations
 <li>Python</li>
