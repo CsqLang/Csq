@@ -5,18 +5,17 @@ Hello there👋,
 This is the new and safe version of Csq which is in developed to solve memory related problems in Csq3 such as memory leak.
 But built-in facilities are still in development.
 ## Features
-<li>Object Oriented Programming </li>
-<li>Functional Programming features</li>
+<li>Object Oriented Programming</li>
+<li>Functional Programming</li>
 <li>Reference Counting for memory safety</li>
 <li>Easy syntax</li>
 <li>Fast speed during executions</li>
-
+<li>Customizable syntax using macro keyword</li>
 ## Requirements
 <li>G++</li>
 
 ## The Principles of Csq code
 <li>Every Csq code shall ends with an extention .csq</li>
-<li>Every variable is an object of SmartPointer class which inherits the datatype of that variable</li>
 <li>All operators overloaded are the methods starting from op_ example: def op_div()</li>
 
 ## Examples/Syntax
