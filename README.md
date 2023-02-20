@@ -5,8 +5,9 @@ Hello there👋,
 This is the new and safe version of Csq which is in developed to solve memory related problems in Csq3 such as memory leak.
 But built-in facilities are still in development.
 ## Features
-<li>Object Oriented Programming</li>
-<li>Functional Programming</li>
+<li>Object oriented programming</li>
+<li>Functional programming</li>
+<li>High level programming
 <li>Reference Counting for memory safety</li>
 <li>Easy syntax</li>
 <li>Fast speed during executions</li>
@@ -142,7 +143,34 @@ endc
 
 x:mytype = mytype()
 ```
-
+### Inheritance
+Syntax
+```
+class <child> inherits <base>
+endc
+```
+Example
+```
+class Animal
+    public:
+        def eat()
+            print("Eating🍔")
+        eat ends
+        def walk()
+            print("Walking🐾")
+        walk ends
+endc
+class Dog inherits public Animal
+    public:
+        def bark()
+            print("Woof Woof🐕")
+        bark ends
+endc
+mydog : Dog = Dog()
+mydog->bark()
+mydog->walk()
+mydog->eat()
+```
 ## Syntax inspirations
 <li>Python</li>
 <li>Ruby</li>
