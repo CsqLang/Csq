@@ -20,6 +20,27 @@ But built-in facilities are still in development.
 
 ## Examples/Syntax
 
+### Keywords
+| Keyword Name |
+| ------------- |
+| if            |
+| elif          |
+| else          |
+| def           |
+| for           |
+| while         |
+| ends          |
+| endc          |
+| macro         |
+| import        |
+| in            |
+| init          |
+| public        |
+| private       |
+| inherits      |
+| protected     |
+| class
+
 ### Comments
 ```
 # This is a comment
