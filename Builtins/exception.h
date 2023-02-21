@@ -14,6 +14,9 @@ void IndexError(){
     printf("Trackback:\n IndexError : An object is trying to access an memory which is out of index.\n");
     Trackback();
 }
+void KeyError(){
+    printf("Trackback:\n KeyError : An object is trying to access key which is not present.\n");
+}
 void DivisonByZeroException(){
     printf("Trackback:\n Couldn't divide by zero.\n");
     Trackback();
