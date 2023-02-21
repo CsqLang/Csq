@@ -528,11 +528,17 @@ class list{
         void pop(){
             data.pop_back();
         }
+        void operator=(list<T> ls){
+            this->data = ls.data;
+        }
         void add(ref<T> elem){
             data.push_back(*elem);
         }
         auto op_brac(ref<list<T>> ls, ref<i32> index){
             return ref<T>(T(ls->data[index->val]));
+        }
+        ref<i32> len(){
+            return ref<i32>(data.size());
         }
         T* begin() { return &this->data[0];}
         const T* begin() const { return &this->data[0];}
@@ -622,5 +628,35 @@ void print(T v, Args... args){
 
 ref<f64> pi = f64(3.141592);
 ref<f64> e = f64(2.718281);
+
+template<typename K, typename V>
+class dict{
+    public:
+        list<K> keys;
+        list<V> values;
+        dict(ref<list<K>> key, ref<list<V>> value){
+            keys = *key;
+            values = *value;
+        }
+        void add(ref<K> key, ref<V> value){
+            keys.add(key);
+            values.add(value);
+        }
+        ref<V> read(ref<K> key){
+            V val;bool pres = false;
+            for(int i = 0;i<keys.len()->val;i++){
+                if(ref<K>(keys.data[i]) == key){
+                    val = values.data[i];
+                    pres = true;
+                    break;
+                }
+            }
+            if(pres == false){
+                KeyError();
+                exit(0);
+            }
+            return ref<V>(val);
+        }
+};
 
 #endif
