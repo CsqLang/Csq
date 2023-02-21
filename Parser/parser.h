@@ -235,7 +235,8 @@ auto TokenVariableAssignShuffle(array<str> tokens){
             assign += tokens[i]+" ";
         }
     }
-    return array<str>({name,type,assign});
+    
+    return array<str>({name,replaceStr(type.Str,",","COMMA"),assign});
 }
 // //Implementation of constructor
 // auto Constructor(array<str> tok){
@@ -299,7 +300,7 @@ auto TokenVariableInAssignShuffle(array<str> tokens){
             assign += tokens[i]+" ";
         }
     }
-    return array<str>({name,type,assign});
+    return array<str>({name,replaceStr(type.Str,",","COMMA"),assign});
 }
 str addSemi(str s){
     array<str> lines = split(s,"\n");
