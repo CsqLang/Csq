@@ -653,9 +653,14 @@ class dict{
             }
             if(pres == false){
                 KeyError();
+                print(" Key called : ",key);
                 exit(0);
             }
             return ref<V>(val);
+        }
+        void pop(){
+            keys.pop();
+            values.pop();
         }
 };
 
