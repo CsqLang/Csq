@@ -172,6 +172,25 @@ mydog->bark()
 mydog->walk()
 mydog->eat()
 ```
+### Importing a module
+Syntax
+```
+import <module>
+```
+Example
+```
+import testmodule
+```
+Creating alias of module
+```
+import test
+module T as test
+```
+Using all members from a module
+```
+import test
+use test::<member_name>
+```
 ## Syntax inspirations
 <li>Python</li>
 <li>Ruby</li>
