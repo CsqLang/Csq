@@ -10,7 +10,9 @@
 #define PARAM(name,type,refr) type name = type(refr)
 #define FORREF(name,type) ref<type> name
 #define ID_REF(name) AMPER name
+#define from(classn) classn::
 #define FOR for(
+#define use using
 #define WHILE while(
 #define ends }
 #define DO ){
