@@ -71,16 +71,24 @@ array<str> ImportsManagement(array<str> tok, str base_path = "./") {
     */
     str path = tok[1];
     array<str> tokens;
-    if(path[0] == '/'){}
+    if(path[0] == '/'){
+        str name = split(path,"/")[split(path,"/").len()-1];
+        str content = read(path+".csqm");
+        str code = "namespace ";
+        code += name + " LBRACE\n";
+        code += content + "\n RBRACE";
+        tokens.add(code);
+    }
     else{
         path = base_path + path;
+        str content = read(currDir+str("/")+path+".csqm");
+        str name = split(path,"/")[split(path,"/").len()-1];
+        str code = "namespace ";
+        code += name + " LBRACE\n";
+        code += content + "\n RBRACE";
+        tokens.add(code);
     }
-    str content = read(currDir+str("/")+path+".csqm");
-    str name = split(path,"/")[split(path,"/").len()-1];
-    str code = "namespace ";
-    code += name + " LBRACE\n";
-    code += content + "\n RBRACE";
-    tokens.add(code);
+    
     return tokens;
 }
 
