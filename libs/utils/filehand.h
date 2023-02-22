@@ -1,15 +1,14 @@
 #if !defined(filehand_utils_Csq3)
 #define filehand_utils_Csq3
     #include "str.h"
-
-    //This function is gonna read the text present in the file.
+    #include <unistd.h>
     auto read(str filepath, int line_num = 10000){
         FILE * fo; 
         fo = fopen(filepath.Str,"r");
         str data;
         char ln[line_num];
         /*File is opened. Start reading the file line by line.*/
-        while ( fgets ( ln, 1000, fo) != NULL ){
+        while ( fgets ( ln, line_num, fo) != NULL ){
             data += str(ln);
         }
         fclose(fo);
