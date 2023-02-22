@@ -15,7 +15,6 @@ int main(int argc, char const *argv[])
         // Reading code:
         str name = argv[1];
         str currentpath = argv[2];
-        currDir = currentpath;
         str compiler_path = argv[3];
         str code = read(currentpath+str("/")+name+".csq");
         ///////////////////////////////////////////////////////////////////
