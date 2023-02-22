@@ -178,7 +178,7 @@ str Rep(str s){
     code = replaceStr(code.Str,"- >","->");
     code = replaceStr(code.Str,"& &","&&");
     code = replaceStr(code.Str," . ",".");
-    //code = replaceStr(code.Str,": :","::");
+    code = replaceStr(code.Str,": :","::");
     code = replaceStr(code.Str," ,",",");
     return code;
 }

@@ -32,8 +32,11 @@
 #define init
 #define inherits :
 #define TRY try{
+#define module namespace
 #define CATCH catch(
 #define ASM asm
+#define all using namespace
 #define FINAL final
+#define as =
 
 #endif // Csq4_Instruction_H
