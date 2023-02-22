@@ -63,26 +63,28 @@ bool file_exists(str filename){
     }
     return is_exist;
 }
-
-//This function will manage the imports.
-array<str> ImportsManagement(array<str> tok){
-    /*Sample input: import m1.m2 m3
-    Tokens: ['m1','.','m2']
+str currDir;
+array<str> ImportsManagement(array<str> tok, str base_path = "./") {
+    /*
+    Syntax: import <module>
+    Sample tokens : {"import","test"}
     */
-    array<str> imp;
-    str s;
-    bool dir = false;
-    for(auto i : tok){
-        if(i == IMPORT){}
-        else{
-            str name_module = split(i,"/")[split(i,"/").len()-1];
-            imp.add(
-                str("namespace ")+name_module+str(" LBRACE\n")+read(i+".csqm")+str("\nRBRACE\n")
-            );
-        }
+    str path = tok[1];
+    array<str> tokens;
+    if(path[0] == '/'){}
+    else{
+        path = base_path + path;
     }
-    return imp;
+    str content = read(currDir+str("/")+path+".csqm");
+    str name = split(path,"/")[split(path,"/").len()-1];
+    str code = "namespace ";
+    code += name + " LBRACE\n";
+    code += content + "\n RBRACE";
+    tokens.add(code);
+    return tokens;
 }
+
+
 array<str> IfTokManagement(array<str> tok){
     array<str> s;
     if(CheckIF(tok) == 1){
@@ -168,7 +170,7 @@ str Rep(str s){
     code = replaceStr(code.Str,"- >","->");
     code = replaceStr(code.Str,"& &","&&");
     code = replaceStr(code.Str," . ",".");
-    code = replaceStr(code.Str,": :","::");
+    //code = replaceStr(code.Str,": :","::");
     code = replaceStr(code.Str," ,",",");
     return code;
 }
