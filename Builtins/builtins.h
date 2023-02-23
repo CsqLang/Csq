@@ -626,8 +626,7 @@ void print(T v, Args... args){
     print(args...);
 }
 
-ref<f64> pi = f64(3.141592);
-ref<f64> e = f64(2.718281);
+
 
 template<typename K, typename V>
 class dict{
