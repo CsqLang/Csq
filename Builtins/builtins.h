@@ -14,7 +14,7 @@
 #include <vector>
 #include <stdio.h>
 #include <string.h>
-#include "exceptions.h"
+#include "exception.h"
 #include "../Memory/Reference_Counter.h"
 using std::string;
 using std::vector;
