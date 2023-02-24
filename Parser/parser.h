@@ -26,6 +26,10 @@ void FunctionEndError(str fn_name){
     printf("Error: function/method %s has not been ended to end use %s ends\n",fn_name.Str,fn_name.Str);
 }
 
+void WrongFunctionEndError(str fn_name,int lineno){
+    printf("Error: In statement at line %d function scope is done for function '%s' but it doesn't exists or already ended. \n",lineno,fn_name.Str);
+}
+
 void VariableValueError(str var_name, int lineno){
     printf("Error: In statement at line %d variable declaration is done for variable '%s' but value is not given \n",lineno,var_name.Str);
 }
@@ -621,6 +625,7 @@ auto Parser::Parse(array<array<str>> tokens){
         else if(tostr(line) == (fn_name + " ends") && (fn_state == true) && (class_state==false)){
             fn_code += "ENDS\n";
             fn_state = false;
+            fn_name = "";
         }
         else if(tostr(line) == (fn_name + " ends") && (fn_state == true) && (class_state==true)){
             nominal_code += "ENDS\n";
