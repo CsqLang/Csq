@@ -516,6 +516,16 @@ auto Parser::Parse(array<array<str>> tokens){
             str name = TokenVariableAssignShuffle(line)[0];
             str type = TokenVariableAssignShuffle(line)[1];
             str val = TokenVariableAssignShuffle(line)[2];
+            //Whether type is not defined
+            if(type == ""){
+                VariableTypeError(name,line_no);
+                exception_counter++;
+            }
+            //Whether values are not NULL
+            if(val == ""){
+                VariableValueError(name,line_no);
+                exception_counter++;
+            }
             //Producing bytecodes.
             str bytecode = "REFERENCE(";bytecode += name + ",";
             bytecode += type + ",";bytecode += type + str("(") + val + "))\n";
@@ -556,11 +566,6 @@ auto Parser::Parse(array<array<str>> tokens){
                         VariableTypeError(n,line_no);
                         exception_counter++;
                     }
-                    //Whether values are not NULL
-                    if(e == ""){
-                        VariableValueError(n,line_no);
-                        exception_counter++;
-                    }
                     bytecode_arg += str("PARAM(") + n + str(",")+t+str(",")+e+"),";
                     Stack::Variables.add(n);
                 }bytecode_arg.pop_bk();
@@ -594,6 +599,11 @@ auto Parser::Parse(array<array<str>> tokens){
                     str n = TokenVariableAssignShuffle(Lexer(i).GetTokens())[0];
                     str t = TokenVariableAssignShuffle(Lexer(i).GetTokens())[1];
                     str e = TokenVariableAssignShuffle(Lexer(i).GetTokens())[2];
+                    //Whether type is not defined
+                    if(t == ""){
+                        VariableTypeError(n,line_no);
+                        exception_counter++;
+                    }
                     bytecode_arg += str("PARAM(") + n + str(",")+t+str(",")+e+"),";
                     Stack::Variables.add(n);
                 }bytecode_arg.pop_bk();
