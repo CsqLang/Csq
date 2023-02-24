@@ -14,6 +14,33 @@
 #include "../libs/utils/filehand.h"
 #include "../Memory/Stack.h"
 //::::::::::::::::::::::::::::::::Some Utilities::::::::::::::::::::::::::::::::
+
+/*
+Errors to be pushed when user has done any mistake.
+*/
+void ClassEndError(str class_name){
+    printf("Error: class %s has not been ended to end use endc\n",class_name.Str);
+}
+
+void FunctionEndError(str fn_name){
+    printf("Error: function/method %s has not been ended to end use %s ends\n",fn_name.Str,fn_name.Str);
+}
+
+void WrongFunctionEndError(str fn_name,int lineno){
+    printf("Error: In statement at line %d function scope is done for function '%s' but it doesn't exists or already ended. \n",lineno,fn_name.Str);
+}
+
+void VariableValueError(str var_name, int lineno){
+    printf("Error: In statement at line %d variable declaration is done for variable '%s' but value is not given \n",lineno,var_name.Str);
+}
+
+void VariableTypeError(str var_name, int lineno){
+    printf("Error: In statement at line %d variable declaration is done for variable '%s' but type is not given \n",lineno,var_name.Str);
+}
+void StopCompilation(){
+    exit(0);
+}
+
 /*
     To know that the folowing tokens are matching with any statement or not.
 */
@@ -371,6 +398,9 @@ auto Parser::Parse(array<array<str>> tokens){
     //Declare states and some needed variables.
     str nominal_code, fn_code, imports, fn_name,class_name;
     bool fn_state = false;bool class_state = false;str main_state = "true";
+    int line_no = 1;
+    //Exception counter::
+    int exception_counter = 0;
     //Applying for range loop to get tokenized tokens present in each line.
     for(array<str> rawline : tokens){
         array<str> line = (WhileTokManagement(ForTokManagement(ElseTokManagement(ElifTokManagement(IfTokManagement(rawline))))));
@@ -382,6 +412,18 @@ auto Parser::Parse(array<array<str>> tokens){
             str val = TokenVariableAssignShuffle(line)[2];
             //Producing bytecodes.
             str bytecode = "REFERENCE(";bytecode += name + ",";
+
+            //Whether type is not defined
+            if(type == ""){
+                VariableTypeError(name,line_no);
+                exception_counter++;
+            }
+            //Whether values are not NULL
+            if(val == ""){
+                VariableValueError(name,line_no);
+                exception_counter++;
+            }
+
             bytecode += type + ",";bytecode += type + str("(") + val + "))\n";
             //Adding the bytecode to the code string.
             nominal_code += bytecode;
@@ -405,6 +447,7 @@ auto Parser::Parse(array<array<str>> tokens){
         else if(CheckClassDefination(line) == true){
             nominal_code += tostr(line) + " LBRACE\n";
             class_state = true;
+            class_name = line[1];
         }
         else if(class_state == true && CheckConstructor(line) == true){
             //Some needed informations about function::
@@ -432,9 +475,20 @@ auto Parser::Parse(array<array<str>> tokens){
                     str n = TokenVariableAssignShuffle(Lexer(i).GetTokens())[0];
                     str t = TokenVariableAssignShuffle(Lexer(i).GetTokens())[1];
                     str e = TokenVariableAssignShuffle(Lexer(i).GetTokens())[2];
+                    //Whether type is not defined
+                    if(t == ""){
+                        VariableTypeError(n,line_no);
+                        exception_counter++;
+                    }
+                    //Whether values are not NULL
+                    if(e == ""){
+                        VariableValueError(n,line_no);
+                        exception_counter++;
+                    }
                     bytecode_arg += str("REFERENCE(") + n + str(",")+t+str(",")+e+"),";
                     Stack::Variables.add(n);
                 }bytecode_arg.pop_bk();
+                
             }
             nominal_code += str("init ")+fn_name+str("(")+bytecode_arg+str(") LBRACE\n");
         }
@@ -443,6 +497,16 @@ auto Parser::Parse(array<array<str>> tokens){
             str name = TokenVariableAssignShuffle(line)[0];
             str type = TokenVariableAssignShuffle(line)[1];
             str val = TokenVariableAssignShuffle(line)[2];
+            //Whether type is not defined
+            if(type == ""){
+                VariableTypeError(name,line_no);
+                exception_counter++;
+            }
+            //Whether values are not NULL
+            if(val == ""){
+                VariableValueError(name,line_no);
+                exception_counter++;
+            }
             //Producing bytecodes.
             str bytecode = "REFERENCE(";bytecode += name + ",";
             bytecode += type + ",";bytecode += type + str("(") + val + "))\n";
@@ -456,6 +520,16 @@ auto Parser::Parse(array<array<str>> tokens){
             str name = TokenVariableAssignShuffle(line)[0];
             str type = TokenVariableAssignShuffle(line)[1];
             str val = TokenVariableAssignShuffle(line)[2];
+            //Whether type is not defined
+            if(type == ""){
+                VariableTypeError(name,line_no);
+                exception_counter++;
+            }
+            //Whether values are not NULL
+            if(val == ""){
+                VariableValueError(name,line_no);
+                exception_counter++;
+            }
             //Producing bytecodes.
             str bytecode = "REFERENCE(";bytecode += name + ",";
             bytecode += type + ",";bytecode += type + str("(") + val + "))\n";
@@ -491,6 +565,11 @@ auto Parser::Parse(array<array<str>> tokens){
                     str n = TokenVariableAssignShuffle(Lexer(i).GetTokens())[0];
                     str t = TokenVariableAssignShuffle(Lexer(i).GetTokens())[1];
                     str e = TokenVariableAssignShuffle(Lexer(i).GetTokens())[2];
+                    //Whether type is not defined
+                    if(t == ""){
+                        VariableTypeError(n,line_no);
+                        exception_counter++;
+                    }
                     bytecode_arg += str("PARAM(") + n + str(",")+t+str(",")+e+"),";
                     Stack::Variables.add(n);
                 }bytecode_arg.pop_bk();
@@ -524,6 +603,11 @@ auto Parser::Parse(array<array<str>> tokens){
                     str n = TokenVariableAssignShuffle(Lexer(i).GetTokens())[0];
                     str t = TokenVariableAssignShuffle(Lexer(i).GetTokens())[1];
                     str e = TokenVariableAssignShuffle(Lexer(i).GetTokens())[2];
+                    //Whether type is not defined
+                    if(t == ""){
+                        VariableTypeError(n,line_no);
+                        exception_counter++;
+                    }
                     bytecode_arg += str("PARAM(") + n + str(",")+t+str(",")+e+"),";
                     Stack::Variables.add(n);
                 }bytecode_arg.pop_bk();
@@ -532,7 +616,6 @@ auto Parser::Parse(array<array<str>> tokens){
         }
         else if(fn_state == true && tostr(line) != (fn_name + " ends") && class_state == false){
             fn_code += tostr(line)+"\n";
-            // printf("TRIG : 1\n");
         }
         
         else if(fn_state == true && tostr(line) !=( fn_name + " ends" )&& class_state == true){
@@ -542,6 +625,7 @@ auto Parser::Parse(array<array<str>> tokens){
         else if(tostr(line) == (fn_name + " ends") && (fn_state == true) && (class_state==false)){
             fn_code += "ENDS\n";
             fn_state = false;
+            fn_name = "";
         }
         else if(tostr(line) == (fn_name + " ends") && (fn_state == true) && (class_state==true)){
             nominal_code += "ENDS\n";
@@ -552,6 +636,26 @@ auto Parser::Parse(array<array<str>> tokens){
         else if(fn_state == false){
             nominal_code += tostr(line) + "\n";
         }
+        line_no++;
+    }
+
+    //Why checking these exceptions at the end
+    /*
+    becuase to check that any scope is ended or not.
+    */
+    if (class_state == true){
+        ClassEndError(class_name);
+        exception_counter++;
+    }
+    else if(fn_state == true){
+        FunctionEndError(fn_name);
+        exception_counter++;
+    }
+
+    //If encountered any error so stop the exection.
+    if(exception_counter > 0){
+        printf("Could not compile due to %d previous errors.\n",exception_counter);
+        StopCompilation();
     }
     return array<str>({imports,addSemi(Rep(fn_code)),addSemi(Rep(nominal_code)),main_state});
 }
