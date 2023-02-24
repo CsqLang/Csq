@@ -19,19 +19,19 @@
 Errors to be pushed when user has done any mistake.
 */
 void ClassEndError(str class_name){
-    printf("Error:\n\t class %s has not been ended to end use endc\n",class_name.Str);
+    printf("Error: class %s has not been ended to end use endc\n",class_name.Str);
 }
 
 void FunctionEndError(str fn_name){
-    printf("Error:\n\t function/method %s has not been ended to end use %s ends\n",fn_name.Str,fn_name.Str);
+    printf("Error: function/method %s has not been ended to end use %s ends\n",fn_name.Str,fn_name.Str);
 }
 
 void VariableValueError(str var_name, int lineno){
-    printf("Error:\n\t In statement at line %d variable declaration is done for variable '%s' but value is not given \n",lineno,var_name.Str);
+    printf("Error: In statement at line %d variable declaration is done for variable '%s' but value is not given \n",lineno,var_name.Str);
 }
 
 void VariableTypeError(str var_name, int lineno){
-    printf("Error:\n\t In statement at line %d variable declaration is done for variable '%s' but type is not given \n",lineno,var_name.Str);
+    printf("Error: In statement at line %d variable declaration is done for variable '%s' but type is not given \n",lineno,var_name.Str);
 }
 void StopCompilation(){
     exit(0);
@@ -409,13 +409,14 @@ auto Parser::Parse(array<array<str>> tokens){
             //Producing bytecodes.
             str bytecode = "REFERENCE(";bytecode += name + ",";
 
+            //Whether type is not defined
+            if(type == ""){
+                VariableTypeError(name,line_no);
+                exception_counter++;
+            }
             //Whether values are not NULL
             if(val == ""){
                 VariableValueError(name,line_no);
-                exception_counter++;
-            }
-            if(type == ""){
-                VariableTypeError(name,line_no);
                 exception_counter++;
             }
 
