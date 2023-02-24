@@ -14,6 +14,22 @@
 #include "../libs/utils/filehand.h"
 #include "../Memory/Stack.h"
 //::::::::::::::::::::::::::::::::Some Utilities::::::::::::::::::::::::::::::::
+
+/*
+Errors to be pushed when user has done any mistake.
+*/
+void ClassEndError(str class_name){
+    printf("Trackback:\n\t class %s has not been ended to end use endc\n",class_name.Str);
+}
+
+void FunctionEndError(str fn_name){
+    printf("Trackback:\n\t function/method %s has not been ended to end use %s ends\n",fn_name.Str,fn_name.Str);
+}
+
+void StopCompilation(){
+    exit(0);
+}
+
 /*
     To know that the folowing tokens are matching with any statement or not.
 */
@@ -371,6 +387,8 @@ auto Parser::Parse(array<array<str>> tokens){
     //Declare states and some needed variables.
     str nominal_code, fn_code, imports, fn_name,class_name;
     bool fn_state = false;bool class_state = false;str main_state = "true";
+    //Exception counter::
+    int exception_counter = 0;
     //Applying for range loop to get tokenized tokens present in each line.
     for(array<str> rawline : tokens){
         array<str> line = (WhileTokManagement(ForTokManagement(ElseTokManagement(ElifTokManagement(IfTokManagement(rawline))))));
@@ -405,6 +423,7 @@ auto Parser::Parse(array<array<str>> tokens){
         else if(CheckClassDefination(line) == true){
             nominal_code += tostr(line) + " LBRACE\n";
             class_state = true;
+            class_name = line[1];
         }
         else if(class_state == true && CheckConstructor(line) == true){
             //Some needed informations about function::
@@ -552,6 +571,25 @@ auto Parser::Parse(array<array<str>> tokens){
         else if(fn_state == false){
             nominal_code += tostr(line) + "\n";
         }
+    }
+
+    //Why checking these exceptions at the end
+    /*
+    becuase to check that any scope is ended or not.
+    */
+    if (class_state == true){
+        ClassEndError(class_name);
+        exception_counter++;
+    }
+    else if(fn_state == true){
+        FunctionEndError(fn_name);
+        exception_counter++;
+    }
+
+    //If encountered any error so stop the exection.
+    if(exception_counter > 0){
+        printf("Could not compile due to %d previous errors.\n",exception_counter);
+        StopCompilation();
     }
     return array<str>({imports,addSemi(Rep(fn_code)),addSemi(Rep(nominal_code)),main_state});
 }
