@@ -19,13 +19,20 @@
 Errors to be pushed when user has done any mistake.
 */
 void ClassEndError(str class_name){
-    printf("Trackback:\n\t class %s has not been ended to end use endc\n",class_name.Str);
+    printf("Error:\n\t class %s has not been ended to end use endc\n",class_name.Str);
 }
 
 void FunctionEndError(str fn_name){
-    printf("Trackback:\n\t function/method %s has not been ended to end use %s ends\n",fn_name.Str,fn_name.Str);
+    printf("Error:\n\t function/method %s has not been ended to end use %s ends\n",fn_name.Str,fn_name.Str);
 }
 
+void VariableValueError(str var_name, int lineno){
+    printf("Error:\n\t In statement at line %d variable declaration is done for variable '%s' but value is not given \n",lineno,var_name.Str);
+}
+
+void VariableTypeError(str var_name, int lineno){
+    printf("Error:\n\t In statement at line %d variable declaration is done for variable '%s' but type is not given \n",lineno,var_name.Str);
+}
 void StopCompilation(){
     exit(0);
 }
@@ -387,6 +394,7 @@ auto Parser::Parse(array<array<str>> tokens){
     //Declare states and some needed variables.
     str nominal_code, fn_code, imports, fn_name,class_name;
     bool fn_state = false;bool class_state = false;str main_state = "true";
+    int line_no = 1;
     //Exception counter::
     int exception_counter = 0;
     //Applying for range loop to get tokenized tokens present in each line.
@@ -400,6 +408,17 @@ auto Parser::Parse(array<array<str>> tokens){
             str val = TokenVariableAssignShuffle(line)[2];
             //Producing bytecodes.
             str bytecode = "REFERENCE(";bytecode += name + ",";
+
+            //Whether values are not NULL
+            if(val == ""){
+                VariableValueError(name,line_no);
+                exception_counter++;
+            }
+            if(type == ""){
+                VariableTypeError(name,line_no);
+                exception_counter++;
+            }
+
             bytecode += type + ",";bytecode += type + str("(") + val + "))\n";
             //Adding the bytecode to the code string.
             nominal_code += bytecode;
@@ -571,6 +590,7 @@ auto Parser::Parse(array<array<str>> tokens){
         else if(fn_state == false){
             nominal_code += tostr(line) + "\n";
         }
+        line_no++;
     }
 
     //Why checking these exceptions at the end
