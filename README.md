@@ -3,7 +3,6 @@
 <br>
 Hello there👋,
 This is the new and safe version of Csq which is in developed to solve memory related problems in Csq3 such as memory leak.
-But built-in facilities are still in development.
 ## Features
 <li>Object oriented programming</li>
 <li>Functional programming</li>
