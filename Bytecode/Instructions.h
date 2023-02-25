@@ -7,7 +7,7 @@
 #define FUNCTIONS(name,args,code) auto name args LBRACE code RBRACE SEMI
 #define CALL(name, args) name args
 #define REFERENCE(name,type, refr) ref<type> name = ref<type>(refr)
-#define PARAM(name,type,refr) type name = type(refr)
+#define PARAM(name,type,refr) ref<type> name = ref<type>(refr)
 #define FORREF(name,type) ref<type> name
 #define ID_REF(name) AMPER name
 #define from(classn) classn::
