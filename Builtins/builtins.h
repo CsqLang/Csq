@@ -525,6 +525,11 @@ class list{
         list(vector<T> data){this->data = data;}
         list(const list<T>& data){this->data = data.data;}
         list(ref<list<T>> data){this->data = data->data;}
+        list(std::initializer_list<T> ls){
+            for(auto i : ls){
+                data.push_back(i);
+            }
+        }
         void pop(){
             data.pop_back();
         }
@@ -627,7 +632,6 @@ void print(T v, Args... args){
 }
 
 
-
 template<typename K, typename V>
 class dict{
     public:
@@ -637,6 +641,7 @@ class dict{
             keys = *key;
             values = *value;
         }
+
         void add(ref<K> key, ref<V> value){
             keys.add(key);
             values.add(value);
