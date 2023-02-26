@@ -53,6 +53,18 @@ bool isIdentifier(str tok){
 bool CheckElse(array<str> tokens){
     return in(tokens,ELSE);
 }
+bool CheckUse(array<str> tokens){
+    return in(tokens,"use");
+}
+bool CheckTry(array<str> tokens){
+    return in(tokens,"try");
+}
+bool CheckCatch(array<str> tokens){
+    return in(tokens,"catch");
+}
+bool CheckAll(array<str> tokens){
+    return in(tokens,"all");
+}
 bool CheckElif(array<str> tokens){
     return in(tokens,ELIF);
 }
@@ -449,6 +461,9 @@ auto Parser::Parse(array<array<str>> tokens){
             class_state = true;
             class_name = line[1];
         }
+        else if(CheckUse(line) == true || CheckAll(line) == true){
+            imports+=Rep(tostr(line))+";\n";
+        }
         else if(class_state == true && CheckConstructor(line) == true){
             //Some needed informations about function::
             str fnname,args,bytecode_arg;bool argstate = false;
@@ -478,11 +493,6 @@ auto Parser::Parse(array<array<str>> tokens){
                     //Whether type is not defined
                     if(t == ""){
                         VariableTypeError(n,line_no);
-                        exception_counter++;
-                    }
-                    //Whether values are not NULL
-                    if(e == ""){
-                        VariableValueError(n,line_no);
                         exception_counter++;
                     }
                     bytecode_arg += str("REFERENCE(") + n + str(",")+t+str(",")+e+"),";
