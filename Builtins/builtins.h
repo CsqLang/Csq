@@ -36,74 +36,75 @@ auto deallocate(T* val){
 //Providing int data types
 
 class i32 {
-public:
-int val;
-i32(int n){
-    val = n;
-}
-i32(ref<i32> n){
-    val = n->val;
-}
-i32(const i32& n){
-val = n.val;
-}
-i32(){}
-auto op_add(ref<i32> v, ref<i32> v2){
-    return i32(v->val + v2->val);
-}
+    public:
+    int val;
+    i32(int n){
+        val = n;
+    }
+    i32(ref<i32> n){
+        val = n->val;
+    }
+    i32(const i32& n){
+    val = n.val;
+    }
+    i32(){}
+    auto op_add(ref<i32> v, ref<i32> v2){
+        return i32(v->val + v2->val);
+    }
 
-auto op_sub(ref<i32> v, ref<i32> v2){
-    return i32(v->val - v2->val);
-}
+    auto op_sub(ref<i32> v, ref<i32> v2){
+        return i32(v->val - v2->val);
+    }
 
-auto op_div(ref<i32> v, ref<i32> v2){
-    return i32(v->val / v2->val);
-}
+    auto op_div(ref<i32> v, ref<i32> v2){
+        return i32(v->val / v2->val);
+    }
 
-auto op_mul(ref<i32> v, ref<i32> v2){
-    return i32(v->val * v2->val);
-}
+    auto op_mul(ref<i32> v, ref<i32> v2){
+        return i32(v->val * v2->val);
+    }
 
-bool op_equal(ref<i32> v, ref<i32> v2){
-    bool state = false;
-    if(v->val == v2->val)
-        state = true;
-    return state;
-}
-bool op_notEqual( ref<i32> v1, ref<i32> v2){
-    bool state = false;
-    if(v1->val != v2->val)
-        state = true;
-    return state;
-}
+    bool op_equal(ref<i32> v, ref<i32> v2){
+        bool state = false;
+        if(v->val == v2->val)
+            state = true;
+        return state;
+    }
+    bool op_notEqual( ref<i32> v1, ref<i32> v2){
+        bool state = false;
+        if(v1->val != v2->val)
+            state = true;
+        return state;
+    }
 
-bool op_lesser( ref<i32> v1, ref<i32> v2){
-    bool state = false;
-    if(v1->val < v2->val)
-        state = true;
-    return state;
-}
+    bool op_lesser( ref<i32> v1, ref<i32> v2){
+        bool state = false;
+        if(v1->val < v2->val)
+            state = true;
+        return state;
+    }
 
-bool op_greater( ref<i32> v1, ref<i32> v2){
-    bool state = false;
-    if(v1->val > v2->val)
-        state = true;
-    return state;
-}
+    bool op_greater( ref<i32> v1, ref<i32> v2){
+        bool state = false;
+        if(v1->val > v2->val)
+            state = true;
+        return state;
+    }
 
-bool op_greaterEqual( ref<i32> v1, ref<i32> v2){
-    bool state = false;
-    if(v1->val >= v2->val)
-        state = true;
-    return state;
-}
+    bool op_greaterEqual( ref<i32> v1, ref<i32> v2){
+        bool state = false;
+        if(v1->val >= v2->val)
+            state = true;
+        return state;
+    }
 
-bool op_lesserEqual( ref<i32> v1, ref<i32> v2){
-    bool state = false;
-    if(v1->val <= v2->val)
-        state = true;
-    return state;
-}
+    bool op_lesserEqual( ref<i32> v1, ref<i32> v2){
+        bool state = false;
+        if(v1->val <= v2->val)
+            state = true;
+        return state;
+    }
+    auto tostr();
 };
 
 
@@ -177,6 +178,7 @@ class i64{
                 state = true;
             return state;
         }
+        auto tostr();
 };
 
 class i128{
@@ -248,6 +250,7 @@ class i128{
                 state = true;
             return state;
         }
+        auto tostr();
 };
 //FLoat typ128
 
@@ -321,6 +324,7 @@ class f32{
                 state = true;
             return state;
         }
+        auto tostr();
 };
 
 class f64{
@@ -392,6 +396,7 @@ class f64{
                 state = true;
             return state;
         }
+        auto tostr();
 };
 
 class f128{
@@ -463,6 +468,7 @@ class f128{
                 state = true;
             return state;
         }
+        auto tostr();
 };
 //Defination for [] operator
 template<typename T>
@@ -515,6 +521,10 @@ class str{
         ref<i64> toi64(){
             return ref<i64>(i64(atol(__str__.c_str())));
         }
+
+        ref<str> tostr(){
+            return ref<str>(new str(this->__str__));
+        }
 };
 
 template<typename T>
@@ -545,39 +555,28 @@ class list{
         ref<i32> len(){
             return ref<i32>(data.size());
         }
+        auto tostr();
         T* begin() { return &this->data[0];}
         const T* begin() const { return &this->data[0];}
         T* end() { return &this->data[this->data.size()]; }
         const T* end() const { return &this->data[this->data.size()];}
 };
 
-auto tostr(ref<i32> val){
-    str s = std::to_string(val->val);
+auto i32::tostr(){
+    str s = std::to_string(val);
     return ref<str>(s);
 }
 
-auto tostr(ref<str> val){
-    str s = *val;
+auto f32::tostr(){
+    str s = std::to_string(val);
     return ref<str>(s);
 }
-auto tostr(str val){
-    str s = val;
+auto f64::tostr(){
+    str s = std::to_string(val);
     return ref<str>(s);
 }
-auto tostr(i32 val){
-    str s = std::to_string(val.val);
-    return ref<str>(s);
-}
-auto tostr(ref<f32> val){
-    str s = std::to_string(val->val);
-    return ref<str>(s);
-}
-auto tostr(ref<f64> val){
-    str s = std::to_string(val->val);
-    return ref<str>(s);
-}
-auto tostr(ref<f128> val){
-    str s = std::to_string(val->val);
+auto f128::tostr(){
+    str s = std::to_string(val);
     return ref<str>(s);
 }
 auto range(ref<i32> val){
@@ -586,48 +585,38 @@ auto range(ref<i32> val){
         ls.add(i32(i));
     }return ref<list<i32>>(list<i32>(ls));
 }
+template<typename T>
+auto list<T>::tostr(){
+    str s = "{ ";
+    for(auto i : this->data){
+        s.__str__ += i.tostr()->__str__ + ", ";
+    }s.__str__+="}";
+    return ref<str>(s);
+}
+
 auto range(ref<i32> start, ref<i32> end_){
     list<i32> ls;
     for(int i=start->val;i<=end_->val;i++){
         ls.add(i32(i));
     }return ref<list<i32>>(list<i32>(ls));
 }
-auto tostr(ref<list<i32>> ls){
-    str s = "{ ";
-    for(auto i : *ls){
-        s.__str__ += tostr(i)->__str__;
-        s.__str__ += ", ";
-    }
-    s.__str__ += "}";
-    return ref<str>(s);
-}
-auto tostr(ref<list<f64>> ls){
-    str s = "{ ";
-    for(auto i : *ls){
-        s.__str__ += tostr(i)->__str__;
-        s.__str__ += ", ";
-    }
-    s.__str__ += "}";
-    return ref<str>(s);
-}
-auto tostr(ref<list<str>> ls){
-    str s = "{ ";
-    for(auto i : *ls){
-        s.__str__ += "\"";
-        s.__str__ += tostr(i)->__str__;
-        s.__str__ += "\",";
-    }
-    s.__str__ += "}";
-    return ref<str>(s);
-}
+
 template<typename T>
 void print(T v){
-    printf("%s\n",tostr(v)->cstr());
+    printf("%s\n",v.tostr()->cstr());
 }
-
+template<typename T>
+void print(ref<T> v){
+    printf("%s\n",v->tostr()->cstr());
+}
 template<typename T, typename... Args>
 void print(T v, Args... args){
-    printf("%s",tostr(v)->cstr());
+    printf("%s",v.tostr()->cstr());
+    print(args...);
+}
+template<typename T, typename... Args>
+void print(ref<T> v, ref<Args>... args){
+    printf("%s",v->tostr()->cstr());
     print(args...);
 }
 
@@ -666,6 +655,22 @@ class dict{
             keys.pop();
             values.pop();
         }
+        auto tostr(){
+            str s = "{ \n";
+            for(int i = 0;i<keys.len()->val;i++){
+                s.__str__ += keys.data[i].tostr()->__str__ + " : ";
+                s.__str__ += values.data[i].tostr()->__str__ + ", \n";
+            }s.__str__ += "}";
+            return ref<str>(s);
+        }
 };
+
+//Conversion functions
+auto tof64(ref<list<i32>> ls){
+    list<f64> r;
+    for(auto i :* ls){
+        r.add(f64(i.val));
+    }return r;
+}
 
 #endif
