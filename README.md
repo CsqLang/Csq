@@ -40,7 +40,14 @@ This is the new and safe version of Csq which is in developed to solve memory re
 | private       |
 | inherits      |
 | protected     |
-| class
+| class         |
+| use           |
+| all           |
+| as            |
+| module        |
+| try           |
+| catch         |
+| from()        |
 
 ### Comments
 ```
