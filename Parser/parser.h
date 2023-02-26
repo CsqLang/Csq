@@ -51,6 +51,63 @@ void StopCompilation(){
     exit(0);
 }
 
+
+//Checking that curly brackets is correctly closed or not
+void CurlyBracketCheck(array<str> tokens, int linenum){
+    int lbrace = 0;
+    int rbrace = 0;
+    bool ended = false;
+    str token_prev = tokens[0];
+    for(auto token : tokens){
+        if(token == "{"){
+            lbrace++;
+        }
+        else if(token == "}" && rbrace!=lbrace){
+            rbrace++;
+        }
+        else if(token == "}" && rbrace == lbrace){
+            CustomError(str(", invalid close of curly bracket"),linenum);
+            exception_counter++;
+        }
+    }
+    if(rbrace == lbrace)
+        ended = true;
+    else
+        ended = false;
+    if(ended == false){
+        CustomError(str(", statement hasn't ended properly expected ")+to_str(lbrace-rbrace)+" }",linenum);
+        exception_counter++;
+    }
+}
+//Checking that square brackets is correctly closed or not
+void SquareBracketCheck(array<str> tokens, int linenum){
+    int lbrac = 0;
+    int rbrac = 0;
+    bool ended = false;
+    str token_prev = tokens[0];
+    for(auto token : tokens){
+        if(token == "["){
+            lbrac++;
+        }
+        else if(token == "]" && rbrac!=lbrac){
+            rbrac++;
+        }
+        else if(token == "]" && rbrac == lbrac){
+            CustomError(str(", invalid close of square bracket"),linenum);
+            exception_counter++;        
+        }
+    }
+    if(rbrac == lbrac)
+        ended = true;
+    else
+        ended = false;
+    if(ended == false){
+        CustomError(str(", statement hasn't ended properly expected ")+to_str(lbrac-rbrac)+" ]",linenum);
+        exception_counter++;
+    }
+}
+
+
 /*
     To know that the folowing tokens are matching with any statement or not.
 */
@@ -113,60 +170,7 @@ bool file_exists(str filename){
     return is_exist;
 }
 
-//Checking that curly brackets is correctly closed or not
-void CurlyBracketCheck(array<str> tokens, int linenum){
-    int lbrace = 0;
-    int rbrace = 0;
-    bool ended = false;
-    str token_prev = tokens[0];
-    for(auto token : tokens){
-        if(token == "{"){
-            lbrace++;
-        }
-        else if(token == "}" && rbrace!=lbrace){
-            rbrace++;
-        }
-        else if(token == "}" && rbrace == lbrace){
-            CustomError(str(", invalid close of curly bracket"),linenum);
-            exception_counter++;
-        }
-    }
-    if(rbrace == lbrace)
-        ended = true;
-    else
-        ended = false;
-    if(ended == false){
-        CustomError(str(", statement hasn't ended properly expected ")+to_str(lbrace-rbrace)+" }",linenum);
-        exception_counter++;
-    }
-}
-//Checking that curly brackets is correctly closed or not
-void SquareBracketCheck(array<str> tokens, int linenum){
-    int lbrac = 0;
-    int rbrac = 0;
-    bool ended = false;
-    str token_prev = tokens[0];
-    for(auto token : tokens){
-        if(token == "["){
-            lbrac++;
-        }
-        else if(token == "]" && rbrac!=lbrac){
-            rbrac++;
-        }
-        else if(token == "]" && rbrac == lbrac){
-            CustomError(str(", invalid close of square bracket"),linenum);
-            exception_counter++;        
-        }
-    }
-    if(rbrac == lbrac)
-        ended = true;
-    else
-        ended = false;
-    if(ended == false){
-        CustomError(str(", statement hasn't ended properly expected ")+to_str(lbrac-rbrac)+" ]",linenum);
-        exception_counter++;
-    }
-}
+
 str currDir;
 array<str> ImportsManagement(array<str> tok, str base_path = "./") {
     /*
