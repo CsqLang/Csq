@@ -14,7 +14,8 @@
 #include "../libs/utils/filehand.h"
 #include "../Memory/Stack.h"
 //::::::::::::::::::::::::::::::::Some Utilities::::::::::::::::::::::::::::::::
-
+//Exception counter::
+int exception_counter = 0;
 /*
 Errors to be pushed when user has done any mistake.
 */
@@ -37,6 +38,15 @@ void VariableValueError(str var_name, int lineno){
 void VariableTypeError(str var_name, int lineno){
     printf("Error: In statement at line %d variable declaration is done for variable '%s' but type is not given \n",lineno,var_name.Str);
 }
+
+void MissingError(str statement_, int lineno){
+    printf("Error: At line %d expected a statement after %s.\n",lineno,statement_.Str);
+}
+
+void CustomError(str statement,int lineno){
+    printf("Error: At line %d%s.\n",lineno,statement.Str);
+}
+
 void StopCompilation(){
     exit(0);
 }
@@ -101,6 +111,61 @@ bool file_exists(str filename){
         fclose(fp); // close the file
     }
     return is_exist;
+}
+
+//Checking that curly brackets is correctly closed or not
+void CurlyBracketCheck(array<str> tokens, int linenum){
+    int lbrace = 0;
+    int rbrace = 0;
+    bool ended = false;
+    str token_prev = tokens[0];
+    for(auto token : tokens){
+        if(token == "{"){
+            lbrace++;
+        }
+        else if(token == "}" && rbrace!=lbrace){
+            rbrace++;
+        }
+        else if(token == "}" && rbrace == lbrace){
+            CustomError(str(", invalid close of curly bracket"),linenum);
+            exception_counter++;
+        }
+    }
+    if(rbrace == lbrace)
+        ended = true;
+    else
+        ended = false;
+    if(ended == false){
+        CustomError(str(", statement hasn't ended properly expected ")+to_str(lbrace-rbrace)+" }",linenum);
+        exception_counter++;
+    }
+}
+//Checking that curly brackets is correctly closed or not
+void SquareBracketCheck(array<str> tokens, int linenum){
+    int lbrac = 0;
+    int rbrac = 0;
+    bool ended = false;
+    str token_prev = tokens[0];
+    for(auto token : tokens){
+        if(token == "["){
+            lbrac++;
+        }
+        else if(token == "]" && rbrac!=lbrac){
+            rbrac++;
+        }
+        else if(token == "]" && rbrac == lbrac){
+            CustomError(str(", invalid close of square bracket"),linenum);
+            exception_counter++;        
+        }
+    }
+    if(rbrac == lbrac)
+        ended = true;
+    else
+        ended = false;
+    if(ended == false){
+        CustomError(str(", statement hasn't ended properly expected ")+to_str(lbrac-rbrac)+" ]",linenum);
+        exception_counter++;
+    }
 }
 str currDir;
 array<str> ImportsManagement(array<str> tok, str base_path = "./") {
@@ -176,18 +241,7 @@ array<str> ElseTokManagement(array<str> tok){
     }
     return s;
 }
-// array<str> EndTokManagement(array<str> tok){
-//     array<str> s;
-//     if(CheckEnd(tok) == 1)
-//         for(auto i : tok)
-//             if(i == "ends")
-//                 s.add("ENDS");
-//             else
-//                 s.add(i);
-//     else
-//         s = tok;
-//     return s;
-// }
+
 array<str> MacroManagement(array<str> tok){
     array<str> newtokens;
     if(CheckMacro(tok)){
@@ -411,12 +465,13 @@ auto Parser::Parse(array<array<str>> tokens){
     str nominal_code, fn_code, imports, fn_name,class_name;
     bool fn_state = false;bool class_state = false;str main_state = "true";
     int line_no = 1;
-    //Exception counter::
-    int exception_counter = 0;
+    
     //Applying for range loop to get tokenized tokens present in each line.
     for(array<str> rawline : tokens){
         array<str> line = (WhileTokManagement(ForTokManagement(ElseTokManagement(ElifTokManagement(IfTokManagement(rawline))))));
-        // printf("\n%s\n",tostr(line).Str);
+        //Evaluting some error checks before conditions to prevent futher processing.
+        CurlyBracketCheck(line,line_no);
+        SquareBracketCheck(line,line_no);
         //Evalute when Variable assignment is there and it's not inside functions body.
         if(CheckVariableAssignment(line) == true and fn_state == false && CheckFunctionDefination(line) == false){
             str name = TokenVariableAssignShuffle(line)[0];
@@ -463,6 +518,32 @@ auto Parser::Parse(array<array<str>> tokens){
         }
         else if(CheckUse(line) == true || CheckAll(line) == true){
             imports+=Rep(tostr(line))+";\n";
+        }
+        else if(CheckTry(line)){
+            if(line.len()==1){
+                MissingError("try",line_no);
+            }
+            else{
+                for(auto token : line)
+                    if(token == "try")
+                        nominal_code += "TRY ";
+                    else
+                        nominal_code += token + " ";
+                nominal_code += "\n";
+            }
+        }
+        else if(CheckCatch(line)){
+            if(line.len()==1){
+                MissingError("catch",line_no);
+            }
+            else{
+                for(auto token : line)
+                    if(token == "catch")
+                        nominal_code += "CATCH ";
+                    else
+                        nominal_code += token + " ";
+                nominal_code += "\n";
+            }
         }
         else if(class_state == true && CheckConstructor(line) == true){
             //Some needed informations about function::
