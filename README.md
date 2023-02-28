@@ -204,7 +204,7 @@ To create a module we should write a flag 'main = false'
 ```
 main = false
 def myfun()
-    print("Hello World")
+    print(str("Hello World"))
 myfun ends
 ```
 Now compile the above file using csq executable.
