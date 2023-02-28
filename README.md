@@ -199,8 +199,8 @@ use test::<member_name>
 ```
 ### Creating a module
 To create a module we should write a flag 'main = false'
-Example
-mod.csq
+#### Example
+```mod.csq```
 ```
 main = false
 def myfun()
@@ -208,7 +208,7 @@ def myfun()
 myfun ends
 ```
 Now compile the above file using csq executable.
-sample.csq
+```sample.csq```
 ```
 import mod
 use mod::myfun
