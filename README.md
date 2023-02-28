@@ -208,6 +208,7 @@ def myfun()
 myfun ends
 ```
 Now compile the above file using csq executable.
+<br>
 ```sample.csq```
 ```
 import mod
