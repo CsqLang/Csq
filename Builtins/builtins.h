@@ -555,6 +555,12 @@ class list{
         ref<i32> len(){
             return ref<i32>(data.size());
         }
+        auto tof64(){
+            list<f64> r;
+            for(auto i : data){
+                r.add(f64(i.val));
+            }return r;
+        }
         auto tostr();
         T* begin() { return &this->data[0];}
         const T* begin() const { return &this->data[0];}
@@ -664,13 +670,4 @@ class dict{
             return ref<str>(s);
         }
 };
-
-//Conversion functions
-auto tof64(ref<list<i32>> ls){
-    list<f64> r;
-    for(auto i :* ls){
-        r.add(f64(i.val));
-    }return r;
-}
-
 #endif
