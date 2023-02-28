@@ -215,6 +215,11 @@ import mod
 use mod::myfun
 myfun()
 ```
+
+## How Csq Works?
+<img src = "https://media.licdn.com/dms/image/C4D22AQGcGg2ir0YA3w/feedshare-shrink_800/0/1677575848649?e=1680739200&v=beta&t=94dQB4fFg_ICdEI2EP-L-AVnr49QxE0gx813xD-r34E"></img>
+
+
 ## Syntax inspirations
 <li>Python</li>
 <li>Ruby</li>
