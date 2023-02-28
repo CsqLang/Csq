@@ -39,6 +39,10 @@ void VariableTypeError(str var_name, int lineno){
     printf("Error: In statement at line %d variable declaration is done for variable '%s' but type is not given \n",lineno,var_name.Str);
 }
 
+void RedefinationVariableError(str var_name, int lineno){
+    printf("Error: In statement at line %d variable %s is redeclared.\n",lineno,var_name.Str);
+}
+
 void MissingError(str statement_, int lineno){
     printf("Error: At line %d expected a statement after %s.\n",lineno,statement_.Str);
 }
@@ -106,7 +110,33 @@ void SquareBracketCheck(array<str> tokens, int linenum){
         exception_counter++;
     }
 }
-
+//Checking that parenthesis is correctly closed or not
+void ParenthesisCheck(array<str> tokens, int linenum){
+    int lparen = 0;
+    int rparen = 0;
+    bool ended = false;
+    str token_prev = tokens[0];
+    for(auto token : tokens){
+        if(token == "("){
+            lparen++;
+        }
+        else if(token == ")" && rparen!=lparen){
+            rparen++;
+        }
+        else if(token == ")" && rparen == lparen){
+            CustomError(str(", invalid close of parenthesis"),linenum);
+            exception_counter++;
+        }
+    }
+    if(rparen == lparen)
+        ended = true;
+    else
+        ended = false;
+    if(ended == false){
+        CustomError(str(", statement hasn't ended properly expected ")+to_str(lparen-rparen)+" )",linenum);
+        exception_counter++;
+    }
+}
 
 /*
     To know that the folowing tokens are matching with any statement or not.
@@ -345,10 +375,7 @@ auto TokenVariableAssignShuffle(array<str> tokens){
     
     return array<str>({name,replaceStr(type.Str,",","COMMA"),assign});
 }
-// //Implementation of constructor
-// auto Constructor(array<str> tok){
 
-// }
 //Variable call implementation
 auto VariableCall(array<str> instructions){
     array<str> newop;
@@ -362,6 +389,8 @@ auto VariableCall(array<str> instructions){
     }
     return newop;
 }
+
+//Same keywords doesn't require ; so to avoid it we need to do condition check.
 auto SemiColanManagement(array<str> tok){
     array<str> newt;
     if(in(tok,"ends") == false && in(tok,"for") == false && in(tok,"def") == false && in(tok,"class") == false
@@ -409,6 +438,12 @@ auto TokenVariableInAssignShuffle(array<str> tokens){
     }
     return array<str>({name,replaceStr(type.Str,",","COMMA"),assign});
 }
+
+/*
+As we know in C++ every seperate statement shall be ended with semicolan if not so
+the compiler will assume that the other statements are the part of the same line
+which is error causer so we need to handle it so this function will do so.
+*/
 str addSemi(str s){
     array<str> lines = split(s,"\n");
     str r;
@@ -474,16 +509,27 @@ auto Parser::Parse(array<array<str>> tokens){
     for(array<str> rawline : tokens){
         array<str> line = (WhileTokManagement(ForTokManagement(ElseTokManagement(ElifTokManagement(IfTokManagement(rawline))))));
         //Evaluting some error checks before conditions to prevent futher processing.
+        //are parenthesis properly closed
+        ParenthesisCheck(line,line_no);
+        //are curly brackets properly closed
         CurlyBracketCheck(line,line_no);
+        //are square brackets properly closed
         SquareBracketCheck(line,line_no);
+
+
+        /*-----------------------------------------------------------------------------------------------------------------------*/
         //Evalute when Variable assignment is there and it's not inside functions body.
         if(CheckVariableAssignment(line) == true and fn_state == false && CheckFunctionDefination(line) == false){
+            //Collecting name, type and value of variable
             str name = TokenVariableAssignShuffle(line)[0];
             str type = TokenVariableAssignShuffle(line)[1];
             str val = TokenVariableAssignShuffle(line)[2];
             //Producing bytecodes.
             str bytecode = "REFERENCE(";bytecode += name + ",";
-
+            if(in(Stack::Variables,name)){
+                RedefinationVariableError(name,line_no);
+                exception_counter++;
+            };
             //Whether type is not defined
             if(type == ""){
                 VariableTypeError(name,line_no);
@@ -572,6 +618,7 @@ auto Parser::Parse(array<array<str>> tokens){
                 auto splitted = split(args,",");
                 //Apply for range loop over splitted arguments.
                 for(auto i : splitted){
+                    //Collecting name, type and value of variable
                     str n = TokenVariableAssignShuffle(Lexer(i).GetTokens())[0];
                     str t = TokenVariableAssignShuffle(Lexer(i).GetTokens())[1];
                     str e = TokenVariableAssignShuffle(Lexer(i).GetTokens())[2];
@@ -581,7 +628,7 @@ auto Parser::Parse(array<array<str>> tokens){
                         exception_counter++;
                     }
                     bytecode_arg += str("REFERENCE(") + n + str(",")+t+str(",")+e+"),";
-                    Stack::Variables.add(n);
+                    // Stack::Variables.add(n);
                 }bytecode_arg.pop_bk();
                 
             }
@@ -589,6 +636,7 @@ auto Parser::Parse(array<array<str>> tokens){
         }
         //Evalute when Variable assignment is there in the body of a function.
         else if(CheckVariableAssignment(line) == true and fn_state == true && CheckFunctionDefination(line) == false && class_state == false){
+            //Collecting name, type and value of variable
             str name = TokenVariableAssignShuffle(line)[0];
             str type = TokenVariableAssignShuffle(line)[1];
             str val = TokenVariableAssignShuffle(line)[2];
@@ -608,10 +656,11 @@ auto Parser::Parse(array<array<str>> tokens){
             //Adding the bytecode to the code string.
             fn_code += bytecode;
             //Add the variable to stack.
-            Stack::Variables.add(name);
+            // Stack::Variables.add(name);
         }
         //Evalute when Variable assignment is there in the body of a function.
         else if(CheckVariableAssignment(line) == true and fn_state == true && CheckFunctionDefination(line) == false && class_state == true){
+            //Collecting name, type and value of variable
             str name = TokenVariableAssignShuffle(line)[0];
             str type = TokenVariableAssignShuffle(line)[1];
             str val = TokenVariableAssignShuffle(line)[2];
@@ -631,7 +680,7 @@ auto Parser::Parse(array<array<str>> tokens){
             //Adding the bytecode to the code string.
             nominal_code += bytecode;
             //Add the variable to stack.
-            Stack::Variables.add(name);
+            // Stack::Variables.add(name);
         }
         //When function defination found so:
         else if(CheckFunctionDefination(line) == true and fn_state == false && class_state == false){
@@ -657,16 +706,21 @@ auto Parser::Parse(array<array<str>> tokens){
                 auto splitted = split(args,",");
                 //Apply for range loop over splitted arguments.
                 for(auto i : splitted){
+                    //Collecting name, type and value of variable
                     str n = TokenVariableAssignShuffle(Lexer(i).GetTokens())[0];
                     str t = TokenVariableAssignShuffle(Lexer(i).GetTokens())[1];
                     str e = TokenVariableAssignShuffle(Lexer(i).GetTokens())[2];
+                    if(in(Stack::Variables,n)){
+                        RedefinationVariableError(n,line_no);
+                        exception_counter++;
+                    };
                     //Whether type is not defined
                     if(t == ""){
                         VariableTypeError(n,line_no);
                         exception_counter++;
                     }
                     bytecode_arg += str("PARAM(") + n + str(",")+t+str(",")+e+"),";
-                    Stack::Variables.add(n);
+                    // Stack::Variables.add(n);
                 }bytecode_arg.pop_bk();
             }
             fn_code += str("def ")+fn_name+str("(")+bytecode_arg+str(") LBRACE\n");
@@ -695,6 +749,7 @@ auto Parser::Parse(array<array<str>> tokens){
                 auto splitted = split(args,",");
                 //Apply for range loop over splitted arguments.
                 for(auto i : splitted){
+                    //Collecting name, type and value of variable
                     str n = TokenVariableAssignShuffle(Lexer(i).GetTokens())[0];
                     str t = TokenVariableAssignShuffle(Lexer(i).GetTokens())[1];
                     str e = TokenVariableAssignShuffle(Lexer(i).GetTokens())[2];
@@ -704,7 +759,7 @@ auto Parser::Parse(array<array<str>> tokens){
                         exception_counter++;
                     }
                     bytecode_arg += str("PARAM(") + n + str(",")+t+str(",")+e+"),";
-                    Stack::Variables.add(n);
+                    // Stack::Variables.add(n);
                 }bytecode_arg.pop_bk();
             }
             nominal_code += str("def ")+fn_name+str("(")+bytecode_arg+str(") LBRACE\n");
