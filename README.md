@@ -197,6 +197,23 @@ Using all members from a module
 import test
 use test::<member_name>
 ```
+### Creating a module
+To create a module we should write a flag 'main = false'
+Example
+mod.csq
+```
+main = false
+def myfun()
+    print("Hello World")
+myfun ends
+```
+Now compile the above file using csq executable.
+sample.csq
+```
+import mod
+use mod::myfun
+myfun()
+```
 ## Syntax inspirations
 <li>Python</li>
 <li>Ruby</li>
