@@ -13,7 +13,7 @@ This is the new and safe version of Csq which is in developed to solve memory re
 <li>Customizable syntax using macro keyword</li>
 
 ## Requirements
-<li>G++</li>
+<li>clang++</li>
 
 ## The Principles of Csq code
 <li>Every Csq code shall ends with an extention .csq</li>
