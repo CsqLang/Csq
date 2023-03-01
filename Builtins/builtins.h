@@ -544,6 +544,12 @@ class list{
                 data.push_back(i);
             }
         }
+        auto sum(){
+            T s = 0;
+            for(auto i : data){
+                s = ref<T>(s)+i;
+            }return ref<T>(s);
+        }
         void pop(){
             data.pop_back();
         }
