@@ -16,6 +16,7 @@
 #include <string.h>
 #include "exception.h"
 #include "../Memory/Reference_Counter.h"
+
 using std::string;
 using std::vector;
 using std::initializer_list;
@@ -515,6 +516,9 @@ class str{
         auto op_add(ref<str> lhs, ref<str> rhs){
             return str(lhs->__str__ + rhs->__str__);
         }
+        auto op_equal(ref<str> lhs, ref<str> rhs){
+            return (lhs->__str__ == rhs->__str__);
+        }
         ref<i32> toi32(){
             return ref<i32>(i32(atoi(__str__.c_str())));
         }
@@ -548,6 +552,9 @@ class list{
         }
         void add(ref<T> elem){
             data.push_back(*elem);
+        }
+        auto read(ref<i32> index){
+            return ref<T>(data[index->val]);
         }
         auto op_brac(ref<list<T>> ls, ref<i32> index){
             return ref<T>(T(ls->data[index->val]));
