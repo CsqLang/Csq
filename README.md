@@ -48,6 +48,8 @@ This is the new and safe version of Csq which is in developed to solve memory re
 | try           |
 | catch         |
 | from()        |
+| break         |
+| continue      |
 
 ### Comments
 ```
