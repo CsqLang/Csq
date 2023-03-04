@@ -17,14 +17,6 @@ enum TokenType {
     LOPERATOR,
 };
 
-//Type of line
-enum LINE_TYPE{
-    CLASS_DEF,
-    VARIABLE_DEF,
-    FUNCTION_DEF,
-    OTHER_STATEMENTS,
-};
-
 //Struct for tokens
 struct Token{
     string token;
@@ -222,8 +214,5 @@ vector<Token> tokenize(string source_code, int line_no) {
 
     return tokens;
 }
-
-
-
 
 #endif // tokenizer_Csq4
