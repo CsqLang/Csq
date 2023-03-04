@@ -20,6 +20,9 @@ using std::regex;
 
 //Identifiers lookup
 string IDENTIFIERS = "^[a-zA-Z_][a-zA-Z0-9_]*$";
+//Value lookup
+string INTEGER = "[+-]?\\d+";
+string DECIMAL = "[+-]?\\d+(\\.\\d+)?";
 
 //Operators lookup
 //Arithmetic operators
@@ -30,6 +33,8 @@ vector<string> LOGICAL_OPERATORS = {"or","and","not"};
 vector<string> COMPARISON_OPERATORS = {"==","!=","<",">","<=",">="};
 //Assignment operators
 vector<string> ASSIGNMENT_OPERATORS = {"="};
+//Symbols lookup
+vector<string> SYMBOLS = {"{","}","(",")","[","]",",","~","@","$","&","!",":","/"};
 
 //Keyword lookup
 vector<string> KEYWORDS_TABLE = 
