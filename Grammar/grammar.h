@@ -12,7 +12,10 @@
 #include <vector>
 #include <stdlib.h>
 #include <stdio.h>
-using std::string, std::vector;
+#include <regex>
+using std::string;
+using std::vector;
+using std::regex;
 
 
 //Identifiers lookup
