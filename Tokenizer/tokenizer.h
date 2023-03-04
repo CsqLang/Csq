@@ -2,7 +2,7 @@
 #define tokenizer_Csq4
 //Importing grammar and token type
 #include "../Grammar/grammar.h"
-
+#define ignore
 
 //Types of token
 enum TokenType {
@@ -15,6 +15,7 @@ enum TokenType {
     ASOPERATOR,
     COPERATOR,
     LOPERATOR,
+    COMMENT
 };
 
 //Struct for tokens
@@ -53,6 +54,11 @@ bool isValue(string val){
     if(isDecimal(val) || isInt(val)){
         state = true;
     }
+    return state;
+}
+
+bool isComment(string val){
+    bool state = val == "#";
     return state;
 }
 //Is operator
@@ -169,47 +175,52 @@ vector<Token> tokenize(string source_code, int line_no) {
     string current_string, str_input;
     int current_line = 1;
     bool string_presence = false;
-    for (int i = 0; i < source_code.length(); i++) {
-        char c = source_code[i];
-        if ((c == ' ' || c == '\n' || c == '\t' || isSymbolLaterals(string(1, c))) && string_presence == false) { // if whitespace or symbol character, handle separately
-            if (c == '\n') {
-                current_line++;
+    bool comment = false;
+    if(source_code[0] == '#')
+        ignore;
+    else{
+        for (int i = 0; i < source_code.length(); i++) {
+            char c = source_code[i];
+            if ((c == ' ' || c == '\n' || c == '\t' || isSymbolLaterals(string(1, c))) && string_presence == false) { // if whitespace or symbol character, handle separately
+                if (c == '\n') {
+                    current_line++;
+                }
+                if (current_string.length() > 0) { // if non-empty string, check if it matches any operator, keyword, or value
+                    Token token = check(current_string, current_line);
+                    tokens.push_back(token);
+                    current_string = "";
+                }
+                if (isSymbolLaterals(string(1, c))) { // handle symbol
+                    tokens.push_back(check(string(1,c),line_no));
+                }
             }
-            if (current_string.length() > 0) { // if non-empty string, check if it matches any operator, keyword, or value
-                Token token = check(current_string, current_line);
-                tokens.push_back(token);
-                current_string = "";
+            else if(c == '"' && string_presence == false){
+                string_presence = true;
             }
-            if (isSymbolLaterals(string(1, c))) { // handle symbol
-                tokens.push_back(check(string(1,c),line_no));
+            else if(c == '"' && string_presence == true){
+                Token tok;
+                tok.token = str_input;
+                tok.type = STR;
+                tokens.push_back(tok);
+                string_presence = false;
+            }
+            else if(c != '"' && string_presence == true){
+                str_input.push_back(c);
+            }
+            else { // if non-whitespace or symbol character, append to current string
+                current_string += c;
             }
         }
-        else if(c == '"' && string_presence == false){
-            string_presence = true;
-        }
-        else if(c == '"' && string_presence == true){
-            Token tok;
-            tok.token = str_input;
-            tok.type = STR;
-            tokens.push_back(tok);
-            string_presence = false;
-        }
-        else if(c != '"' && string_presence == true){
-            str_input.push_back(c);
-        }
-        else { // if non-whitespace or symbol character, append to current string
-            current_string += c;
-        }
-    }
 
-    if (current_string.length() > 0) { // process the last string
-        Token token = check(current_string, current_line);
-        tokens.push_back(token);
-    }
+        if (current_string.length() > 0) { // process the last string
+            Token token = check(current_string, current_line);
+            tokens.push_back(token);
+        }
 
-    if (string_presence) { // handle unclosed string literal
-        printf("Error: unclosed string literal at line %d\n", line_no);
-        exit(1);
+        if (string_presence) { // handle unclosed string literal
+            printf("Error: unclosed string literal at line %d\n", line_no);
+            exit(1);
+        }
     }
 
     return tokens;
