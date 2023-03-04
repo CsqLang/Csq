@@ -22,6 +22,10 @@ enum LINE_TYPE{
 struct Token{
     string token;
     TokenType type;
+    Token(string token_, TokenType type_){
+        token = token_;
+        type_ = type_;
+    }
 };  
 
 
