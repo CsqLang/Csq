@@ -2,7 +2,7 @@
 #define tokenizer_Csq4
 //Importing grammar and token type
 #include "../Grammar/grammar.h"
-#include <regex>
+
 
 //Types of token
 enum TokenType {
@@ -38,7 +38,7 @@ bool in(string item, vector<string> ls){
 
 //Checking is it an identifier
 bool isIdentifier(string val) {
-    std::regex identifier_regex(IDENTIFIERS);
+    regex identifier_regex(IDENTIFIERS);
     return regex_match(val, identifier_regex);
 }
 //Is operator
