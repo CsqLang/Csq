@@ -94,6 +94,7 @@ public:
         ret = strtod(Str, &ptr);
         return ret;
     }
+
     auto replace(char sub[], char new_str[])
     {
         char *Str = this->Str;
