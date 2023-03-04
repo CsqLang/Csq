@@ -172,14 +172,14 @@ Token check(string val,int line){
 }
 
 
-vector<Token> tokenize(string source_code) {
+vector<Token> tokenize(string source_code,int line_no) {
     vector<Token> tokens;
     string current_string;
     int current_line = 1;
-
+    bool string_presence = false;
     for (int i = 0; i < source_code.length(); i++) {
         char c = source_code[i];
-        if (c == ' ' || c == '\n' || c == '\t' || isSymbolLaterals(string(1, c))) { // if whitespace or symbol character, handle separately
+        if ((c == ' ' || c == '\n' || c == '\t' || isSymbolLaterals(string(1, c)) )&& string_presence == false) { // if whitespace or symbol character, handle separately
             if (c == '\n') {
                 current_line++;
             }
@@ -189,10 +189,7 @@ vector<Token> tokenize(string source_code) {
                 current_string = "";
             }
             if (isSymbolLaterals(string(1, c))) { // handle symbol
-                Token token;
-                token.token = string(1, c);
-                token.type = SYMBOL;
-                tokens.push_back(token);
+                tokens.push_back(check(string(1,c),line_no));
             }
         }
         else { // if non-whitespace or symbol character, append to current string
