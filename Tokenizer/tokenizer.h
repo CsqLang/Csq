@@ -2,6 +2,7 @@
 #define tokenizer_Csq4
 //Importing grammar and token type
 #include "../Grammar/grammar.h"
+#include <regex>
 
 //Types of token
 enum TokenType {
@@ -22,11 +23,62 @@ enum LINE_TYPE{
 struct Token{
     string token;
     TokenType type;
-    Token(string token_, TokenType type_){
-        token = token_;
-        type_ = type_;
-    }
 };  
+
+//This function will return a bool state which will decide whether an item is present in vector or not.
+bool in(string item, vector<string> ls){
+    bool state = false;
+    for(auto item_ : ls)
+        if(item == item_){
+            state = true;
+            break;
+        }
+    return state;
+}
+
+//Checking is it an identifier
+bool isIdentifier(string val) {
+    std::regex identifier_regex(IDENTIFIERS);
+    return regex_match(val, identifier_regex);
+}
+//Is operator
+bool isOperator(string val){
+    bool state = false;
+    if(in(val, ARITHMETIC_OPERATORS) || in(val,COMPARISON_OPERATORS) || in(val,ASSIGNMENT_OPERATORS)  || in(val,LOGICAL_OPERATORS)){
+        state = true;
+    }
+    return state;
+}
+
+bool isKeyword(string val){
+    bool state = false;
+    if(in(val, KEYWORDS_TABLE)){
+        state = true;
+    }
+    return state;
+}
+
+//This is the checking section which will take a token and then check it's type.
+Token check(string val,int line){
+    Token token;
+    if(isKeyword(val)){
+        token.token = val;
+        token.type = KEYWORD;
+    }
+    else if(isOperator(val)){
+        token.token = val;
+        token.type = OPERATOR;
+    }
+    else if(isIdentifier(val)){
+        token.token = val;
+        token.type = IDENTIFIER;
+    }
+    else{
+        printf("Unrecognized '%s' at line %d\n",val.c_str(),line);
+        exit(0);
+    }
+    return token;
+}
 
 
 #endif // tokenizer_Csq4
