@@ -12,7 +12,7 @@ void ExpectedAValue(int line){
 //This struct will be storing the properties of a variable.
 struct Variable{
     string name;
-    string type;
+    string type = "ref<Type>";
     string value;
     int lineOfDeclaration;
 };
