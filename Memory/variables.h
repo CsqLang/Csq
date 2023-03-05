@@ -2,6 +2,13 @@
 #define Variable_H_Csq4
 #include "../Grammar/grammar.h"
 #include "../Tokenizer/tokenizer.h"
+#include "exception.h"
+//Errors for invalid use cases.
+void ExpectedAValue(int line){
+    printf("Error: At line %d expected a value after '='.\n",line);
+    error_count++;
+}
+
 //This struct will be storing the properties of a variable.
 struct Variable{
     string name;
@@ -19,25 +26,16 @@ struct Variable{
 */
 
 //This function will take tokens and return the object of Variable struct.
-Variable VariableAssignment(vector<Token> tokens){
+Variable VariableAssignment(vector<Token> tokens, int line){
     Variable variable;
-    bool type_end,value_end = true;
+    bool value_end = true;
     int pos = 0;
     for(Token tok : tokens){
-        if(tok.type == IDENTIFIER){
+        if(pos == 0 && tok.type == IDENTIFIER){
             variable.name = tok.token;
             pos++;
         }
-        else if(tok.type == SYMBOL && tok.token == ":"){
-            type_end = false;
-            pos++;
-        }
-        else if(type_end == false && tok.type != ASOPERATOR){
-            variable.type += tok.token;
-            pos++;
-        }
-        else if(type_end == false && tok.type == ASOPERATOR && value_end == true){
-            type_end = true;
+        else if(tok.type == ASOPERATOR && value_end == true){
             value_end = false;
             pos++;
         }
@@ -48,6 +46,9 @@ Variable VariableAssignment(vector<Token> tokens){
             variable.value += tok.token;
             value_end = true;
         }
+    }
+    if(variable.value == ""){
+        ExpectedAValue(line);
     }
     return variable;
 }
