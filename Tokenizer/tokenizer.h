@@ -6,16 +6,16 @@
 
 //Types of token
 enum TokenType {
-    KEYWORD,
-    IDENTIFIER,
-    STR,
-    VALUE,
-    SYMBOL,
-    AROPERATOR,
-    ASOPERATOR,
-    COPERATOR,
-    LOPERATOR,
-    COMMENT
+    KEYWORD = 1,
+    IDENTIFIER = 2,
+    STR = 3,
+    VALUE = 4,
+    SYMBOL = 5,
+    AROPERATOR = 6,
+    ASOPERATOR = 7,
+    COPERATOR = 8,
+    LOPERATOR = 9,
+    COMMENT =10
 };
 
 //Struct for tokens
