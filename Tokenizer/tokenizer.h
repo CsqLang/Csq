@@ -45,7 +45,7 @@ bool isInt(string val){
     return regex_match(val, int_regex);
 }
 bool isDecimal(string val){
-    regex Decimal_regex(INTEGER);
+    regex Decimal_regex(DECIMAL);
     return regex_match(val, Decimal_regex);
 }
 
