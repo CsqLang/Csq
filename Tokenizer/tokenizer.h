@@ -24,6 +24,14 @@ struct Token{
     TokenType type;
 };  
 
+//This function will be returning an object to Token struct.
+Token addToken(TokenType type, string value){
+    Token token;
+    token.token = value;
+    token.type = type;
+    return token;
+}
+
 //This function will return a bool state which will decide whether an item is present in vector or not.
 bool in(string item, vector<string> ls){
     bool state = false;
