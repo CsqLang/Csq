@@ -3,10 +3,12 @@
 
 #include "../Tokenizer/tokenizer.h"
 #include "../Parser/exception.h"
+#include "ast.h"
 
-struct Value {
-    string value;
-    TokenType type;
+//Value for AST
+struct Value : public AST{
+    Token token;
+    AST_TYPE type = AST_TYPE::VALUE;
 };
 
 void BadValueError(int line){
@@ -17,8 +19,7 @@ void BadValueError(int line){
 Value addValue(Token value,int line){
     Value val;
     if(value.type == VALUE || value.type == STR || value.type == IDENTIFIER){
-        val.value = value.token;
-        val.type = value.type;
+        val.token = value;
     }
     else
         BadValueError(line);
