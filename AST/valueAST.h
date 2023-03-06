@@ -6,7 +6,7 @@
 #include "ast.h"
 
 //Value for AST
-struct Value : public AST{
+struct Value : AST{
     Token token;
     AST_TYPE type = AST_TYPE::VALUE;
 };
