@@ -8,7 +8,7 @@
 //Value for AST
 struct Value : AST{
     Token token;
-    AST_TYPE type = AST_TYPE::VALUE;
+    AST_TYPE type = AST_TYPE::VALUE_TYPE;
 };
 
 void BadValueError(int line){
