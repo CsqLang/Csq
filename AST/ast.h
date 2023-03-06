@@ -5,7 +5,7 @@
 
 //Types of AST
 enum AST_TYPE{
-    VALUE = 1,
+    VALUE_TYPE = 1,
     VAR_DECLARATION = 2,
     VAR_ASSIGNMENT = 3,
     FUN_DEFINITION = 4,
