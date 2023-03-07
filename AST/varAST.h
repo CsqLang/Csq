@@ -30,15 +30,15 @@ VarAssign assignVariable(string name, AST* value){
     return var;
 }
 
-AST addNode(VarDec value){
-    AST ast = value;
-    ast.type = VAR_DECLARATION;
+AST* addNode(VarDec value){
+    AST* ast = &value;
+    ast->type = VAR_DECLARATION;
     return ast;
 }
 
-AST addNode(VarAssign value){
-    AST ast = value;
-    ast.type = VAR_ASSIGNMENT;
+AST* addNode(VarAssign value){
+    AST* ast = &value;
+    ast->type = VAR_ASSIGNMENT;
     return ast;
 }
 
