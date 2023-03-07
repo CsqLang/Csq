@@ -36,4 +36,10 @@ BinaryExp parseBinaryExp(vector<Token> tokens, int line) {
     return exp;
 }
 
+AST addNode(BinaryExp value){
+    AST ast = value;
+    ast.type = BINARY_EXP;
+    return ast;
+}
+
 #endif // BINARYAST_H_CSQ4
