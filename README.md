@@ -1,7 +1,6 @@
 # Csq4
 ![Csq4 (1)](https://user-images.githubusercontent.com/90708238/212843929-05cc3e4c-0b83-45be-8493-a423308c6fbc.png)
 <br>
-Hello there👋,
 This is the new and safe version of Csq which is in developed to solve memory related problems in Csq3 such as memory leak.
 ## Features
 <li>Object oriented programming</li>
@@ -21,35 +20,36 @@ This is the new and safe version of Csq which is in developed to solve memory re
 
 ## Examples/Syntax
 
-### Keywords
-| Keyword Name |
-| ------------- |
-| if            |
-| elif          |
-| else          |
-| def           |
-| for           |
-| while         |
-| ends          |
-| endc          |
-| macro         |
-| import        |
-| in            |
-| init          |
-| public        |
-| private       |
-| inherits      |
-| protected     |
-| class         |
-| use           |
-| all           |
-| as            |
-| module        |
-| try           |
-| catch         |
-| from()        |
-| break         |
-| continue      |
+<div align="center">
+
+| Keyword   | Description           |
+|:---------:|:---------------------:|
+| if        | Conditionally execute |
+| elif      | Alternative condition  |
+| else      | Alternative to if      |
+| def       | Define a function      |
+| for       | Loop through a range   |
+| while     | Loop until condition   |
+| end(s)    | End of a block         |
+| macro     | Define a macro         |
+| import    | Import a module        |
+| in        | Membership check       |
+| init      | Constructor method     |
+| public    | Public attribute       |
+| private   | Private attribute      |
+| protected | Protected attribute    |
+| inherits  | Inheritance           |
+| class     | Define a class         |
+| use       | Use a namespace        |
+| all       | Import all modules     |
+| as        | Rename a module        |
+| module    | Define a module        |
+| try       | Exception handling     |
+| catch     | Catch an exception     |
+| break     | Exit a loop            |
+| continue  | Skip to next iteration |
+
+</div>
 
 ### Comments
 ```
@@ -219,7 +219,9 @@ myfun()
 ```
 
 ## How Csq Works?
+<p align="center">
 <img src = "https://media.licdn.com/dms/image/C4D22AQGcGg2ir0YA3w/feedshare-shrink_800/0/1677575848649?e=1680739200&v=beta&t=94dQB4fFg_ICdEI2EP-L-AVnr49QxE0gx813xD-r34E"></img>
+</p>
 
 
 ## Syntax inspirations
