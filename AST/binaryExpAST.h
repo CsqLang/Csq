@@ -36,9 +36,9 @@ BinaryExp parseBinaryExp(vector<Token> tokens, int line) {
     return exp;
 }
 
-AST addNode(BinaryExp value){
-    AST ast = value;
-    ast.type = BINARY_EXP;
+AST* addNode(BinaryExp value){
+    AST* ast = &value;
+    ast->type = BINARY_EXP;
     return ast;
 }
 
