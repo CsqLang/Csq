@@ -27,4 +27,11 @@ Value addValue(Token value,int line){
 }
 
 
+AST addNode(Value value){
+    AST ast = value;
+    ast.type = VALUE_TYPE;
+    return ast;
+}
+
+
 #endif // Value_Struct_Csq4
