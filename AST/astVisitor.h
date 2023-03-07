@@ -27,23 +27,42 @@ AST view:
 To visit AST there are several algorithms but for Csq we are gonna use DFS(Depth First Search).
 */
 
-//This function will traverse and print the types of statements:
+
+//Traverse Binary Expression tree
+
+void printTree(BinaryExp* tree){
+  printf("Binary Expression : %s\n",tree->opt.token.c_str());
+  printf("|Value : %s\n |Value : %s\n", tree->val1.token.token.c_str(), tree->val2.token.token.c_str());
+}
+void printTree(Value* tree){
+  printf("Binary Expression : %s\n",tree->token.token.c_str());
+}
+void printTree(AST* tree){
+  if(tree->type == VALUE_TYPE)
+    printTree(cast(Value*)(tree));
+  else if(tree->type == BINARY_EXP)
+    printTree(cast(BinaryExp*)(tree));
+  else{
+    printf("NONE %d \n",tree->type);
+  }
+}
+void printTree(VarDec* dec){
+  printf("Variable Declaration : %s\n",dec->name.c_str());
+  printTree(dec->value);
+}
 void DFSprint(AST* tree){
     switch(tree->type){
       case VALUE_TYPE:{
-        Value* val = cast(Value*)(tree);
-        printf("|----VALUE--->%s\n", val->token.token.c_str());
+        printTree(cast(Value*)(tree));
         break;
       }
       case BINARY_EXP:{
-        BinaryExp* expr = cast(BinaryExp*)(tree);
-        printf("Binary Expression : %s ",expr->opt.token.c_str());
-        //Now creating separate nodes for Values to get meta AST.
-        AST* val1_ast = addNode(expr->val1);
-        AST* val2_ast = addNode(expr->val2);
-        DFSprint(val1_ast);
-        DFSprint(val2_ast);
+        printTree(cast(BinaryExp*)(tree));
         break;
+      }
+      case VAR_DECLARATION: {
+          printTree(cast(VarDec*)(tree));
+          break;
       }
     }
 }
