@@ -27,8 +27,19 @@ VarAssign assignVariable(string name, AST* value){
     VarAssign var;
     var.name = name;
     var.value = value;
+    return var;
 }
 
+AST addNode(VarDec value){
+    AST ast = value;
+    ast.type = VAR_DECLARATION;
+    return ast;
+}
 
+AST addNode(VarAssign value){
+    AST ast = value;
+    ast.type = VAR_ASSIGNMENT;
+    return ast;
+}
 
 #endif // varAST_Csq4
