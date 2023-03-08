@@ -29,23 +29,23 @@ struct Node{
 //Inherited structs for different types of AST Node.
 
 //Value struct for value_type AST node.
-struct Value;
+typedef struct Value;
 //BinaryExpr struct for binary expressions.
-struct BinaryExpr;
+typedef struct BinaryExpr;
 //VarDecl struct for variable declarations.
-struct VarDecl;
+typedef struct VarDecl;
 //VarAssign struct for variable assignments.
-struct VarAssign;
+typedef struct VarAssign;
 //ForLoop struct for for loops.
-struct ForLoop;
+typedef struct ForLoop;
 //WhileLoop struct for while loops.
-struct WhileLoop;
+typedef struct WhileLoop;
 //Function struct for functions definitions.
-struct FunctionDef;
+typedef struct FunctionDef;
 //Function struct for functions calls.
-struct FunctionCall;
+typedef struct FunctionCall;
 //Class struct for Classes.
-struct ClassDef;
+typedef struct ClassDef;
 
 //Body for above AST node types
 
