@@ -91,6 +91,13 @@ struct WhileLoop : Node{
     Node* condition;
 };
 
+//Body for FunctionCall struct
+struct FunctionCall : Node{
+    NODE_TYPE type = FUNCTION_CALL;
+    string name;
+    vector<Node*> param;
+};
+
 
 void printNode(Node* node){
     switch (node->type) {
@@ -117,6 +124,28 @@ void printNode(Node* node){
             printNode(binaryExprNode->value1);
             printNode(binaryExprNode->value2);
             break;
+        }
+        case FOR_LOOP:{
+            ForLoop* forLoopNode = static_cast<ForLoop*>(node);
+            printf("|For Loop: %s over ",forLoopNode->iter_name.c_str());
+            printNode(forLoopNode->condition);
+        }
+        case WHILE_LOOP:{
+            WhileLoop* whileLoopNode = static_cast<WhileLoop*>(node);
+            printf("|While Loop for ");
+            printNode(whileLoopNode->condition);
+        }
+        case FUNCTION_CALL:{
+            FunctionCall* functionCallNode = static_cast<FunctionCall*>(node);
+            printf("Function Call : Name : %s \n",functionCallNode->name.c_str());
+            if(functionCallNode->param.size() > 0)
+                for(int paramCount = 1; paramCount <= functionCallNode->param.size();paramCount++){
+                    printf("|Argument %d: \n\t",paramCount);
+                    printNode(functionCallNode->param[paramCount-1]);
+                    printf("\n");
+                }
+            else
+                ignore;
         }
     }
 }
