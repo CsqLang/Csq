@@ -4,7 +4,7 @@
 //Imports
 #include "../Grammar/grammar.h"
 #include "../Tokenizer/tokenizer.h"
-#include <iostream>
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Types of AST
@@ -29,23 +29,23 @@ struct Node{
 //Inherited structs for different types of AST Node.
 
 //Value struct for value_type AST node.
-typedef struct Value;
+struct Value;
 //BinaryExpr struct for binary expressions.
-typedef struct BinaryExpr;
+struct BinaryExpr;
 //VarDecl struct for variable declarations.
-typedef struct VarDecl;
+struct VarDecl;
 //VarAssign struct for variable assignments.
-typedef struct VarAssign;
+struct VarAssign;
 //ForLoop struct for for loops.
-typedef struct ForLoop;
+struct ForLoop;
 //WhileLoop struct for while loops.
-typedef struct WhileLoop;
+struct WhileLoop;
 //Function struct for functions definitions.
-typedef struct FunctionDef;
+struct FunctionDef;
 //Function struct for functions calls.
-typedef struct FunctionCall;
+struct FunctionCall;
 //Class struct for Classes.
-typedef struct ClassDef;
+struct ClassDef;
 
 //Body for above AST node types
 
@@ -96,24 +96,24 @@ void printNode(Node* node){
     switch (node->type) {
         case VALUE_TYPE: {
             Value* valueNode = static_cast<Value*>(node);
-            std::cout << "|Value: " << valueNode->value.token << std::endl;
+            printf("|Value : %s\n",valueNode->value.token.c_str());
             break;
         }
         case VAR_DECLARATION: {
             VarDecl* varDeclNode = static_cast<VarDecl*>(node);
-            std::cout << "|Variable Declaration: " << varDeclNode->name << std::endl;
+            printf("|Variable Declaration: %s\n",varDeclNode->name.c_str());
             printNode(varDeclNode->value);
             break;
         }
         case VAR_ASSIGNMENT: {
             VarAssign* varAssignNode = static_cast<VarAssign*>(node);
-            std::cout << "|Variable Assignment: " << varAssignNode->name << "\n";
+            printf("|Variable Assignment : %s\n",varAssignNode->name.c_str());
             printNode(varAssignNode->value);
             break;
         }
         case BINARY_EXPR: {
             BinaryExpr* binaryExprNode = static_cast<BinaryExpr*>(node);
-            std::cout << "|Binary Expression: " << binaryExprNode->opt.token << "\n|";
+            printf("|Binary Expression : %s\n",binaryExprNode->opt.token.c_str());
             printNode(binaryExprNode->value1);
             printNode(binaryExprNode->value2);
             break;
