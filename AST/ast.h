@@ -185,8 +185,34 @@ void assignElifStmtNode(ElifStmt* node, Node* condition, Block* body){
 }
 
 void assignElseStmtNode(ElseStmt* node, Block* body){
-    node->type = ELIF_STATEMENT;
+    node->type = ELSE_STATEMENT;
     node->body = body;
+}
+
+void assignForLoop(ForLoop* node, Block* body, Node* condition, string iter_name){
+    node->body = body;
+    node->condition = condition;
+    node->iter_name = iter_name;
+    node->type = FOR_LOOP;
+}
+
+void assignWhileLoop(WhileLoop* node, Block* body, Node* condition){
+    node->body = body;
+    node->condition = condition;
+    node->type = WHILE_LOOP;
+}
+
+void assignFunctionDecl(FunctionDecl* node, string name, Block* body, vector<VarDecl*> param){
+    node->body = body;
+    node->name = name;
+    node->param = param;
+    node->type = FUNCTION_DECL;
+}
+
+void assignFunctionCall(FunctionCall* node, string name, vector<Node*> param){
+    node->name = name;
+    node->param = param;
+    node->type = FUNCTION_CALL;
 }
 
 //Help functions for Block node
