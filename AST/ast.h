@@ -53,6 +53,12 @@ struct FunctionCall;
 struct ClassDef;    
 //Block struct for group of different nodes.
 struct Block;
+//IfStmt struct for if statements
+struct IfStmt;
+//ElifStmt struct for else if statements
+struct ElifStmt;
+//ElseStmt for Else statements
+struct ElseStmt;
 
 //Body for above AST node types
 
@@ -112,6 +118,26 @@ struct Block : Node{
     vector<Node*> statements;
 };
 
+//Body for FunctionDecl struct
+struct FunctionDecl : Node{
+    NODE_TYPE type = FUNCTION_DECL;
+    Block* body;
+};
+
+//Help functions to create instances of AST nodes.
+void assignValue(Value* node, Token token){
+    node->type = VALUE_TYPE;
+    node->value = token;
+    node->value.type = token.type;
+}
+
+void assignVarDeclNode(VarDecl* node, string name,string type, Node* value){
+    node->type = VAR_DECLARATION;
+    node->name = name;
+    node->Dtype = type;
+    node->value = value;
+}
+
 //Help functions for Block node
 Block* newBlock(){
     Block* block;
@@ -121,11 +147,6 @@ void addStatement(Block* block, Node* statement){
     block->statements.push_back(statement);
 }
 
-//Body for FunctionDecl struct
-struct FunctionDecl : Node{
-    NODE_TYPE type = FUNCTION_DECL;
-    Block* body;
-};
 
 void printNode(Node* node){
     switch (node->type) {
