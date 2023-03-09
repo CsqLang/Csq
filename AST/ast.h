@@ -124,6 +124,24 @@ struct FunctionDecl : Node{
     Block* body;
 };
 
+//Body for IfStmt struct
+struct IfStmt : Node{
+    NODE_TYPE type = IF_STATEMENT;
+    Node* condition;
+    Block* body;
+};
+//Body for ElifStmt struct
+struct ElifStmt : Node{
+    NODE_TYPE type = ELIF_STATEMENT;
+    Node* condition;
+    Block* body;
+};
+//Body for ElseStmt struct
+struct ElseStmt : Node{
+    NODE_TYPE type = ELSE_STATEMENT;
+    Node* condition;
+    Block* body;
+};
 //Help functions to create instances of AST nodes.
 void assignValueNode(Value* node, Token token){
     node->type = VALUE_TYPE;
