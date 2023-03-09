@@ -15,7 +15,8 @@ enum TokenType {
     ASOPERATOR = 7,
     COPERATOR = 8,
     LOPERATOR = 9,
-    COMMENT =10
+    COMMENT =10,
+    UNKNOWN = 11,
 };
 
 //Struct for tokens
@@ -172,8 +173,8 @@ Token check(string val,int line){
         token.type = SYMBOL;
     }
     else{
-        printf("Unrecognized '%s' at line %d\n",val.c_str(),line);
-        exit(0);
+        token.token = val;
+        token.type = UNKNOWN;
     }
     return token;
 }
