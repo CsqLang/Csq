@@ -125,7 +125,7 @@ struct FunctionDecl : Node{
 };
 
 //Help functions to create instances of AST nodes.
-void assignValue(Value* node, Token token){
+void assignValueNode(Value* node, Token token){
     node->type = VALUE_TYPE;
     node->value = token;
     node->value.type = token.type;
@@ -136,6 +136,19 @@ void assignVarDeclNode(VarDecl* node, string name,string type, Node* value){
     node->name = name;
     node->Dtype = type;
     node->value = value;
+}
+
+void assignBinaryExprNode(BinaryExpr* node, Node* val1, Node* val2, Token opt){
+    node->opt= opt;
+    node->type = BINARY_EXPR;
+    node->value1 = val1;
+    node->value2 = val2;
+}
+
+void assignVarAssignNode(VarAssign* node, string name, Node* val){
+    node->type = VAR_ASSIGNMENT;
+    node->name = name;
+    node->value = val;
 }
 
 //Help functions for Block node
