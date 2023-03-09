@@ -34,7 +34,7 @@ vector<string> COMPARISON_OPERATORS = {"==","!=","<",">","<=",">="};
 //Assignment operators
 vector<string> ASSIGNMENT_OPERATORS = {"="};
 //Symbols lookup
-vector<string> SYMBOLS = {"{","}","(",")","[","]",",","~","@","$","&","!",":","/"};
+vector<string> SYMBOLS = {"{","}","(",")","[","]",",","~","@","$","&","!",":","/",";"};
 
 //Keyword lookup
 vector<string> KEYWORDS_TABLE = 
