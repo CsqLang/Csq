@@ -139,7 +139,6 @@ struct ElifStmt : Node{
 //Body for ElseStmt struct
 struct ElseStmt : Node{
     NODE_TYPE type = ELSE_STATEMENT;
-    Node* condition;
     Block* body;
 };
 //Help functions to create instances of AST nodes.
@@ -167,6 +166,23 @@ void assignVarAssignNode(VarAssign* node, string name, Node* val){
     node->type = VAR_ASSIGNMENT;
     node->name = name;
     node->value = val;
+}
+
+void assignIfStmtNode(IfStmt* node, Node* condition, Block* body){
+    node->type = IF_STATEMENT;
+    node->condition = condition;
+    node->body = body;
+}
+
+void assignElifStmtNode(ElifStmt* node, Node* condition, Block* body){
+    node->type = ELIF_STATEMENT;
+    node->condition = condition;
+    node->body = body;
+}
+
+void assignElseStmtNode(ElseStmt* node, Block* body){
+    node->type = ELIF_STATEMENT;
+    node->body = body;
 }
 
 //Help functions for Block node
