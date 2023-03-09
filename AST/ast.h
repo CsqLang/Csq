@@ -18,6 +18,11 @@ enum NODE_TYPE{
     WHILE_LOOP = 7,
     BINARY_EXPR = 8,
     FUNCTION_CALL = 9,
+    FUNCTION_DECL  = 10,
+    BLOCK = 11,
+    IF_STATEMENT = 12,
+    ELIF_STATEMENT = 13,
+    ELSE_STATEMENT = 14,
 };
 
 //Base class for all AST.
@@ -41,11 +46,13 @@ struct ForLoop;
 //WhileLoop struct for while loops.
 struct WhileLoop;
 //Function struct for functions definitions.
-struct FunctionDef;
+struct FunctionDecl;
 //Function struct for functions calls.
 struct FunctionCall;
 //Class struct for Classes.
-struct ClassDef;
+struct ClassDef;    
+//Block struct for group of different nodes.
+struct Block;
 
 //Body for above AST node types
 
@@ -68,6 +75,7 @@ struct BinaryExpr : Node{
 struct VarDecl : Node{
     NODE_TYPE type = VAR_DECLARATION;
     string name;
+    string Dtype;
     Node* value;
 };
 
@@ -98,6 +106,26 @@ struct FunctionCall : Node{
     vector<Node*> param;
 };
 
+//Body for Block struct
+struct Block : Node{
+    NODE_TYPE type = BLOCK;
+    vector<Node*> statements;
+};
+
+//Help functions for Block node
+Block* newBlock(){
+    Block* block;
+    return block;
+}
+void addStatement(Block* block, Node* statement){
+    block->statements.push_back(statement);
+}
+
+//Body for FunctionDecl struct
+struct FunctionDecl : Node{
+    NODE_TYPE type = FUNCTION_DECL;
+    Block* body;
+};
 
 void printNode(Node* node){
     switch (node->type) {
@@ -149,5 +177,66 @@ void printNode(Node* node){
         }
     }
 }
+
+//Another visitor function to visit the AST nodes but this time it will also generate IR codes
+string generateCode(Node* node) {
+    switch (node->type) {
+        case VALUE_TYPE: {
+            Value* valueNode = static_cast<Value*>(node);
+            return valueNode->value.token; // return the value as C++ code
+        }
+        case VAR_DECLARATION: {
+            VarDecl* varDeclNode = static_cast<VarDecl*>(node);
+            return varDeclNode->Dtype + " " + varDeclNode->name + " = " + generateCode(varDeclNode->value) + ";";
+        }
+        case VAR_ASSIGNMENT: {
+            VarAssign* varAssignNode = static_cast<VarAssign*>(node);
+            return varAssignNode->name + " = " + generateCode(varAssignNode->value) + ";";
+        }
+        case BINARY_EXPR: {
+            BinaryExpr* binaryExprNode = static_cast<BinaryExpr*>(node);
+            string left = generateCode(binaryExprNode->value1);
+            string right = generateCode(binaryExprNode->value2);
+            return "(" + left + " " + binaryExprNode->opt.token + " " + right + ")";
+        }
+        case FOR_LOOP:{
+            ForLoop* forLoopNode = static_cast<ForLoop*>(node);
+            string condition = generateCode(forLoopNode->condition);
+            return "for (auto " + forLoopNode->iter_name + " : " + condition + ") {";
+        }
+        case WHILE_LOOP:{
+            WhileLoop* whileLoopNode = static_cast<WhileLoop*>(node);
+            string condition = generateCode(whileLoopNode->condition);
+            return "while (" + condition + ") {";
+        }
+        case FUNCTION_CALL:{
+            FunctionCall* functionCallNode = static_cast<FunctionCall*>(node);
+            string name = functionCallNode->name;
+            string params = "";
+            for (int i = 0; i < functionCallNode->param.size(); i++) {
+                params += generateCode(functionCallNode->param[i]);
+                if (i != functionCallNode->param.size() - 1) {
+                    params += ", ";
+                }
+            }
+            return name + "(" + params + ")";
+        }
+        case BLOCK:{
+            Block* blockNode = static_cast<Block*>(node);
+            string code = "{";
+            for (int i = 0; i < blockNode->statements.size(); i++) {
+                code += generateCode(blockNode->statements[i]);
+                code += "\n";
+            }
+            code += "}";
+            return code;
+        }
+        default: {
+            return ""; // return empty string for unknown node types
+        }
+    }
+}
+
+
 
 #endif // AST_Csq4_H
