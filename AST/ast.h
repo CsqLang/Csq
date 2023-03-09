@@ -97,12 +97,14 @@ struct ForLoop : Node{
     NODE_TYPE type = FOR_LOOP;
     Node* condition;
     string iter_name;
+    Block* body;
 };
 
 //Body for WhileLoop struct
 struct WhileLoop : Node{
     NODE_TYPE type = FOR_LOOP;
     Node* condition;
+    Block* body;
 };
 
 //Body for FunctionCall struct
@@ -121,7 +123,9 @@ struct Block : Node{
 //Body for FunctionDecl struct
 struct FunctionDecl : Node{
     NODE_TYPE type = FUNCTION_DECL;
+    string name;
     Block* body;
+    vector<VarDecl*> param;
 };
 
 //Body for IfStmt struct
@@ -270,12 +274,17 @@ string generateCode(Node* node) {
         case FOR_LOOP:{
             ForLoop* forLoopNode = static_cast<ForLoop*>(node);
             string condition = generateCode(forLoopNode->condition);
-            return "for (auto " + forLoopNode->iter_name + " : " + condition + ") {";
+            return "for (auto " + forLoopNode->iter_name + " : " + condition + ") {\n"+generateCode(forLoopNode->body) + "}";
         }
         case WHILE_LOOP:{
             WhileLoop* whileLoopNode = static_cast<WhileLoop*>(node);
             string condition = generateCode(whileLoopNode->condition);
-            return "while (" + condition + ") {";
+            return "while (" + condition + ") {\n" + generateCode(whileLoopNode->body) + "}";
+        }
+        case IF_STATEMENT:{
+            IfStmt* ifNode = static_cast<IfStmt*>(node);
+            string condition = generateCode(ifNode->condition);
+            return "if (" + condition + ") {";
         }
         case FUNCTION_CALL:{
             FunctionCall* functionCallNode = static_cast<FunctionCall*>(node);
@@ -299,12 +308,16 @@ string generateCode(Node* node) {
             code += "}";
             return code;
         }
+        case FUNCTION_DECL:{
+            FunctionDecl* funNode = static_cast<FunctionDecl*>(node);
+            string params;
+            for(VarDecl* var : funNode->param)
+                params += var->name + ",";
+            return "DEF " + funNode->name + " (" + params + ") {\n" + generateCode(funNode->body) + "}\n";
+        }
         default: {
             return ""; // return empty string for unknown node types
         }
     }
 }
-
-
-
 #endif // AST_Csq4_H
