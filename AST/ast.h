@@ -145,6 +145,14 @@ struct ElseStmt : Node{
     NODE_TYPE type = ELSE_STATEMENT;
     Block* body;
 };
+
+//Struct for ClassDef
+struct ClassDef : Node{
+    NODE_TYPE type = CLASS_DEFINITION;
+    string name;
+    Block* body;
+};
+
 //Help functions to create instances of AST nodes.
 void assignValueNode(Value* node, Token token){
     node->type = VALUE_TYPE;
@@ -213,6 +221,12 @@ void assignFunctionCall(FunctionCall* node, string name, vector<Node*> param){
     node->name = name;
     node->param = param;
     node->type = FUNCTION_CALL;
+}
+
+void assignClassDef(ClassDef* node, string name, Block* body){
+    node->name = name;
+    node->body = body;
+    node->type = CLASS_DEFINITION; 
 }
 
 //Help functions for Block node
