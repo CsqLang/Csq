@@ -4,7 +4,7 @@
 //Imports
 #include "../Grammar/grammar.h"
 #include "../Tokenizer/tokenizer.h"
-
+#include "../IR/IRcode.h"
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Types of AST
@@ -326,6 +326,16 @@ string generateCode(Node* node) {
             string condition = generateCode(ifNode->condition);
             return "if (" + condition + ") {";
         }
+        case ELIF_STATEMENT:{
+            ElifStmt* elifNode = static_cast<ElifStmt*>(node);
+            string condition = generateCode(elifNode->condition);
+            return "else if (" + condition + ") {";
+        }
+        case ELSE_STATEMENT:{
+            IfStmt* ifNode = static_cast<IfStmt*>(node);
+            string condition = generateCode(ifNode->condition);
+            return "else (" + condition + ") {";
+        }
         case FUNCTION_CALL:{
             FunctionCall* functionCallNode = static_cast<FunctionCall*>(node);
             string name = functionCallNode->name;
@@ -336,7 +346,7 @@ string generateCode(Node* node) {
                     params += ", ";
                 }
             }
-            return name + "(" + params + ")";
+            return "def " + name + "(" + params + ")";
         }
         case BLOCK:{
             Block* blockNode = static_cast<Block*>(node);
