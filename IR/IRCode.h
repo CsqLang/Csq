@@ -2,19 +2,19 @@
 #define IRCODE_H_Csq4
 
 #include "instructions.h"
-//Struct to represent every IR code:
-struct IR;
-struct IR{
-    instructions type;
-    string code;
-};
-
 //The stack storing the IR codes.
-vector<IR> IRStack;
+string IR = "Program : \n";
 
-//Functions used to add IR codes to the stack.
-void pushVariable(string name, Node* value);
-void pushValue(Value value);
-void defFunction(string name, Block body);
+void defClass(string name, Block* body){
+    IR += "CLASS " + name + "\n" + generateCode(body) + ";\n";
+}
+
+void declVar(string name,string type, Node* val){
+    IR += type + " " + name + " = " + generateCode(val) + ";\n";
+}
+
+void assignVar(string name, Node* val){
+    IR += name + " =  " + generateCode(val) + ";\n";
+}
 
 #endif // IRCODE_H_Csq4
