@@ -5,7 +5,9 @@
 
 enum instructions{
     PUSHVAR,
+    VARASSIGN,
     DEF,
+    CALL,
     FOR,
     WHILE,
     IF,
