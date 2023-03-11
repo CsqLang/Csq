@@ -230,12 +230,13 @@ void assignClassDef(ClassDef* node, string name, Block* body){
 }
 
 //Help functions for Block node
-Block* newBlock(){
-    Block* block;
+Block newBlock(){
+    Block block;
+    block.type = BLOCK;
     return block;
 }
-void addStatement(Block* block, Node* statement){
-    block->statements.push_back(statement);
+void addStatement(Block block, Node* statement){
+    block.statements.push_back(statement);
 }
 
 
@@ -290,6 +291,9 @@ void printNode(Node* node){
     }
 }
 
+/// @brief 
+/// @param node 
+/// @return 
 //Another visitor function to visit the AST nodes but this time it will also generate IR codes
 string generateCode(Node* node) {
     switch (node->type) {
@@ -299,7 +303,7 @@ string generateCode(Node* node) {
         }
         case VAR_DECLARATION: {
             VarDecl* varDeclNode = static_cast<VarDecl*>(node);
-            return varDeclNode->Dtype + " " + varDeclNode->name + " = " + generateCode(varDeclNode->value) + ";";
+            return  "VAR " + varDeclNode->name + " = " + generateCode(varDeclNode->value) + ";";
         }
         case VAR_ASSIGNMENT: {
             VarAssign* varAssignNode = static_cast<VarAssign*>(node);
@@ -313,28 +317,35 @@ string generateCode(Node* node) {
         }
         case FOR_LOOP:{
             ForLoop* forLoopNode = static_cast<ForLoop*>(node);
+            Block* bodyNode = static_cast<Block*>(forLoopNode->body);
             string condition = generateCode(forLoopNode->condition);
-            return "for (auto " + forLoopNode->iter_name + " : " + condition + ") {\n"+generateCode(forLoopNode->body) + "}";
+            string bodyCode = "";
+            for (int i = 0; i < bodyNode->statements.size(); i++) {
+                bodyCode += generateCode(bodyNode->statements[i]);
+                bodyCode += "\n";
+            }
+            return "FOR (VAR " + forLoopNode->iter_name + " : " + condition + ") {\n"+ bodyCode + "}";
         }
+
         case WHILE_LOOP:{
             WhileLoop* whileLoopNode = static_cast<WhileLoop*>(node);
             string condition = generateCode(whileLoopNode->condition);
-            return "while (" + condition + ") {\n" + generateCode(whileLoopNode->body) + "}";
+            return "WHILE (" + condition + ") {\n" + generateCode(whileLoopNode->body) + "}";
         }
         case IF_STATEMENT:{
             IfStmt* ifNode = static_cast<IfStmt*>(node);
             string condition = generateCode(ifNode->condition);
-            return "if (" + condition + ") {";
+            return "IF (" + condition + ") {";
         }
         case ELIF_STATEMENT:{
             ElifStmt* elifNode = static_cast<ElifStmt*>(node);
             string condition = generateCode(elifNode->condition);
-            return "else if (" + condition + ") {";
+            return "ELIF (" + condition + ") {";
         }
         case ELSE_STATEMENT:{
             IfStmt* ifNode = static_cast<IfStmt*>(node);
             string condition = generateCode(ifNode->condition);
-            return "else (" + condition + ") {";
+            return "ELSE (" + condition + ") {";
         }
         case FUNCTION_CALL:{
             FunctionCall* functionCallNode = static_cast<FunctionCall*>(node);
@@ -346,11 +357,11 @@ string generateCode(Node* node) {
                     params += ", ";
                 }
             }
-            return "def " + name + "(" + params + ")";
+            return name + "(" + params + ")";
         }
         case BLOCK:{
             Block* blockNode = static_cast<Block*>(node);
-            string code = "{";
+            string code = "{\n";
             for (int i = 0; i < blockNode->statements.size(); i++) {
                 code += generateCode(blockNode->statements[i]);
                 code += "\n";
@@ -370,4 +381,5 @@ string generateCode(Node* node) {
         }
     }
 }
+
 #endif // AST_Csq4_H
