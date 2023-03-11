@@ -330,22 +330,45 @@ string generateCode(Node* node) {
         case WHILE_LOOP:{
             WhileLoop* whileLoopNode = static_cast<WhileLoop*>(node);
             string condition = generateCode(whileLoopNode->condition);
-            return "WHILE (" + condition + ") {\n" + generateCode(whileLoopNode->body) + "}";
+            Block* bodyNode = static_cast<Block*>(whileLoopNode->body);
+            string bodyCode = "";
+            for (int i = 0; i < bodyNode->statements.size(); i++) {
+                bodyCode += generateCode(bodyNode->statements[i]);
+                bodyCode += "\n";
+            }
+            return "WHILE (" + condition + ") {\n" + bodyCode + "}";
         }
         case IF_STATEMENT:{
             IfStmt* ifNode = static_cast<IfStmt*>(node);
             string condition = generateCode(ifNode->condition);
-            return "IF (" + condition + ") {";
+            Block* bodyNode = static_cast<Block*>(ifNode->body);
+            string bodyCode = "";
+            for (int i = 0; i < bodyNode->statements.size(); i++) {
+                bodyCode += generateCode(bodyNode->statements[i]);
+                bodyCode += "\n";
+            }
+            return "IF (" + condition + ") {\n" + bodyCode + "}\n";
         }
         case ELIF_STATEMENT:{
             ElifStmt* elifNode = static_cast<ElifStmt*>(node);
             string condition = generateCode(elifNode->condition);
-            return "ELIF (" + condition + ") {";
+            Block* bodyNode = static_cast<Block*>(elifNode->body);
+            string bodyCode = "";
+            for (int i = 0; i < bodyNode->statements.size(); i++) {
+                bodyCode += generateCode(bodyNode->statements[i]);
+                bodyCode += "\n";
+            }
+            return "ELIF (" + condition + ") {\n" + bodyCode + "}\n";
         }
         case ELSE_STATEMENT:{
-            IfStmt* ifNode = static_cast<IfStmt*>(node);
-            string condition = generateCode(ifNode->condition);
-            return "ELSE (" + condition + ") {";
+            ElseStmt* elseNode = static_cast<ElseStmt*>(node);
+            Block* bodyNode = static_cast<Block*>(elseNode->body);
+            string bodyCode = "";
+            for (int i = 0; i < bodyNode->statements.size(); i++) {
+                bodyCode += generateCode(bodyNode->statements[i]);
+                bodyCode += "\n";
+            }
+            return "ELSE{" + bodyCode + "}\n";
         }
         case FUNCTION_CALL:{
             FunctionCall* functionCallNode = static_cast<FunctionCall*>(node);
