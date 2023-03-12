@@ -57,6 +57,15 @@
             state = true;
         return state;
     }       
+
+    bool isBinaryExpr(vector<Token> tokens){
+        bool state = 0;
+        for(Token token : tokens){
+            if(isOperator(token.token))
+                state = 1;
+        }
+        return state;
+    }
     //This will be useful to do parsing.
     int current_index = 0;
     //This represents the stream of tokens.
