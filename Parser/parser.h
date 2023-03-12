@@ -75,6 +75,8 @@
             VarDecl varNode;
             varNode.type = VAR_DECLARATION;
             varNode.name = tokens[0].token;
+            //Add variable name to stack.
+            Variables.push_back(varNode.name);
             /*If this if block is implemented it means it has passed conditions of VarDecl so 
             as tokens[1] there will be '=' so we should work upon values so to do so we could
             do one more check to find the type of values like BinaryExpr or any else.
