@@ -153,81 +153,7 @@ struct ClassDef : Node{
     Block* body;
 };
 
-//Help functions to create instances of AST nodes.
-void assignValueNode(Value* node, Token token){
-    node->type = VALUE_TYPE;
-    node->value = token;
-    node->value.type = token.type;
-}
 
-void assignVarDeclNode(VarDecl* node, string name,string type, Node* value){
-    node->type = VAR_DECLARATION;
-    node->name = name;
-    node->Dtype = type;
-    node->value = value;
-}
-
-void assignBinaryExprNode(BinaryExpr* node, Node* val1, Node* val2, Token opt){
-    node->opt= opt;
-    node->type = BINARY_EXPR;
-    node->value1 = val1;
-    node->value2 = val2;
-}
-
-void assignVarAssignNode(VarAssign* node, string name, Node* val){
-    node->type = VAR_ASSIGNMENT;
-    node->name = name;
-    node->value = val;
-}
-
-void assignIfStmtNode(IfStmt* node, Node* condition, Block* body){
-    node->type = IF_STATEMENT;
-    node->condition = condition;
-    node->body = body;
-}
-
-void assignElifStmtNode(ElifStmt* node, Node* condition, Block* body){
-    node->type = ELIF_STATEMENT;
-    node->condition = condition;
-    node->body = body;
-}
-
-void assignElseStmtNode(ElseStmt* node, Block* body){
-    node->type = ELSE_STATEMENT;
-    node->body = body;
-}
-
-void assignForLoop(ForLoop* node, Block* body, Node* condition, string iter_name){
-    node->body = body;
-    node->condition = condition;
-    node->iter_name = iter_name;
-    node->type = FOR_LOOP;
-}
-
-void assignWhileLoop(WhileLoop* node, Block* body, Node* condition){
-    node->body = body;
-    node->condition = condition;
-    node->type = WHILE_LOOP;
-}
-
-void assignFunctionDecl(FunctionDecl* node, string name, Block* body, vector<VarDecl*> param){
-    node->body = body;
-    node->name = name;
-    node->param = param;
-    node->type = FUNCTION_DECL;
-}
-
-void assignFunctionCall(FunctionCall* node, string name, vector<Node*> param){
-    node->name = name;
-    node->param = param;
-    node->type = FUNCTION_CALL;
-}
-
-void assignClassDef(ClassDef* node, string name, Block* body){
-    node->name = name;
-    node->body = body;
-    node->type = CLASS_DEFINITION; 
-}
 
 //Help functions for Block node
 Block newBlock(){
@@ -404,5 +330,82 @@ string generateCode(Node* node) {
         }
     }
 }
+
+
+//Help functions to create instances of AST nodes.
+// void assignValueNode(Value* node, Token token){
+//     node->type = VALUE_TYPE;
+//     node->value = token;
+//     node->value.type = token.type;
+// }
+
+// void assignVarDeclNode(VarDecl* node, string name,string type, Node* value){
+//     node->type = VAR_DECLARATION;
+//     node->name = name;
+//     node->Dtype = type;
+//     node->value = value;
+// }
+
+// void assignBinaryExprNode(BinaryExpr* node, Node* val1, Node* val2, Token opt){
+//     node->opt= opt;
+//     node->type = BINARY_EXPR;
+//     node->value1 = val1;
+//     node->value2 = val2;
+// }
+
+// void assignVarAssignNode(VarAssign* node, string name, Node* val){
+//     node->type = VAR_ASSIGNMENT;
+//     node->name = name;
+//     node->value = val;
+// }
+
+// void assignIfStmtNode(IfStmt* node, Node* condition, Block* body){
+//     node->type = IF_STATEMENT;
+//     node->condition = condition;
+//     node->body = body;
+// }
+
+// void assignElifStmtNode(ElifStmt* node, Node* condition, Block* body){
+//     node->type = ELIF_STATEMENT;
+//     node->condition = condition;
+//     node->body = body;
+// }
+
+// void assignElseStmtNode(ElseStmt* node, Block* body){
+//     node->type = ELSE_STATEMENT;
+//     node->body = body;
+// }
+
+// void assignForLoop(ForLoop* node, Block* body, Node* condition, string iter_name){
+//     node->body = body;
+//     node->condition = condition;
+//     node->iter_name = iter_name;
+//     node->type = FOR_LOOP;
+// }
+
+// void assignWhileLoop(WhileLoop* node, Block* body, Node* condition){
+//     node->body = body;
+//     node->condition = condition;
+//     node->type = WHILE_LOOP;
+// }
+
+// void assignFunctionDecl(FunctionDecl* node, string name, Block* body, vector<VarDecl*> param){
+//     node->body = body;
+//     node->name = name;
+//     node->param = param;
+//     node->type = FUNCTION_DECL;
+// }
+
+// void assignFunctionCall(FunctionCall* node, string name, vector<Node*> param){
+//     node->name = name;
+//     node->param = param;
+//     node->type = FUNCTION_CALL;
+// }
+
+// void assignClassDef(ClassDef* node, string name, Block* body){
+//     node->name = name;
+//     node->body = body;
+//     node->type = CLASS_DEFINITION; 
+// }
 
 #endif // AST_Csq4_H
