@@ -16,7 +16,7 @@ enum NODE_TYPE{
     CLASS_DEFINITION = 5,
     FOR_LOOP = 6,
     WHILE_LOOP = 7,
-    BINARY_EXPR = 8,
+    EXPR_TYPE = 8,
     FUNCTION_CALL = 9,
     FUNCTION_DECL  = 10,
     BLOCK = 11,
@@ -71,25 +71,24 @@ struct Value : Node{
 
 
 //Body for BinaryExpr struct
-struct BinaryExpr : Node{
-    NODE_TYPE type = BINARY_EXPR;
-    Token opt;
-    Node* value1;
-    Node* value2;
+// struct BinaryExpr : Node{
+//     NODE_TYPE type = BINARY_EXPR;
+//     Token opt;
+//     Node* value1;
+//     Node* value2;
 
-    BinaryExpr(Node* value1, Node* value2, Token opt){
-        this->value1 = value1;
-        this->value2 = value2;
-        this->opt = opt;
-    }
-    BinaryExpr(){}
-};
+//     BinaryExpr(Node* value1, Node* value2, Token opt){
+//         this->value1 = value1;
+//         this->value2 = value2;
+//         this->opt = opt;
+//     }
+//     BinaryExpr(){}
+// };
 
 //Body for expr node.
 struct Expr : Node{
-    Token _token;
-    string _token;
-    Node* _node;
+    string expr;
+    NODE_TYPE type = EXPR_TYPE;
 };
 
 //Body for VarDecl struct
@@ -181,60 +180,6 @@ void addStatement(Block block, Node* statement){
 }
 
 
-void printNode(Node* node){
-    switch (node->type) {
-        case VALUE_TYPE: {
-            Value* valueNode = static_cast<Value*>(node);
-            printf("|Value : %s\n",valueNode->value.token.c_str());
-            break;
-        }
-        case VAR_DECLARATION: {
-            VarDecl* varDeclNode = static_cast<VarDecl*>(node);
-            printf("|Variable Declaration: %s\n",varDeclNode->name.c_str());
-            printNode(varDeclNode->value);
-            break;
-        }
-        case VAR_ASSIGNMENT: {
-            VarAssign* varAssignNode = static_cast<VarAssign*>(node);
-            printf("|Variable Assignment : %s\n",varAssignNode->name.c_str());
-            printNode(varAssignNode->value);
-            break;
-        }
-        case BINARY_EXPR: {
-            BinaryExpr* binaryExprNode = static_cast<BinaryExpr*>(node);
-            printf("|Binary Expression : %s\n",binaryExprNode->opt.token.c_str());
-            printNode(binaryExprNode->value1);
-            printNode(binaryExprNode->value2);
-            break;
-        }
-        case FOR_LOOP:{
-            ForLoop* forLoopNode = static_cast<ForLoop*>(node);
-            printf("|For Loop: %s over ",forLoopNode->iter_name.c_str());
-            printNode(forLoopNode->condition);
-        }
-        case WHILE_LOOP:{
-            WhileLoop* whileLoopNode = static_cast<WhileLoop*>(node);
-            printf("|While Loop for ");
-            printNode(whileLoopNode->condition);
-        }
-        case FUNCTION_CALL:{
-            FunctionCall* functionCallNode = static_cast<FunctionCall*>(node);
-            printf("Function Call : Name : %s \n",functionCallNode->name.c_str());
-            if(functionCallNode->param.size() > 0)
-                for(int paramCount = 1; paramCount <= functionCallNode->param.size();paramCount++){
-                    printf("|Argument %d: \n\t",paramCount);
-                    printNode(functionCallNode->param[paramCount-1]);
-                    printf("\n");
-                }
-            else
-                ignore;
-        }
-    }
-}
-
-/// @brief 
-/// @param node 
-/// @return 
 //Another visitor function to visit the AST nodes but this time it will also generate IR codes
 string generateCode(Node* node) {
     switch (node->type) {
@@ -250,11 +195,9 @@ string generateCode(Node* node) {
             VarAssign* varAssignNode = static_cast<VarAssign*>(node);
             return varAssignNode->name + " = " + generateCode(varAssignNode->value) + ";";
         }
-        case BINARY_EXPR: {
-            BinaryExpr* binaryExprNode = static_cast<BinaryExpr*>(node);
-            string left = generateCode(binaryExprNode->value1);
-            string right = generateCode(binaryExprNode->value2);
-            return "(" + left + " " + binaryExprNode->opt.token + " " + right + ")";
+        case EXPR_TYPE:{
+            Expr* exprNode = static_cast<Expr*>(node);
+            return exprNode->expr;
         }
         case FOR_LOOP:{
             ForLoop* forLoopNode = static_cast<ForLoop*>(node);
@@ -345,82 +288,4 @@ string generateCode(Node* node) {
         }
     }
 }
-
-
-//Help functions to create instances of AST nodes.
-// void assignValueNode(Value* node, Token token){
-//     node->type = VALUE_TYPE;
-//     node->value = token;
-//     node->value.type = token.type;
-// }
-
-// void assignVarDeclNode(VarDecl* node, string name,string type, Node* value){
-//     node->type = VAR_DECLARATION;
-//     node->name = name;
-//     node->Dtype = type;
-//     node->value = value;
-// }
-
-// void assignBinaryExprNode(BinaryExpr* node, Node* val1, Node* val2, Token opt){
-//     node->opt= opt;
-//     node->type = BINARY_EXPR;
-//     node->value1 = val1;
-//     node->value2 = val2;
-// }
-
-// void assignVarAssignNode(VarAssign* node, string name, Node* val){
-//     node->type = VAR_ASSIGNMENT;
-//     node->name = name;
-//     node->value = val;
-// }
-
-// void assignIfStmtNode(IfStmt* node, Node* condition, Block* body){
-//     node->type = IF_STATEMENT;
-//     node->condition = condition;
-//     node->body = body;
-// }
-
-// void assignElifStmtNode(ElifStmt* node, Node* condition, Block* body){
-//     node->type = ELIF_STATEMENT;
-//     node->condition = condition;
-//     node->body = body;
-// }
-
-// void assignElseStmtNode(ElseStmt* node, Block* body){
-//     node->type = ELSE_STATEMENT;
-//     node->body = body;
-// }
-
-// void assignForLoop(ForLoop* node, Block* body, Node* condition, string iter_name){
-//     node->body = body;
-//     node->condition = condition;
-//     node->iter_name = iter_name;
-//     node->type = FOR_LOOP;
-// }
-
-// void assignWhileLoop(WhileLoop* node, Block* body, Node* condition){
-//     node->body = body;
-//     node->condition = condition;
-//     node->type = WHILE_LOOP;
-// }
-
-// void assignFunctionDecl(FunctionDecl* node, string name, Block* body, vector<VarDecl*> param){
-//     node->body = body;
-//     node->name = name;
-//     node->param = param;
-//     node->type = FUNCTION_DECL;
-// }
-
-// void assignFunctionCall(FunctionCall* node, string name, vector<Node*> param){
-//     node->name = name;
-//     node->param = param;
-//     node->type = FUNCTION_CALL;
-// }
-
-// void assignClassDef(ClassDef* node, string name, Block* body){
-//     node->name = name;
-//     node->body = body;
-//     node->type = CLASS_DEFINITION; 
-// }
-
 #endif // AST_Csq4_H
