@@ -91,6 +91,27 @@
             do one more check to find the type of values like BinaryExpr or any else.
             */
         }
+        else if(isBinaryExpr(tokens) && isVarDecl(tokens) == 0){
+            BinaryExpr bnode;
+            vector<Token> tempTokens = tokens;
+            /*
+            We can use median to do so.
+            */
+            if(tempTokens.size() % 2 != 0){
+                int median = (tempTokens.size() + 1)/2;
+                if(isOperator(tempTokens[median-1].token)){
+                    bnode.opt = tempTokens[median-1];
+                    if(tempTokens.size() == 3){
+                        Value val1, val2;
+                        val1.value = tempTokens[0];
+                        val2.value = tempTokens[2];
+                        bnode.value1 = &val1;
+                        bnode.value1 = &val2;
+                    }
+                } 
+            }
+            node = &bnode;
+        }
         return node;
     }
 
