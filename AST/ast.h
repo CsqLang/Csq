@@ -59,7 +59,8 @@ struct IfStmt;
 struct ElifStmt;
 //ElseStmt for Else statements
 struct ElseStmt;
-
+//Expr node to store any kind of expression without much processing.
+struct Expr;
 //Body for above AST node types
 
 //Body for Value struct
@@ -75,6 +76,20 @@ struct BinaryExpr : Node{
     Token opt;
     Node* value1;
     Node* value2;
+
+    BinaryExpr(Node* value1, Node* value2, Token opt){
+        this->value1 = value1;
+        this->value2 = value2;
+        this->opt = opt;
+    }
+    BinaryExpr(){}
+};
+
+//Body for expr node.
+struct Expr : Node{
+    Token _token;
+    string _token;
+    Node* _node;
 };
 
 //Body for VarDecl struct
