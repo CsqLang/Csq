@@ -58,61 +58,8 @@
         return state;
     }       
 
-    bool isBinaryExpr(vector<Token> tokens){
-        bool state = 0;
-        for(Token token : tokens){
-            if(isOperator(token.token))
-                state = 1;
-        }
-        return state;
-    }
-    //This will be useful to do parsing.
-    int current_index = 0;
-    //This represents the stream of tokens.
-    vector<Token> Tokens;
-    //function to traverse the stream of tokens one by one.
-    Token next(){
-        current_index++;
-        return Tokens[current_index-1];
-    }
-
-    //function to do parsing and return AST node.
+   
     Node* ParseStatement(vector<Token> tokens){
-        Node* node;
-        Tokens = tokens;
-        if(isVarDecl(tokens)){
-            VarDecl varNode;
-            varNode.type = VAR_DECLARATION;
-            varNode.name = tokens[0].token;
-            //Add variable name to stack.
-            Variables.push_back(varNode.name);
-            /*If this if block is implemented it means it has passed conditions of VarDecl so 
-            as tokens[1] there will be '=' so we should work upon values so to do so we could
-            do one more check to find the type of values like BinaryExpr or any else.
-            */
-        }
-        else if(isBinaryExpr(tokens) && isVarDecl(tokens) == 0){
-            BinaryExpr bnode;
-            vector<Token> tempTokens = tokens;
-            /*
-            We can use median to do so.
-            */
-            if(tempTokens.size() % 2 != 0){
-                int median = (tempTokens.size() + 1)/2;
-                if(isOperator(tempTokens[median-1].token)){
-                    bnode.opt = tempTokens[median-1];
-                    if(tempTokens.size() == 3){
-                        Value val1, val2;
-                        val1.value = tempTokens[0];
-                        val2.value = tempTokens[2];
-                        bnode.value1 = &val1;
-                        bnode.value1 = &val2;
-                    }
-                } 
-            }
-            node = &bnode;
-        }
-        return node;
+        
     }
-
 #endif // PARSEr_H_CSQ4
