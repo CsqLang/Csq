@@ -62,6 +62,7 @@ struct Expr;
 class Node{
     public:
         NODE_TYPE type;
+        virtual string tostr();
 };
 
 //Body for Value struct
@@ -73,6 +74,9 @@ struct Value : public Node{
     Value(Token val){
         value = val;
         type = VALUE_TYPE;
+    }
+    string tostr(){
+        return "";
     }
 };
 
@@ -88,6 +92,9 @@ struct Expr : Node{
         type = EXPR_TYPE;
         expr = expr_;
     }
+    virtual string tostr(){
+        return expr;
+    }
 };
 
 //Body for VarDecl struct
@@ -101,6 +108,9 @@ struct VarDecl : Node{
         value = value_;
         type = VAR_DECLARATION;
     }
+    virtual string tostr(){
+        return "VAR " + name + " = " + value.tostr();
+    }
 };
 
 //Body for VarAssign struct
@@ -113,6 +123,9 @@ struct VarAssign : Node{
         name = name_;
         value = val;
     }
+    string tostr(){
+        return "";
+    }
 };
 
 //Body for ForLoop struct
@@ -121,6 +134,9 @@ struct ForLoop : Node{
     Node* condition;
     string iter_name;
     Block* body;
+    virtual string tostr(){
+        return "";
+    }
 };
 
 //Body for WhileLoop struct
@@ -128,6 +144,9 @@ struct WhileLoop : Node{
     NODE_TYPE type = FOR_LOOP;
     Node* condition;
     Block* body;
+    virtual string tostr(){
+        return "";
+    }
 };
 
 //Body for FunctionCall struct
@@ -135,12 +154,18 @@ struct FunctionCall : Node{
     NODE_TYPE type = FUNCTION_CALL;
     string name;
     vector<Node*> param;
+    virtual string tostr(){
+        return "";
+    }
 };
 
 //Body for Block struct
 struct Block : Node{
     NODE_TYPE type = BLOCK;
     vector<Node*> statements;
+    virtual string tostr(){
+        return "";
+    }
 };
 
 //Body for FunctionDecl struct
@@ -149,6 +174,9 @@ struct FunctionDecl : Node{
     string name;
     Block* body;
     vector<VarDecl*> param;
+    virtual string tostr(){
+        return "";
+    }
 };
 
 //Body for IfStmt struct
@@ -156,17 +184,26 @@ struct IfStmt : Node{
     NODE_TYPE type = IF_STATEMENT;
     Expr* condition;
     Block* body;
+    virtual string tostr(){
+        return "";
+    }
 };
 //Body for ElifStmt struct
 struct ElifStmt : Node{
     NODE_TYPE type = ELIF_STATEMENT;
     Node* condition;
     Block* body;
+    virtual string tostr(){
+        return "";
+    }
 };
 //Body for ElseStmt struct
 struct ElseStmt : Node{
     NODE_TYPE type = ELSE_STATEMENT;
     Block* body;
+    virtual string tostr(){
+        return "";
+    }
 };
 
 //Struct for ClassDef
@@ -174,6 +211,9 @@ struct ClassDef : Node{
     NODE_TYPE type = CLASS_DEFINITION;
     string name;
     Block* body;
+    string tostr(){
+        return "";
+    }
 };
 
 
@@ -190,13 +230,71 @@ void addStatement(Block block, Node* statement){
 
 
 //Another visitor function to visit the AST nodes but this time it will also generate IR codes
-string visit(Node node){
-    switch(node.type){
-        case VAR_DECLARATION:{
-            
+// Visitor function to visit the AST nodes and generate IR codes
+string visit(Node& node) {
+    switch (node.type) {
+        case VAR_DECLARATION: {
+            VarDecl& varDecl = static_cast<VarDecl&>(node);
+            return varDecl.tostr();
+        }
+        case VAR_ASSIGNMENT: {
+            VarAssign& varAssign = static_cast<VarAssign&>(node);
+            return varAssign.tostr();
+        }
+        case FUNCTION_DECL: {
+            FunctionDecl& funcDecl = static_cast<FunctionDecl&>(node);
+            return funcDecl.tostr();
+        }
+        case FUNCTION_CALL: {
+            FunctionCall& funcCall = static_cast<FunctionCall&>(node);
+            return funcCall.tostr();
+        }
+        case BLOCK: {
+            Block& block = static_cast<Block&>(node);
+            string result;
+            for (Node* statement : block.statements) {
+                result += visit(*statement);
+            }
+            return result;
+        }
+        case IF_STATEMENT: {
+            IfStmt& ifStmt = static_cast<IfStmt&>(node);
+            return ifStmt.tostr() + visit(*ifStmt.condition) + visit(*ifStmt.body);
+        }
+        case ELIF_STATEMENT: {
+            ElifStmt& elifStmt = static_cast<ElifStmt&>(node);
+            return elifStmt.tostr() + visit(*elifStmt.condition) + visit(*elifStmt.body);
+        }
+        case ELSE_STATEMENT: {
+            ElseStmt& elseStmt = static_cast<ElseStmt&>(node);
+            return elseStmt.tostr() + visit(*elseStmt.body);
+        }
+        case FOR_LOOP: {
+            ForLoop& forLoop = static_cast<ForLoop&>(node);
+            return forLoop.tostr() + visit(*forLoop.condition) + visit(*forLoop.body);
+        }
+        case WHILE_LOOP: {
+            WhileLoop& whileLoop = static_cast<WhileLoop&>(node);
+            return whileLoop.tostr() + visit(*whileLoop.condition) + visit(*whileLoop.body);
+        }
+        case CLASS_DEFINITION: {
+            ClassDef& classDef = static_cast<ClassDef&>(node);
+            return classDef.tostr() + visit(*classDef.body);
+        }
+        case VALUE_TYPE: {
+            Value& value = static_cast<Value&>(node);
+            return value.tostr();
+        }
+        case EXPR_TYPE: {
+            Expr& expr = static_cast<Expr&>(node);
+            return expr.tostr();
+        }
+        default: {
+            return "";
         }
     }
 }
+
 
 
 #endif // AST_Csq4_H
