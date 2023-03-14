@@ -58,9 +58,6 @@ struct ElifStmt;
 struct ElseStmt;
 //Expr node to store any kind of expression without much processing.
 struct Expr;
-
-//Base class for all
-class Node;
 //Base class for all AST.
 class Node{
     public:
@@ -82,7 +79,7 @@ struct Value : public Node{
 
 
 //Body for expr node.
-struct Expr : public Node{
+struct Expr : Node{
     string expr;
     Expr(){
         type = EXPR_TYPE;
@@ -94,7 +91,7 @@ struct Expr : public Node{
 };
 
 //Body for VarDecl struct
-struct VarDecl : public Node{
+struct VarDecl : Node{
     string name;
     string Dtype;
     Expr value;
@@ -107,7 +104,7 @@ struct VarDecl : public Node{
 };
 
 //Body for VarAssign struct
-struct VarAssign : public Node{
+struct VarAssign : Node{
     Expr value;
     string name;
     VarAssign(){type = VAR_ASSIGNMENT;}
