@@ -27,11 +27,15 @@ typedef enum {
 //Node struct
 struct Node;
 //A short alias for unique_ptr<Node>
-typedef std::unique_ptr<Node> Nodetype;
+typedef std::unique_ptr<Node> NodePtr;
 
 //body struct for node type
 struct Node{
-    
+    NODE_TYPE type;
+    Node(NODE_TYPE nodetype){
+        type = nodetype;
+    }
+    Node(){}
 };
 
 #endif // AST_Csq4_H
