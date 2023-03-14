@@ -25,10 +25,7 @@ enum NODE_TYPE{
     ELSE_STATEMENT = 14,
 };
 
-//Base class for all AST.
-struct Node{
-    NODE_TYPE type;
-};
+
 
 
 //Inherited structs for different types of AST Node.
@@ -61,49 +58,64 @@ struct ElifStmt;
 struct ElseStmt;
 //Expr node to store any kind of expression without much processing.
 struct Expr;
-//Body for above AST node types
+
+//Base class for all
+class Node;
+//Base class for all AST.
+class Node{
+    public:
+        NODE_TYPE type;
+};
 
 //Body for Value struct
-struct Value : Node{
-    NODE_TYPE type = VALUE_TYPE;
+struct Value : public Node{
     Token value;
+    Value(){
+        type = VALUE_TYPE;
+    }
+    Value(Token val){
+        value = val;
+        type = VALUE_TYPE;
+    }
 };
 
 
-//Body for BinaryExpr struct
-// struct BinaryExpr : Node{
-//     NODE_TYPE type = BINARY_EXPR;
-//     Token opt;
-//     Node* value1;
-//     Node* value2;
-
-//     BinaryExpr(Node* value1, Node* value2, Token opt){
-//         this->value1 = value1;
-//         this->value2 = value2;
-//         this->opt = opt;
-//     }
-//     BinaryExpr(){}
-// };
 
 //Body for expr node.
-struct Expr : Node{
+struct Expr : public Node{
     string expr;
-    NODE_TYPE type = EXPR_TYPE;
+    Expr(){
+        type = EXPR_TYPE;
+    }
+    Expr(string expr_){
+        type = EXPR_TYPE;
+        expr = expr_;
+    }
 };
 
 //Body for VarDecl struct
-struct VarDecl : Node{
-    NODE_TYPE type = VAR_DECLARATION;
+struct VarDecl : public Node{
     string name;
     string Dtype;
-    Node* value;
+    Expr value;
+    VarDecl(){type = VAR_DECLARATION;}
+    VarDecl(string name_, Expr value_){
+        name = name_;
+        value = value_;
+        type = VAR_DECLARATION;
+    }
 };
 
 //Body for VarAssign struct
-struct VarAssign : Node{
-    NODE_TYPE type = VAR_ASSIGNMENT;
-    Node* value;
+struct VarAssign : public Node{
+    Expr value;
     string name;
+    VarAssign(){type = VAR_ASSIGNMENT;}
+    VarAssign(string name_, Expr val){
+        type = VAR_ASSIGNMENT;
+        name = name_;
+        value = val;
+    }
 };
 
 //Body for ForLoop struct
@@ -145,7 +157,7 @@ struct FunctionDecl : Node{
 //Body for IfStmt struct
 struct IfStmt : Node{
     NODE_TYPE type = IF_STATEMENT;
-    Node* condition;
+    Expr* condition;
     Block* body;
 };
 //Body for ElifStmt struct
@@ -181,111 +193,13 @@ void addStatement(Block block, Node* statement){
 
 
 //Another visitor function to visit the AST nodes but this time it will also generate IR codes
-string generateCode(Node* node) {
-    switch (node->type) {
-        case VALUE_TYPE: {
-            Value* valueNode = static_cast<Value*>(node);
-            return valueNode->value.token; // return the value as C++ code
-        }
-        case VAR_DECLARATION: {
-            VarDecl* varDeclNode = static_cast<VarDecl*>(node);
-            return  "VAR " + varDeclNode->name + " = " + generateCode(varDeclNode->value) + ";";
-        }
-        case VAR_ASSIGNMENT: {
-            VarAssign* varAssignNode = static_cast<VarAssign*>(node);
-            return varAssignNode->name + " = " + generateCode(varAssignNode->value) + ";";
-        }
-        case EXPR_TYPE:{
-            Expr* exprNode = static_cast<Expr*>(node);
-            return exprNode->expr;
-        }
-        case FOR_LOOP:{
-            ForLoop* forLoopNode = static_cast<ForLoop*>(node);
-            Block* bodyNode = static_cast<Block*>(forLoopNode->body);
-            string condition = generateCode(forLoopNode->condition);
-            string bodyCode = "";
-            for (int i = 0; i < bodyNode->statements.size(); i++) {
-                bodyCode += generateCode(bodyNode->statements[i]);
-                bodyCode += "\n";
-            }
-            return "FOR (VAR " + forLoopNode->iter_name + " : " + condition + ") {\n"+ bodyCode + "}";
-        }
-
-        case WHILE_LOOP:{
-            WhileLoop* whileLoopNode = static_cast<WhileLoop*>(node);
-            string condition = generateCode(whileLoopNode->condition);
-            Block* bodyNode = static_cast<Block*>(whileLoopNode->body);
-            string bodyCode = "";
-            for (int i = 0; i < bodyNode->statements.size(); i++) {
-                bodyCode += generateCode(bodyNode->statements[i]);
-                bodyCode += "\n";
-            }
-            return "WHILE (" + condition + ") {\n" + bodyCode + "}";
-        }
-        case IF_STATEMENT:{
-            IfStmt* ifNode = static_cast<IfStmt*>(node);
-            string condition = generateCode(ifNode->condition);
-            Block* bodyNode = static_cast<Block*>(ifNode->body);
-            string bodyCode = "";
-            for (int i = 0; i < bodyNode->statements.size(); i++) {
-                bodyCode += generateCode(bodyNode->statements[i]);
-                bodyCode += "\n";
-            }
-            return "IF (" + condition + ") {\n" + bodyCode + "}\n";
-        }
-        case ELIF_STATEMENT:{
-            ElifStmt* elifNode = static_cast<ElifStmt*>(node);
-            string condition = generateCode(elifNode->condition);
-            Block* bodyNode = static_cast<Block*>(elifNode->body);
-            string bodyCode = "";
-            for (int i = 0; i < bodyNode->statements.size(); i++) {
-                bodyCode += generateCode(bodyNode->statements[i]);
-                bodyCode += "\n";
-            }
-            return "ELIF (" + condition + ") {\n" + bodyCode + "}\n";
-        }
-        case ELSE_STATEMENT:{
-            ElseStmt* elseNode = static_cast<ElseStmt*>(node);
-            Block* bodyNode = static_cast<Block*>(elseNode->body);
-            string bodyCode = "";
-            for (int i = 0; i < bodyNode->statements.size(); i++) {
-                bodyCode += generateCode(bodyNode->statements[i]);
-                bodyCode += "\n";
-            }
-            return "ELSE{" + bodyCode + "}\n";
-        }
-        case FUNCTION_CALL:{
-            FunctionCall* functionCallNode = static_cast<FunctionCall*>(node);
-            string name = functionCallNode->name;
-            string params = "";
-            for (int i = 0; i < functionCallNode->param.size(); i++) {
-                params += generateCode(functionCallNode->param[i]);
-                if (i != functionCallNode->param.size() - 1) {
-                    params += ", ";
-                }
-            }
-            return name + "(" + params + ")";
-        }
-        case BLOCK:{
-            Block* blockNode = static_cast<Block*>(node);
-            string code = "{\n";
-            for (int i = 0; i < blockNode->statements.size(); i++) {
-                code += generateCode(blockNode->statements[i]);
-                code += "\n";
-            }
-            code += "}";
-            return code;
-        }
-        case FUNCTION_DECL:{
-            FunctionDecl* funNode = static_cast<FunctionDecl*>(node);
-            string params;
-            for(VarDecl* var : funNode->param)
-                params += var->name + ",";
-            return "DEF " + funNode->name + " (" + params + ") {\n" + generateCode(funNode->body) + "}\n";
-        }
-        default: {
-            return ""; // return empty string for unknown node types
+string visit(Node node){
+    switch(node.type){
+        case VAR_DECLARATION:{
+            
         }
     }
 }
+
+
 #endif // AST_Csq4_H
