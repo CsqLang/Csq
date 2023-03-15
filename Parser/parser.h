@@ -57,9 +57,4 @@
             state = true;
         return state;
     }       
-
-   
-    Node* ParseStatement(vector<Token> tokens){
-        
-    }
 #endif // PARSEr_H_CSQ4
