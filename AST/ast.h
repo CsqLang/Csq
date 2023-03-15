@@ -6,6 +6,7 @@
 #include "../Tokenizer/tokenizer.h"
 #include "../IR/IRcode.h"
 #include <memory>
+using namespace std;
 
 typedef enum {
     VALUE_TYPE = 1,
@@ -26,9 +27,8 @@ typedef enum {
 
 //Node struct
 struct Node;
-//A short alias for unique_ptr<Node>
-typedef std::unique_ptr<Node> NodePtr;
-
+//A short alias for shared_ptr<Node>
+#define Ptr shared_ptr
 //body struct for node type
 struct Node{
     NODE_TYPE type;
@@ -37,5 +37,31 @@ struct Node{
     }
     Node(){}
 };
+
+struct VarDecl : Node{
+    string name;
+    string value;
+    VarDecl(string name_, string value_){
+        name = name_;
+        value = value_;
+        type = VAR_DECLARATION;
+    }
+    VarDecl(){
+        name = "";
+        value = "";
+        type = VAR_DECLARATION;
+    }
+};
+
+string visit(const Ptr<Node>& node) {
+    switch (node->type) {
+        case VAR_DECLARATION: {
+            Ptr<VarDecl> var = static_pointer_cast<VarDecl>(node);
+            return "VarDecl: name=" + var->name + ", value=" + var->value;
+        }
+        default:
+            return "Unknown node type";
+    }
+}
 
 #endif // AST_Csq4_H
