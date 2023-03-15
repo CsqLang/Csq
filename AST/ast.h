@@ -28,7 +28,7 @@ typedef enum {
 //Node struct
 struct Node;
 //body struct for node type
-typedef struct Node{
+struct Node{
     NODE_TYPE type;
     Node(NODE_TYPE nodetype){
         type = nodetype;
@@ -37,23 +37,29 @@ typedef struct Node{
 };
 
 //Declaration for Node types.
-typedef struct Expr;
-typedef struct VarDecl;
-typedef struct VarAssign;
-typedef struct Block;
-typedef struct FunctionDecl;
-typedef struct ClassDecl;
-typedef struct ForLoop;
-typedef struct WhileLoop;
-typedef struct IfStmt;
-typedef struct ElifStmt;
-typedef struct ElseStmt;
+struct Expr;
+struct VarDecl;
+struct VarAssign;
+struct Block;
+struct FunctionDecl;
+struct ClassDecl;
+struct ForLoop;
+struct WhileLoop;
+struct IfStmt;
+struct ElifStmt;
+struct ElseStmt;
 
 // Definitions for above node types
 
-typedef struct VarDecl : Node{
+struct Expr : Node{
+    string expr;
+    Expr(){type = EXPR_TYPE; expr = "";}
+    Expr(string express){type = EXPR_TYPE; expr = express;}
+};
+
+struct VarDecl : Node{
     string name;
-    string value;
+    Expr value;
     VarDecl(string name_, string value_){
         name = name_;
         value = value_;
@@ -61,21 +67,21 @@ typedef struct VarDecl : Node{
     }
     VarDecl(){
         name = "";
-        value = "";
+        value = Expr();
         type = VAR_DECLARATION;
     }
 };
 
 
-//Visit function.
-string visit(const Ptr<Node>& node);
-//Definition for visit function 
 
+
+
+//Definition for visit function 
 string visit(const Ptr<Node>& node) {
     switch (node->type) {
         case VAR_DECLARATION: {
             Ptr<VarDecl> var = static_pointer_cast<VarDecl>(node);
-            return "VarDecl: name=" + var->name + ", value=" + var->value;
+            return "VarDecl: name=" + var->name + ", value=" + var->value.expr;
         }
         default:
             return "Unknown node type";
