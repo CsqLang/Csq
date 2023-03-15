@@ -8,8 +8,9 @@
 #include <memory>
 using namespace std;
 
+//Alias for shared_ptr;
+#define Ptr shared_ptr
 typedef enum {
-    VALUE_TYPE = 1,
     VAR_DECLARATION,
     VAR_ASSIGNMENT,
     FUN_DEFINITION,
@@ -17,7 +18,6 @@ typedef enum {
     FOR_LOOP,
     WHILE_LOOP,
     EXPR_TYPE,
-    FUNCTION_CALL,
     FUNCTION_DECL,
     BLOCK,
     IF_STATEMENT,
@@ -27,10 +27,8 @@ typedef enum {
 
 //Node struct
 struct Node;
-//A short alias for shared_ptr<Node>
-#define Ptr(type_) shared_ptr<type_>
 //body struct for node type
-struct Node{
+typedef struct Node{
     NODE_TYPE type;
     Node(NODE_TYPE nodetype){
         type = nodetype;
@@ -38,7 +36,22 @@ struct Node{
     Node(){}
 };
 
-struct VarDecl : Node{
+//Declaration for Node types.
+typedef struct Expr;
+typedef struct VarDecl;
+typedef struct VarAssign;
+typedef struct Block;
+typedef struct FunctionDecl;
+typedef struct ClassDecl;
+typedef struct ForLoop;
+typedef struct WhileLoop;
+typedef struct IfStmt;
+typedef struct ElifStmt;
+typedef struct ElseStmt;
+
+// Definitions for above node types
+
+typedef struct VarDecl : Node{
     string name;
     string value;
     VarDecl(string name_, string value_){
@@ -53,10 +66,15 @@ struct VarDecl : Node{
     }
 };
 
-string visit(const Ptr(Node)& node) {
+
+//Visit function.
+string visit(const Ptr<Node>& node);
+//Definition for visit function 
+
+string visit(const Ptr<Node>& node) {
     switch (node->type) {
         case VAR_DECLARATION: {
-            Ptr(VarDecl) var = static_pointer_cast<VarDecl>(node);
+            Ptr<VarDecl> var = static_pointer_cast<VarDecl>(node);
             return "VarDecl: name=" + var->name + ", value=" + var->value;
         }
         default:
