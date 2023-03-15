@@ -130,8 +130,15 @@ string visit(const Ptr<Node>& node) {
             return code;
         }
         case FUNCTION_DECL:{
-            printf("Function decl\n");
-            return "";
+            Ptr<FunctionDecl> fun = static_pointer_cast<FunctionDecl>(node);
+            string params;
+            for(string param : fun->params)
+                params += "VAR " + param + ", ";
+            params.pop_back();
+            shared_ptr<Block> block = std::make_shared<Block>();
+            for(string statement : fun->body.statements)
+                block->statements.push_back(statement);
+            return "FUN " + fun->name + " ( " + params + "){\n" + visit(block) + "};\n";
         }
         default:
             return "Unknown node type " + to_string(node->type);
