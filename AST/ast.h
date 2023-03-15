@@ -88,7 +88,11 @@ struct VarAssign : Node{
     }
 };
 
-
+struct Block : Node{
+    vector<string> statements;
+    Block(){type = BLOCK;}
+    Block(string statement){statements.push_back(statement);type = BLOCK;}
+};
 
 //Definition for visit function 
 string visit(const Ptr<Node>& node) {
@@ -100,6 +104,13 @@ string visit(const Ptr<Node>& node) {
         case VAR_ASSIGNMENT: {
             Ptr<VarDecl> var = static_pointer_cast<VarDecl>(node);
             return var->name + " = " + var->value.expr;
+        }
+        case BLOCK:{
+            Ptr<Block> block = static_pointer_cast<Block>(node);
+            string code;
+            for(string statement : block->statements)
+                code += statement + ";\n";
+            return code;
         }
         default:
             return "Unknown node type";
