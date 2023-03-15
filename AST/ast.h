@@ -23,6 +23,7 @@ typedef enum {
     IF_STATEMENT,
     ELIF_STATEMENT,
     ELSE_STATEMENT,
+    FUN_ARGUMENT,
 } NODE_TYPE;
 
 //Node struct
@@ -48,7 +49,7 @@ struct WhileLoop;
 struct IfStmt;
 struct ElifStmt;
 struct ElseStmt;
-
+struct FunArg;
 // Definitions for above node types
 
 struct Expr : Node{
@@ -91,7 +92,23 @@ struct VarAssign : Node{
 struct Block : Node{
     vector<string> statements;
     Block(){type = BLOCK;}
-    Block(string statement){statements.push_back(statement);type = BLOCK;}
+    Block(vector<string> statement){statements = statement;type = BLOCK;}
+};
+
+struct FunctionDecl : Node{
+    string name;
+    vector<string> params;
+    Block body;
+    FunctionDecl(){
+        type = FUNCTION_DECL;
+        name = "";
+    }
+    FunctionDecl(string name_, vector<string> params_, Block body_){
+        type = FUNCTION_DECL;
+        name = name_;
+        params = params_;
+        body = body_;
+    }
 };
 
 //Definition for visit function 
@@ -112,8 +129,12 @@ string visit(const Ptr<Node>& node) {
                 code += statement + ";\n";
             return code;
         }
+        case FUNCTION_DECL:{
+            printf("Function decl\n");
+            return "";
+        }
         default:
-            return "Unknown node type";
+            return "Unknown node type " + to_string(node->type);
     }
 }
 
