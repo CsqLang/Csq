@@ -140,6 +140,24 @@ string visit(const Ptr<Node>& node) {
                 block->statements.push_back(statement);
             return "FUN " + fun->name + " ( " + params + "){\n" + visit(block) + "};\n";
         }
+        case FOR_LOOP:{
+            return "";
+        }
+        case WHILE_LOOP:{
+            return "";
+        }
+        case CLASS_DEFINITION:{
+            return "";
+        }
+        case IF_STATEMENT:{
+            return "";
+        }
+        case ELIF_STATEMENT:{
+            return "";
+        }
+        case ELSE_STATEMENT:{
+            return "";
+        }
         default:
             return "Unknown node type " + to_string(node->type);
     }
@@ -171,6 +189,14 @@ Ptr<Node> addNode(Expr decl){
 Ptr<Node> addNode(Block decl){
     auto node = make_shared<Block>();
     node->statements = decl.statements;
+    return static_pointer_cast<Node>(node);
+}
+
+Ptr<Node> addNode(FunctionDecl decl){
+    auto node = make_shared<FunctionDecl>();
+    node->body = decl.body;
+    node->name = decl.name;
+    node->params = decl.params;
     return static_pointer_cast<Node>(node);
 }
 
