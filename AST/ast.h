@@ -145,6 +145,34 @@ string visit(const Ptr<Node>& node) {
     }
 }
 
+
 //Functions to add nodes for ease of use.
+
+Ptr<Node> addNode(VarDecl decl){
+    auto node = make_shared<VarDecl>();
+    node->name = decl.name;
+    node->value = decl.value;
+    return static_pointer_cast<Node>(node);
+}
+
+Ptr<Node> addNode(VarAssign decl){
+    auto node = make_shared<VarAssign>();
+    node->name = decl.name;
+    node->value = decl.value;
+    return static_pointer_cast<Node>(node);
+}
+
+Ptr<Node> addNode(Expr decl){
+    auto node = make_shared<Expr>();
+    node->expr = decl.expr;
+    return static_pointer_cast<Node>(node);
+}
+
+Ptr<Node> addNode(Block decl){
+    auto node = make_shared<Block>();
+    node->statements = decl.statements;
+    return static_pointer_cast<Node>(node);
+}
+
 
 #endif // AST_Csq4_H
