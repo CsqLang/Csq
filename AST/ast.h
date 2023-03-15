@@ -73,6 +73,20 @@ struct VarDecl : Node{
 };
 
 
+struct VarAssign : Node{
+    string name;
+    Expr value;
+    VarAssign(string name_, string value_){
+        name = name_;
+        value = value_;
+        type = VAR_ASSIGNMENT;
+    }
+    VarAssign(){
+        name = "";
+        value = Expr();
+        type = VAR_ASSIGNMENT;
+    }
+};
 
 
 
@@ -81,7 +95,11 @@ string visit(const Ptr<Node>& node) {
     switch (node->type) {
         case VAR_DECLARATION: {
             Ptr<VarDecl> var = static_pointer_cast<VarDecl>(node);
-            return "VarDecl: name=" + var->name + ", value=" + var->value.expr;
+            return "VAR " + var->name + " = " + var->value.expr;
+        }
+        case VAR_ASSIGNMENT: {
+            Ptr<VarDecl> var = static_pointer_cast<VarDecl>(node);
+            return var->name + " = " + var->value.expr;
         }
         default:
             return "Unknown node type";
