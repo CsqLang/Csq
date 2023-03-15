@@ -135,7 +135,7 @@ string visit(const Ptr<Node>& node) {
             for(string param : fun->params)
                 params += "VAR " + param + ", ";
             params.pop_back();
-            shared_ptr<Block> block = std::make_shared<Block>();
+            shared_ptr<Block> block = make_shared<Block>();
             for(string statement : fun->body.statements)
                 block->statements.push_back(statement);
             return "FUN " + fun->name + " ( " + params + "){\n" + visit(block) + "};\n";
@@ -144,5 +144,7 @@ string visit(const Ptr<Node>& node) {
             return "Unknown node type " + to_string(node->type);
     }
 }
+
+//Functions to add nodes for ease of use.
 
 #endif // AST_Csq4_H
