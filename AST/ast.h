@@ -28,7 +28,7 @@ typedef enum {
 //Node struct
 struct Node;
 //A short alias for shared_ptr<Node>
-#define Ptr shared_ptr
+#define Ptr(type_) shared_ptr<type_>
 //body struct for node type
 struct Node{
     NODE_TYPE type;
@@ -53,10 +53,10 @@ struct VarDecl : Node{
     }
 };
 
-string visit(const Ptr<Node>& node) {
+string visit(const Ptr(Node)& node) {
     switch (node->type) {
         case VAR_DECLARATION: {
-            Ptr<VarDecl> var = static_pointer_cast<VarDecl>(node);
+            Ptr(VarDecl) var = static_pointer_cast<VarDecl>(node);
             return "VarDecl: name=" + var->name + ", value=" + var->value;
         }
         default:
