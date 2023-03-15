@@ -58,5 +58,23 @@
         if(tokens[0].type == IDENTIFIER && tokens[1].type == ASOPERATOR && tokens[2].type != ASOPERATOR && in(tokens[0].token,Variables) == 1)
             state = true;
         return state;
-    }       
+    }
+
+    bool isParenClosed(TokenStream tokens){
+        bool state = false;
+        int lparencount = 0;
+        int rparencount = 0;
+        for(Token token : tokens){
+            if(token.type == SYMBOL && token.token == "(")
+                lparencount++;
+            else if(token.type == SYMBOL && token.token == ")")
+                rparencount++;
+            else
+                ignore;
+        }
+        if(lparencount == rparencount)
+            state = true;
+        return state;
+    }
+
 #endif // PARSEr_H_CSQ4
