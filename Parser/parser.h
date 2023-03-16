@@ -23,6 +23,10 @@
         printf("At line : %d, square brackets aren't properly closed.",line);
         error_count++;
     }
+
+    void StopCompilation(){
+        printf("Couldn't compile due to %d previous errors.\n",error_count);
+    }
     /*
         Check tokens.
     */
@@ -124,15 +128,13 @@
         return state;
     }
 
-    vector<TokenStream> SplitCodelines(string code){
+    vector<TokenStream> TokenizeStatements(string code){
         vector<TokenStream> code_;
         int line = 1;
         string statement = "";
         for(char ch : code){
             if(ch != ';')
                 statement.push_back(ch);
-            else if(ch == '\n')
-                line++;
             else{
                 TokenStream tokens;
                 for(Token token : tokenize(statement,line)){
@@ -144,5 +146,7 @@
         }
         return code_;
     }
+
+    
 
 #endif // PARSEr_H_CSQ4
