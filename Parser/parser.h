@@ -4,12 +4,25 @@
     #include "../AST/ast.h"
     #include "../Memory/stack.h"
 
+    int error_count = 0;
+
     typedef vector<Token> TokenStream;
     typedef vector<string> StringStream;
     //Tools required for parsing
 
     /*Exceptions required for parsing and finding out the mistakes earlier.*/
-
+    void ParenthesisNotClosed(int line){
+        printf("At line : %d, parenthesis aren't properly closed.",line);
+        error_count++;
+    }
+    void CurlyBraceNotClosed(int line){
+        printf("At line : %d, curly brackets aren't properly closed.",line);
+        error_count++;
+    }
+    void SquareBracNotClosed(int line){
+        printf("At line : %d, square brackets aren't properly closed.",line);
+        error_count++;
+    }
     /*
         Check tokens.
     */
@@ -109,6 +122,27 @@
         if(lcurlycount == rcurlycount)
             state = true;
         return state;
+    }
+
+    vector<TokenStream> SplitCodelines(string code){
+        vector<TokenStream> code_;
+        int line = 1;
+        string statement = "";
+        for(char ch : code){
+            if(ch != ';')
+                statement.push_back(ch);
+            else if(ch == '\n')
+                line++;
+            else{
+                TokenStream tokens;
+                for(Token token : tokenize(statement,line)){
+                    tokens.push_back(token);
+                }
+                code_.push_back(tokens);
+                statement = "";
+            }
+        }
+        return code_;
     }
 
 #endif // PARSEr_H_CSQ4
