@@ -119,57 +119,32 @@ struct ForLoop : Node{
     ForLoop(string itername, Expr cond, Block body_){type = FOR_LOOP;iter_name = itername;condition = cond; body = body_;}
 };
 
-//Definition for visit function 
-string visit(const Ptr<Node>& node) {
-    switch (node->type) {
-        case VAR_DECLARATION: {
-            Ptr<VarDecl> var = static_pointer_cast<VarDecl>(node);
-            return "VAR " + var->name + " = " + var->value.expr;
-        }
-        case VAR_ASSIGNMENT: {
-            Ptr<VarDecl> var = static_pointer_cast<VarDecl>(node);
-            return var->name + " = " + var->value.expr;
-        }
-        case BLOCK:{
-            Ptr<Block> block = static_pointer_cast<Block>(node);
-            string code;
-            for(string statement : block->statements)
-                code += statement + ";\n";
-            return code;
-        }
-        case FUNCTION_DECL:{
-            Ptr<FunctionDecl> fun = static_pointer_cast<FunctionDecl>(node);
-            string params;
-            for(string param : fun->params)
-                params += "VAR " + param + ", ";
-            params.pop_back();
-            shared_ptr<Block> block = make_shared<Block>();
-            for(string statement : fun->body.statements)
-                block->statements.push_back(statement);
-            return "FUN " + fun->name + " ( " + params + "){\n" + visit(block) + "};\n";
-        }
-        case FOR_LOOP:{
-            return "";
-        }
-        case WHILE_LOOP:{
-            return "";
-        }
-        case CLASS_DEFINITION:{
-            return "";
-        }
-        case IF_STATEMENT:{
-            return "";
-        }
-        case ELIF_STATEMENT:{
-            return "";
-        }
-        case ELSE_STATEMENT:{
-            return "";
-        }
-        default:
-            return "Unknown node type " + to_string(node->type);
-    }
-}
+struct WhileLoop : Node{
+    Expr condition;
+    Block body;
+    WhileLoop(){type = WHILE_LOOP;}
+    WhileLoop(Expr cond, Block body_){type = WHILE_LOOP;condition = cond; body = body_;}
+};
+
+struct IfStmt : Node{
+    Expr condition;
+    Block body;
+    IfStmt(){type = IF_STATEMENT;}
+    IfStmt(Expr cond, Block body_){type = IF_STATEMENT;condition = cond; body = body_;}
+};
+
+struct ElifStmt : Node{
+    Expr condition;
+    Block body;
+    ElifStmt(){type = ELIF_STATEMENT;}
+    ElifStmt(Expr cond, Block body_){type = ELIF_STATEMENT;condition = cond; body = body_;}
+};
+
+struct ElseStmt : Node{
+    Block body;
+    ElseStmt(){type = ELSE_STATEMENT;}
+    ElseStmt(Block body_){type = ELSE_STATEMENT;body = body_;}
+};
 
 
 //Functions to add nodes for ease of use.
@@ -214,4 +189,78 @@ void addStatement(Ptr<Block> block, string statement){
 void addParam(Ptr<FunctionDecl> fun, string param){
     fun->params.push_back(param);
 }
+
+//Definition for visit function 
+string visit(const Ptr<Node>& node) {
+    switch (node->type) {
+        case VAR_DECLARATION: {
+            Ptr<VarDecl> var = static_pointer_cast<VarDecl>(node);
+            return "VAR " + var->name + " = " + var->value.expr;
+        }
+        case VAR_ASSIGNMENT: {
+            Ptr<VarDecl> var = static_pointer_cast<VarDecl>(node);
+            return var->name + " = " + var->value.expr;
+        }
+        case BLOCK:{
+            Ptr<Block> block = static_pointer_cast<Block>(node);
+            string code;
+            for(string statement : block->statements)
+                code += statement + ";\n";
+            return code;
+        }
+        case FUNCTION_DECL:{
+            Ptr<FunctionDecl> fun = static_pointer_cast<FunctionDecl>(node);
+            string params;
+            for(string param : fun->params)
+                params += "VAR " + param + ", ";
+            params.pop_back();
+            shared_ptr<Block> block = make_shared<Block>();
+            for(string statement : fun->body.statements)
+                addStatement(block,statement);
+            return "FUN " + fun->name + " ( " + params + "){\n" + visit(block) + "};\n";
+        }
+        case FOR_LOOP:{
+            Ptr<ForLoop> floop = static_pointer_cast<ForLoop>(node);
+            shared_ptr<Block> block = make_shared<Block>();
+            for(string statement : floop->body.statements){
+                addStatement(block,statement);
+            }
+            return "FOR(" + floop->iter_name + " : " + floop->condition.expr + "){\n" + visit(block) + "};\n";
+        }
+        case WHILE_LOOP:{
+            Ptr<WhileLoop> stmt = static_pointer_cast<WhileLoop>(node);
+            shared_ptr<Block> block = make_shared<Block>();
+            for(string statement : stmt->body.statements){
+                addStatement(block,statement);
+            }
+            return "WHILE(" + stmt->condition.expr + "){\n" + visit(block) + "};\n";
+        }
+        case IF_STATEMENT:{
+            Ptr<IfStmt> stmt = static_pointer_cast<IfStmt>(node);
+            shared_ptr<Block> block = make_shared<Block>();
+            for(string statement : stmt->body.statements){
+                addStatement(block,statement);
+            }
+            return "IF(" + stmt->condition.expr + "){\n" + visit(block) + "}\n";
+        }
+        case ELIF_STATEMENT:{
+            Ptr<ElifStmt> stmt = static_pointer_cast<ElifStmt>(node);
+            shared_ptr<Block> block = make_shared<Block>();
+            for(string statement : stmt->body.statements){
+                addStatement(block,statement);
+            }
+            return "ELIF(" + stmt->condition.expr + "){\n" + visit(block) + "}\n";
+        }
+        case ELSE_STATEMENT:{
+            Ptr<ElseStmt> stmt = static_pointer_cast<ElseStmt>(node);
+            shared_ptr<Block> block = make_shared<Block>();
+            for(string statement : stmt->body.statements)
+                addStatement(block,statement);
+            return "ELSE{\n" + visit(block) + "}\n"
+        }
+        default:
+            return "Unknown node type " + to_string(node->type);
+    }
+}
+
 #endif // AST_Csq4_H
