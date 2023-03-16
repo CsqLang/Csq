@@ -77,4 +77,38 @@
         return state;
     }
 
+    bool isBracketClosed(TokenStream tokens){
+        bool state = false;
+        int lbraccount = 0;
+        int rbraccount = 0;
+        for(Token token : tokens){
+            if(token.type == SYMBOL && token.token == "[")
+                lbraccount++;
+            else if(token.type == SYMBOL && token.token == "]")
+                rbraccount++;
+            else
+                ignore;
+        }
+        if(lbraccount == rbraccount)
+            state = true;
+        return state;
+    }
+
+    bool isCurlyClosed(TokenStream tokens){
+        bool state = false;
+        int lcurlycount = 0;
+        int rcurlycount = 0;
+        for(Token token : tokens){
+            if(token.type == SYMBOL && token.token == "{")
+                lcurlycount++;
+            else if(token.type == SYMBOL && token.token == "}")
+                rcurlycount++;
+            else
+                ignore;
+        }
+        if(lcurlycount == rcurlycount)
+            state = true;
+        return state;
+    }
+
 #endif // PARSEr_H_CSQ4
