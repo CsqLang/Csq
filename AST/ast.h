@@ -111,6 +111,14 @@ struct FunctionDecl : Node{
     }
 };
 
+struct ForLoop : Node{
+    Expr condition;
+    string iter_name;
+    Block body;
+    ForLoop(){type = FOR_LOOP;}
+    ForLoop(string itername, Expr cond, Block body_){type = FOR_LOOP;iter_name = itername;condition = cond; body = body_;}
+};
+
 //Definition for visit function 
 string visit(const Ptr<Node>& node) {
     switch (node->type) {
@@ -200,5 +208,10 @@ Ptr<Node> addNode(FunctionDecl decl){
     return static_pointer_cast<Node>(node);
 }
 
-
+void addStatement(Ptr<Block> block, string statement){
+    block->statements.push_back(statement);
+}
+void addParam(Ptr<FunctionDecl> fun, string param){
+    fun->params.push_back(param);
+}
 #endif // AST_Csq4_H
