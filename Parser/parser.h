@@ -147,6 +147,54 @@
         return code_;
     }
 
-    
+    bool isFunDecl(TokenStream tokens){
+        bool state = false;
+        for(Token token : tokens)
+            if(token.type == KEYWORD && token.token == "def")
+                state = true;
+        return state;
+    }
+
+    bool isForStmt(TokenStream tokens){
+        bool state = false;
+        for(Token token : tokens)
+            if(token.type == KEYWORD && token.token == "for")
+                state = true;
+        return state;
+    }
+
+    bool isWhileStmt(TokenStream tokens){
+        bool state = false;
+        for(Token token : tokens)
+            if(token.type == KEYWORD && token.token == "while")
+                state = true;
+        return state;
+    }
+
+    bool isIfStmt(TokenStream tokens){
+        bool state = false;
+        for(Token token : tokens)
+            if(token.type == KEYWORD && token.token == "if")
+                state = true;
+        return state;
+    }
+
+
+    bool isElifStmt(TokenStream tokens){
+        bool state = false;
+        for(Token token : tokens)
+            if(token.type == KEYWORD && token.token == "elif")
+                state = true;
+        return state;
+    }
+
+
+    bool isElseStmt(TokenStream tokens){
+        bool state = false;
+        for(Token token : tokens)
+            if(token.type == KEYWORD && token.token == "else")
+                state = true;
+        return state;
+    }
 
 #endif // PARSEr_H_CSQ4
