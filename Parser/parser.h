@@ -197,4 +197,20 @@
         return state;
     }
 
+    bool isClassDef(TokenStream tokens){
+        bool state = false;
+        for(Token token : tokens)
+            if(token.type == KEYWORD && token.token == "class")
+                state = true;
+        return state;
+    }
+
+    bool isImportStmt(TokenStream tokens){
+        bool state = false;
+        for(Token token : tokens)
+            if(token.type == KEYWORD && token.token == "import")
+                state = true;
+        return state;
+    }
+
 #endif // PARSEr_H_CSQ4
