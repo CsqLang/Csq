@@ -40,5 +40,22 @@ void RunExecutable(string path){
     system(command.c_str());
 }
 
+bool gcc,gpp,clang,clangpp;
+
+void CompileToExec(string path, string name){
+    if(gcc == 1){
+        CompileToGCC(path, name);
+    }
+    else if(gpp == 1){
+        CompileToGPP(path, name);
+    }
+    else if(clang == 1){
+        CompileToClang(path, name);
+    }
+    else if(clangpp == 1){
+        CompileToClangPP(path, name);
+    }
+}
+
 
 #endif // CSQ_VM_4
