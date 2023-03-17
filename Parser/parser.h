@@ -257,18 +257,18 @@
             bool body_status = false;
             vector<string> statements;
             string statement;
-            for(Token token : tokens)
-                if(token.token != ":" && body_status != true)
-                    decl->condition.expr += token.token;
-                else if(token.token == ":" && body_status == false)
+            for(int ind = 3; ind < tokens.size(); ind++)
+                if(tokens[ind].token != ":" && body_status != true)
+                    decl->condition.expr += tokens[ind].token;
+                else if(tokens[ind].token == ":" && body_status == false)
                     body_status = true;
-                else if(body_status == true && token.token != ";")
-                   statement += token.token;
-                else if(body_status == true && token.token == ";"){
+                else if(body_status == true && tokens[ind].token != ";")
+                   statement += tokens[ind].token;
+                else if(body_status == true && tokens[ind].token == ";"){
                     statements.push_back(statement);
                     statement = "";
                 }
-                else if(body_status == true && token.token == "endfor")
+                else if(body_status == true && tokens[ind].token == "endfor")
                     body_status = false;
             //After storing the statement into vector we need to do one more parsing so that it will not create enough conflict.
             for(string stmt : statements){
