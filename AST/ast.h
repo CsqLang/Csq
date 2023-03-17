@@ -5,7 +5,9 @@
 #include "../Grammar/grammar.h"
 #include "../Tokenizer/tokenizer.h"
 #include "../IR/IRcode.h"
+#include "../Memory/stack.h"
 #include <memory>
+#include <stack>
 using namespace std;
 
 //Alias for shared_ptr;
@@ -70,6 +72,7 @@ struct VarDecl : Node{
         name = "";
         value = Expr();
         type = VAR_DECLARATION;
+
     }
 };
 
