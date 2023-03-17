@@ -8,6 +8,7 @@
 
     typedef vector<Token> TokenStream;
     typedef vector<string> StringStream;
+    typedef Ptr<Node> NodePtr;
     //Tools required for parsing
 
     /*Exceptions required for parsing and finding out the mistakes earlier.*/
@@ -27,6 +28,14 @@
     void StopCompilation(){
         printf("Couldn't compile due to %d previous errors.\n",error_count);
     }
+
+    void CsqErrorGuard(){
+        if(error_count > 0){
+            StopCompilation();
+            exit(0);
+        }
+    }
+
     /*
         Check tokens.
     */
@@ -212,5 +221,18 @@
                 state = true;
         return state;
     }
+
+    NodePtr ParseStatement(TokenStream tokens) {
+        NodePtr node = std::make_shared<Node>();
+        if (isVarDecl(tokens)) {
+            shared_ptr<VarDecl> decl = std::make_shared<VarDecl>(); // initialize the shared_ptr
+            decl->name = tokens[0].token;
+            for (int i = 2; i < tokens.size(); i++)
+                decl->value.expr += tokens[i].token;
+            node = static_pointer_cast<Node>(decl);
+        }
+        return node;
+    }
+
 
 #endif // PARSEr_H_CSQ4
