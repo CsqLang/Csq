@@ -252,7 +252,20 @@
             node = decl;
         }
         else if(isForStmt(tokens)){
-
+            shared_ptr<ForLoop> decl = make_shared<ForLoop>();
+            decl->iter_name = tokens[1].token;
+            bool body_status = false;
+            vector<string> statements;
+            string statement;
+            for(Token token : tokens)
+                if(token.token != ":" && body_status != true)
+                    decl->condition.expr += token.token;
+                else if(token.token == ":" && body_status == false)
+                    body_status = true;
+                else if(body_status == true && token.token != ";")
+                   statement += token.token;
+                else if(body_status == true && token.token == ";")
+                    statements.push_back(statement);statement = "";
         }
         
         return node;
