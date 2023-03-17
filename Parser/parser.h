@@ -239,6 +239,16 @@
                 decl->value.expr += tokens[i].token;
             node = decl;
         }
+        else if(isVarAssign(tokens)) {
+            shared_ptr<VarAssign> decl = make_shared<VarAssign>(); // initialize the shared_ptr
+            decl->name = tokens[0].token;
+            for (int i = 2; i < tokens.size(); i++)
+                decl->value.expr += tokens[i].token;
+            node = decl;
+        }
+        else if(isForStmt(tokens)){
+            
+        }
         return node;
     }
 
