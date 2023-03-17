@@ -137,25 +137,6 @@
         return state;
     }
 
-    vector<TokenStream> TokenizeStatements(string code){
-        vector<TokenStream> code_;
-        int line = 1;
-        string statement = "";
-        for(char ch : code){
-            if(ch != ';')
-                statement.push_back(ch);
-            else{
-                TokenStream tokens;
-                for(Token token : tokenize(statement,line)){
-                    tokens.push_back(token);
-                }
-                code_.push_back(tokens);
-                statement = "";
-            }
-        }
-        return code_;
-    }
-
     bool isFunDecl(TokenStream tokens){
         bool state = false;
         for(Token token : tokens)
