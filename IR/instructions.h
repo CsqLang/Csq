@@ -3,30 +3,17 @@
 #include "../AST/ast.h"
 
 
-enum instructions{
-    PUSHVAR,
-    VARASSIGN,
-    DEF,
-    CALL,
-    FOR,
-    WHILE,
-    IF,
-    ELIF,
-    ELSE,
-    CLASS,
-    PUSHVALUE,
-};
+#define VAR auto
+#define FUN auto
+#define FOR for
+#define WHILE while
+#define CLASS class
+#define IN :
+#define IF if
+#define ELIF else if
+#define ELSE else
+#define SWITCH switch
+#define CASE case:
 
-
-/*
-    Example::
-    Csq code: a = 49
-    AST representation:
-    Variable Declaration
-        /       \
-       a        49
-    IR representation:
-    PUSHVAR a 49
-*/
 
 #endif // instructions_IRCsq4
