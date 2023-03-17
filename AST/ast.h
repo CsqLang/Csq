@@ -256,7 +256,7 @@ string visit(const Ptr<Node>& node) {
             shared_ptr<Block> block = make_shared<Block>();
             for(string statement : stmt->body.statements)
                 addStatement(block,statement);
-            return "ELSE{\n" + visit(block) + "}\n"
+            return "ELSE{\n" + visit(block) + "}\n";
         }
         default:
             return "Unknown node type " + to_string(node->type);
