@@ -229,16 +229,6 @@
         return state;
     }
 
-    NodePtr ParseStatement(TokenStream tokens) {
-        NodePtr node = std::make_shared<Node>();
-        if (isVarDecl(tokens)) {
-            shared_ptr<VarDecl> decl = std::make_shared<VarDecl>(); // initialize the shared_ptr
-            decl->name = tokens[0].token;
-            for (int i = 2; i < tokens.size(); i++)
-                decl->value.expr += tokens[i].token;
-            node = decl;
-        }
-        return node;
-    }
+    
 
 #endif // PARSEr_H_CSQ4
