@@ -66,6 +66,7 @@
     /*
         Check tokens.
     */
+
     bool parenthesisPresent(TokenStream tokens){
         StringStream strtokens;
         bool presence = false;
@@ -108,7 +109,7 @@
 
     bool isVarAssign(TokenStream tokens){
         bool state = false;
-        if(tokens[0].type == IDENTIFIER && tokens[1].type == ASOPERATOR && tokens[2].type != ASOPERATOR && in(tokens[0].token,Variables) == 1)
+        if(tokens[1].type == ASOPERATOR && (tokens[2].type != ASOPERATOR) && (in(tokens[0].token,Variables) == 1))
             state = true;
         return state;
     }
@@ -229,6 +230,7 @@
                 state = true;
         return state;
     }
+    string varn;
 
     NodePtr ParseStatement(TokenStream tokens) {
         NodePtr node = make_shared<Node>();
@@ -238,6 +240,9 @@
             for (int i = 2; i < tokens.size(); i++)
                 decl->value.expr += tokens[i].token;
             node = decl;
+            vector<string> Varstacktemp = Variables;
+            Varstacktemp.push_back(decl->name);
+            Variables = Varstacktemp;
         }
         else if(isVarAssign(tokens)) {
             shared_ptr<VarAssign> decl = make_shared<VarAssign>(); // initialize the shared_ptr
@@ -247,8 +252,9 @@
             node = decl;
         }
         else if(isForStmt(tokens)){
-            
+
         }
+        
         return node;
     }
 
