@@ -264,8 +264,20 @@
                     body_status = true;
                 else if(body_status == true && token.token != ";")
                    statement += token.token;
-                else if(body_status == true && token.token == ";")
-                    statements.push_back(statement);statement = "";
+                else if(body_status == true && token.token == ";"){
+                    statements.push_back(statement);
+                    statement = "";
+                }
+                else if(body_status == true && token.token == "endfor")
+                    body_status = false;
+            //After storing the statement into vector we need to do one more parsing so that it will not create enough conflict.
+            for(string stmt : statements){
+                //First tokenize the gathered statement.
+                TokenStream tokens_ = tokenize(stmt,-1);
+                shared_ptr<Node> node_returned = static_pointer_cast<Node>(ParseStatement(tokens_));;
+                decl->body.statements.push_back(visit(node_returned));
+            }
+            node = decl;
         }
         
         return node;
