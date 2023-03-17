@@ -36,6 +36,28 @@
         }
     }
 
+    //Different types of tokens including symbols and keywords
+    typedef enum{
+        LBRACE,
+        RBRACE,
+        LPAREN,
+        RPAREN,
+        LBRACK,
+        RBRACK,
+        PERCENT,
+        EQUAL,
+        TILDE,
+        COMMA,
+        GREATER,
+        LESSER,
+        SEMI,
+        COLAN,
+        PLUS,
+        MINUS,
+        STAR,
+        BSLASH,
+    }PTOKEN;
+
     /*
         Check tokens.
     */
