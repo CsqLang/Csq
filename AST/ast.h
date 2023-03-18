@@ -228,7 +228,7 @@ string visit(const Ptr<Node>& node) {
             for(string statement : floop->body.statements){
                 addStatement(block,statement);
             }
-            return "FOR(" + floop->iter_name + " : " + floop->condition.expr + "){\n" + visit(block) + "};\n";
+            return "FOR( VAR " + floop->iter_name + " : " + floop->condition.expr + "){\n" + visit(block) + "};\n";
         }
         case WHILE_LOOP:{
             Ptr<WhileLoop> stmt = static_pointer_cast<WhileLoop>(node);
@@ -262,7 +262,10 @@ string visit(const Ptr<Node>& node) {
             return "ELSE{\n" + visit(block) + "}\n";
         }
         default:
-            return "Unknown node type " + to_string(node->type);
+            string code;
+            Ptr<Expr> stmt = static_pointer_cast<Expr>(node);
+            code = stmt->expr;
+            return code;
     }
 }
 
