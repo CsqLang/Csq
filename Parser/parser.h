@@ -13,18 +13,22 @@
 
     /*Exceptions required for parsing and finding out the mistakes earlier.*/
     void ParenthesisNotClosed(int line){
-        printf("At line : %d, parenthesis aren't properly closed.",line);
+        printf("At line : %d, parenthesis aren't properly closed.\n",line);
         error_count++;
     }
     void CurlyBraceNotClosed(int line){
-        printf("At line : %d, curly brackets aren't properly closed.",line);
+        printf("At line : %d, curly brackets aren't properly closed.\n",line);
         error_count++;
     }
     void SquareBracNotClosed(int line){
-        printf("At line : %d, square brackets aren't properly closed.",line);
+        printf("At line : %d, square brackets aren't properly closed.\n",line);
         error_count++;
     }
 
+    void ExpectedInAfterFor(){
+        printf("Error : Expected a 'in' keyword after iterator name in for loop.\n");
+        error_count++;
+    }
 
     void StopCompilation(){
         printf("Couldn't compile due to %d previous errors.\n",error_count);
@@ -238,7 +242,13 @@
             shared_ptr<VarDecl> decl = make_shared<VarDecl>(); // initialize the shared_ptr
             decl->name = tokens[0].token;
             for (int i = 2; i < tokens.size(); i++)
-                decl->value.expr += tokens[i].token;
+                if(tokens[i].token != ";")
+                    if(tokens[i].type == STR)
+                        decl->value.expr += "\"" + tokens[i].token + "\"";
+                    else
+                        decl->value.expr += tokens[i].token;
+                else
+                    break;
             node = decl;
             vector<string> Varstacktemp = Variables;
             Varstacktemp.push_back(decl->name);
@@ -248,41 +258,43 @@
             shared_ptr<VarAssign> decl = make_shared<VarAssign>(); // initialize the shared_ptr
             decl->name = tokens[0].token;
             for (int i = 2; i < tokens.size(); i++)
-                decl->value.expr += tokens[i].token;
+                if(tokens[i].token != ";")
+                    decl->value.expr += tokens[i].token;
+                else
+                    break;
             node = decl;
         }
         else if(isForStmt(tokens)){
             shared_ptr<ForLoop> decl = make_shared<ForLoop>();
+            /*
+            Input code without tokenization:
+            for i in a:for j in i:jj = 39;endfor;endfor
+
+            [for, i, in, a]
+              0   1  2   3
+
+            */
+            string statements;
+            bool body_state = false;
             decl->iter_name = tokens[1].token;
-            bool body_status = false;
-            vector<string> statements;
-            string statement;
-            for(int ind = 3; ind < tokens.size(); ind++)
-                if(tokens[ind].token != ":" && body_status != true)
-                    decl->condition.expr += tokens[ind].token;
-                else if(tokens[ind].token == ":" && body_status == false)
-                    body_status = true;
-                else if(body_status == true && tokens[ind].token != ";")
-                   statement += tokens[ind].token;
-                else if(body_status == true && tokens[ind].token == ";"){
-                    statements.push_back(statement);
-                    statement = "";
+            
+            if(tokens[2].token != "in")
+                ExpectedInAfterFor();
+            else{
+                for(int i = 3;i<tokens.size();i++){
+                    if(tokens[i].token != ":")
+                        decl->condition.expr += tokens[i].token + " ";
+                    else if(tokens[i].token == ":")
+                        body_state = true;
+                    else if(body_state == 1 && tokens[i].token != "endfor")
+                        ignore;
                 }
-                else if(body_status == true && tokens[ind].token == "endfor")
-                    body_status = false;
-            //After storing the statement into vector we need to do one more parsing so that it will not create enough conflict.
-            for(string stmt : statements){
-                //First tokenize the gathered statement.
-                TokenStream tokens_ = tokenize(stmt,-1);
-                shared_ptr<Node> node_returned = static_pointer_cast<Node>(ParseStatement(tokens_));;
-                decl->body.statements.push_back(visit(node_returned));
+                node = decl;
             }
-            node = decl;
+
         }
-        
+
         return node;
     }
-
-    
 
 #endif // PARSEr_H_CSQ4
