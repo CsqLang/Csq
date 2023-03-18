@@ -274,7 +274,7 @@
               0   1  2   3
 
             */
-            string statements;
+            TokenStream statements;
             bool body_state = false;
             decl->iter_name = tokens[1].token;
             
@@ -282,13 +282,16 @@
                 ExpectedInAfterFor();
             else{
                 for(int i = 3;i<tokens.size();i++){
-                    if(tokens[i].token != ":")
+                    if(tokens[i].token != ":" && body_state == 0)
                         decl->condition.expr += tokens[i].token + " ";
-                    else if(tokens[i].token == ":")
+                    else if(tokens[i].token == ":" && body_state == 0)
                         body_state = true;
                     else if(body_state == 1 && tokens[i].token != "endfor")
-                        ignore;
+                        statements.push_back(tokens[i]);
+                    else if(body_state == 2 && tokens[i].token == ";")
+                        statements.push_back(tokens[i]);
                 }
+                decl->body.statements.push_back(visit(ParseStatement(statements)));
                 node = decl;
             }
 
