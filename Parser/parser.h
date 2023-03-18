@@ -266,35 +266,44 @@
         }
         else if(isForStmt(tokens)){
             shared_ptr<ForLoop> decl = make_shared<ForLoop>();
-            /*
-            Input code without tokenization:
-            for i in a:for j in i:jj = 39;endfor;endfor
-
-            [for, i, in, a]
-              0   1  2   3
-
-            */
-            TokenStream statements;
+            vector<TokenStream> statements;
             bool body_state = false;
             decl->iter_name = tokens[1].token;
             
             if(tokens[2].token != "in")
                 ExpectedInAfterFor();
             else{
+                TokenStream statement;
                 for(int i = 3;i<tokens.size();i++){
                     if(tokens[i].token != ":" && body_state == 0)
                         decl->condition.expr += tokens[i].token + " ";
                     else if(tokens[i].token == ":" && body_state == 0)
                         body_state = true;
                     else if(body_state == 1 && tokens[i].token != "endfor")
-                        statements.push_back(tokens[i]);
-                    else if(body_state == 2 && tokens[i].token == ";")
-                        statements.push_back(tokens[i]);
+                        statement.push_back(tokens[i]);
+                    else if(body_state == 1 && tokens[i].token == ";"){
+                        printf("%s ",tokens[i].token.c_str());
+                        statement.push_back(tokens[i]);
+                        statements.push_back(statement);
+                        statement.clear();
+                    }
+                    else if(body_state == 1 && tokens[i].token == "endfor"){
+                        break;
+                    }
                 }
-                decl->body.statements.push_back(visit(ParseStatement(statements)));
                 node = decl;
             }
+        }
 
+        else{
+            shared_ptr<Expr> decl = make_shared<Expr>();
+            for(Token token : tokens){
+                if(token.token != ";")
+                    decl->expr += token.token;
+                else
+                    break;
+            }
+            node= decl;
         }
 
         return node;
