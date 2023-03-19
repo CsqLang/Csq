@@ -1,3 +1,6 @@
+/*
+----------------------------------------------The tokenizer for Csq4---------------------------------------------------
+*/
 #if !defined(tokenizer_Csq4)
 #define tokenizer_Csq4
 //Importing grammar and token type
@@ -314,7 +317,7 @@ vector<Token> tokenize(string source_code, int line_no) {
             }
             else if(c == '"' && string_presence == true){
                 Token tok;
-                tok.token = str_input;
+                tok.token = ""+str_input+"";
                 tok.type = STR;
                 tokens.push_back(tok);
                 string_presence = false;
@@ -353,6 +356,17 @@ vector<Token> tokenize(string source_code, int line_no) {
                 }
                 
             }
+            case EQUAL:{
+                switch(symbolType(tokens[i+1])){
+                    case EQUAL:{
+                        Token token;
+                        token.token = "==";
+                        token.type = COPERATOR;
+                        filtered_Tokens.push_back(token);
+                        i = i + 2;
+                    }
+                }
+            }
             case GREATER:{
                 switch(symbolType(tokens[i+1])){
                     case EQUAL:{
@@ -380,7 +394,6 @@ vector<Token> tokenize(string source_code, int line_no) {
             }
         }
     }
-
     return filtered_Tokens;
 }
 
