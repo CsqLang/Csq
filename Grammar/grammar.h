@@ -1,6 +1,6 @@
 /*
     This is the grammar for Csq4 generally
-    we defines it by using some frameworks such as Bison
+    we defines it by using some frameworks such as Bison and Yacc
     but we don't want to increase complexity here so we are defining it
     inside the code only which can be directly accessed by the C/C++ code.
 */
@@ -34,7 +34,7 @@ vector<string> COMPARISON_OPERATORS = {"==","!=","<",">","<=",">="};
 //Assignment operators
 vector<string> ASSIGNMENT_OPERATORS = {"="};
 //Symbols lookup
-vector<string> SYMBOLS = {"{","}","(",")","[","]",",","~","@","$","&","!",":","/",";","."};
+vector<string> SYMBOLS = {"{","}","(",")","[","]",",","~","@","$","&","!",":",";","."};
 
 //Keyword lookup
 vector<string> KEYWORDS_TABLE = 
