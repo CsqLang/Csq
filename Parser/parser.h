@@ -41,32 +41,6 @@
         }
     }
 
-    //Different types of tokens including symbols and keywords
-    typedef enum{
-        LBRACE,
-        RBRACE,
-        LPAREN,
-        RPAREN,
-        LBRACK,
-        RBRACK,
-        PERCENT,
-        EQUAL,
-        TILDE,
-        COMMA,
-        GREATER,
-        LESSER,
-        SEMI,
-        COLAN,
-        PLUS,
-        MINUS,
-        STAR,
-        BSLASH,
-        HASHTAG,
-        AMPER,
-        POWER,
-        IMPORT,
-    }PTOKEN;
-
     /*
         Check tokens.
     */
@@ -269,37 +243,28 @@
             vector<TokenStream> statements;
             bool body_state = false;
             decl->iter_name = tokens[1].token;
-            
-            if(tokens[2].token != "in")
-                ExpectedInAfterFor();
-            else{
-                TokenStream statement;
-                for(int i = 3;i<tokens.size();i++){
-                    if(tokens[i].token != ":" && body_state == 0)
-                        decl->condition.expr += tokens[i].token + " ";
-                    else if(tokens[i].token == ":" && body_state == 0)
-                        body_state = true;
-                    else if(body_state == 1 && tokens[i].token != "endfor")
-                        statement.push_back(tokens[i]);
-                    else if(body_state == 1 && tokens[i].token == ";"){
-                        printf("%s ",tokens[i].token.c_str());
-                        statement.push_back(tokens[i]);
-                        statements.push_back(statement);
-                        statement.clear();
-                    }
-                    else if(body_state == 1 && tokens[i].token == "endfor"){
-                        break;
-                    }
+            bool condition_state = true;
+            for(int i = 3; i < tokens.size();i++){
+                if(condition_state == true && tokens[i].token != ":" && body_state == false)
+                    decl->condition.expr += tokens[i].token + " ";
+                else if(condition_state == true && tokens[i].token == ":" && body_state == false){
+                    condition_state = false;
+                    body_state = true;
                 }
-                node = decl;
             }
+            node = decl;
         }
 
         else{
             shared_ptr<Expr> decl = make_shared<Expr>();
             for(Token token : tokens){
                 if(token.token != ";")
-                    decl->expr += token.token;
+                    if(token.type == STR){
+                        decl->expr += "\""+token.token+"\"";
+                    }
+                    else{
+                        decl->expr += token.token;
+                    }
                 else
                     break;
             }
