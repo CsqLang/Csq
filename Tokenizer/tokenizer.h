@@ -340,30 +340,7 @@ vector<Token> tokenize(string source_code, int line_no) {
 
     vector<Token> filtered_Tokens;
     for(int i = 0;i<tokens.size();i++){
-        switch(tokens[i].type){
-            case ASOPERATOR:{
-                switch(tokens[i+1].type)
-                    case ASOPERATOR:{
-                        Token token;
-                        token.type = COPERATOR;
-                        token.token = "==";
-                        filtered_Tokens.push_back(token);
-                        i = i + 2;
-                    }
-            }
-            case SYMBOL:{
-                switch(tokens[i+1].type)
-                    case ASOPERATOR:{
-                        Token token;
-                        token.type = COPERATOR;
-                        token.token = "!=";
-                        filtered_Tokens.push_back(token);
-                        i = i + 2;
-                    }
-            }
-            default:
-                filtered_Tokens.push_back(tokens[i]);
-        }
+        
     }
 
     return filtered_Tokens;
