@@ -43,9 +43,13 @@ typedef enum{
     AMPER = 20,
     VBAR = 21,
     NOT = 22,
-    POWER = 23,
+    HAT = 23,
     NOTSYMBOL = 24,
     DOT = 25,
+    OR,
+    AND,
+    MOD,
+
 }STOKEN;
 
 //Struct for tokens
@@ -216,7 +220,18 @@ STOKEN symbolType(Token token){
                 return EQUAL;
         }
         case AROPERATOR:{
-
+            if(token.token == "+")
+                return PLUS;
+            else if(token.token == "-")
+                return MINUS;
+            else if(token.token == "*")
+                return STAR;
+            else if(token.token == "/")
+                return BSLASH;
+            else if(token.token == "%")
+                return MOD;
+            else if(token.token == "^")
+                return HAT;
         }
         case SYMBOL:{
             if(token.token == "!")
@@ -237,6 +252,31 @@ STOKEN symbolType(Token token){
                 return LBRACK;
             else if(token.token == "]")
                 return RBRACK;
+            else if(token.token == ".")
+                return DOT;
+            else if(token.token == ",")
+                return COMMA;
+            else if(token.token == ":")
+                return COLAN;
+            else if(token.token == ";")
+                return SEMI;
+            else if(token.token == "~")
+                return TILDE;
+        }
+        case LOPERATOR:{
+            if(token.token == "or")
+                return OR;
+            else if(token.token == "and")
+                return AND;
+            else if(token.token == "not")
+                return NOT;
+        }
+        case COPERATOR:{
+            if(token.token == ">")
+                return GREATER;
+            else if(token.token == "<")
+                return LESSER;
+            
         }
         default:{
             return NOTSYMBOL;
