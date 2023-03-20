@@ -295,7 +295,11 @@ vector<Token> tokenize(string source_code, int line_no) {
     vector<Token> tokens;
     string current_string, str_input;
     int current_line = 1;
+    //Indentation count;
+    int IndentCount = 0;
+    //Some states
     bool indent_ended = true;
+    bool indentation_present = false;
     bool char_start = false;
     bool string_presence = false;
     bool comment = false;
@@ -305,11 +309,13 @@ vector<Token> tokenize(string source_code, int line_no) {
         //Checking for indentation.
         //This string will store the code without indentations.
         if(source_code[0] == ' '){
+            indentation_present = true;
             string temp_source;
             for(int i = 0;i<source_code.length();i++){
                 if(source_code[i] == ' ' && char_start == false){
                     Token indent;
                     indent.token = ' ';
+                    IndentCount++;
                     indent.type = INDENT;
                     tokens.push_back(indent);
                     indent_ended = false; 
@@ -339,17 +345,17 @@ vector<Token> tokenize(string source_code, int line_no) {
                     tokens.push_back(check(string(1,c),line_no));
                 }
             }
-            else if(c == '"' && string_presence == false){
+            else if((c == '"' || c == '\'') && string_presence == false){
                 string_presence = true;
             }
-            else if(c == '"' && string_presence == true){
+            else if((c == '"' || c == '\'') && string_presence == true){
                 Token tok;
                 tok.token = ""+str_input+"";
                 tok.type = STR;
                 tokens.push_back(tok);
                 string_presence = false;
             }
-            else if(c != '"' && string_presence == true){
+            else if((c != '"' || c != '\'') && string_presence == true){
                 str_input.push_back(c);
             }
             else { // if non-whitespace or symbol character, append to current string
@@ -421,6 +427,7 @@ vector<Token> tokenize(string source_code, int line_no) {
             }
         }
     }
+
     return filtered_Tokens;
 }
 
