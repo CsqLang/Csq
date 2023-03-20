@@ -66,4 +66,36 @@ vector<string> KEYWORDS_TABLE =
 "continue",
 };
 
+
+/*
+----------------------------------------------------------GRAMMAR RULES-----------------------------------------------------
+[1] Expr
+Represents:
+          | any value is called an expression it could be either binary expr or just values and identifiers
+Example:
+        |  (a+4), 3, (464+44/3+x)
+
+[2] Variable declaration or assignment
+Represents:
+          | any identifier with = is considered as variable decl or assignemnt
+            | If the identifier is not declared in variable stack so it's variable decl
+            | Else it's variable assignment
+Syntax:
+    <identifier> = <Expr>
+Example:
+        |Decleration:
+        | a = 59
+        |Assignment
+        | a = 49
+[3] Function declaration 
+Represents:
+          | any statement starting with def keyword is function or method.
+Syntax:
+    def <identifier>(<param>):
+    ___.......
+Example:
+        def mytest():
+            a = 95
+*/
+
 #endif // Grammar_csq4
