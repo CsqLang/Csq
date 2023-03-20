@@ -1,3 +1,8 @@
+/*
+
+This is the test to check whether tokenizer is working perfectly or not?
+
+*/
 #include <iostream>
 #include "AST/ast.h"
 #include "Parser/parser.h"
@@ -5,7 +10,8 @@
 int main() {
     vector<TokenStream> tokens = {
         tokenize("for i in a:",1),
-        tokenize(" print(\"Hi\")",2),
+        tokenize("  print(\"hello\")",2),
+        tokenize("print(\"hi\")",2),
     };
     int line_no = 1;
     for(TokenStream tokS : tokens){
@@ -37,3 +43,23 @@ int main() {
 
     return 0;
 }
+
+/*
+Output shall be : 
+Line[1]
+(for,KEYWORD)
+(i,IDENTIFIER)
+(in,KEYWORD)
+(a,IDENTIFIER)
+(:,SYMBOL)
+Line[2]
+( ,INDENT)
+( ,INDENT)
+(print,IDENTIFIER)
+((,SYMBOL)
+(),SYMBOL)
+Line[3]
+(print,IDENTIFIER)
+((,SYMBOL)
+(),SYMBOL)
+*/
