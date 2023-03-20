@@ -1,6 +1,6 @@
 /*
     This is the grammar for Csq4 generally
-    we defines it by using some frameworks such as Bison and Yacc
+    we defines it by using some frameworks such as Bison
     but we don't want to increase complexity here so we are defining it
     inside the code only which can be directly accessed by the C/C++ code.
 */
