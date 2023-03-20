@@ -7,6 +7,8 @@
 #include "../Grammar/grammar.h"
 #define ignore
 
+#define MAX_INDENT_LEVEL 500
+
 //Types of token
 enum TokenType {
     KEYWORD = 1,
@@ -19,7 +21,8 @@ enum TokenType {
     COPERATOR = 8,
     LOPERATOR = 9,
     COMMENT =10,
-    UNKNOWN = 11,
+    INDENT = 11,
+    UNKNOWN = 12,
 };
 
 //This enum field will give even more detail about symbols excluding identifiers, numbrs and keywords
@@ -292,11 +295,35 @@ vector<Token> tokenize(string source_code, int line_no) {
     vector<Token> tokens;
     string current_string, str_input;
     int current_line = 1;
+    bool indent_ended = true;
+    bool char_start = false;
     bool string_presence = false;
     bool comment = false;
     if(source_code[0] == '#')
         ignore;
     else{
+        //Checking for indentation.
+        //This string will store the code without indentations.
+        if(source_code[0] == ' '){
+            string temp_source;
+            for(int i = 0;i<source_code.length();i++){
+                if(source_code[i] == ' ' && char_start == false){
+                    Token indent;
+                    indent.token = ' ';
+                    indent.type = INDENT;
+                    tokens.push_back(indent);
+                    indent_ended = false; 
+                }
+                else if(source_code[i] != ' ' && char_start == false && indent_ended == false){
+                    indent_ended = true;
+                    temp_source.push_back(source_code[i]);
+                    char_start = true;
+                }
+                else if(char_start == 1)
+                    temp_source.push_back(source_code[i]);
+            }
+            source_code = temp_source;
+        }
         for (int i = 0; i < source_code.length(); i++) {
             char c = source_code[i];
             if ((c == ' ' || c == '\n' || c == '\t' || isSymbolLaterals(string(1, c))) && string_presence == false) { // if whitespace or symbol character, handle separately
