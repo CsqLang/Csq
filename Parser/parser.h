@@ -27,11 +27,11 @@
     //Scope for the statements
     struct Scope{
         int indent_level;
-        string id;
+        Block body;
         Scope(){}
-        Scope(int level, string id_){
+        Scope(int level, Block body_){
             indent_level = level;
-            id = id_;
+            body = body_;
         }
     };
 
@@ -100,6 +100,10 @@
         return indent_level;
     }
 
+    /*
+    Indentation handling shall be done in such a way in which every
+    line with certain indentation shall be stored as an object.
+    */
     
 
 #endif // PARSEr_H_CSQ4
