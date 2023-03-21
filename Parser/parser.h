@@ -86,6 +86,20 @@
         return block;
     }
 
+    //This function is gonna return the deepest indent level.
+    int DeepestIndentLevel(vector<TokenStream> tokens)
+    {
+        int indent_level = 0;
+        for(TokenStream tokenStream : tokens)
+        {
+            if(getIndentLevel(tokenStream) > indent_level){
+                indent_level = getIndentLevel(tokenStream);
+            }
+            else{}
+        }
+        return indent_level;
+    }
+
     
 
 #endif // PARSEr_H_CSQ4
