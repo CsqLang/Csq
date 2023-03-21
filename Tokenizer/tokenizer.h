@@ -22,7 +22,8 @@ enum TokenType {
     LOPERATOR = 9,
     COMMENT =10,
     INDENT = 11,
-    UNKNOWN = 12,
+    NEWLINE = 12,
+    UNKNOWN = 13,
 };
 
 //This enum field will give even more detail about symbols excluding identifiers, numbrs and keywords
@@ -291,7 +292,7 @@ STOKEN symbolType(Token token){
 }
 
 
-vector<Token> tokenize(string source_code, int line_no) {
+vector<Token> tokenize(string source_code) {
     vector<Token> tokens;
     string current_string, str_input;
     int current_line = 1;
@@ -335,6 +336,10 @@ vector<Token> tokenize(string source_code, int line_no) {
             if ((c == ' ' || c == '\n' || c == '\t' || isSymbolLaterals(string(1, c))) && string_presence == false) { // if whitespace or symbol character, handle separately
                 if (c == '\n') {
                     current_line++;
+                    Token newline;
+                    newline.token = "\n";
+                    newline.type = NEWLINE;
+                    tokens.push_back(newline);
                 }
                 if (current_string.length() > 0) { // if non-empty string, check if it matches any operator, keyword, or value
                     Token token = check(current_string, current_line);
@@ -342,7 +347,7 @@ vector<Token> tokenize(string source_code, int line_no) {
                     current_string = "";
                 }
                 if (isSymbolLaterals(string(1, c))) { // handle symbol
-                    tokens.push_back(check(string(1,c),line_no));
+                    tokens.push_back(check(string(1,c),current_line));
                 }
             }
             else if((c == '"' || c == '\'') && string_presence == false){
@@ -369,7 +374,7 @@ vector<Token> tokenize(string source_code, int line_no) {
         }
 
         if (string_presence) { // handle unclosed string literal
-            printf("Error: unclosed string literal at line %d\n", line_no);
+            printf("Error: unclosed string literal at line %d\n", current_line);
             exit(1);
         }
     }
