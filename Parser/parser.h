@@ -76,21 +76,16 @@
         }
         return result;
     }
-    
-    IfStmt ParseIfStmt(TokenStream tokens);
-    ElifStmt ParseElifStmt(TokenStream tokens);
-    ElseStmt ParseElseStmt(TokenStream tokens);
-
-    vector<Block>  ParseScope(vector<TokenStream> raw_tokens, int indent_level,string id = ""){
-        TokenStream out_of_stock;
+    //Function to parse scope of the particular indent_level;
+    Block ParseScope(vector<TokenStream> raw_tokens, int indent_level,string id = ""){
         Block block;
         for(TokenStream tokenStream : raw_tokens){
             if(getIndentLevel(tokenStream) == indent_level)
                 block.statements.push_back(TokenStreamToString(tokenStream));
-            else{
-                
-            }
         }
+        return block;
     }
+
+    
 
 #endif // PARSEr_H_CSQ4
