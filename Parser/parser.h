@@ -65,14 +65,32 @@
         }
         return lines;
     }
+    //We can't directly use TokenStream as body of block so for that we use string.
+    string TokenStreamToString(TokenStream tokens){
+        string result;
+        for(Token token : tokens){
+            if(token.type == STR)
+                result += "\"" + token.token + "\" ";
+            else
+                result += token.token + " ";
+        }
+        return result;
+    }
     
     IfStmt ParseIfStmt(TokenStream tokens);
     ElifStmt ParseElifStmt(TokenStream tokens);
     ElseStmt ParseElseStmt(TokenStream tokens);
 
-    // vector<Block,TokenStream>  ParseScope(TokenStream raw_tokens, int indent_level,string id = ""){
-    //     vector<TokenStream> tokens = LineSeperator(raw_tokens);
-    //     return tokens;
-    // }
+    vector<Block>  ParseScope(vector<TokenStream> raw_tokens, int indent_level,string id = ""){
+        TokenStream out_of_stock;
+        Block block;
+        for(TokenStream tokenStream : raw_tokens){
+            if(getIndentLevel(tokenStream) == indent_level)
+                block.statements.push_back(TokenStreamToString(tokenStream));
+            else{
+                
+            }
+        }
+    }
 
 #endif // PARSEr_H_CSQ4
