@@ -106,11 +106,10 @@ struct FunctionDecl : Node{
         type = FUNCTION_DECL;
         name = "";
     }
-    FunctionDecl(string name_, vector<string> params_, Block body_){
+    FunctionDecl(string name_, vector<string> params_){
         type = FUNCTION_DECL;
         name = name_;
         params = params_;
-        body = body_;
     }
 };
 
@@ -119,34 +118,34 @@ struct ForLoop : Node{
     string iter_name;
     Block body;
     ForLoop(){type = FOR_LOOP;}
-    ForLoop(string itername, Expr cond, Block body_){type = FOR_LOOP;iter_name = itername;condition = cond; body = body_;}
+    ForLoop(string itername, Expr cond){type = FOR_LOOP;iter_name = itername;condition = cond;}
 };
 
 struct WhileLoop : Node{
     Expr condition;
     Block body;
     WhileLoop(){type = WHILE_LOOP;}
-    WhileLoop(Expr cond, Block body_){type = WHILE_LOOP;condition = cond; body = body_;}
+    WhileLoop(Expr cond){type = WHILE_LOOP;condition = cond;}
 };
 
 struct IfStmt : Node{
     Expr condition;
     Block body;
     IfStmt(){type = IF_STATEMENT;}
-    IfStmt(Expr cond, Block body_){type = IF_STATEMENT;condition = cond; body = body_;}
+    IfStmt(Expr cond){type = IF_STATEMENT;condition = cond;}
 };
 
 struct ElifStmt : Node{
     Expr condition;
     Block body;
     ElifStmt(){type = ELIF_STATEMENT;}
-    ElifStmt(Expr cond, Block body_){type = ELIF_STATEMENT;condition = cond; body = body_;}
+    ElifStmt(Expr cond){type = ELIF_STATEMENT;condition = cond;}
 };
 
 struct ElseStmt : Node{
     Block body;
     ElseStmt(){type = ELSE_STATEMENT;}
-    ElseStmt(Block body_){type = ELSE_STATEMENT;body = body_;}
+    ElseStmt(){type = ELSE_STATEMENT;}
 };
 
 
