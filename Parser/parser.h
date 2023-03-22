@@ -122,15 +122,6 @@
 
     vector<Scope> Scopes;
 
-    void ScopeParser(vector<TokenStream> tokens){
-        int deepest_indent = DeepestIndentLevel(tokens);
-        for(int indent = deepest_indent; indent >= 0; indent--){
-            Scopes.push_back(
-                Scope(indent,
-                    ParseScope(tokens,indent)
-                    )
-            );
-        }
-    }
+    
 
 #endif // PARSEr_H_CSQ4
