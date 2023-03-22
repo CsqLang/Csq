@@ -192,7 +192,30 @@ which will be used by scope defining functions to get desired results.
         return stmt;
     }
 
-
+    ElifStmt ParseElifStmt(TokenStream tokens){
+        ElifStmt stmt;
+        bool condition = false;
+        for(int i = 0; i<tokens.size(); i++)
+            if(tokens[i].token == "elif" && tokens[i].type == KEYWORD && condition == 0)
+                condition = true;
+            else if(condition && tokens[i].token != ":")
+                stmt.condition.expr += tokens[i].token;
+            else if(condition && tokens[i].token == ":")
+            {
+                condition = false;
+                break;
+            }
+        if(stmt.condition.expr == ""){
+            printf("Error:[%d] expected an expression, after keyword elif.\n",error_count+1);
+            printf("Hint:[%d] add a condition after elif keyword.\n",error_count+1);
+            error_count++;
+        }
+        if(condition){
+            printf("Error:[%d] the elif statement hasn't ended sucessfuly.\nHint:[%d] add a colon after condition.\n",error_count+1, error_count+1);
+            error_count++;
+        }
+        return stmt;
+    }
 
     //Function to parse scope of the particular indent_level;
     vector<Statement> ParseScope(vector<TokenStream> raw_tokens, string id = ""){
