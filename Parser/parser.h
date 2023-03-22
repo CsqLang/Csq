@@ -32,6 +32,19 @@
         Scope(int level, Block body_){
             indent_level = level;
             body = body_;
+        };
+    };
+
+    //Struct to store infos about statements
+    struct Statement{
+        int indent_level;
+        int statement_number;
+        string statement;
+        Statement(){}
+        Statement(int statement_num, string statement_, int indent_level_){
+            statement_number = statement_num;
+            statement = statement_;
+            indent_level = indent_level_;
         }
     };
 
@@ -77,13 +90,14 @@
         return result;
     }
     //Function to parse scope of the particular indent_level;
-    Block ParseScope(vector<TokenStream> raw_tokens, int indent_level,string id = ""){
-        Block block;
+    vector<Statement> ParseScope(vector<TokenStream> raw_tokens, string id = ""){
+        vector<Statement> statements;
+        int statNum = 1;
         for(TokenStream tokenStream : raw_tokens){
-            if(getIndentLevel(tokenStream) == indent_level)
-                block.statements.push_back(TokenStreamToString(tokenStream));
+            statements.push_back(Statement(statNum, TokenStreamToString(tokenStream),getIndentLevel(tokenStream)));
+            statNum++;
         }
-        return block;
+        return statements;
     }
 
     //This function is gonna return the deepest indent level.
@@ -105,5 +119,18 @@
     line with certain indentation shall be stored as an object.
     */
     
+
+    vector<Scope> Scopes;
+
+    void ScopeParser(vector<TokenStream> tokens){
+        int deepest_indent = DeepestIndentLevel(tokens);
+        for(int indent = deepest_indent; indent >= 0; indent--){
+            Scopes.push_back(
+                Scope(indent,
+                    ParseScope(tokens,indent)
+                    )
+            );
+        }
+    }
 
 #endif // PARSEr_H_CSQ4
