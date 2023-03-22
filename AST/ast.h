@@ -220,7 +220,7 @@ string visit(const Ptr<Node>& node) {
             shared_ptr<Block> block = make_shared<Block>();
             for(string statement : fun->body.statements)
                 addStatement(block,statement);
-            return "FUN " + fun->name + " ( " + params + "){\n" + visit(block) + "};\n";
+            return "FUN " + fun->name + " ( " + params + ")\n";
         }
         case FOR_LOOP:{
             Ptr<ForLoop> floop = static_pointer_cast<ForLoop>(node);
@@ -228,7 +228,7 @@ string visit(const Ptr<Node>& node) {
             for(string statement : floop->body.statements){
                 addStatement(block,statement);
             }
-            return "FOR( VAR " + floop->iter_name + " : " + floop->condition.expr + ")\n" + visit(block) + "\n";
+            return "FOR( VAR " + floop->iter_name + " : " + floop->condition.expr + ")\n";
         }
         case WHILE_LOOP:{
             Ptr<WhileLoop> stmt = static_pointer_cast<WhileLoop>(node);
@@ -236,7 +236,7 @@ string visit(const Ptr<Node>& node) {
             for(string statement : stmt->body.statements){
                 addStatement(block,statement);
             }
-            return "WHILE(" + stmt->condition.expr + ")\n" + visit(block) + "\n";
+            return "WHILE(" + stmt->condition.expr + ")\n";
         }
         case IF_STATEMENT:{
             Ptr<IfStmt> stmt = static_pointer_cast<IfStmt>(node);
@@ -244,7 +244,7 @@ string visit(const Ptr<Node>& node) {
             for(string statement : stmt->body.statements){
                 addStatement(block,statement);
             }
-            return "IF(" + stmt->condition.expr + ")\n" + visit(block) + "";
+            return "IF(" + stmt->condition.expr + ")\n";
         }
         case ELIF_STATEMENT:{
             Ptr<ElifStmt> stmt = static_pointer_cast<ElifStmt>(node);
@@ -252,14 +252,14 @@ string visit(const Ptr<Node>& node) {
             for(string statement : stmt->body.statements){
                 addStatement(block,statement);
             }
-            return "ELIF(" + stmt->condition.expr + ")\n" + visit(block) + "\n";
+            return "ELIF(" + stmt->condition.expr + ")\n";
         }
         case ELSE_STATEMENT:{
             Ptr<ElseStmt> stmt = static_pointer_cast<ElseStmt>(node);
             shared_ptr<Block> block = make_shared<Block>();
             for(string statement : stmt->body.statements)
                 addStatement(block,statement);
-            return "ELSE\n" + visit(block) + "\n";
+            return "ELSE\n";
         }
         default:
             string code;
