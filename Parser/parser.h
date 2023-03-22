@@ -89,6 +89,89 @@
         }
         return result;
     }
+
+
+    bool isIfStmt(TokenStream tokens){
+        bool state = 0;
+        for(Token token : tokens)
+            if(token.token == "if" && token.type == KEYWORD)
+            {
+                state = true;
+                break;
+            }
+        return state;
+    }
+    bool isElifStmt(TokenStream tokens){
+        bool state = 0;
+        for(Token token : tokens)
+            if(token.token == "elif" && token.type == KEYWORD)
+            {
+                state = true;
+                break;
+            }
+        return state;
+    }
+    bool isElseStmt(TokenStream tokens){
+        bool state = 0;
+        for(Token token : tokens)
+            if(token.token == "else" && token.type == KEYWORD)
+            {
+                state = true;
+                break;
+            }
+        return state;
+    }
+    bool isFunDecl(TokenStream tokens){
+        bool state = 0;
+        for(Token token : tokens)
+            if(token.token == "def" && token.type == KEYWORD)
+            {
+                state = true;
+                break;
+            }
+        return state;
+    }
+    bool isVarDecl(TokenStream tokens){
+        bool state = 0;
+        if(tokens[0].type == IDENTIFIER && tokens[1].token == "=")
+            state = 1;
+        return state;
+    }
+    bool isWhileStmt(TokenStream tokens){
+        bool state = 0;
+        for(Token token : tokens)
+            if(token.token == "while" && token.type == KEYWORD)
+            {
+                state = true;
+                break;
+            }
+        return state;
+    }
+    bool isForStmt(TokenStream tokens){
+        bool state = 0;
+        for(Token token : tokens)
+            if(token.token == "for" && token.type == KEYWORD)
+            {
+                state = true;
+                break;
+            }
+        return state;
+    }
+/*
+In this field the actual parsing will be done
+and the process is that the functions will parse and generate AST node 
+which will be used by scope defining functions to get desired results.
+*/
+    IfStmt ParseIfStmt(TokenStream tokens);
+    ElifStmt ParseElifStmt(TokenStream tokens);
+    ElseStmt ParseElseStmt(TokenStream tokens);
+
+    IfStmt ParseIfStmt(TokenStream tokens){
+
+    }
+
+
+
     //Function to parse scope of the particular indent_level;
     vector<Statement> ParseScope(vector<TokenStream> raw_tokens, string id = ""){
         vector<Statement> statements;
@@ -118,9 +201,6 @@
     Indentation handling shall be done in such a way in which every
     line with certain indentation shall be stored as an object.
     */
-    
-
-    vector<Scope> Scopes;
 
     
 
