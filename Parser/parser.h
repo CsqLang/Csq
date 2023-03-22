@@ -162,6 +162,11 @@ In this field the actual parsing will be done
 and the process is that the functions will parse and generate AST node 
 which will be used by scope defining functions to get desired results.
 */
+    ForLoop ParseForLoop(TokenStream tokens);
+    WhileLoop ParseWhileLoop(TokenStream tokens);
+    VarDecl ParseVarDecl(TokenStream tokens);
+    VarAssign ParseVarAssign(TokenStream tokens);
+    FunctionDecl ParseFuncDecl(TokenStream tokens);
     IfStmt ParseIfStmt(TokenStream tokens);
     ElifStmt ParseElifStmt(TokenStream tokens);
     ElseStmt ParseElseStmt(TokenStream tokens);
@@ -214,6 +219,11 @@ which will be used by scope defining functions to get desired results.
             printf("Error:[%d] the elif statement hasn't ended sucessfuly.\nHint:[%d] add a colon after condition.\n",error_count+1, error_count+1);
             error_count++;
         }
+        return stmt;
+    }
+
+    ElseStmt ParseElseStmt(TokenStream tokens){
+        ElseStmt stmt;
         return stmt;
     }
 
