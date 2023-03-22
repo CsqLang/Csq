@@ -53,10 +53,9 @@ typedef enum{
     HAT = 23,
     NOTSYMBOL = 24,
     DOT = 25,
-    OR,
-    AND,
-    MOD,
-
+    OR = 26,
+    AND = 27,
+    MOD = 28,
 }STOKEN;
 
 //Struct for tokens
