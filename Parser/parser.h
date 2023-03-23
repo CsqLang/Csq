@@ -224,6 +224,10 @@ which will be used by scope defining functions to get desired results.
 
     ElseStmt ParseElseStmt(TokenStream tokens){
         ElseStmt node;
+        if(tokens[1].token != ":"){
+            printf("Error:[%d] expected a : after else.\n",error_count+1);
+            error_count++;
+        }
         return node;
     }
 
@@ -238,7 +242,7 @@ which will be used by scope defining functions to get desired results.
             else if(value)
                 node.value.expr += token.token + " ";
         if(node.value.expr == ""){
-            printf("[%d] Error: expected a value after assignment operator.\n",error_count+1);
+            printf("Error:[%d] expected a value after assignment operator.\n",error_count+1);
             error_count++;
         }
         return node;
@@ -255,7 +259,7 @@ which will be used by scope defining functions to get desired results.
             else if(value)
                 node.value.expr += token.token + " ";
         if(node.value.expr == ""){
-            printf("[%d] Error: expected a value after assignment operator.\n",error_count+1);
+            printf("Error:[%d] expected a value after assignment operator.\n",error_count+1);
             error_count++;
         }
         return node;
@@ -263,7 +267,11 @@ which will be used by scope defining functions to get desired results.
 
     WhileLoop ParseWhileLoop(TokenStream tokens){
         WhileLoop node;
+        for(Token token : tokens){
+            if(token.token == "while" && token.type == KEYWORD){
 
+            }
+        }
         return node;
     }
 
