@@ -267,10 +267,20 @@ which will be used by scope defining functions to get desired results.
 
     WhileLoop ParseWhileLoop(TokenStream tokens){
         WhileLoop node;
+        bool condition = false;
         for(Token token : tokens){
-            if(token.token == "while" && token.type == KEYWORD){
-
+            if(token.token == "while" && token.type == KEYWORD)
+                condition = true;
+            else if(condition && token.token != ":")
+                node.condition.expr += token.token + " ";
+            else if(condition && token.token == ":"){
+                condition = false;
+                break;
             }
+        }
+        if(condition){
+            printf("Error:[%d] expected a colon after conditon.\n",error_count+1);
+            error_count++;
         }
         return node;
     }
