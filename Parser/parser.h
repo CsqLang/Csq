@@ -227,6 +227,40 @@ which will be used by scope defining functions to get desired results.
         return stmt;
     }
 
+    VarDecl ParseVarDecl(TokenStream tokens){
+        VarDecl decl;
+        bool value = false;
+        for(Token token : tokens)
+            if(!value && token.type == IDENTIFIER)
+                decl.name = token.token;
+            else if(token.type == ASOPERATOR && !value)
+                value = true;
+            else if(value)
+                decl.value.expr += token.token + " ";
+        if(decl.value.expr == ""){
+            printf("[%d] Error: expected a value after assignment operator.\n",error_count+1);
+            error_count++;
+        }
+        return decl;
+    }
+
+    VarAssign ParseVarAssign(TokenStream tokens){
+        VarAssign decl;
+        bool value = false;
+        for(Token token : tokens)
+            if(!value && token.type == IDENTIFIER)
+                decl.name = token.token;
+            else if(token.type == ASOPERATOR && !value)
+                value = true;
+            else if(value)
+                decl.value.expr += token.token + " ";
+        if(decl.value.expr == ""){
+            printf("[%d] Error: expected a value after assignment operator.\n",error_count+1);
+            error_count++;
+        }
+        return decl;
+    }
+
     //Function to parse scope of the particular indent_level;
     vector<Statement> ParseScope(vector<TokenStream> raw_tokens, string id = ""){
         vector<Statement> statements;
