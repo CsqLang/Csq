@@ -172,20 +172,20 @@ which will be used by scope defining functions to get desired results.
     ElseStmt ParseElseStmt(TokenStream tokens);
 
     IfStmt ParseIfStmt(TokenStream tokens){
-        IfStmt stmt;
+        IfStmt node;
         bool condition = false;
 
         for(int i = 0; i<tokens.size(); i++)
             if(tokens[i].token == "if" && tokens[i].type == KEYWORD && condition == 0)
                 condition = true;
             else if(condition && tokens[i].token != ":")
-                stmt.condition.expr += tokens[i].token;
+                node.condition.expr += tokens[i].token;
             else if(condition && tokens[i].token == ":")
             {
                 condition = false;
                 break;
             }
-        if(stmt.condition.expr == ""){
+        if(node.condition.expr == ""){
             printf("Error:[%d] expected an expression, after keyword if.\n",error_count+1);
             printf("Hint:[%d] add a condition after if keyword.\n",error_count+1);
             error_count++;
@@ -194,23 +194,23 @@ which will be used by scope defining functions to get desired results.
             printf("Error:[%d] the if statement hasn't ended sucessfuly.\nHint:[%d] add a colon after condition.\n",error_count+1, error_count+1);
             error_count++;
         }
-        return stmt;
+        return node;
     }
 
     ElifStmt ParseElifStmt(TokenStream tokens){
-        ElifStmt stmt;
+        ElifStmt node;
         bool condition = false;
         for(int i = 0; i<tokens.size(); i++)
             if(tokens[i].token == "elif" && tokens[i].type == KEYWORD && condition == 0)
                 condition = true;
             else if(condition && tokens[i].token != ":")
-                stmt.condition.expr += tokens[i].token;
+                node.condition.expr += tokens[i].token;
             else if(condition && tokens[i].token == ":")
             {
                 condition = false;
                 break;
             }
-        if(stmt.condition.expr == ""){
+        if(node.condition.expr == ""){
             printf("Error:[%d] expected an expression, after keyword elif.\n",error_count+1);
             printf("Hint:[%d] add a condition after elif keyword.\n",error_count+1);
             error_count++;
@@ -219,46 +219,52 @@ which will be used by scope defining functions to get desired results.
             printf("Error:[%d] the elif statement hasn't ended sucessfuly.\nHint:[%d] add a colon after condition.\n",error_count+1, error_count+1);
             error_count++;
         }
-        return stmt;
+        return node;
     }
 
     ElseStmt ParseElseStmt(TokenStream tokens){
-        ElseStmt stmt;
-        return stmt;
+        ElseStmt node;
+        return node;
     }
 
     VarDecl ParseVarDecl(TokenStream tokens){
-        VarDecl decl;
+        VarDecl node;
         bool value = false;
         for(Token token : tokens)
             if(!value && token.type == IDENTIFIER)
-                decl.name = token.token;
+                node.name = token.token;
             else if(token.type == ASOPERATOR && !value)
                 value = true;
             else if(value)
-                decl.value.expr += token.token + " ";
-        if(decl.value.expr == ""){
+                node.value.expr += token.token + " ";
+        if(node.value.expr == ""){
             printf("[%d] Error: expected a value after assignment operator.\n",error_count+1);
             error_count++;
         }
-        return decl;
+        return node;
     }
 
     VarAssign ParseVarAssign(TokenStream tokens){
-        VarAssign decl;
+        VarAssign node;
         bool value = false;
         for(Token token : tokens)
             if(!value && token.type == IDENTIFIER)
-                decl.name = token.token;
+                node.name = token.token;
             else if(token.type == ASOPERATOR && !value)
                 value = true;
             else if(value)
-                decl.value.expr += token.token + " ";
-        if(decl.value.expr == ""){
+                node.value.expr += token.token + " ";
+        if(node.value.expr == ""){
             printf("[%d] Error: expected a value after assignment operator.\n",error_count+1);
             error_count++;
         }
-        return decl;
+        return node;
+    }
+
+    WhileLoop ParseWhileLoop(TokenStream tokens){
+        WhileLoop node;
+
+        return node;
     }
 
     //Function to parse scope of the particular indent_level;
