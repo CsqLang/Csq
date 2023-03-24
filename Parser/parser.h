@@ -285,6 +285,33 @@ which will be used by scope defining functions to get desired results.
         return node;
     }
 
+    ForLoop ParseForLoop(TokenStream tokens){
+        ForLoop node;
+        bool condition = false;
+        bool iter = false;
+        for(Token token : tokens)
+            if(token.token == "for" && !condition)
+                iter = true;
+            else if(iter && token.token != "in" && !condition)
+                node.iter_name += token.token;
+            else if(iter && token.token == "in" && !condition){
+                iter = false;
+                condition = true;
+            }
+            else if(condition && token.token != ":"){
+                node.condition.expr += token.token + " ";
+            }
+            else if(condition && token.token == ":"){
+                condition = 0;
+                break;
+            }
+        if(condition){
+            printf("Error:[%d] expected an end of condition.", error_count+1);
+            error_count++;
+        }
+        return node;
+    }
+
     //Function to parse scope of the particular indent_level;
     vector<Statement> ParseScope(vector<TokenStream> raw_tokens, string id = ""){
         vector<Statement> statements;
