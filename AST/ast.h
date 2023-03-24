@@ -215,6 +215,7 @@ string visit(const Ptr<Node>& node) {
             for(string param : fun->params)
                 params += "ParamType " + param + ", ";
             params.pop_back();
+            params.pop_back();
             shared_ptr<Block> block = make_shared<Block>();
             for(string statement : fun->body.statements)
                 addStatement(block,statement);
