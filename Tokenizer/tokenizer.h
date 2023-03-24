@@ -354,7 +354,7 @@ vector<Token> tokenize(string source_code) {
             }
             else if((c == '"' || c == '\'') && string_presence == true){
                 Token tok;
-                tok.token = ""+str_input+"";
+                tok.token = "\""+str_input+"\"";
                 tok.type = STR;
                 tokens.push_back(tok);
                 string_presence = false;
