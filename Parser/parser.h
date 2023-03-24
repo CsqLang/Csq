@@ -162,16 +162,16 @@ In this field the actual parsing will be done
 and the process is that the functions will parse and generate AST node 
 which will be used by scope defining functions to get desired results.
 */
-    ForLoop ParseForLoop(TokenStream tokens);
-    WhileLoop ParseWhileLoop(TokenStream tokens);
-    VarDecl ParseVarDecl(TokenStream tokens);
-    VarAssign ParseVarAssign(TokenStream tokens);
-    FunctionDecl ParseFuncDecl(TokenStream tokens);
-    IfStmt ParseIfStmt(TokenStream tokens);
-    ElifStmt ParseElifStmt(TokenStream tokens);
-    ElseStmt ParseElseStmt(TokenStream tokens);
+    ForLoop ParseForLoop(TokenStream tokens);//(Defined)
+    WhileLoop ParseWhileLoop(TokenStream tokens);//(Defined)
+    VarDecl ParseVarDecl(TokenStream tokens);//(Defined)
+    VarAssign ParseVarAssign(TokenStream tokens);//(Defined)
+    FunctionDecl ParseFuncDecl(TokenStream tokens);//(Undefined)
+    IfStmt ParseIfStmt(TokenStream tokens); //(Defined)
+    ElifStmt ParseElifStmt(TokenStream tokens); //(Defined)
+    ElseStmt ParseElseStmt(TokenStream tokens); //(Defined)
 
-    IfStmt ParseIfStmt(TokenStream tokens){
+    IfStmt ParseIfStmt(TokenStream tokens){ 
         IfStmt node;
         bool condition = false;
 
@@ -307,6 +307,36 @@ which will be used by scope defining functions to get desired results.
             }
         if(condition){
             printf("Error:[%d] expected an end of condition.", error_count+1);
+            error_count++;
+        }
+        return node;
+    }
+
+    FunctionDecl ParseFuncDecl(TokenStream tokens){
+        FunctionDecl node;
+        bool param = false;
+        bool name = false;
+        for(Token token : tokens){
+            if(token.token == "def" && !name && !param){
+                name = 1;
+            }
+            else if(name && token.token != "(" && !param){
+                node.name += token.token + " ";
+            }
+            else if(name && token.token == "(" && !param){
+                name = 0;
+                param = 1;
+            }
+            else if(param && token.token != ")"){
+                node.params.push_back(token.token);
+            }
+            else if(param && token.token == ")"){
+                param = 0;
+                break;
+            }
+        }
+        if(param){
+            printf("Error:[%d] expected an end of param.\nHint: put a ) after params.\n", error_count+1);
             error_count++;
         }
         return node;
