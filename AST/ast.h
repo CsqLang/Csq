@@ -145,7 +145,6 @@ struct ElifStmt : Node{
 struct ElseStmt : Node{
     Block body;
     ElseStmt(){type = ELSE_STATEMENT;}
-    ElseStmt(){type = ELSE_STATEMENT;}
 };
 
 
@@ -214,12 +213,12 @@ string visit(const Ptr<Node>& node) {
             Ptr<FunctionDecl> fun = static_pointer_cast<FunctionDecl>(node);
             string params;
             for(string param : fun->params)
-                params += "VAR " + param + ", ";
+                params += "ParamType " + param + ", ";
             params.pop_back();
             shared_ptr<Block> block = make_shared<Block>();
             for(string statement : fun->body.statements)
                 addStatement(block,statement);
-            return "FUN " + fun->name + " ( " + params + ")\n";
+            return "template<typename ParamType>\nFUN " + fun->name + " ( " + params + ")\n";
         }
         case FOR_LOOP:{
             Ptr<ForLoop> floop = static_pointer_cast<ForLoop>(node);
