@@ -386,7 +386,23 @@ which will be used by scope defining functions to get desired results.
     Indentation handling shall be done in such a way in which every
     line with certain indentation shall be stored as an object.
     */
+    //Define vector for all indentation levels
+    vector<Statement> Statements;
 
-    
+    //Ultimate parsing statement.
+    void Parse(TokenStream tokens);
+    void Parse(TokenStream tokens){
+        if(isVarDecl(tokens)){
+            int indent_level = getIndentLevel(tokens);
+            //Now remove all indent tokens present since we now know the indent level.
+            TokenStream tokens_;
+            for(Token token : tokens)
+                if(token.type == INDENT)
+                    ignore;
+                else
+                    tokens_.push_back(token);
+            tokens = tokens_;
+        }
+    }
 
 #endif // PARSEr_H_CSQ4
