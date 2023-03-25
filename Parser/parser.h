@@ -316,6 +316,8 @@ which will be used by scope defining functions to get desired results.
         FunctionDecl node;
         bool param = false;
         bool name = false;
+        bool ended = false;
+        string param_;
         for(Token token : tokens){
             if(token.token == "def" && !name && !param){
                 name = 1;
@@ -327,16 +329,29 @@ which will be used by scope defining functions to get desired results.
                 name = 0;
                 param = 1;
             }
-            else if(param && token.token != ")"){
-                node.params.push_back(token.token);
+            else if(param && token.token != "," && token.token != ")"){
+                param_ += token.token;
+            }
+            else if(param && token.token == ","){
+                node.params.push_back(param_);
+                param_ = "";
             }
             else if(param && token.token == ")"){
                 param = 0;
+                node.params.push_back(param_);
+                param_ = "";
+            }
+            else if(token.token == ":"){
+                ended = true;
                 break;
             }
         }
         if(param){
             printf("Error:[%d] expected an end of param.\nHint: put a ) after params.\n", error_count+1);
+            error_count++;
+        }
+        if(!ended){
+            printf("Error:[%d] expected an end for function.\nHint: put a : at the end.\n", error_count+1);
             error_count++;
         }
         return node;
