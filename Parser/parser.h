@@ -135,12 +135,6 @@
         bool state = 0;
         if(tokens[0].type == IDENTIFIER && tokens[1].token == "=" && !in(tokens[0].token,Variables))
             state = 1;
-        if(state){
-            vector<string> Variables_ = Variables;
-            Variables_.push_back(tokens[0].token);
-            Variables = Variables_;
-            Variables_.empty();
-        }
         return state;
     }
     bool isVarAssign(TokenStream tokens){
@@ -246,6 +240,11 @@ which will be used by scope defining functions to get desired results.
     VarDecl ParseVarDecl(TokenStream tokens){
         VarDecl node;
         bool value = false;
+        
+        vector<string> Variables_ = Variables;
+        Variables_.push_back(tokens[0].token);
+        Variables = Variables_;
+        Variables_.empty();
         for(Token token : tokens)
             if(!value && token.type == IDENTIFIER)
                 node.name = token.token;
