@@ -133,7 +133,19 @@
     }
     bool isVarDecl(TokenStream tokens){
         bool state = 0;
-        if(tokens[0].type == IDENTIFIER && tokens[1].token == "=")
+        if(tokens[0].type == IDENTIFIER && tokens[1].token == "=" && !in(tokens[0].token,Variables))
+            state = 1;
+        if(state){
+            vector<string> Variables_ = Variables;
+            Variables_.push_back(tokens[0].token);
+            Variables = Variables_;
+            Variables_.empty();
+        }
+        return state;
+    }
+    bool isVarAssign(TokenStream tokens){
+        bool state = 0;
+        if(tokens[0].type == IDENTIFIER && tokens[1].token == "=" && in(tokens[0].token,Variables))
             state = 1;
         return state;
     }
@@ -391,17 +403,32 @@ which will be used by scope defining functions to get desired results.
 
     //Ultimate parsing statement.
     void Parse(TokenStream tokens);
-    void Parse(TokenStream tokens){
-        if(isVarDecl(tokens)){
+    void Parse(vector<TokenStream> code_tokens){
+        int statement_number = 1;
+        for(TokenStream tokens : code_tokens){
             int indent_level = getIndentLevel(tokens);
             //Now remove all indent tokens present since we now know the indent level.
             TokenStream tokens_;
-            for(Token token : tokens)
-                if(token.type == INDENT)
-                    ignore;
-                else
-                    tokens_.push_back(token);
-            tokens = tokens_;
+                for(Token token : tokens)
+                    if(token.type == INDENT)
+                        ignore;
+                    else
+                        tokens_.push_back(token);
+                tokens = tokens_;
+            if(isVarDecl(tokens)){
+                
+                //Now get AST node for the statement.
+                auto node_ = make_shared<VarDecl>(ParseVarDecl(tokens));
+                NodePtr node = static_pointer_cast<Node>(node_);
+                Statements.push_back(Statement(statement_number,visit(node),indent_level));
+            }
+            else if(isVarAssign(tokens)){
+                //Now get AST node for the statement.
+                auto node_ = make_shared<VarAssign>(ParseVarAssign(tokens));
+                NodePtr node = static_pointer_cast<Node>(node_);
+                Statements.push_back(Statement(statement_number,visit(node),indent_level));
+            }
+            statement_number++;
         }
     }
 
