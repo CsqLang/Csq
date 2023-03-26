@@ -100,7 +100,7 @@ struct Block : Node{
 
 struct FunctionDecl : Node{
     string name;
-    vector<string> params;
+    vector<string> params = {};
     Block body;
     FunctionDecl(){
         type = FUNCTION_DECL;
@@ -212,10 +212,14 @@ string visit(const Ptr<Node>& node) {
         case FUNCTION_DECL:{
             Ptr<FunctionDecl> fun = static_pointer_cast<FunctionDecl>(node);
             string params;
-            for(string param : fun->params)
-                params += "ParamType " + param + ", ";
-            params.pop_back();
-            params.pop_back();
+            
+            if(fun->params.size()>0 && fun->params[0]!=""){
+                for(string param : fun->params){
+                    params += "ParamType " + param + ", ";
+                }
+                params.pop_back();
+                params.pop_back();
+            }
             shared_ptr<Block> block = make_shared<Block>();
             for(string statement : fun->body.statements)
                 addStatement(block,statement);
