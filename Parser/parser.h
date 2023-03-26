@@ -429,6 +429,18 @@ which will be used by scope defining functions to get desired results.
                 NodePtr node = static_pointer_cast<Node>(node_);
                 Statements.push_back(Statement(statement_number,visit(node),indent_level));
             }
+            else if(isForStmt(tokens)){
+                //Now get AST node for the statement.
+                auto node_ = make_shared<ForLoop>(ParseForLoop(tokens));
+                NodePtr node = static_pointer_cast<Node>(node_);
+                Statements.push_back(Statement(statement_number,visit(node),indent_level));
+            }
+            else if(isWhileStmt(tokens)){
+                //Now get AST node for the statement.
+                auto node_ = make_shared<WhileLoop>(ParseWhileLoop(tokens));
+                NodePtr node = static_pointer_cast<Node>(node_);
+                Statements.push_back(Statement(statement_number,visit(node),indent_level));
+            }
             statement_number++;
         }
     }
