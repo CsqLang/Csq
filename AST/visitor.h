@@ -43,6 +43,30 @@ string ElseStmt_visitor(Ptr<ElseStmt> node){
     return "ELSE\n";
 }
 
+//Visitor for ForLoop and WhileLoop statements
+string ForLoop_visitor(Ptr<ForLoop> node){
+    return "FOR( VAR " + node->iter_name + " : " + node->condition.expr + ")\n";
+}
+string WhileLoop_visitor(Ptr<WhileLoop> node){
+    return "WHILE(" + node->condition.expr + ")\n";
+}
+
+//Visitor for Function declarations.
+string FuncDecl_visitor(Ptr<FunctionDecl> node){
+    string params;
+    if(node->params.size()>0 && node->params[0]!=""){
+        for(string param : node->params){
+            params += "ParamType " + param + ", ";
+        }
+        params.pop_back();
+        params.pop_back();
+    }
+    shared_ptr<Block> block = make_shared<Block>();
+    for(string statement : node->body.statements)
+        addStatement(block,statement);
+    return "template<typename ParamType>\nFUN " + node->name + " ( " + params + ")\n";
+}
+
 //Definition for visit function 
 string visit(const Ptr<Node>& node) {
     switch (node->type) {
@@ -60,35 +84,15 @@ string visit(const Ptr<Node>& node) {
         }
         case FUNCTION_DECL:{
             Ptr<FunctionDecl> fun = static_pointer_cast<FunctionDecl>(node);
-            string params;
-            
-            if(fun->params.size()>0 && fun->params[0]!=""){
-                for(string param : fun->params){
-                    params += "ParamType " + param + ", ";
-                }
-                params.pop_back();
-                params.pop_back();
-            }
-            shared_ptr<Block> block = make_shared<Block>();
-            for(string statement : fun->body.statements)
-                addStatement(block,statement);
-            return "template<typename ParamType>\nFUN " + fun->name + " ( " + params + ")\n";
+            return FuncDecl_visitor(fun);
         }
         case FOR_LOOP:{
             Ptr<ForLoop> floop = static_pointer_cast<ForLoop>(node);
-            shared_ptr<Block> block = make_shared<Block>();
-            for(string statement : floop->body.statements){
-                addStatement(block,statement);
-            }
-            return "FOR( VAR " + floop->iter_name + " : " + floop->condition.expr + ")\n";
+            return ForLoop_visitor(floop);
         }
         case WHILE_LOOP:{
             Ptr<WhileLoop> stmt = static_pointer_cast<WhileLoop>(node);
-            shared_ptr<Block> block = make_shared<Block>();
-            for(string statement : stmt->body.statements){
-                addStatement(block,statement);
-            }
-            return "WHILE(" + stmt->condition.expr + ")\n";
+            return WhileLoop_visitor(stmt);
         }
         case IF_STATEMENT:{
             Ptr<IfStmt> stmt = static_pointer_cast<IfStmt>(node);
@@ -103,10 +107,8 @@ string visit(const Ptr<Node>& node) {
             return ElseStmt_visitor(stmt);
         }
         default:
-            string code;
             Ptr<Expr> stmt = static_pointer_cast<Expr>(node);
-            code = stmt->expr;
-            return code;
+            return stmt->expr;
     }
 }
 
