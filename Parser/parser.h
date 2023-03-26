@@ -334,7 +334,7 @@ which will be used by scope defining functions to get desired results.
                 name = 1;
             }
             else if(name && token.token != "(" && !param){
-                node.name += token.token + " ";
+                node.name += token.token;
             }
             else if(name && token.token == "(" && !param){
                 name = 0;
@@ -359,10 +359,6 @@ which will be used by scope defining functions to get desired results.
         }
         if(param){
             printf("Error:[%d] expected an end of param.\nHint: put a ) after params.\n", error_count+1);
-            error_count++;
-        }
-        if(!ended){
-            printf("Error:[%d] expected an end for function.\nHint: put a : at the end.\n", error_count+1);
             error_count++;
         }
         return node;
@@ -424,6 +420,12 @@ which will be used by scope defining functions to get desired results.
             else if(isVarAssign(tokens)){
                 //Now get AST node for the statement.
                 auto node_ = make_shared<VarAssign>(ParseVarAssign(tokens));
+                NodePtr node = static_pointer_cast<Node>(node_);
+                Statements.push_back(Statement(statement_number,visit(node),indent_level));
+            }
+            else if(isFunDecl(tokens)){
+                //Now get AST node for the statement.
+                auto node_ = make_shared<FunctionDecl>(ParseFuncDecl(tokens));
                 NodePtr node = static_pointer_cast<Node>(node_);
                 Statements.push_back(Statement(statement_number,visit(node),indent_level));
             }
