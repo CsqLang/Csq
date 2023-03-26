@@ -470,7 +470,7 @@ which will be used by scope defining functions to get desired results.
             else{
                auto node_ = make_shared<Expr>(ParseExpr(tokens));
                NodePtr node = static_pointer_cast<Node>(node_); 
-               Statements.push_back(Statement(statement_number,visit(node),EXPR,indent_level));
+               Statements.push_back(Statement(statement_number,visit(node),EXPR_TYPE,indent_level));
             }
             statement_number++;
         }
