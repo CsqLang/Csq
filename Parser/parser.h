@@ -441,6 +441,24 @@ which will be used by scope defining functions to get desired results.
                 NodePtr node = static_pointer_cast<Node>(node_);
                 Statements.push_back(Statement(statement_number,visit(node),indent_level));
             }
+            else if(isIfStmt(tokens)){
+                //Now get AST node for the statement.
+                auto node_ = make_shared<IfStmt>(ParseIfStmt(tokens));
+                NodePtr node = static_pointer_cast<Node>(node_);
+                Statements.push_back(Statement(statement_number,visit(node),indent_level));
+            }
+            else if(isElifStmt(tokens)){
+                //Now get AST node for the statement.
+                auto node_ = make_shared<ElifStmt>(ParseElifStmt(tokens));
+                NodePtr node = static_pointer_cast<Node>(node_);
+                Statements.push_back(Statement(statement_number,visit(node),indent_level));
+            }
+            else if(isElseStmt(tokens)){
+                //Now get AST node for the statement.
+                auto node_ = make_shared<ElseStmt>(ParseElseStmt(tokens));
+                NodePtr node = static_pointer_cast<Node>(node_);
+                Statements.push_back(Statement(statement_number,visit(node),indent_level));
+            }
             statement_number++;
         }
     }
