@@ -410,11 +410,11 @@ which will be used by scope defining functions to get desired results.
             int indent_level = getIndentLevel(tokens);
             //Now remove all indent tokens present since we now know the indent level.
             TokenStream tokens_;
-                for(Token token : tokens)
-                    if(token.type == INDENT)
-                        ignore;
-                    else
-                        tokens_.push_back(token);
+            for(Token token : tokens)
+                if(token.type == INDENT)
+                    ignore;
+                else
+                    tokens_.push_back(token);
                 tokens = tokens_;
             if(isVarDecl(tokens)){
                 
@@ -472,6 +472,19 @@ which will be used by scope defining functions to get desired results.
             }
             statement_number++;
         }
+    }
+
+    //This function is expecting that the Statements vector is already filled by the ParseLines function.
+    string ParseStatements(){
+        string code;
+        int max_line_indent = 0;
+        //State 0.5 get the max indent of the statements.
+        for(Statement statement : Statements)
+            if(statement.indent_level > max_line_indent)
+                max_line_indent = statement.indent_level;
+            else
+                ignore;
+        //Stage 1:
     }
 
 #endif // PARSEr_H_CSQ4
