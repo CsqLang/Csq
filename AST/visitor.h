@@ -14,7 +14,7 @@ string ElseStmt_visitor(Ptr<ElseStmt> node);
 string ForLoop_visitor(Ptr<ForLoop> node);
 string WhileLoop_visitor(Ptr<WhileLoop> node);
 string ClassDecl_visitor(Ptr<ClassDecl> node);
-
+string Block_visitor(Ptr<Block> node);
 
 //Visitor for variable declaration and assignment
 string VarDecl_visitor(Ptr<VarDecl> node){
@@ -24,6 +24,24 @@ string VarAssign_visitor(Ptr<VarAssign> node){
     return node->name + " = " + node->value.expr;
 }
 
+//Visitor for blocks
+string Block_visitor(Ptr<Block> node){
+    string code = "{\n";
+    for(string statement : node->statements)
+        code += statement + ";\n";
+    return code + "}\n";
+}
+
+//Visitor for If,Elif and Else statements
+string IfStmt_visitor(Ptr<IfStmt> node){
+    return "IF(" + node->condition.expr + ")\n";
+}
+string ElifStmt_visitor(Ptr<ElifStmt> node){
+    return "ELIF(" + node->condition.expr + ")\n";
+}
+string ElseStmt_visitor(Ptr<ElseStmt> node){
+    return "ELSE\n";
+}
 
 //Definition for visit function 
 string visit(const Ptr<Node>& node) {
@@ -38,10 +56,7 @@ string visit(const Ptr<Node>& node) {
         }
         case BLOCK:{
             Ptr<Block> block = static_pointer_cast<Block>(node);
-            string code = "{\n";
-            for(string statement : block->statements)
-                code += statement + ";\n";
-            return code + "}\n";
+            return Block_visitor(block);
         }
         case FUNCTION_DECL:{
             Ptr<FunctionDecl> fun = static_pointer_cast<FunctionDecl>(node);
@@ -77,26 +92,15 @@ string visit(const Ptr<Node>& node) {
         }
         case IF_STATEMENT:{
             Ptr<IfStmt> stmt = static_pointer_cast<IfStmt>(node);
-            shared_ptr<Block> block = make_shared<Block>();
-            for(string statement : stmt->body.statements){
-                addStatement(block,statement);
-            }
-            return "IF(" + stmt->condition.expr + ")\n";
+            return IfStmt_visitor(stmt);
         }
         case ELIF_STATEMENT:{
             Ptr<ElifStmt> stmt = static_pointer_cast<ElifStmt>(node);
-            shared_ptr<Block> block = make_shared<Block>();
-            for(string statement : stmt->body.statements){
-                addStatement(block,statement);
-            }
-            return "ELIF(" + stmt->condition.expr + ")\n";
+            return ElifStmt_visitor(stmt);
         }
         case ELSE_STATEMENT:{
             Ptr<ElseStmt> stmt = static_pointer_cast<ElseStmt>(node);
-            shared_ptr<Block> block = make_shared<Block>();
-            for(string statement : stmt->body.statements)
-                addStatement(block,statement);
-            return "ELSE\n";
+            return ElseStmt_visitor(stmt);
         }
         default:
             string code;
