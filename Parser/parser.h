@@ -237,6 +237,12 @@ which will be used by scope defining functions to get desired results.
         return node;
     }
 
+    Expr ParseExpr(TokenStream tokens){
+        Expr node;
+        node.expr = TokenStreamToString(tokens);
+        return node;
+    }
+
     VarDecl ParseVarDecl(TokenStream tokens){
         VarDecl node;
         bool value = false;
@@ -397,8 +403,8 @@ which will be used by scope defining functions to get desired results.
     vector<Statement> Statements;
 
     //Ultimate parsing statement.
-    void Parse(TokenStream tokens);
-    void Parse(vector<TokenStream> code_tokens){
+    void ParseLines(TokenStream tokens);
+    void ParseLines(vector<TokenStream> code_tokens){
         int statement_number = 1;
         for(TokenStream tokens : code_tokens){
             int indent_level = getIndentLevel(tokens);
@@ -458,6 +464,11 @@ which will be used by scope defining functions to get desired results.
                 auto node_ = make_shared<ElseStmt>(ParseElseStmt(tokens));
                 NodePtr node = static_pointer_cast<Node>(node_);
                 Statements.push_back(Statement(statement_number,visit(node),indent_level));
+            }
+            else{
+               auto node_ = make_shared<Expr>(ParseExpr(tokens));
+               NodePtr node = static_pointer_cast<Node>(node_); 
+               Statements.push_back(Statement(statement_number,visit(node),indent_level));
             }
             statement_number++;
         }
