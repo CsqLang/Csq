@@ -27,11 +27,11 @@
     //Scope for the statements
     struct Scope{
         int indent_level;
-        Block body;
+        NODE_TYPE of;
         Scope(){}
-        Scope(int level, Block body_){
+        Scope(int level, NODE_TYPE of_){
             indent_level = level;
-            body = body_;
+            of = of_;
         };
     };
 
@@ -437,7 +437,7 @@ which will be used by scope defining functions to get desired results.
                 //Now get AST node for the statement.
                 auto node_ = make_shared<FunctionDecl>(ParseFuncDecl(tokens));
                 NodePtr node = static_pointer_cast<Node>(node_);
-                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),FUN_DEFINITION,indent_level));
+                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),FUNCTION_DECL,indent_level));
             }
             else if(isForStmt(tokens)){
                 //Now get AST node for the statement.
@@ -482,7 +482,7 @@ which will be used by scope defining functions to get desired results.
         bool state = 1;
         if
         (type == FOR_LOOP || type == WHILE_LOOP || type == IF_STATEMENT || type == ELIF_STATEMENT ||
-         type == ELSE_STATEMENT || type == FUN_DEFINITION || type == CLASS_DEFINITION
+         type == ELSE_STATEMENT || type == FUNCTION_DECL || type == CLASS_DEFINITION
         ){
             state = 0;
         }
@@ -496,6 +496,7 @@ which will be used by scope defining functions to get desired results.
         int last_indent = 0;
         NODE_TYPE last_stmt_type;
         string last_stmt;
+        Scope scope(0,PROGRAM);
         //State 0.5: get the max indent of the statements.
         for(Statement statement : Statements)
             if(statement.indent_level > max_line_indent)
@@ -504,7 +505,7 @@ which will be used by scope defining functions to get desired results.
                 ignore;
         //Stage 1: Parse.
         for(Statement statement : Statements){
-            if(last_stmt_type != BLOCK && last_indent == statement.indent_level){
+            if(notBlockStatement(last_stmt_type) && last_indent == statement.indent_level){
                 string line = statement.statement;
                 code += line;
                 last_stmt = statement.raw_statement;
@@ -516,8 +517,13 @@ which will be used by scope defining functions to get desired results.
                     printf("Error: at line %d, unexpected indent after a non-blocked statement -> %s.\n",statement.number-1, last_stmt.c_str());
                     code = "";
                 }
-                else{
-
+                else if(last_stmt_type == FUNCTION_DECL){
+                    scope.indent_level = statement.indent_level;
+                    scope.of = FUNCTION_DECL;
+                    code += "{\n";
+                    code += statement.statement + "\n";
+                    last_stmt_type = statement.type;
+                    last_indent = statement.indent_level;
                 }
             }
             else{
