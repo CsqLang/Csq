@@ -520,6 +520,10 @@ which will be used by scope defining functions to get desired results.
                 else if(last_stmt_type == FUNCTION_DECL){
                     scope.indent_level = statement.indent_level;
                     scope.of = FUNCTION_DECL;
+
+                    //Catching for some errors.
+                    if(statement.indent_level == last_indent)
+                        printf("Error: at line %d, expected an indent after function declaration -> %s.\n",statement.number-1, last_stmt.c_str());
                     code += "{\n";
                     code += statement.statement + "\n";
                     last_stmt_type = statement.type;
