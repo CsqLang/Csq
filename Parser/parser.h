@@ -40,11 +40,13 @@
         int indent_level;
         int number;
         string statement;
+        string raw_statement;
         NODE_TYPE type;
         Statement(){}
-        Statement(int statement_num, string statement_, NODE_TYPE type_, int indent_level_){
+        Statement(int statement_num,string raw, string statement_, NODE_TYPE type_, int indent_level_){
             number = statement_num;
             statement = statement_;
+            raw_statement = raw;
             indent_level = indent_level_;
             type = type_;
         }
@@ -423,57 +425,68 @@ which will be used by scope defining functions to get desired results.
                 //Now get AST node for the statement.
                 auto node_ = make_shared<VarDecl>(ParseVarDecl(tokens));
                 NodePtr node = static_pointer_cast<Node>(node_);
-                Statements.push_back(Statement(statement_number,visit(node),VAR_DECLARATION,indent_level));
+                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),VAR_DECLARATION,indent_level));
             }
             else if(isVarAssign(tokens)){
                 //Now get AST node for the statement.
                 auto node_ = make_shared<VarAssign>(ParseVarAssign(tokens));
                 NodePtr node = static_pointer_cast<Node>(node_);
-                Statements.push_back(Statement(statement_number,visit(node),VAR_ASSIGNMENT,indent_level));
+                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),VAR_ASSIGNMENT,indent_level));
             }
             else if(isFunDecl(tokens)){
                 //Now get AST node for the statement.
                 auto node_ = make_shared<FunctionDecl>(ParseFuncDecl(tokens));
                 NodePtr node = static_pointer_cast<Node>(node_);
-                Statements.push_back(Statement(statement_number,visit(node),FUN_DEFINITION,indent_level));
+                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),FUN_DEFINITION,indent_level));
             }
             else if(isForStmt(tokens)){
                 //Now get AST node for the statement.
                 auto node_ = make_shared<ForLoop>(ParseForLoop(tokens));
                 NodePtr node = static_pointer_cast<Node>(node_);
-                Statements.push_back(Statement(statement_number,visit(node),FOR_LOOP,indent_level));
+                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),FOR_LOOP,indent_level));
             }
             else if(isWhileStmt(tokens)){
                 //Now get AST node for the statement.
                 auto node_ = make_shared<WhileLoop>(ParseWhileLoop(tokens));
                 NodePtr node = static_pointer_cast<Node>(node_);
-                Statements.push_back(Statement(statement_number,visit(node),WHILE_LOOP,indent_level));
+                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),WHILE_LOOP,indent_level));
             }
             else if(isIfStmt(tokens)){
                 //Now get AST node for the statement.
                 auto node_ = make_shared<IfStmt>(ParseIfStmt(tokens));
                 NodePtr node = static_pointer_cast<Node>(node_);
-                Statements.push_back(Statement(statement_number,visit(node),IF_STATEMENT,indent_level));
+                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),IF_STATEMENT,indent_level));
             }
             else if(isElifStmt(tokens)){
                 //Now get AST node for the statement.
                 auto node_ = make_shared<ElifStmt>(ParseElifStmt(tokens));
                 NodePtr node = static_pointer_cast<Node>(node_);
-                Statements.push_back(Statement(statement_number,visit(node),ELIF_STATEMENT,indent_level));
+                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),ELIF_STATEMENT,indent_level));
             }
             else if(isElseStmt(tokens)){
                 //Now get AST node for the statement.
                 auto node_ = make_shared<ElseStmt>(ParseElseStmt(tokens));
                 NodePtr node = static_pointer_cast<Node>(node_);
-                Statements.push_back(Statement(statement_number,visit(node),ELSE_STATEMENT,indent_level));
+                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),ELSE_STATEMENT,indent_level));
             }
             else{
                auto node_ = make_shared<Expr>(ParseExpr(tokens));
                NodePtr node = static_pointer_cast<Node>(node_); 
-               Statements.push_back(Statement(statement_number,visit(node),EXPR_TYPE,indent_level));
+               Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),EXPR_TYPE,indent_level));
             }
             statement_number++;
         }
+    }
+
+    bool notBlockStatement(NODE_TYPE type){
+        bool state = 1;
+        if
+        (type == FOR_LOOP || type == WHILE_LOOP || type == IF_STATEMENT || type == ELIF_STATEMENT ||
+         type == ELSE_STATEMENT || type == FUN_DEFINITION || type == CLASS_DEFINITION
+        ){
+            state = 0;
+        }
+        return state;
     }
 
     //This function is expecting that the Statements vector is already filled by the ParseLines function.
@@ -482,6 +495,7 @@ which will be used by scope defining functions to get desired results.
         int max_line_indent = 0;
         int last_indent = 0;
         NODE_TYPE last_stmt_type;
+        string last_stmt;
         //State 0.5: get the max indent of the statements.
         for(Statement statement : Statements)
             if(statement.indent_level > max_line_indent)
@@ -490,14 +504,27 @@ which will be used by scope defining functions to get desired results.
                 ignore;
         //Stage 1: Parse.
         for(Statement statement : Statements){
-            if(last_stmt_type != BLOCK){
+            if(last_stmt_type != BLOCK && last_indent == statement.indent_level){
                 string line = statement.statement;
                 code += line;
+                last_stmt = statement.raw_statement;
+                last_indent = statement.indent_level;
+                last_stmt_type = statement.type;
+            }
+            else if(last_indent+1 == statement.indent_level){
+                if(notBlockStatement(last_stmt_type)){
+                    printf("Error: at line %d, unexpected indent after a non-blocked statement -> %s.\n",statement.number-1, last_stmt.c_str());
+                    code = "";
+                }
+                else{
+
+                }
             }
             else{
 
             }
         }
+        return code;
     }
 
 #endif // PARSEr_H_CSQ4
