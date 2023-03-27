@@ -172,12 +172,12 @@
     //Errors for the bad code.
 
     void error(int line, string msg){
-        printf("Error [%d]: at line %d, %s\n",error_count+1, line, msg);
+        printf("Error [%d]: at line %d, %s\n",error_count+1, line, msg.c_str());
         error_count++;
     }
 
     void unexpected_indent(int line, string last_stmt_type){
-        error(line, last_stmt_type);
+        error(line, "unexpected indent after " + last_stmt_type);
     }
 
 /*
@@ -528,6 +528,8 @@ which will be used by scope defining functions to get desired results.
                 }
                 else{
                     //Throw error since unexpected indent is given despite the last statement wasn't a block decl.
+                    unexpected_indent(statement.number, last_stmt);
+                    code = "";
                 }
             }
             else{
