@@ -167,6 +167,15 @@
             }
         return state;
     }
+
+
+    //Errors for the bad code.
+
+    void error(int line, string msg){
+        printf("Error [%d]: at line %d, %s\n",error_count+1, line, msg);
+        error_count++;
+    }
+
 /*
 In this field the actual parsing will be done
 and the process is that the functions will parse and generate AST node 
@@ -505,16 +514,21 @@ which will be used by scope defining functions to get desired results.
                 ignore;
         //Stage 1: Parse.
         for(Statement statement : Statements){
-            if(notBlockStatement(last_stmt_type) && statement.indent_level == last_indent){
-                code += statement.statement;
-                code += "\n";
-                last_stmt_type = statement.type;
-                last_stmt = statement.raw_statement;
-                last_indent = statement.indent_level;
+            if(notBlockStatement(last_stmt_type)){
+                if(statement.indent_level == last_indent){
+                    code += statement.statement;
+                    code += "\n";
+                    last_stmt_type = statement.type;
+                    last_stmt = statement.raw_statement;
+                    last_indent = statement.indent_level;
+                }
+                else{
+                    //Throw error since unexpected indent is given despite the last statement wasn't a block decl.
+                }
             }
             else{
 
-            }
+            }   
         }
         return code;
     }
