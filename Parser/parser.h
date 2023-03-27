@@ -505,33 +505,11 @@ which will be used by scope defining functions to get desired results.
                 ignore;
         //Stage 1: Parse.
         for(Statement statement : Statements){
-            if(notBlockStatement(last_stmt_type) && last_indent == statement.indent_level){
-                string line = statement.statement;
-                code += line;
-                last_stmt = statement.raw_statement;
-                last_indent = statement.indent_level;
-                last_stmt_type = statement.type;
-            }
-            else if(last_indent+1 == statement.indent_level){
-                if(notBlockStatement(last_stmt_type)){
-                    printf("Error: at line %d, unexpected indent after a non-blocked statement -> %s.\n",statement.number-1, last_stmt.c_str());
-                    code = "";
-                }
-                else if(last_stmt_type == FUNCTION_DECL){
-                    scope.indent_level = statement.indent_level;
-                    scope.of = FUNCTION_DECL;
+            if(1){
 
-                    //Catching for some errors.
-                    if(statement.indent_level == last_indent)
-                        printf("Error: at line %d, expected an indent after function declaration -> %s.\n",statement.number-1, last_stmt.c_str());
-                    code += "{\n";
-                    code += statement.statement + "\n";
-                    last_stmt_type = statement.type;
-                    last_indent = statement.indent_level;
-                }
             }
             else{
-
+                
             }
         }
         return code;
