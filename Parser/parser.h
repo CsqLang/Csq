@@ -505,11 +505,15 @@ which will be used by scope defining functions to get desired results.
                 ignore;
         //Stage 1: Parse.
         for(Statement statement : Statements){
-            if(1){
-
+            if(notBlockStatement(last_stmt_type) && statement.indent_level == last_indent){
+                code += statement.statement;
+                code += "\n";
+                last_stmt_type = statement.type;
+                last_stmt = statement.raw_statement;
+                last_indent = statement.indent_level;
             }
             else{
-                
+
             }
         }
         return code;
