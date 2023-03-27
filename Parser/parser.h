@@ -176,6 +176,10 @@
         error_count++;
     }
 
+    void unexpected_indent(int line, string last_stmt_type){
+        error(line, last_stmt_type);
+    }
+
 /*
 In this field the actual parsing will be done
 and the process is that the functions will parse and generate AST node 
