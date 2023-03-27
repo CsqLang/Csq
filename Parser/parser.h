@@ -180,6 +180,10 @@
         error(line, "unexpected indent after " + last_stmt_type);
     }
 
+    void expected_indent(int line, string last_stmt_type){
+        error(line, "expected an indent after " + last_stmt_type);
+    }
+
 /*
 In this field the actual parsing will be done
 and the process is that the functions will parse and generate AST node 
@@ -525,6 +529,12 @@ which will be used by scope defining functions to get desired results.
                     last_stmt_type = statement.type;
                     last_stmt = statement.raw_statement;
                     last_indent = statement.indent_level;
+
+                    //Defining scope
+                    if(statement.type == FUNCTION_DECL){
+                        scope.indent_level = statement.indent_level;
+                        scope.of = FUNCTION_DECL;
+                    }
                 }
                 else{
                     //Throw error since unexpected indent is given despite the last statement wasn't a block decl.
@@ -533,7 +543,15 @@ which will be used by scope defining functions to get desired results.
                 }
             }
             else{
-
+                if(statement.indent_level == last_indent){
+                    expected_indent(statement.number, last_stmt);
+                    code = "";
+                }
+                else{
+                    code += "{";
+                    code += statement.statement;
+                    code += "\n";
+                }
             }   
         }
         return code;
