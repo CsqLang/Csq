@@ -15,7 +15,6 @@ using namespace std;
 typedef enum {
     VAR_DECLARATION,
     VAR_ASSIGNMENT,
-    FUN_DEFINITION,
     CLASS_DEFINITION,
     FOR_LOOP,
     WHILE_LOOP,
@@ -26,6 +25,7 @@ typedef enum {
     ELIF_STATEMENT,
     ELSE_STATEMENT,
     FUN_ARGUMENT,
+    PROGRAM,
 } NODE_TYPE;
 
 //Node struct
