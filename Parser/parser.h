@@ -567,6 +567,15 @@ which will be used by scope defining functions to get desired results.
                 scope.indent_level = scope.indent_level-1;
                 
             }
+            else if(scope.indent_level != statement.indent_level){
+                    for(int i = 0; i < (scope.indent_level - statement.indent_level);i++){
+                        code += "}\n";
+                    }
+                    code += statement.statement + "\n";
+                    last_scope.indent_level = scope.indent_level-statement.indent_level;
+                    scope.indent_level = scope.indent_level-statement.indent_level;
+            }
+            
         }
         return code;
     }
