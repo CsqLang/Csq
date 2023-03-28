@@ -522,7 +522,7 @@ which will be used by scope defining functions to get desired results.
                 ignore;
         //Stage 1: Parse.
         for(Statement statement : Statements){
-            if(notBlockStatement(last_stmt_type)){
+            if(notBlockStatement(last_stmt_type) && notBlockStatement(scope.of)){
                 if(statement.indent_level == last_indent){
                     code += statement.statement;
                     code += "\n";
@@ -542,16 +542,29 @@ which will be used by scope defining functions to get desired results.
                     code = "";
                 }
             }
-            else{
+            if(notBlockStatement(last_stmt_type) && !notBlockStatement(scope.of)){
                 if(statement.indent_level == last_indent){
-                    expected_indent(statement.number, last_stmt);
-                    code = "";
-                }
-                else{
-                    code += "{";
                     code += statement.statement;
                     code += "\n";
+                    last_stmt_type = statement.type;
+                    last_stmt = statement.raw_statement;
+                    last_indent = statement.indent_level;
+
+                    //Defining scope
+                    if(statement.type == FUNCTION_DECL){
+                        scope.indent_level = statement.indent_level;
+                        scope.of = FUNCTION_DECL;
+                        code += statement.statement + "{\n";
+                    }
                 }
+                else if(last_indent-1 == statement.indent_level){
+                    code += "}\n" + statement.statement + "\n";
+                }
+            }
+            else{
+                
+                    code += statement.statement;
+                    code += "\n";
             }   
         }
         return code;
