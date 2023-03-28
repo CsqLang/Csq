@@ -514,6 +514,7 @@ which will be used by scope defining functions to get desired results.
         NODE_TYPE last_stmt_type;
         string last_stmt;
         Scope scope(0,PROGRAM);
+        Scope last_scope(0,PROGRAM);
         //State 0.5: get the max indent of the statements.
         for(Statement statement : Statements)
             if(statement.indent_level > max_line_indent)
@@ -540,7 +541,10 @@ which will be used by scope defining functions to get desired results.
                         code += statement.statement + "{\n";
                         scope.indent_level = statement.indent_level + 1;
                     }
-                    
+                    else if(statement.type == IF_STATEMENT){
+                        code += statement.statement + "{\n";
+                        scope.indent_level = statement.indent_level + 1;
+                    }
                     else{
                         code += statement.statement + "\n";
                     }
@@ -550,7 +554,11 @@ which will be used by scope defining functions to get desired results.
                 }
             }
             else if(scope.indent_level == statement.indent_level+1){
-                    code += "}\n"+statement.statement + "\n";
+                code += "}\n"+statement.statement + "\n";
+                last_scope.of = scope.of;
+                last_scope.indent_level = scope.indent_level-1;
+                scope.indent_level = scope.indent_level-1;
+                
             }
         }
         return code;
