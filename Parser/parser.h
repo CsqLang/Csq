@@ -545,6 +545,14 @@ which will be used by scope defining functions to get desired results.
                         code += statement.statement + "{\n";
                         scope.indent_level = statement.indent_level + 1;
                     }
+                    else if(statement.type == ELIF_STATEMENT){
+                        code += statement.statement + "{\n";
+                        scope.indent_level = statement.indent_level + 1;
+                    }
+                    else if(statement.type == ELSE_STATEMENT){
+                        code += statement.statement + "{\n";
+                        scope.indent_level = statement.indent_level + 1;
+                    }
                     else{
                         code += statement.statement + "\n";
                     }
@@ -555,7 +563,6 @@ which will be used by scope defining functions to get desired results.
             }
             else if(scope.indent_level == statement.indent_level+1){
                 code += "}\n"+statement.statement + "\n";
-                last_scope.of = scope.of;
                 last_scope.indent_level = scope.indent_level-1;
                 scope.indent_level = scope.indent_level-1;
                 
