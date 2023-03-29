@@ -505,7 +505,17 @@ which will be used by scope defining functions to get desired results.
         }
         return state;
     }
-
+    
+    bool isBlockStatement(NODE_TYPE type){
+        bool state = 0;
+        if
+        (type == FOR_LOOP || type == WHILE_LOOP || type == IF_STATEMENT || type == ELIF_STATEMENT ||
+         type == ELSE_STATEMENT || type == FUNCTION_DECL || type == CLASS_DEFINITION
+        ){
+            state = 1;
+        }
+        return state;
+    }
     //This function is expecting that the Statements vector is already filled by the ParseLines function.
     string ParseStatements(){
         string code;
