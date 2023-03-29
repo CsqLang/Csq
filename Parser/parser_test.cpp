@@ -1,8 +1,3 @@
-/*
-
-This is the test to check whether tokenizer is working perfectly or not?
-
-*/
 #include <iostream>
 #include "../AST/ast.h"
 #include "Parser/parser.h"
