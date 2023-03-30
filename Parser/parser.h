@@ -516,6 +516,14 @@ which will be used by scope defining functions to get desired results.
         }
         return state;
     }
+
+
+    //Traverse and print the statements with their properties.
+    void PrintStatements(){
+        for(Statement statement : Statements){
+            printf("line : %d indent : %d type : %d (%s)\n",statement.number,statement.indent_level, statement.type, statement.statement.c_str());
+        }
+    }
     //This function is expecting that the Statements vector is already filled by the ParseLines function.
     string ParseStatements(){
         string code;
@@ -533,59 +541,53 @@ which will be used by scope defining functions to get desired results.
                 ignore;
         //Stage 1: Parse.
         /*
-        def fun():
-            s = 40
-        s2 = 45
-
-        {
-            1,"DEF fun()",0,
-            2,"VAR s = 40",1,
-            3,"VAR s2 = 45",0
-        }
+        
+        if 1 == 1:
+            a = 40
+        elif 2 == 1:
+            b = 10
+        else:
+            print('None')
         
         */
         for(Statement statement : Statements){
             if(scope.indent_level == statement.indent_level){
-                if(notBlockStatement(last_stmt_type)){
-                    if(statement.type == FUNCTION_DECL){
-                        code += statement.statement + "{\n";
-                        scope.indent_level = statement.indent_level + 1;
+                switch(statement.type){
+                    case VAR_DECLARATION:{
+                        code += statement.statement;
+                        code += "\n";
+                        break;
                     }
-                    else if(statement.type == IF_STATEMENT){
-                        code += statement.statement + "{\n";
-                        scope.indent_level = statement.indent_level + 1;
+                    case VAR_ASSIGNMENT:{
+                        code += statement.statement;
+                        code += "\n";
+                        break;
                     }
-                    else if(statement.type == ELIF_STATEMENT){
-                        code += statement.statement + "{\n";
-                        scope.indent_level = statement.indent_level + 1;
+                    case IF_STATEMENT:{
+                        code += statement.statement;
+                        code += "{\n";
+                        scope.indent_level = statement.indent_level+1;
+                        break;
                     }
-                    else if(statement.type == ELSE_STATEMENT){
-                        code += statement.statement + "{\n";
-                        scope.indent_level = statement.indent_level + 1;
+                    case ELIF_STATEMENT:{
+                        code += statement.statement;
+                        code += "{\n";
+                        scope.indent_level = statement.indent_level+1;
+                        break;
                     }
-                    else{
-                        code += statement.statement + "\n";
+                    case ELSE_STATEMENT:{
+                        code += statement.statement;
+                        code += "{\n";
+                        scope.indent_level = statement.indent_level+1;
+                        break;
                     }
                 }
-                else{
-                    expected_indent(statement.number, last_stmt);
-                }
             }
-            else if(scope.indent_level == statement.indent_level+1){
-                code += "}\n"+statement.statement + "\n";
-                last_scope.indent_level = scope.indent_level-1;
-                scope.indent_level = scope.indent_level-1;
-                
+            else if(scope.indent_level-1 == statement.indent_level){
+                code += statement.statement;
+                code += "\n}\n";
+                scope.indent_level = 0;
             }
-            else if(scope.indent_level != statement.indent_level){
-                    for(int i = 0; i < (scope.indent_level - statement.indent_level);i++){
-                        code += "}\n";
-                    }
-                    code += statement.statement + "\n";
-                    last_scope.indent_level = scope.indent_level-statement.indent_level;
-                    scope.indent_level = scope.indent_level-statement.indent_level;
-            }
-            
         }
         return code;
     }
