@@ -67,6 +67,10 @@ string FuncDecl_visitor(Ptr<FunctionDecl> node){
     return "template<typename ParamType>\nFUN " + node->name + " ( " + params + ")\n";
 }
 
+string Expr_visitor(Ptr<Expr> node){
+    return node->expr;
+}
+
 //Definition for visit function 
 string visit(const Ptr<Node>& node) {
     switch (node->type) {
@@ -108,9 +112,10 @@ string visit(const Ptr<Node>& node) {
         }
         default:
             Ptr<Expr> stmt = static_pointer_cast<Expr>(node);
-            return stmt->expr;
+            return Expr_visitor(stmt);
     }
 }
+
 
 
 #endif // VISITOR_H_CSQ4
