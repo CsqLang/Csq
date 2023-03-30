@@ -566,6 +566,12 @@ which will be used by scope defining functions to get desired results.
                         scope.indent_level = statement.indent_level+1;
                         break;
                     }
+                    case FUNCTION_DECL:{
+                        code += statement.statement;
+                        code += "{\n";
+                        scope.indent_level = statement.indent_level+1;
+                        break;
+                    }
                     case ELIF_STATEMENT:{
                         code += statement.statement;
                         code += "{\n";
@@ -593,9 +599,9 @@ which will be used by scope defining functions to get desired results.
                 }
                 else{
                     code += statement.statement+"\n";
+                    scope.indent_level = statement.indent_level-1;
                 }
                 
-                scope.indent_level = 0;
             }
         }
         return code;
