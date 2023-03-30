@@ -1,4 +1,8 @@
-#include <iostream>
+/*
+This file is containing certain sets of test for the parser to see it works or not?
+
+*/
+
 #include "AST/ast.h"
 #include "Parser/parser.h"
 
@@ -9,7 +13,7 @@ void testMultipleFunctions(){
 
     auto tokens = Tokenizer(code);
     ParseLines(tokens);
-    cout << ParseStatements() << "\n";
+    printf("%s\n",ParseStatements().c_str());
 }
 
 void testIfElseLadder(){
@@ -18,7 +22,7 @@ void testIfElseLadder(){
 
     auto tokens = Tokenizer(code);
     ParseLines(tokens);
-    cout << ParseStatements() << "\n";
+    printf("%s\n",ParseStatements().c_str());
 }
 
 
