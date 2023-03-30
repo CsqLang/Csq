@@ -86,10 +86,7 @@
     string TokenStreamToString(TokenStream tokens){
         string result;
         for(Token token : tokens){
-            if(token.type == STR)
-                result += "\"" + token.token + "\" ";
-            else
-                result += token.token + " ";
+            result += token.token + " ";
         }
         return result;
     }
@@ -581,11 +578,23 @@ which will be used by scope defining functions to get desired results.
                         scope.indent_level = statement.indent_level+1;
                         break;
                     }
+                    case EXPR_TYPE:{
+                        code += statement.statement;
+                        code += "\n";
+                    }
                 }
             }
             else if(scope.indent_level-1 == statement.indent_level){
-                code += statement.statement;
                 code += "\n}\n";
+                if(isBlockStatement(statement.type)){
+                    code += statement.statement;
+                    code += "{\n";
+                    scope.indent_level = statement.indent_level+1;
+                }
+                else{
+                    code += statement.statement+"\n";
+                }
+                
                 scope.indent_level = 0;
             }
         }
