@@ -590,8 +590,10 @@ which will be used by scope defining functions to get desired results.
                     }
                 }
             }
-            else if(scope.indent_level-1 == statement.indent_level){
-                code += "\n}\n";
+            else{
+                for(int i = 0;i<scope.indent_level-statement.indent_level;i++){
+                    code += "\n}\n";
+                }
                 if(isBlockStatement(statement.type)){
                     code += statement.statement;
                     code += "{\n";
