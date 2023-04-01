@@ -52,7 +52,7 @@ struct IfStmt;
 struct ElifStmt;
 struct ElseStmt;
 struct FunArg;
-// Definitions for above node types
+// Definitions for above Node types
 
 struct Expr : Node{
     string expr;
@@ -191,6 +191,8 @@ void addParam(Ptr<FunctionDecl> fun, string param){
     fun->params.push_back(param);
 }
 
+
+//Importing visitor containing all utilities to visit AST.
 #include "visitor.h"
 
 #endif // AST_Csq4_H
