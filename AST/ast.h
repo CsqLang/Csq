@@ -12,6 +12,9 @@ using namespace std;
 
 //Alias for shared_ptr;
 #define Ptr shared_ptr
+
+
+//Node types
 typedef enum {
     VAR_DECLARATION,
     VAR_ASSIGNMENT,
