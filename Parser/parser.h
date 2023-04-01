@@ -666,7 +666,7 @@ which will be used by scope defining functions to get desired results.
                                 scope.indent_level = statement.indent_level+1;
                                 scope.of = FUNCTION_DECL;
                                 master_scope = scope;
-                                code += statement.statement + "{\n";
+                                fncode += statement.statement + "{\n";
                                 fnstate = 1;
                                 break;
                             }
