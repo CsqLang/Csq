@@ -56,6 +56,7 @@ typedef enum{
     OR = 26,
     AND = 27,
     MOD = 28,
+    FSLASH = 29,
 }STOKEN;
 
 //Struct for tokens
@@ -233,7 +234,7 @@ STOKEN symbolType(Token token){
             else if(token.token == "*")
                 return STAR;
             else if(token.token == "/")
-                return BSLASH;
+                return FSLASH;
             else if(token.token == "%")
                 return MOD;
             else if(token.token == "^")
@@ -404,6 +405,50 @@ vector<Token> tokenize(string source_code) {
                     }
                 }
             }
+            case PLUS:{
+                switch(symbolType(tokens[i+1])){
+                    case EQUAL:{
+                        Token token;
+                        token.token = "+=";
+                        token.type = ASOPERATOR;
+                        filtered_Tokens.push_back(token);
+                        i = i + 2;
+                    }
+                }
+            }
+            case MINUS:{
+                switch(symbolType(tokens[i+1])){
+                    case EQUAL:{
+                        Token token;
+                        token.token = "-=";
+                        token.type = ASOPERATOR;
+                        filtered_Tokens.push_back(token);
+                        i = i + 2;
+                    }
+                }
+            }
+            case STAR:{
+                switch(symbolType(tokens[i+1])){
+                    case EQUAL:{
+                        Token token;
+                        token.token = "*=";
+                        token.type = ASOPERATOR;
+                        filtered_Tokens.push_back(token);
+                        i = i + 2;
+                    }
+                }
+            }
+            case FSLASH:{
+                switch(symbolType(tokens[i+1])){
+                    case EQUAL:{
+                        Token token;
+                        token.token = "/=";
+                        token.type = ASOPERATOR;
+                        filtered_Tokens.push_back(token);
+                        i = i + 2;
+                    }
+                }
+            }
             case GREATER:{
                 switch(symbolType(tokens[i+1])){
                     case EQUAL:{
@@ -420,6 +465,28 @@ vector<Token> tokenize(string source_code) {
                     case EQUAL:{
                         Token token;
                         token.token = "<=";
+                        token.type = COPERATOR;
+                        filtered_Tokens.push_back(token);
+                        i = i + 2;
+                    }
+                }
+            }
+            case AMPER:{
+                switch(symbolType(tokens[i+1])){
+                    case AMPER:{
+                        Token token;
+                        token.token = "&&";
+                        token.type = COPERATOR;
+                        filtered_Tokens.push_back(token);
+                        i = i + 2;
+                    }
+                }
+            }
+            case VBAR:{
+                switch(symbolType(tokens[i+1])){
+                    case VBAR:{
+                        Token token;
+                        token.token = "||";
                         token.type = COPERATOR;
                         filtered_Tokens.push_back(token);
                         i = i + 2;
