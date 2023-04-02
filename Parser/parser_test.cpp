@@ -13,7 +13,7 @@ void testMultipleFunctions(){
 
 void testMultipleFunctions2(){
 
-    string code = "def fun1():\n print('inside fun1')\n if 1 == 1:\n  print('1 is 1')\n elif 2 == 3:\n  print('I think compiler has crashed')\ndef fun2():\n print('inside fun2')\n if 2==2:\n  print('2 is 2')\nprint('done')";
+    string code = "def fun1():";
 
     auto tokens = Tokenizer(code);
     ParseLines(tokens);
@@ -29,7 +29,24 @@ void testIfElseLadder(){
     printf("%s\n",ParseStatements().c_str());
 }
 
+void testIfElseLadder2(){
+
+    string code = "elif 1 == 2:\n print('Your math is wrong')\nelse:\n print('Your math is correct')";
+
+    auto tokens = Tokenizer(code);
+    ParseLines(tokens);
+    printf("%s\n",ParseStatements().c_str());
+}
+
+void testnestedIfElseLadder(){
+
+    string code = "if 1:\n if 2:\n  print('Hello')\n else:\n  if 2:\n   print('Hello')\n  print('do it')";
+
+    auto tokens = Tokenizer(code);
+    ParseLines(tokens);
+    printf("%s\n",ParseStatements().c_str());
+}
 
 int main() {
-    testMultipleFunctions2();
+    testIfElseLadder();
 }
