@@ -826,8 +826,8 @@ which will be used by scope defining functions to get desired results.
                     case IF_STATEMENT:{
                         if(scope.of == CLASS_DEFINITION){noStorageClass(statement.number, statement.raw_statement, scope);}
                         else{
-                            code += statement.statement;
-                            code += "{\n";
+                            fncode += statement.statement;
+                            fncode += "{\n";
                             scope.indent_level = statement.indent_level + 1;
                             scope.of = IF_STATEMENT;
                             keyword_log.push_back("if");
@@ -849,8 +849,8 @@ which will be used by scope defining functions to get desired results.
                     }
                     case ELSE_STATEMENT:{
                         if(in("elif",keyword_log) || in("if",keyword_log)){
-                            code += statement.statement;
-                            code += "{\n";
+                            fncode += statement.statement;
+                            fncode += "{\n";
                             scope.indent_level = statement.indent_level+1;
                             scope.of = ELSE_STATEMENT;
                             keyword_log.push_back("else");
