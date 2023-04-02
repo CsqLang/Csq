@@ -805,6 +805,84 @@ which will be used by scope defining functions to get desired results.
                     }
                 }
             }
+
+            //This section contains the statements required to parse functions
+
+            else if(scope.indent_level == statement.indent_level && master_scope.of == FUNCTION_DECL){
+                //The statement can also have certain types of node so we need to check via switch.
+                switch(statement.type){
+                    case EXPR_TYPE:{
+                        code += statement.statement;
+                        break;                                        
+                    }
+                    case VAR_DECLARATION:{
+                        code += statement.statement;
+                        break;                                    
+                    }
+                    case VAR_ASSIGNMENT:{
+                        code += statement.statement;
+                        break;                                
+                    }
+                    case IF_STATEMENT:{
+                        if(scope.of == CLASS_DEFINITION){noStorageClass(statement.number, statement.raw_statement, scope);}
+                        else{
+                            code += statement.statement;
+                            code += "{\n";
+                            scope.indent_level = statement.indent_level + 1;
+                            scope.of = IF_STATEMENT;
+                            keyword_log.push_back("if");
+                        }
+                        break;                                
+                    }
+                    case ELIF_STATEMENT:{
+                        if(in("if",keyword_log)){
+                            code += statement.statement;
+                            code += "{\n";
+                            scope.indent_level = statement.indent_level+1;
+                            scope.of = ELIF_STATEMENT;
+                            keyword_log.push_back("elif");
+                        }
+                        else{
+                            elifUsedWithoutIf(statement.number);
+                        }
+                        break;                                
+                    }
+                    case ELSE_STATEMENT:{
+                        if(in("elif",keyword_log) || in("if",keyword_log)){
+                            code += statement.statement;
+                            code += "{\n";
+                            scope.indent_level = statement.indent_level+1;
+                            scope.of = ELSE_STATEMENT;
+                            keyword_log.push_back("else");
+                        }
+                        else{
+                            elseUsedWithoutIf(statement.number);
+                        }
+                        break;                                
+                    }
+                    case FUNCTION_DECL:{
+                        function_insideFunction(statement.number);
+                        break;                                
+                    }
+                    case WHILE_LOOP:{
+                        scope.indent_level = statement.indent_level+1;
+                        scope.of = WHILE_LOOP;
+                        fncode += statement.statement + "{\n";
+                        break;                                
+                    }
+                    case FOR_LOOP:{
+                        scope.indent_level = statement.indent_level+1;
+                        scope.of = FOR_LOOP;
+                        fncode += statement.statement + "{\n";
+                        break;                                
+                    }
+                    default:{
+                        unrecognized_statement(statement.number, statement.raw_statement);
+                        break;
+                    }
+                }
+            }
+
         }
         return code;
     }
