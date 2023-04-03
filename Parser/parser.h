@@ -705,14 +705,17 @@ which will be used by scope defining functions to get desired results.
                 switch(statement.type){
                     case EXPR_TYPE:{
                         code += statement.statement;
+                        code += "\n";
                         break;                                        
                     }
                     case VAR_DECLARATION:{
                         code += statement.statement;
+                        code += "\n";
                         break;                                    
                     }
                     case VAR_ASSIGNMENT:{
                         code += statement.statement;
+                        code += "\n";
                         break;                                
                     }
                     case IF_STATEMENT:{
@@ -817,14 +820,17 @@ which will be used by scope defining functions to get desired results.
                 switch(statement.type){
                     case EXPR_TYPE:{
                         fncode += statement.statement;
+                        fncode += "\n";
                         break;                                        
                     }
                     case VAR_DECLARATION:{
                         fncode += statement.statement;
+                        fncode += "\n";
                         break;                                    
                     }
                     case VAR_ASSIGNMENT:{
                         fncode += statement.statement;
+                        fncode += "\n";
                         break;                                
                     }
                     case IF_STATEMENT:{
@@ -905,14 +911,17 @@ which will be used by scope defining functions to get desired results.
                 switch(statement.type){
                     case EXPR_TYPE:{
                         fncode += statement.statement;
+                        fncode += "\n";
                         break;                                        
                     }
                     case VAR_DECLARATION:{
                         fncode += statement.statement;
+                        fncode += "\n";
                         break;                                    
                     }
                     case VAR_ASSIGNMENT:{
                        fncode += statement.statement;
+                       fncode += "\n";
                         break;                                
                     }
                     case IF_STATEMENT:{
