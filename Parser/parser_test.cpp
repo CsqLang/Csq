@@ -2,23 +2,23 @@
 #include "Parser/parser.h"
 
 
-void testMultipleFunctions(){
+void testFunction(){
 
-    string code = "def fun1():\n print('inside fun1')\ndef fun2():\n print('inside fun2')\n";
+    string code = "def fun1():\n print('inside fun1')";
+
+    auto tokens = Tokenizer(code);
+    ParseLines(tokens);
+    printf("%s\n",ParseStatements().c_str());
+}
+void testIfElseInFunction(){
+
+    string code = "def fun1():\n if 3 > 2:\n  print('3 > 2')\n  else:\n  print('corrupted')";
 
     auto tokens = Tokenizer(code);
     ParseLines(tokens);
     printf("%s\n",ParseStatements().c_str());
 }
 
-void testMultipleFunctions2(){
-
-    string code = "def fun1():";
-
-    auto tokens = Tokenizer(code);
-    ParseLines(tokens);
-    printf("%s\n",ParseStatements().c_str());
-}
 
 void testIfElseLadder(){
 
@@ -48,5 +48,7 @@ void testnestedIfElseLadder(){
 }
 
 int main() {
-    testIfElseLadder();
+    // testFunction();
+    // testIfElseInFunction();
+    testnestedIfElseLadder();
 }
