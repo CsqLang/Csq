@@ -29,6 +29,24 @@ void testIfElseLadder(){
     printf("%s\n",ParseStatements().c_str());
 }
 
+void testForloop(){
+
+    string code = "for i in ls:\n print(i)";
+
+    auto tokens = Tokenizer(code);
+    ParseLines(tokens);
+    printf("%s\n",ParseStatements().c_str());
+}
+
+void testWhileloop(){
+
+    string code = "i = 0\nwhile 1==i:\n print(i)\n i=i+1";
+
+    auto tokens = Tokenizer(code);
+    ParseLines(tokens);
+    printf("%s\n",ParseStatements().c_str());
+}
+
 void testIfElseLadder2(){
 
     string code = "elif 1 == 2:\n print('Your math is wrong')\nelse:\n print('Your math is correct')";
@@ -48,7 +66,5 @@ void testnestedIfElseLadder(){
 }
 
 int main() {
-    // testFunction();
-    // testIfElseInFunction();
-    testnestedIfElseLadder();
+    testWhileloop();
 }
