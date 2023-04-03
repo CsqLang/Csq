@@ -460,6 +460,7 @@ which will be used by scope defining functions to get desired results.
         Token line_end_token;
         line_end_token.token = "ignore";
         line_end_token.type = KEYWORD;
+        int last_indent_level = 0;
         code_tokens.push_back(TokenStream({line_end_token}));
         for(TokenStream tokens : code_tokens){
             int indent_level = getIndentLevel(tokens);
@@ -900,15 +901,15 @@ which will be used by scope defining functions to get desired results.
                 //Now we again have to check which type of statement
                 switch(statement.type){
                     case EXPR_TYPE:{
-                        code += statement.statement;
+                        fncode += statement.statement;
                         break;                                        
                     }
                     case VAR_DECLARATION:{
-                        code += statement.statement;
+                        fncode += statement.statement;
                         break;                                    
                     }
                     case VAR_ASSIGNMENT:{
-                        code += statement.statement;
+                       fncode += statement.statement;
                         break;                                
                     }
                     case IF_STATEMENT:{
@@ -916,8 +917,8 @@ which will be used by scope defining functions to get desired results.
                             noStorageClass(statement.number, statement.raw_statement, scope);
                         }
                         else{
-                            code += statement.statement;
-                            code += "{";
+                            fncode += statement.statement;
+                            fncode += "{";
                             scope.indent_level = statement.indent_level + 1;
                             scope.of = IF_STATEMENT;
                             keyword_log.push_back("if");
@@ -926,8 +927,8 @@ which will be used by scope defining functions to get desired results.
                     }
                     case ELIF_STATEMENT:{
                         if(in("if",keyword_log)){
-                            code += statement.statement;
-                            code += "{\n";
+                            fncode += statement.statement;
+                            fncode += "{\n";
                             scope.indent_level = statement.indent_level+1;
                             scope.of = ELIF_STATEMENT;
                             keyword_log.push_back("elif");
@@ -939,8 +940,8 @@ which will be used by scope defining functions to get desired results.
                     }
                     case ELSE_STATEMENT:{
                         if(in("elif",keyword_log) || in("if",keyword_log)){
-                            code += statement.statement;
-                            code += "{\n";
+                            fncode += statement.statement;
+                            fncode += "{\n";
                             scope.indent_level = statement.indent_level+1;
                             scope.of = ELSE_STATEMENT;
                             keyword_log.push_back("else");
