@@ -572,6 +572,7 @@ which will be used by scope defining functions to get desired results.
         vector<string> keyword_log;
         Scope scope(0,PROGRAM);
         Scope master_scope(0,PROGRAM);
+        Scope last_master_scope(0,PROGRAM);
         //State 0.5: get the max indent of the statements.
         for(Statement statement : Statements)
             if(statement.indent_level > max_line_indent)
@@ -890,6 +891,23 @@ which will be used by scope defining functions to get desired results.
                         unrecognized_statement(statement.number, statement.raw_statement);
                         break;
                     }
+                }
+            }
+            else if(scope.indent_level != statement.indent_level && master_scope.of == FUNCTION_DECL){
+                int change_indent = scope.indent_level-statement.indent_level;
+                scope.indent_level = change_indent;
+                for(int i = 0;i<change_indent;i++)
+                    fncode += "}\n";
+                printf("%d\n",change_indent);
+                if(scope.indent_level == master_scope.indent_level){
+                    vector<string> functionstack1 = Functions;
+                    functionstack1.push_back(fncode);
+                    master_scope = last_master_scope;
+                    last_master_scope.indent_level = scope.indent_level-1;
+                    last_master_scope.of = FUNCTION_DECL;
+                    Functions = functionstack1;
+                    printf("%s\n",fncode.c_str());
+                    fncode = "";
                 }
             }
 
