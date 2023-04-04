@@ -895,11 +895,11 @@ which will be used by scope defining functions to get desired results.
             }
             else if(scope.indent_level != statement.indent_level && master_scope.of == FUNCTION_DECL){
                 int change_indent = scope.indent_level-statement.indent_level;
-                scope.indent_level = change_indent;
+                scope.indent_level = scope.indent_level-change_indent;
                 for(int i = 0;i<change_indent;i++)
                     fncode += "}\n";
-                printf("%d\n",change_indent);
-                if(scope.indent_level == master_scope.indent_level){
+                printf("%d\n",scope.indent_level);
+                if(scope.indent_level == master_scope.indent_level-1){
                     vector<string> functionstack1 = Functions;
                     functionstack1.push_back(fncode);
                     master_scope = last_master_scope;
