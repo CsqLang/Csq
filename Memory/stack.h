@@ -5,4 +5,12 @@
 vector<string> Variables;
 vector<string> Functions;
 
+int FunctionStackLength(){
+    return Functions.size();
+}
+
+int VariableStackLength(){
+    return Variables.size();
+}
+
 #endif // Stack_H
