@@ -835,6 +835,7 @@ which will be used by scope defining functions to get desired results.
                         break;                                
                     }
                     case IF_STATEMENT:{
+                        printf("Counter else");
                         if(scope.of == CLASS_DEFINITION){noStorageClass(statement.number, statement.raw_statement, scope);}
                         else{
                             fncode += statement.statement;
@@ -846,6 +847,7 @@ which will be used by scope defining functions to get desired results.
                         break;                                
                     }
                     case ELIF_STATEMENT:{
+                        printf("Counter else");
                         if(in("if",keyword_log)){
                             code += statement.statement;
                             code += "{\n";
@@ -859,6 +861,7 @@ which will be used by scope defining functions to get desired results.
                         break;                                
                     }
                     case ELSE_STATEMENT:{
+                        printf("Counter else");
                         if(in("elif",keyword_log) || in("if",keyword_log)){
                             fncode += statement.statement;
                             fncode += "{\n";
