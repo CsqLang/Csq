@@ -670,7 +670,8 @@ which will be used by scope defining functions to get desired results.
                             default:{
                                 scope.indent_level = statement.indent_level+1;
                                 scope.of = FUNCTION_DECL;
-                                master_scope = scope;
+                                master_scope.of = FUNCTION_DECL;
+                                master_scope.indent_level = scope.indent_level;
                                 fncode += statement.statement + "{\n";
                                 fnstate = 1;
                                 break;
@@ -819,13 +820,19 @@ which will be used by scope defining functions to get desired results.
 
             else if(master_scope.of == FUNCTION_DECL && scope.indent_level == statement.indent_level)
             {
-                switch(scope.of)
+                switch(statement.type)
                 {
                     case VAR_DECLARATION:{
                         fncode += statement.statement + "\n";
+                        break;
                     }
                     case VAR_ASSIGNMENT:{
                         fncode += statement.statement + "\n";
+                        break;
+                    }
+                    case EXPR_TYPE:{
+                        fncode += statement.statement + "\n";
+                        break;
                     }
                 }
             }
@@ -838,7 +845,9 @@ which will be used by scope defining functions to get desired results.
                     fncode += "}";
                 //Checking for the end of function scope.
                 if(statement.indent_level == master_scope.indent_level-1){
-
+                    master_scope = last_master_scope;
+                    master_scope.indent_level = statement.indent_level;
+                    Functions.push_back(fncode);
                 }
             }
 
