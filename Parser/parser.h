@@ -894,7 +894,10 @@ which will be used by scope defining functions to get desired results.
                 if(statement.indent_level == master_scope.indent_level-1){
                     master_scope = last_master_scope;
                     master_scope.indent_level = statement.indent_level;
+                    last_master_scope.indent_level = master_scope.indent_level+1;
+                    last_master_scope.of = FUNCTION_DECL;
                     Functions.push_back(fncode);
+                    fncode = "";
                     //The statement can also have certain types of node so we need to check via switch.
                     //Now the statement having indent level same as function decl so it need the parsing one more time.
                     switch(statement.type){
@@ -952,45 +955,6 @@ which will be used by scope defining functions to get desired results.
                             }
                             break;                                
                         }
-                        case FUNCTION_DECL:{
-                            //First check that the function is defined in a correct place or not?
-                            switch(scope.of){
-                                case FUNCTION_DECL:{
-                                    function_insideFunction(statement.number);
-                                    break;
-                                }
-                                case IF_STATEMENT:{
-                                    function_insideIfstmt(statement.number);
-                                    break;
-                                }
-                                case ELIF_STATEMENT:{
-                                    function_insideElif(statement.number);
-                                    break;
-                                }
-                                case ELSE_STATEMENT:{
-                                    function_insideElse(statement.number);
-                                    break;
-                                }
-                                case FOR_LOOP:{
-                                    function_insideFor(statement.number);
-                                    break;
-                                }
-                                case WHILE_LOOP:{
-                                    function_insideWhile(statement.number);
-                                    break;
-                                }
-                                default:{
-                                    scope.indent_level = statement.indent_level+1;
-                                    scope.of = FUNCTION_DECL;
-                                    master_scope.of = FUNCTION_DECL;
-                                    master_scope.indent_level = scope.indent_level;
-                                    fncode += statement.statement + "{\n";
-                                    fnstate = 1;
-                                    break;
-                                }
-                            }
-                            break;                                
-                        }
                         case WHILE_LOOP:{
                             scope.indent_level = statement.indent_level+1;
                             scope.of = WHILE_LOOP;
@@ -1001,6 +965,21 @@ which will be used by scope defining functions to get desired results.
                             scope.indent_level = statement.indent_level+1;
                             scope.of = FOR_LOOP;
                             code += statement.statement + "{\n";
+                            break;                                
+                        }
+                        case FUNCTION_DECL:{
+                            //First check that the function is defined in a correct place or not?
+                            switch(scope.of){
+                                default:{
+                                    scope.indent_level = statement.indent_level+1;
+                                    scope.of = FUNCTION_DECL;
+                                    master_scope.of = FUNCTION_DECL;
+                                    master_scope.indent_level = scope.indent_level;
+                                    fncode += statement.statement + "{\n";
+                                    fnstate = 1;
+                                    break;
+                                }
+                            }
                             break;                                
                         }
                         default:{
@@ -1070,6 +1049,9 @@ which will be used by scope defining functions to get desired results.
                             scope.of = FOR_LOOP;
                             fncode += statement.statement + "{\n";
                             break;
+                        }
+                        case FUNCTION_DECL:{
+                            function_insideFunction(statement.number);
                         }
                     }
                 }
