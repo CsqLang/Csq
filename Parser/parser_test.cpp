@@ -1,5 +1,5 @@
-#include "AST/ast.h"
-#include "Parser/parser.h"
+#include "../AST/ast.h"
+#include "parser.h"
 
 
 void testFunction(){
@@ -12,17 +12,17 @@ void testFunction(){
 }
 void testIfElseInFunction(){
 
-    string code = "def fun1():\n if 3 > 2:\n  print('3 > 2')\n  else:\n  print('corrupted')";
-
+    string code = "def fun1():\n if 3 > 2:\n  print('3 > 2')\n elif 1:\n  print('else')\n elif 1:\n  print('else')";
     auto tokens = Tokenizer(code);
     ParseLines(tokens);
-    printf("%s\n",ParseStatements().c_str());
+    ParseStatements();
+    printf("%s\n",Functions[0].c_str());
 }
 
 
 void testIfElseLadder(){
 
-    string code = "if 1 == 2:\n print('Your math is wrong')\nelse:\n print('Your math is correct')";
+    string code = "if 1 == 2:\n print('Your math is wrong')\nelif 1>2:\n print('1>2')\nelse:\n print('Your math is correct')";
 
     auto tokens = Tokenizer(code);
     ParseLines(tokens);
@@ -65,6 +65,23 @@ void testnestedIfElseLadder(){
     printf("%s\n",ParseStatements().c_str());
 }
 
-int main() {
-    testWhileloop();
+void StatementsLeak(){
+    string code = "def fun1():\n if 3 > 2:\n  print('3 > 2')\n elif 1:\n  print('else')\n elif 1:\n  print('else')";
+    auto tokens = Tokenizer(code);
+    ParseLines(tokens);
+    for(Statement st : Statements){
+        printf("(%s indent : %d type : %d line : %d)\n",st.statement.c_str(),st.indent_level,st.type,st.number);
+    }
+}
+
+void testExprsInFunction(){
+    string code = "def fun1():\n print('inside fun1')\n a = 50\n b = 49\n c = a + b\n return c";
+
+    auto tokens = Tokenizer(code);
+    ParseLines(tokens);
+    ParseStatements();
+    printf("%s\n",Functions[0].c_str());
+}
+void clear(){
+    system("clear");
 }
