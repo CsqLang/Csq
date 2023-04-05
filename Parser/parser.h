@@ -1050,6 +1050,12 @@ which will be used by scope defining functions to get desired results.
                             fncode += statement.statement + "{\n";
                             break;
                         }
+                        case WHILE_LOOP:{
+                            scope.indent_level = statement.indent_level+1;
+                            scope.of = WHILE_LOOP;
+                            fncode += statement.statement + "{\n";
+                            break;                                
+                        }
                         case FUNCTION_DECL:{
                             function_insideFunction(statement.number);
                         }
