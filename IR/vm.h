@@ -15,6 +15,15 @@ enum TARGET_COMPILER{
     GPP,
 };
 
+
+string combineFunctions(){
+    string code;
+    for(string function : Functions){
+        code += function + "\n";
+    }
+    return code;
+}
+
 void CompileToGPP(string path, string name){
     string command = "g++ " + path + " -o " + name;
     system(command.c_str());
