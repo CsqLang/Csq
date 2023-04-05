@@ -12,7 +12,7 @@ void testFunction(){
 }
 void testIfElseInFunction(){
 
-    string code = "def fun1():\n if 3 > 2:\n  print('3 > 2')\n elif 1:\n  print('else')\n elif 1:\n  print('else')";
+    string code = "def fun(a):\n if a == 2:\n  if a+1 == 2+1:\n   print('auth passed')";
     auto tokens = Tokenizer(code);
     ParseLines(tokens);
     ParseStatements();
