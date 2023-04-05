@@ -788,6 +788,7 @@ which will be used by scope defining functions to get desired results.
                             default:{
                                 scope.indent_level = statement.indent_level+1;
                                 scope.of = FUNCTION_DECL;
+                                master_scope = scope;
                                 code += statement.statement + "{\n";
                                 fnstate = 1;
                                 break;
@@ -814,103 +815,30 @@ which will be used by scope defining functions to get desired results.
                 }
             }
 
-            //This section contains the statements required to parse functions
+            //This section contains the statements required to parse functions down.
 
-            else if(scope.indent_level == statement.indent_level && master_scope.of == FUNCTION_DECL){
-                //The statement can also have certain types of node so we need to check via switch.
-                switch(statement.type){
-                    case EXPR_TYPE:{
-                        fncode += statement.statement;
-                        fncode += "\n";
-                        break;                                        
-                    }
+            else if(master_scope.of == FUNCTION_DECL && scope.indent_level == statement.indent_level)
+            {
+                switch(scope.of)
+                {
                     case VAR_DECLARATION:{
-                        fncode += statement.statement;
-                        fncode += "\n";
-                        break;                                    
+                        fncode += statement.statement + "\n";
                     }
                     case VAR_ASSIGNMENT:{
-                        fncode += statement.statement;
-                        fncode += "\n";
-                        break;                                
-                    }
-                    case IF_STATEMENT:{
-                        printf("Counter else");
-                        if(scope.of == CLASS_DEFINITION){noStorageClass(statement.number, statement.raw_statement, scope);}
-                        else{
-                            fncode += statement.statement;
-                            fncode += "{\n";
-                            scope.indent_level = statement.indent_level + 1;
-                            scope.of = IF_STATEMENT;
-                            keyword_log.push_back("if");
-                        }
-                        break;                                
-                    }
-                    case ELIF_STATEMENT:{
-                        printf("Counter else");
-                        if(in("if",keyword_log)){
-                            code += statement.statement;
-                            code += "{\n";
-                            scope.indent_level = statement.indent_level+1;
-                            scope.of = ELIF_STATEMENT;
-                            keyword_log.push_back("elif");
-                        }
-                        else{
-                            elifUsedWithoutIf(statement.number);
-                        }
-                        break;                                
-                    }
-                    case ELSE_STATEMENT:{
-                        printf("Counter else");
-                        if(in("elif",keyword_log) || in("if",keyword_log)){
-                            fncode += statement.statement;
-                            fncode += "{\n";
-                            scope.indent_level = statement.indent_level+1;
-                            scope.of = ELSE_STATEMENT;
-                            keyword_log.push_back("else");
-                        }
-                        else{
-                            elseUsedWithoutIf(statement.number);
-                        }
-                        break;                                
-                    }
-                    case FUNCTION_DECL:{
-                        function_insideFunction(statement.number);
-                        break;                                
-                    }
-                    case WHILE_LOOP:{
-                        scope.indent_level = statement.indent_level+1;
-                        scope.of = WHILE_LOOP;
-                        fncode += statement.statement + "{\n";
-                        break;                                
-                    }
-                    case FOR_LOOP:{
-                        scope.indent_level = statement.indent_level+1;
-                        scope.of = FOR_LOOP;
-                        fncode += statement.statement + "{\n";
-                        break;                                
-                    }
-                    default:{
-                        unrecognized_statement(statement.number, statement.raw_statement);
-                        break;
+                        fncode += statement.statement + "\n";
                     }
                 }
             }
-            else if(scope.indent_level != statement.indent_level && master_scope.of == FUNCTION_DECL){
-                int change_indent = scope.indent_level-statement.indent_level;
-                scope.indent_level = scope.indent_level-change_indent;
-                for(int i = 0;i<change_indent;i++)
-                    fncode += "}\n";
-                printf("%d\n",scope.indent_level);
-                if(scope.indent_level == master_scope.indent_level-1){
-                    vector<string> functionstack1 = Functions;
-                    functionstack1.push_back(fncode);
-                    master_scope = last_master_scope;
-                    last_master_scope.indent_level = scope.indent_level-1;
-                    last_master_scope.of = FUNCTION_DECL;
-                    Functions = functionstack1;
-                    printf("%s\n",fncode.c_str());
-                    fncode = "";
+            else if(master_scope.of == FUNCTION_DECL && scope.indent_level != statement.indent_level)
+            {
+                // the change of indent level.
+                int c_indent = scope.indent_level - statement.indent_level;
+                // add } till the c_indent
+                for(int i = 0; i < c_indent; i++)
+                    fncode += "}";
+                //Checking for the end of function scope.
+                if(statement.indent_level == master_scope.indent_level-1){
+
                 }
             }
 
