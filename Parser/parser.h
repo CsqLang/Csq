@@ -847,6 +847,21 @@ which will be used by scope defining functions to get desired results.
                         }
                         break;   
                     }
+
+                    case ELIF_STATEMENT:{
+                        if(in("if",keyword_log)){
+                            fncode += statement.statement;
+                            fncode += "{\n";
+                            scope.indent_level = statement.indent_level+1;
+                            scope.of = ELIF_STATEMENT;
+                            keyword_log.push_back("elif");
+                        }
+                        else{
+                            elifUsedWithoutIf(statement.number);
+                        }
+                        break;                                
+                    }
+
                     case ELSE_STATEMENT:{
                         if(in("elif",keyword_log) || in("if",keyword_log)){
                             fncode += statement.statement;
@@ -874,6 +889,63 @@ which will be used by scope defining functions to get desired results.
                     master_scope = last_master_scope;
                     master_scope.indent_level = statement.indent_level;
                     Functions.push_back(fncode);
+                }
+
+                switch(statement.type)
+                {
+                    case VAR_DECLARATION:{
+                        fncode += statement.statement + "\n";
+                        break;
+                    }
+                    case VAR_ASSIGNMENT:{
+                        fncode += statement.statement + "\n";
+                        break;
+                    }
+                    case EXPR_TYPE:{
+                        fncode += statement.statement + "\n";
+                        break;
+                    }
+                    case IF_STATEMENT:{
+                        if(master_scope.of == CLASS_DEFINITION){
+                            noStorageClass(statement.number, statement.raw_statement, scope);
+                        }
+                        else{
+                            fncode += statement.statement;
+                            fncode += "{";
+                            scope.indent_level = statement.indent_level + 1;
+                            scope.of = IF_STATEMENT;
+                            keyword_log.push_back("if");
+                        }
+                        break;   
+                    }
+
+                    case ELIF_STATEMENT:{
+                        if(in("if",keyword_log)){
+                            fncode += statement.statement;
+                            fncode += "{\n";
+                            scope.indent_level = statement.indent_level+1;
+                            scope.of = ELIF_STATEMENT;
+                            keyword_log.push_back("elif");
+                        }
+                        else{
+                            elifUsedWithoutIf(statement.number);
+                        }
+                        break;                                
+                    }
+
+                    case ELSE_STATEMENT:{
+                        if(in("elif",keyword_log) || in("if",keyword_log)){
+                            fncode += statement.statement;
+                            fncode += "{\n";
+                            scope.indent_level = statement.indent_level+1;
+                            scope.of = ELSE_STATEMENT;
+                            keyword_log.push_back("else");
+                        }
+                        else{
+                            elseUsedWithoutIf(statement.number);
+                        }
+                        break; 
+                    }
                 }
             }
 
