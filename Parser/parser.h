@@ -834,6 +834,32 @@ which will be used by scope defining functions to get desired results.
                         fncode += statement.statement + "\n";
                         break;
                     }
+                    case IF_STATEMENT:{
+                        if(master_scope.of == CLASS_DEFINITION){
+                            noStorageClass(statement.number, statement.raw_statement, scope);
+                        }
+                        else{
+                            fncode += statement.statement;
+                            fncode += "{";
+                            scope.indent_level = statement.indent_level + 1;
+                            scope.of = IF_STATEMENT;
+                            keyword_log.push_back("if");
+                        }
+                        break;   
+                    }
+                    case ELSE_STATEMENT:{
+                        if(in("elif",keyword_log) || in("if",keyword_log)){
+                            fncode += statement.statement;
+                            fncode += "{\n";
+                            scope.indent_level = statement.indent_level+1;
+                            scope.of = ELSE_STATEMENT;
+                            keyword_log.push_back("else");
+                        }
+                        else{
+                            elseUsedWithoutIf(statement.number);
+                        }
+                        break; 
+                    }
                 }
             }
             else if(master_scope.of == FUNCTION_DECL && scope.indent_level != statement.indent_level)
@@ -842,7 +868,7 @@ which will be used by scope defining functions to get desired results.
                 int c_indent = scope.indent_level - statement.indent_level;
                 // add } till the c_indent
                 for(int i = 0; i < c_indent; i++)
-                    fncode += "}";
+                    fncode += "}\n";
                 //Checking for the end of function scope.
                 if(statement.indent_level == master_scope.indent_level-1){
                     master_scope = last_master_scope;
