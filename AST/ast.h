@@ -28,7 +28,7 @@ typedef enum {
     ELIF_STATEMENT,
     ELSE_STATEMENT,
     FUN_ARGUMENT,
-    PROGRAM,
+    PROGRAM, //The basic node type is Program which doesn't needs to be traversed.
 } NODE_TYPE;
 
 //Node struct
