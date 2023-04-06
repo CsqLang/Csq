@@ -26,9 +26,9 @@ string combineFunctions(){
 }
 
 string formIR(string code, string fncode, string current_path){
-    string IR = "#include \"" + current_path + "\"\n";
-    IR += fncode + "\n";
-    IR += code + "\n";
+    string IR = "#include \"" + current_path + "/IR/instructions.h\"\n";
+    IR += fncode + "\nint main(int argc, char const *argv[]){\n";
+    IR += code + "\nreturn 0;}\n";
     return IR;
 }
 
@@ -43,6 +43,12 @@ string readCode(string path){
     // Close the file
     file.close();
     return code;
+}
+
+void writeIR(string code, string path, string curr_dir, string name, string lang = ".cpp"){
+    ofstream file(curr_dir + "/" + name + lang);
+    file <<code << "\n";
+    file.close();
 }
 
 void CompileToGPP(string path, string name){
