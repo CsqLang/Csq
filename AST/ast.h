@@ -4,7 +4,6 @@
 //Imports
 #include "../Grammar/grammar.h"
 #include "../Tokenizer/tokenizer.h"
-#include "../IR/IRcode.h"
 #include "../Memory/stack.h"
 #include <memory>
 #include <stack>
