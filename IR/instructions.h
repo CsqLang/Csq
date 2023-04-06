@@ -1,7 +1,8 @@
 #if !defined(instructions_IRCsq4)
 #define instructions_IRCsq4
 #include "../AST/ast.h"
-
+#include "builtins.h"
+//Instructions
 
 #define VAR auto
 #define FUN auto
