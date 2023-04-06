@@ -24,6 +24,13 @@ string combineFunctions(){
     return code;
 }
 
+string formIR(string code, string fncode, string current_path){
+    string IR = "#include \"" + current_path + "\"\n";
+    IR += fncode + "\n";
+    IR += code + "\n";
+    return IR;
+}
+
 void CompileToGPP(string path, string name){
     string command = "g++ " + path + " -o " + name;
     system(command.c_str());
