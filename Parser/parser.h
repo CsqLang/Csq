@@ -1,812 +1,1072 @@
-/*:::::::::::::::::::::::::::::::FEATURES SHALL BE THERE IN CSQ4:::::::::::::::::::::::::::::::::::::
- (1) REFERENCE COUNTING (DONE)
- (2) OBJECT ORIENTED PROGRAMMING (DONE)
- (3) FUNCTIONAL PROGRAMMING (DONE)
- (4) GENERATION OF EXECUTABLE BUT WILL BE RUNNED AT RUNTIME (PENDING, AND WILL BE DONE BY CODE GENERATOR)
- (5) IMPORTS (DONE)
+#if !defined(PARSEr_H_CSQ4)
+#define PARSEr_H_CSQ4
+    //Imports
+    #include "../Tokenizer/tokenizer.h"
+    #include "../AST/ast.h"
+    #include "../Memory/stack.h"
 
-    Source : @anchor https://www.github.com/CsqLang/Csq4
-    Last modified by Aniket Kumar
- * **/
-#if !defined(PARSER_CSQ4_H)
-#define PARSER_CSQ4_H
-#include "lexer.h"
-#include "../libs/utils/filehand.h"
-#include "../Memory/Stack.h"
-//::::::::::::::::::::::::::::::::Some Utilities::::::::::::::::::::::::::::::::
-//Exception counter::
-int exception_counter = 0;
+    //Total count of errors.
+    int error_count = 0;
+    //Some alias
+    typedef vector<Token> TokenStream;
+    typedef vector<string> StringStream;
+    typedef Ptr<Node> NodePtr;
+    //Tools required for parsing
+
+    //Program node to store all the childs
+    typedef struct : Node{
+        vector<Block> statements;
+        void addChild(Block child){
+            statements.push_back(child);
+        }
+    }Program;
+    //Root for all nodes.
+    Program root;
+
+
+    //Scope for the statements
+    struct Scope{
+        int indent_level;
+        NODE_TYPE of;
+        Scope(){}
+        Scope(int level, NODE_TYPE of_){
+            indent_level = level;
+            of = of_;
+        };
+    };
+
+    //Struct to store infos about statements
+    struct Statement{
+        int indent_level;
+        int number;
+        string statement;
+        string raw_statement;
+        NODE_TYPE type;
+        Statement(){}
+        Statement(int statement_num,string raw, string statement_, NODE_TYPE type_, int indent_level_){
+            number = statement_num;
+            statement = statement_;
+            raw_statement = raw;
+            indent_level = indent_level_;
+            type = type_;
+        }
+    };
+
+    //Getting current indentation level.
+    int getIndentLevel(TokenStream tokens){
+        int indent_level = 0;
+        if(tokens[0].type != INDENT)
+            return indent_level;
+        else{
+            for(Token token : tokens){
+                if(token.type == INDENT)
+                    indent_level++;
+                else
+                    break; 
+            }
+            return indent_level;
+        }
+    }
+
+    vector<TokenStream> Tokenizer(string code){
+        code += "\n";
+        vector<TokenStream> lines;
+        string current = "";
+        for(char ch : code){
+            if(ch != '\n')
+                current.push_back(ch);
+            else{
+                lines.push_back(tokenize(current));
+                current = "";
+            }
+        }
+        return lines;
+    }
+    //We can't directly use TokenStream as body of block so for that we use string.
+    string TokenStreamToString(TokenStream tokens){
+        string result;
+        for(Token token : tokens){
+            result += token.token + " ";
+        }
+        return result;
+    }
+
+
+    bool isIfStmt(TokenStream tokens){
+        bool state = 0;
+        for(Token token : tokens)
+            if(token.token == "if" && token.type == KEYWORD)
+            {
+                state = true;
+                break;
+            }
+        return state;
+    }
+    bool isElifStmt(TokenStream tokens){
+        bool state = 0;
+        for(Token token : tokens)
+            if(token.token == "elif" && token.type == KEYWORD)
+            {
+                state = true;
+                break;
+            }
+        return state;
+    }
+    bool isElseStmt(TokenStream tokens){
+        bool state = 0;
+        for(Token token : tokens)
+            if(token.token == "else" && token.type == KEYWORD)
+            {
+                state = true;
+                break;
+            }
+        return state;
+    }
+    bool isFunDecl(TokenStream tokens){
+        bool state = 0;
+        for(Token token : tokens)
+            if(token.token == "def" && token.type == KEYWORD)
+            {
+                state = true;
+                break;
+            }
+        return state;
+    }
+    bool isVarDecl(TokenStream tokens){
+        bool state = 0;
+        if(tokens[0].type == IDENTIFIER && tokens[1].token == "=" && !in(tokens[0].token,Variables))
+            state = 1;
+        return state;
+    }
+    bool isVarAssign(TokenStream tokens){
+        bool state = 0;
+        if(tokens[0].type == IDENTIFIER && tokens[1].token == "=" && in(tokens[0].token,Variables))
+            state = 1;
+        return state;
+    }
+    bool isWhileStmt(TokenStream tokens){
+        bool state = 0;
+        for(Token token : tokens)
+            if(token.token == "while" && token.type == KEYWORD)
+            {
+                state = true;
+                break;
+            }
+        return state;
+    }
+    bool isForStmt(TokenStream tokens){
+        bool state = 0;
+        for(Token token : tokens)
+            if(token.token == "for" && token.type == KEYWORD)
+            {
+                state = true;
+                break;
+            }
+        return state;
+    }
+
+
+    //Errors for the bad code.
+
+    void error(int line, string msg){
+        printf("Error [%d]: at line %d, %s\n",error_count+1, line, msg.c_str());
+        error_count++;
+    }
+
+    void unexpected_indent(int line, string last_stmt_type){
+        error(line, "unexpected indent after " + last_stmt_type);
+    }
+
+    void expected_indent(int line, string last_stmt_type){
+        error(line, "expected an indent after " + last_stmt_type);
+    }
+    void unrecognized_statement(int line, string stmt){
+        error(line, "unrecognized statement '" + stmt + "'.");
+    }
+    void function_insideIfstmt(int line){
+        error(line, "function is defined inside IfStmt which is not allowed.");
+    }
+    void function_insideElif(int line){
+        error(line, "function is defined inside ElifStmt which is not allowed.");
+    }
+    void function_insideElse(int line){
+        error(line, "function is defined inside ElseStmt which is not allowed.");
+    }
+    void function_insideFunction(int line){
+        error(line, "function is defined inside another function which is not allowed.");
+    }
+    void function_insideWhile(int line){
+        error(line, "function is defined inside WhileLoop which is not allowed.");
+    }
+    void function_insideFor(int line){
+        error(line, "function is defined inside another ForLoop which is not allowed.");
+    }
+    
+    void noStorageClass(int line, string stmt, Scope scope){
+        if(scope.of == CLASS_DEFINITION){
+            error(line, "no storage class for the '" + stmt + "' inside a class.");
+        }
+    }
+    void elifUsedWithoutIf(int line){
+        error(line, "elif defined without any if statement before.");
+    }
+    void elseUsedWithoutIf(int line){
+        error(line, "else defined without any if or elif statement before.");
+    }
+
 /*
-Errors to be pushed when user has done any mistake.
+In this field the actual parsing will be done
+and the process is that the functions will parse and generate AST node 
+which will be used by scope defining functions to get desired results.
 */
-void ClassEndError(str class_name){
-    printf("Error: class %s has not been ended to end use endc\n",class_name.Str);
-}
+    ForLoop ParseForLoop(TokenStream tokens);//(Defined)
+    WhileLoop ParseWhileLoop(TokenStream tokens);//(Defined)
+    VarDecl ParseVarDecl(TokenStream tokens);//(Defined)
+    VarAssign ParseVarAssign(TokenStream tokens);//(Defined)
+    FunctionDecl ParseFuncDecl(TokenStream tokens);//(Undefined)
+    IfStmt ParseIfStmt(TokenStream tokens); //(Defined)
+    ElifStmt ParseElifStmt(TokenStream tokens); //(Defined)
+    ElseStmt ParseElseStmt(TokenStream tokens); //(Defined)
 
-void FunctionEndError(str fn_name){
-    printf("Error: function/method %s has not been ended to end use %s ends\n",fn_name.Str,fn_name.Str);
-}
+    IfStmt ParseIfStmt(TokenStream tokens){ 
+        IfStmt node;
+        bool condition = false;
 
-void WrongFunctionEndError(str fn_name,int lineno){
-    printf("Error: In statement at line %d function scope is done for function '%s' but it doesn't exists or already ended. \n",lineno,fn_name.Str);
-}
-
-void VariableValueError(str var_name, int lineno){
-    printf("Error: In statement at line %d variable declaration is done for variable '%s' but value is not given \n",lineno,var_name.Str);
-}
-
-void VariableTypeError(str var_name, int lineno){
-    printf("Error: In statement at line %d variable declaration is done for variable '%s' but type is not given \n",lineno,var_name.Str);
-}
-
-void RedefinationVariableError(str var_name, int lineno){
-    printf("Error: In statement at line %d variable %s is redeclared.\n",lineno,var_name.Str);
-}
-
-void MissingError(str statement_, int lineno){
-    printf("Error: At line %d expected a statement after %s.\n",lineno,statement_.Str);
-}
-
-void CustomError(str statement,int lineno){
-    printf("Error: At line %d%s.\n",lineno,statement.Str);
-}
-
-void StopCompilation(){
-    exit(0);
-}
-
-
-//Checking that curly brackets is correctly closed or not
-void CurlyBracketCheck(array<str> tokens, int linenum){
-    int lbrace = 0;
-    int rbrace = 0;
-    bool ended = false;
-    str token_prev = tokens[0];
-    for(auto token : tokens){
-        if(token == "{"){
-            lbrace++;
+        for(int i = 0; i<tokens.size(); i++)
+            if(tokens[i].token == "if" && tokens[i].type == KEYWORD && condition == 0)
+                condition = true;
+            else if(condition && tokens[i].token != ":")
+                node.condition.expr += tokens[i].token;
+            else if(condition && tokens[i].token == ":")
+            {
+                condition = false;
+                break;
+            }
+        if(node.condition.expr == ""){
+            printf("Error:[%d] expected an expression, after keyword if.\n",error_count+1);
+            printf("Hint:[%d] add a condition after if keyword.\n",error_count+1);
+            error_count++;
         }
-        else if(token == "}" && rbrace!=lbrace){
-            rbrace++;
+        if(condition){
+            printf("Error:[%d] the if statement hasn't ended sucessfuly.\nHint:[%d] add a colon after condition.\n",error_count+1, error_count+1);
+            error_count++;
         }
-        else if(token == "}" && rbrace == lbrace){
-            CustomError(str(", invalid close of curly bracket"),linenum);
-            exception_counter++;
-        }
+        return node;
     }
-    if(rbrace == lbrace)
-        ended = true;
-    else
-        ended = false;
-    if(ended == false){
-        CustomError(str(", statement hasn't ended properly expected ")+to_str(lbrace-rbrace)+" }",linenum);
-        exception_counter++;
-    }
-}
-//Checking that square brackets is correctly closed or not
-void SquareBracketCheck(array<str> tokens, int linenum){
-    int lbrac = 0;
-    int rbrac = 0;
-    bool ended = false;
-    str token_prev = tokens[0];
-    for(auto token : tokens){
-        if(token == "["){
-            lbrac++;
-        }
-        else if(token == "]" && rbrac!=lbrac){
-            rbrac++;
-        }
-        else if(token == "]" && rbrac == lbrac){
-            CustomError(str(", invalid close of square bracket"),linenum);
-            exception_counter++;        
-        }
-    }
-    if(rbrac == lbrac)
-        ended = true;
-    else
-        ended = false;
-    if(ended == false){
-        CustomError(str(", statement hasn't ended properly expected ")+to_str(lbrac-rbrac)+" ]",linenum);
-        exception_counter++;
-    }
-}
-//Checking that parenthesis is correctly closed or not
-void ParenthesisCheck(array<str> tokens, int linenum){
-    int lparen = 0;
-    int rparen = 0;
-    bool ended = false;
-    str token_prev = tokens[0];
-    for(auto token : tokens){
-        if(token == "("){
-            lparen++;
-        }
-        else if(token == ")" && rparen!=lparen){
-            rparen++;
-        }
-        else if(token == ")" && rparen == lparen){
-            CustomError(str(", invalid close of parenthesis"),linenum);
-            exception_counter++;
-        }
-    }
-    if(rparen == lparen)
-        ended = true;
-    else
-        ended = false;
-    if(ended == false){
-        CustomError(str(", statement hasn't ended properly expected ")+to_str(lparen-rparen)+" )",linenum);
-        exception_counter++;
-    }
-}
 
-/*
-    To know that the folowing tokens are matching with any statement or not.
-*/
-bool CheckIF(array<str> tokens){
-    return in(tokens,IF);
-}
-bool isIdentifier(str tok){
-    return Regex(identifier,tok);
-}
-bool CheckElse(array<str> tokens){
-    return in(tokens,ELSE);
-}
-bool CheckUse(array<str> tokens){
-    return in(tokens,"use");
-}
-bool CheckTry(array<str> tokens){
-    return in(tokens,"try");
-}
-bool CheckCatch(array<str> tokens){
-    return in(tokens,"catch");
-}
-bool CheckAll(array<str> tokens){
-    return in(tokens,"all");
-}
-bool CheckElif(array<str> tokens){
-    return in(tokens,ELIF);
-}
-bool CheckFor(array<str> tokens){
-    return in(tokens,FOR);
-}
-bool CheckWhile(array<str> tokens){
-    return in(tokens,WHILE);
-}
-bool CheckFunctionDefination(array<str> tokens){
-    return in(tokens,DEF);
-}
-bool CheckClassDefination(array<str> tokens){
-    return in(tokens,CLASS);
-}
-bool CheckEnd(array<str> tokens){
-    return in(tokens,ENDS);
-}
-bool CheckImport(array<str> tokens){
-    return in(tokens,IMPORT);
-}
-bool CheckConstructor(array<str> tokens){
-    return in(tokens,INIT);
-}
-bool CheckMacro(array<str> tokens){
-    return in(tokens,MACRO);
-}
-bool file_exists(str filename){
-    FILE *fp = fopen(filename.Str, "r");
-    bool is_exist = false;
-    if (fp != NULL)
+    ElifStmt ParseElifStmt(TokenStream tokens){
+        ElifStmt node;
+        bool condition = false;
+        for(int i = 0; i<tokens.size(); i++)
+            if(tokens[i].token == "elif" && tokens[i].type == KEYWORD && condition == 0)
+                condition = true;
+            else if(condition && tokens[i].token != ":")
+                node.condition.expr += tokens[i].token;
+            else if(condition && tokens[i].token == ":")
+            {
+                condition = false;
+                break;
+            }
+        if(node.condition.expr == ""){
+            printf("Error:[%d] expected an expression, after keyword elif.\n",error_count+1);
+            printf("Hint:[%d] add a condition after elif keyword.\n",error_count+1);
+            error_count++;
+        }
+        if(condition){
+            printf("Error:[%d] the elif statement hasn't ended sucessfuly.\nHint:[%d] add a colon after condition.\n",error_count+1, error_count+1);
+            error_count++;
+        }
+        return node;
+    }
+
+    ElseStmt ParseElseStmt(TokenStream tokens){
+        ElseStmt node;
+        if(tokens[1].token != ":"){
+            printf("Error:[%d] expected a : after else.\n",error_count+1);
+            error_count++;
+        }
+        return node;
+    }
+
+    Expr ParseExpr(TokenStream tokens){
+        Expr node;
+        node.expr = TokenStreamToString(tokens);
+        return node;
+    }
+
+    VarDecl ParseVarDecl(TokenStream tokens){
+        VarDecl node;
+        bool value = false;
+        
+        vector<string> Variables_ = Variables;
+        Variables_.push_back(tokens[0].token);
+        Variables = Variables_;
+        Variables_.empty();
+        for(Token token : tokens)
+            if(!value && token.type == IDENTIFIER)
+                node.name = token.token;
+            else if(token.type == ASOPERATOR && !value)
+                value = true;
+            else if(value)
+                node.value.expr += token.token + " ";
+        if(node.value.expr == ""){
+            printf("Error:[%d] expected a value after assignment operator.\n",error_count+1);
+            error_count++;
+        }
+        return node;
+    }
+
+    VarAssign ParseVarAssign(TokenStream tokens){
+        VarAssign node;
+        bool value = false;
+        for(Token token : tokens)
+            if(!value && token.type == IDENTIFIER)
+                node.name = token.token;
+            else if(token.type == ASOPERATOR && !value)
+                value = true;
+            else if(value)
+                node.value.expr += token.token + " ";
+        if(node.value.expr == ""){
+            printf("Error:[%d] expected a value after assignment operator.\n",error_count+1);
+            error_count++;
+        }
+        return node;
+    }
+
+    WhileLoop ParseWhileLoop(TokenStream tokens){
+        WhileLoop node;
+        bool condition = false;
+        for(Token token : tokens){
+            if(token.token == "while" && token.type == KEYWORD)
+                condition = true;
+            else if(condition && token.token != ":")
+                node.condition.expr += token.token + " ";
+            else if(condition && token.token == ":"){
+                condition = false;
+                break;
+            }
+        }
+        if(condition){
+            printf("Error:[%d] expected a colon after conditon.\n",error_count+1);
+            error_count++;
+        }
+        return node;
+    }
+
+    ForLoop ParseForLoop(TokenStream tokens){
+        ForLoop node;
+        bool condition = false;
+        bool iter = false;
+        for(Token token : tokens)
+            if(token.token == "for" && !condition)
+                iter = true;
+            else if(iter && token.token != "in" && !condition)
+                node.iter_name += token.token;
+            else if(iter && token.token == "in" && !condition){
+                iter = false;
+                condition = true;
+            }
+            else if(condition && token.token != ":"){
+                node.condition.expr += token.token + " ";
+            }
+            else if(condition && token.token == ":"){
+                condition = 0;
+                break;
+            }
+        if(condition){
+            printf("Error:[%d] expected an end of condition.", error_count+1);
+            error_count++;
+        }
+        return node;
+    }
+
+    FunctionDecl ParseFuncDecl(TokenStream tokens){
+        FunctionDecl node;
+        bool param = false;
+        bool name = false;
+        bool ended = false;
+        string param_;
+        for(Token token : tokens){
+            if(token.token == "def" && !name && !param){
+                name = 1;
+            }
+            else if(name && token.token != "(" && !param){
+                node.name += token.token;
+            }
+            else if(name && token.token == "(" && !param){
+                name = 0;
+                param = 1;
+            }
+            else if(param && token.token != "," && token.token != ")"){
+                param_ += token.token;
+            }
+            else if(param && token.token == ","){
+                node.params.push_back(param_);
+                param_ = "";
+            }
+            else if(param && token.token == ")"){
+                param = 0;
+                node.params.push_back(param_);
+                param_ = "";
+            }
+            else if(token.token == ":"){
+                ended = true;
+                break;
+            }
+        }
+        if(param){
+            printf("Error:[%d] expected an end of param.\nHint: put a ) after params.\n", error_count+1);
+            error_count++;
+        }
+        return node;
+    }
+
+    // //Function to parse scope of the particular indent_level;
+    // vector<Statement> ParseScope(vector<TokenStream> raw_tokens, string id = ""){
+    //     vector<Statement> statements;
+    //     int statNum = 1;
+    //     for(TokenStream tokenStream : raw_tokens){
+    //         statements.push_back(Statement(statNum, TokenStreamToString(tokenStream),getIndentLevel(tokenStream)));
+    //         statNum++;
+    //     }
+    //     return statements;
+    // }
+
+    //This function is gonna return the deepest indent level.
+    int DeepestIndentLevel(vector<TokenStream> tokens)
     {
-        is_exist = true;
-        fclose(fp); // close the file
+        int indent_level = 0;
+        for(TokenStream tokenStream : tokens)
+        {
+            if(getIndentLevel(tokenStream) > indent_level){
+                indent_level = getIndentLevel(tokenStream);
+            }
+            else{}
+        }
+        return indent_level;
     }
-    return is_exist;
-}
 
-
-str currDir;
-array<str> ImportsManagement(array<str> tok, str base_path = "./") {
     /*
-    Syntax: import <module>
-    Sample tokens : {"import","test"}
+    Indentation handling shall be done in such a way in which every
+    line with certain indentation shall be stored as an object.
     */
-    str path = tok[1];
-    array<str> tokens;
-    if(path[0] == '/'){
-        str name = split(path,"/")[split(path,"/").len()-1];
-        str content = read(path+".csqm");
-        str code = "namespace ";
-        code += name + " LBRACE\n";
-        code += content + "\n RBRACE";
-        tokens.add(code);
-    }
-    else{
-        path = base_path + path;
-        str content = read(currDir+str("/")+path+".csqm");
-        str name = split(path,"/")[split(path,"/").len()-1];
-        str code = "namespace ";
-        code += name + " LBRACE\n";
-        code += content + "\n RBRACE";
-        tokens.add(code);
-    }
-    
-    return tokens;
-}
+    //Define vector for all indentation levels
+    vector<Statement> Statements;
 
-
-array<str> IfTokManagement(array<str> tok){
-    array<str> s;
-    if(CheckIF(tok) == 1){
-        for(auto i : tok)
-            if(i == "if")
-                s.add("IF");
-            else
-                s.add(i);
-        s.add("DO");
-    }
-    else{
-        s = tok;
-    }
-    return s;
-}
-array<str> ElifTokManagement(array<str> tok){
-    array<str> s;
-    if(CheckIF(tok) == 1){
-        for(auto i : tok)
-            if(i == "elif")
-                s.add("ELIF");
-            else
-                s.add(i);
-        s.add("DO");
-    }
-    else{
-        s = tok;
-    }
-    return s;
-}
-array<str> ElseTokManagement(array<str> tok){
-    array<str> s;
-    if(CheckIF(tok) == 1){
-        for(auto i : tok)
-            if(i == "else")
-                s.add("ELSE");
-            else
-                s.add(i);
-    }
-    else{
-        s = tok;
-    }
-    return s;
-}
-
-array<str> MacroManagement(array<str> tok){
-    array<str> newtokens;
-    if(CheckMacro(tok)){
-        for(auto e : tok)
-            if(e == MACRO)
-                newtokens.add("#define");
-            else
-                newtokens.add(e);
-    }
-    else
-        newtokens = tok;
-    return newtokens;
-}
-str Rep(str s){
-    str code;
-    code = replaceStr(s.Str," = = ","==");
-    code = replaceStr(code.Str,"!s"," ");
-    code = replaceStr(code.Str,"+ +","++");
-    code = replaceStr(code.Str,"- -","--");
-    code = replaceStr(code.Str,"+ =","+=");
-    code = replaceStr(code.Str,"- =","-=");
-    code = replaceStr(code.Str,"* =","*=");
-    code = replaceStr(code.Str,"/ =","/=");
-    code = replaceStr(code.Str,"! =","!=");
-    code = replaceStr(code.Str,"> =",">=");
-    code = replaceStr(code.Str,"< =","<=");
-    code = replaceStr(code.Str,"- >","->");
-    code = replaceStr(code.Str,"& &","&&");
-    code = replaceStr(code.Str," . ",".");
-    code = replaceStr(code.Str,": :","::");
-    code = replaceStr(code.Str," ,",",");
-    return code;
-}
-bool CheckVariableAssignment(array<str> tokens){
-    bool colon, equal;
-    for(auto op : tokens){
-        if(op == ":"){
-            colon = true;
-        }
-        else if(op == "="){
-            equal = true;
-        }
-    }
-    bool state = false;
-    if(colon == true && equal == true){
-        state = true;
-    }
-    return state;
-}
-#define ignore NULL;
-//Variable call implementation
-auto CheckVariableCall(array<str> instructions){
-    array<str> newop;
-    for(auto op : instructions){
-        if(Regex(identifier,op) == true && in(Stack::Variables,op) == true && in(ReservedTokens.keys,op) == false){
-            newop.add(str("* ")+op);
-        }
-        else{
-            newop.add(op);
-        }
-    }
-    return newop;
-}
-//Variable assignment shuffle function will produce 3 new tokens of name,type and assignment.
-auto TokenVariableAssignShuffle(array<str> tokens){
-    str type,name,assign;
-    bool varname = true;
-    bool typepos;
-    bool valpos;
-    //Example:
-    /*
-        a:int = 387
-        ["a","COLON","int","EQUAL","387"]
-    */
-    //Getting positions of all main identities...
-    for(int i=0;i<tokens.len();i++){
-        if(varname == true && tokens[i] != ":"){
-            name += tokens[i];
-        }
-        else if(tokens[i] == ":"){
-            valpos = false;
-            typepos = true;
-            varname = false;
-        }
-        else if(tokens[i] == "="){
-            valpos = true;
-            typepos = false;
-            varname = false;
-        }
-        else if(typepos == true && valpos == false){
-            type += tokens[i]+" ";
-        }
-        else if(valpos == true && tokens[i] !=";"){
-            assign += tokens[i]+" ";
-        }
-    }
-    
-    return array<str>({name,replaceStr(type.Str,",","COMMA"),assign});
-}
-
-//Variable call implementation
-auto VariableCall(array<str> instructions){
-    array<str> newop;
-    for(auto op : instructions){
-        if(Regex(identifier,op) == true && in(Stack::Variables,op) == true && in(ReservedTokens.keys,op) == false){
-            newop.add(str("*")+op);
-        }
-        else{
-            newop.add(op);
-        }
-    }
-    return newop;
-}
-
-//Same keywords doesn't require ; so to avoid it we need to do condition check.
-auto SemiColanManagement(array<str> tok){
-    array<str> newt;
-    if(in(tok,"ends") == false && in(tok,"for") == false && in(tok,"def") == false && in(tok,"class") == false
-    && in(tok,"if") == false && in(tok,"else") == false && in(tok,"elif") == false && in(tok,"import") == false){
-        newt = tok;
-        newt.add("SEMI");
-    }
-    else{
-        newt = tok;
-    }
-    return newt;
-}
-//Variable assignment shuffle function will produce 3 new tokens of name,type and assignment.
-auto TokenVariableInAssignShuffle(array<str> tokens){
-    str type,name,assign;
-    bool varname = true;
-    bool typepos;
-    bool valpos;
-    //Example:
-    /*
-        a:int = 387
-        ["a","COLON","int","EQUAL","387"]
-    */
-    //Getting positions of all main identities...
-    for(int i=1;i<tokens.len();i++){
-        if(varname == true && tokens[i] != ":"){
-            name += tokens[i];
-        }
-        else if(tokens[i] == ":"){
-            valpos = false;
-            typepos = true;
-            varname = false;
-        }
-        else if(tokens[i] == "in"){
-            valpos = true;
-            typepos = false;
-            varname = false;
-        }
-        else if(typepos == true && valpos == false){
-            type += tokens[i]+" ";
-        }
-        else if(valpos == true && tokens[i] !=";"){
-            assign += tokens[i]+" ";
-        }
-    }
-    return array<str>({name,replaceStr(type.Str,",","COMMA"),assign});
-}
-
-/*
-As we know in C++ every seperate statement shall be ended with semicolan if not so
-the compiler will assume that the other statements are the part of the same line
-which is error causer so we need to handle it so this function will do so.
-*/
-str addSemi(str s){
-    array<str> lines = split(s,"\n");
-    str r;
-    for(auto l : lines){
-        if(find_str(l.Str,str("def").Str) == 1 || find_str(l.Str,str("ends").Str)==1){
-            r += l + "\n";
-        }
-        else{
-            r += l + ";\n";
-        }
-    }return r;
-}
-array<str> ForTokManagement(array<str> tok){
-    // array<str> t;
-    array<str> code;
-    if(CheckFor(tok) == true){
-        str n = TokenVariableInAssignShuffle(tok)[0];
-        str t = TokenVariableInAssignShuffle(tok)[1];
-        str a = TokenVariableInAssignShuffle(tok)[2];
-        code = {"FOR FORREF(",n+",",t+") IN",a," DO"};
-    }
-    else{
-        code = tok;
-    }
-    return code;
-}
-array<str> WhileTokManagement(array<str> tok){
-    array<str> code;
-    if(CheckWhile(tok) == 1){
-        for(auto i : tok){
-            if(i == "while"){
-                code += "WHILE";
-            }
-            else{
-                code += i;
-            }
-        }code += "DO";
-    }else{
-        code = tok;
-    }
-    return code;
-}
-
-/*This is the class which is basiclly the implementation of parser for Csq4.
-How it will work:
-input: tokens
-output: Csq4 bytecodes instead of AST.
-*/
-class Parser{
-    public:
-        //Declaration of Parse function.
-        auto Parse(array<array<str>> tokens);
-};
-//Defination of Parse function in Parser class
-/*This function needs all tokens present in the code.*/
-auto Parser::Parse(array<array<str>> tokens){
-    //Declare states and some needed variables.
-    str nominal_code, fn_code, imports, fn_name,class_name;
-    bool fn_state = false;bool class_state = false;str main_state = "true";
-    int line_no = 1;
-    
-    //Applying for range loop to get tokenized tokens present in each line.
-    for(array<str> rawline : tokens){
-        array<str> line = (WhileTokManagement(ForTokManagement(ElseTokManagement(ElifTokManagement(IfTokManagement(rawline))))));
-        //Evaluting some error checks before conditions to prevent futher processing.
-        //are parenthesis properly closed
-        ParenthesisCheck(line,line_no);
-        //are curly brackets properly closed
-        CurlyBracketCheck(line,line_no);
-        //are square brackets properly closed
-        SquareBracketCheck(line,line_no);
-
-
-        /*-----------------------------------------------------------------------------------------------------------------------*/
-        //Evalute when Variable assignment is there and it's not inside functions body.
-        if(CheckVariableAssignment(line) == true and fn_state == false && CheckFunctionDefination(line) == false){
-            //Collecting name, type and value of variable
-            str name = TokenVariableAssignShuffle(line)[0];
-            str type = TokenVariableAssignShuffle(line)[1];
-            str val = TokenVariableAssignShuffle(line)[2];
-            //Producing bytecodes.
-            str bytecode = "REFERENCE(";bytecode += name + ",";
-            if(in(Stack::Variables,name)){
-                RedefinationVariableError(name,line_no);
-                exception_counter++;
-            };
-            //Whether type is not defined
-            if(type == ""){
-                VariableTypeError(name,line_no);
-                exception_counter++;
-            }
-            //Whether values are not NULL
-            if(val == ""){
-                VariableValueError(name,line_no);
-                exception_counter++;
-            }
-
-            bytecode += type + ",";bytecode += type + str("(") + val + "))\n";
-            //Adding the bytecode to the code string.
-            nominal_code += bytecode;
-            //Add the variable to stack.
-            Stack::Variables.add(name);
-        }
-        else if(CheckMacro(line) == 1 && CheckFunctionDefination(line) == 0){
-            auto tokens_ = MacroManagement(line);
-            for(auto t : tokens_){
-                nominal_code += t + " ";
-            }nominal_code += "\n";
-        }
-        else if(tostr(line) == "main = false"){
-            main_state = "false";
-        }
-        else if(CheckImport(line) == true){
-            for(auto i : ImportsManagement(line)){
-                imports+=i+"\n";
-            }
-        }
-        else if(CheckClassDefination(line) == true){
-            nominal_code += tostr(line) + " LBRACE\n";
-            class_state = true;
-            class_name = line[1];
-        }
-        else if(CheckUse(line) == true || CheckAll(line) == true){
-            imports+=Rep(tostr(line))+";\n";
-        }
-        else if(CheckTry(line)){
-            if(line.len()==1){
-                MissingError("try",line_no);
-            }
-            else{
-                for(auto token : line)
-                    if(token == "try")
-                        nominal_code += "TRY ";
-                    else
-                        nominal_code += token + " ";
-                nominal_code += "\n";
-            }
-        }
-        else if(CheckCatch(line)){
-            if(line.len()==1){
-                MissingError("catch",line_no);
-            }
-            else{
-                for(auto token : line)
-                    if(token == "catch")
-                        nominal_code += "CATCH ";
-                    else
-                        nominal_code += token + " ";
-                nominal_code += "\n";
-            }
-        }
-        else if(class_state == true && CheckConstructor(line) == true){
-            //Some needed informations about function::
-            str fnname,args,bytecode_arg;bool argstate = false;
-            //Extracting name of the function and the arguments.
-            for(int i = 0;i<line.len();i++){
-                if(line[i] == "(")
-                    argstate = true;
-                // else if(line[i] == "def " && i==0){}
-                else if(argstate == false && i>0)
-                    fnname+=line[i]+" ";
-                else if(argstate == true)
-                    args += line[i];
-            }args.pop_bk();
-            fn_name = replaceStr(fnname.Str," ","");
-            //Rechanging the state because the function is defined and it's body hasn't ended.
-            fn_state = true;
-            //Transform the function's arguments in bytecode representation.
-            if(args == ""){bytecode_arg = "";}
-            else{
-                //Stage one split the arguments via ','
-                auto splitted = split(args,",");
-                //Apply for range loop over splitted arguments.
-                for(auto i : splitted){
-                    //Collecting name, type and value of variable
-                    str n = TokenVariableAssignShuffle(Lexer(i).GetTokens())[0];
-                    str t = TokenVariableAssignShuffle(Lexer(i).GetTokens())[1];
-                    str e = TokenVariableAssignShuffle(Lexer(i).GetTokens())[2];
-                    //Whether type is not defined
-                    if(t == ""){
-                        VariableTypeError(n,line_no);
-                        exception_counter++;
-                    }
-                    bytecode_arg += str("REFERENCE(") + n + str(",")+t+str(",")+e+"),";
-                    // Stack::Variables.add(n);
-                }bytecode_arg.pop_bk();
+    //Ultimate parsing statement.
+    void ParseLines(TokenStream tokens);
+    void ParseLines(vector<TokenStream> code_tokens){
+        int statement_number = 1;
+        Token line_end_token;
+        line_end_token.token = "ignore";
+        line_end_token.type = KEYWORD;
+        int last_indent_level = 0;
+        code_tokens.push_back(TokenStream({line_end_token}));
+        for(TokenStream tokens : code_tokens){
+            int indent_level = getIndentLevel(tokens);
+            //Now remove all indent tokens present since we now know the indent level.
+            TokenStream tokens_;
+            for(Token token : tokens)
+                if(token.type == INDENT)
+                    ignore;
+                else
+                    tokens_.push_back(token);
+                tokens = tokens_;
+            if(isVarDecl(tokens)){
                 
+                //Now get AST node for the statement.
+                auto node_ = make_shared<VarDecl>(ParseVarDecl(tokens));
+                NodePtr node = static_pointer_cast<Node>(node_);
+                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),VAR_DECLARATION,indent_level));
             }
-            nominal_code += str("init ")+fn_name+str("(")+bytecode_arg+str(") LBRACE\n");
-        }
-        //Evalute when Variable assignment is there in the body of a function.
-        else if(CheckVariableAssignment(line) == true and fn_state == true && CheckFunctionDefination(line) == false && class_state == false){
-            //Collecting name, type and value of variable
-            str name = TokenVariableAssignShuffle(line)[0];
-            str type = TokenVariableAssignShuffle(line)[1];
-            str val = TokenVariableAssignShuffle(line)[2];
-            //Whether type is not defined
-            if(type == ""){
-                VariableTypeError(name,line_no);
-                exception_counter++;
+            else if(isVarAssign(tokens)){
+                //Now get AST node for the statement.
+                auto node_ = make_shared<VarAssign>(ParseVarAssign(tokens));
+                NodePtr node = static_pointer_cast<Node>(node_);
+                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),VAR_ASSIGNMENT,indent_level));
             }
-            //Whether values are not NULL
-            if(val == ""){
-                VariableValueError(name,line_no);
-                exception_counter++;
+            else if(isFunDecl(tokens)){
+                //Now get AST node for the statement.
+                auto node_ = make_shared<FunctionDecl>(ParseFuncDecl(tokens));
+                NodePtr node = static_pointer_cast<Node>(node_);
+                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),FUNCTION_DECL,indent_level));
             }
-            //Producing bytecodes.
-            str bytecode = "REFERENCE(";bytecode += name + ",";
-            bytecode += type + ",";bytecode += type + str("(") + val + "))\n";
-            //Adding the bytecode to the code string.
-            fn_code += bytecode;
-            //Add the variable to stack.
-            // Stack::Variables.add(name);
-        }
-        //Evalute when Variable assignment is there in the body of a function.
-        else if(CheckVariableAssignment(line) == true and fn_state == true && CheckFunctionDefination(line) == false && class_state == true){
-            //Collecting name, type and value of variable
-            str name = TokenVariableAssignShuffle(line)[0];
-            str type = TokenVariableAssignShuffle(line)[1];
-            str val = TokenVariableAssignShuffle(line)[2];
-            //Whether type is not defined
-            if(type == ""){
-                VariableTypeError(name,line_no);
-                exception_counter++;
+            else if(isForStmt(tokens)){
+                //Now get AST node for the statement.
+                auto node_ = make_shared<ForLoop>(ParseForLoop(tokens));
+                NodePtr node = static_pointer_cast<Node>(node_);
+                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),FOR_LOOP,indent_level));
             }
-            //Whether values are not NULL
-            if(val == ""){
-                VariableValueError(name,line_no);
-                exception_counter++;
+            else if(isWhileStmt(tokens)){
+                //Now get AST node for the statement.
+                auto node_ = make_shared<WhileLoop>(ParseWhileLoop(tokens));
+                NodePtr node = static_pointer_cast<Node>(node_);
+                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),WHILE_LOOP,indent_level));
             }
-            //Producing bytecodes.
-            str bytecode = "REFERENCE(";bytecode += name + ",";
-            bytecode += type + ",";bytecode += type + str("(") + val + "))\n";
-            //Adding the bytecode to the code string.
-            nominal_code += bytecode;
-            //Add the variable to stack.
-            // Stack::Variables.add(name);
-        }
-        //When function defination found so:
-        else if(CheckFunctionDefination(line) == true and fn_state == false && class_state == false){
-            //Some needed informations about function::
-            str fnname,args,bytecode_arg;bool argstate = false;
-            //Extracting name of the function and the arguments.
-            for(int i = 0;i<line.len();i++){
-                if(line[i] == "(")
-                    argstate = true;
-                // else if(line[i] == "def " && i==0){}
-                else if(argstate == false && i>0)
-                    fnname+=line[i]+" ";
-                else if(argstate == true)
-                    args += line[i];
-            }args.pop_bk();
-            fn_name = replaceStr(fnname.Str," ","");
-            //Rechanging the state because the function is defined and it's body hasn't ended.
-            fn_state = true;
-            //Transform the function's arguments in bytecode representation.
-            if(args == ""){bytecode_arg = "";}
+            else if(isIfStmt(tokens)){
+                //Now get AST node for the statement.
+                auto node_ = make_shared<IfStmt>(ParseIfStmt(tokens));
+                NodePtr node = static_pointer_cast<Node>(node_);
+                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),IF_STATEMENT,indent_level));
+            }
+            else if(isElifStmt(tokens)){
+                //Now get AST node for the statement.
+                auto node_ = make_shared<ElifStmt>(ParseElifStmt(tokens));
+                NodePtr node = static_pointer_cast<Node>(node_);
+                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),ELIF_STATEMENT,indent_level));
+            }
+            else if(isElseStmt(tokens)){
+                //Now get AST node for the statement.
+                auto node_ = make_shared<ElseStmt>(ParseElseStmt(tokens));
+                NodePtr node = static_pointer_cast<Node>(node_);
+                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),ELSE_STATEMENT,indent_level));
+            }
             else{
-                //Stage one split the arguments via ','
-                auto splitted = split(args,",");
-                //Apply for range loop over splitted arguments.
-                for(auto i : splitted){
-                    //Collecting name, type and value of variable
-                    str n = TokenVariableAssignShuffle(Lexer(i).GetTokens())[0];
-                    str t = TokenVariableAssignShuffle(Lexer(i).GetTokens())[1];
-                    str e = TokenVariableAssignShuffle(Lexer(i).GetTokens())[2];
-                    if(in(Stack::Variables,n)){
-                        RedefinationVariableError(n,line_no);
-                        exception_counter++;
-                    };
-                    //Whether type is not defined
-                    if(t == ""){
-                        VariableTypeError(n,line_no);
-                        exception_counter++;
-                    }
-                    bytecode_arg += str("PARAM(") + n + str(",")+t+str(",")+e+"),";
-                    // Stack::Variables.add(n);
-                }bytecode_arg.pop_bk();
+               auto node_ = make_shared<Expr>(ParseExpr(tokens));
+               NodePtr node = static_pointer_cast<Node>(node_); 
+               Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),EXPR_TYPE,indent_level));
             }
-            fn_code += str("def ")+fn_name+str("(")+bytecode_arg+str(") LBRACE\n");
-        }
-        //When function defination found so:
-        else if(CheckFunctionDefination(line) == true && class_state == true){
-            //Some needed informations about function::
-            str fnname,args,bytecode_arg;bool argstate = false;
-            //Extracting name of the function and the arguments.
-            for(int i = 0;i<line.len();i++){
-                if(line[i] == "(")
-                    argstate = true;
-                // else if(line[i] == "def " && i==0){}
-                else if(argstate == false && i>0)
-                    fnname+=line[i]+" ";
-                else if(argstate == true)
-                    args += line[i];
-            }args.pop_bk();
-            fn_name = replaceStr(fnname.Str," ","");
-            //Rechanging the state because the function is defined and it's body hasn't ended.
-            fn_state = true;
-            //Transform the function's arguments in bytecode representation.
-            if(args == ""){bytecode_arg = "";}
-            else{
-                //Stage one split the arguments via ','
-                auto splitted = split(args,",");
-                //Apply for range loop over splitted arguments.
-                for(auto i : splitted){
-                    //Collecting name, type and value of variable
-                    str n = TokenVariableAssignShuffle(Lexer(i).GetTokens())[0];
-                    str t = TokenVariableAssignShuffle(Lexer(i).GetTokens())[1];
-                    str e = TokenVariableAssignShuffle(Lexer(i).GetTokens())[2];
-                    //Whether type is not defined
-                    if(t == ""){
-                        VariableTypeError(n,line_no);
-                        exception_counter++;
-                    }
-                    bytecode_arg += str("PARAM(") + n + str(",")+t+str(",")+e+"),";
-                    // Stack::Variables.add(n);
-                }bytecode_arg.pop_bk();
-            }
-            nominal_code += str("def ")+fn_name+str("(")+bytecode_arg+str(") LBRACE\n");
-        }
-        else if(fn_state == true && tostr(line) != (fn_name + " ends") && class_state == false){
-            fn_code += tostr(line)+"\n";
+            statement_number++;
         }
         
-        else if(fn_state == true && tostr(line) !=( fn_name + " ends" )&& class_state == true){
-            nominal_code += tostr(line)+"\n";
-            // nominal_code += "ENDS\n";
-        }
-        else if(tostr(line) == (fn_name + " ends") && (fn_state == true) && (class_state==false)){
-            fn_code += "ENDS\n";
-            fn_state = false;
-            fn_name = "";
-        }
-        else if(tostr(line) == (fn_name + " ends") && (fn_state == true) && (class_state==true)){
-            nominal_code += "ENDS\n";
-            fn_state = false;
-        }
-        else if(tostr(line) == "endc"){nominal_code += "ENDCLASS\n";class_state = false;}
-        //If none of the above condition matched with tokens.
-        else if(fn_state == false){
-            nominal_code += tostr(line) + "\n";
-        }
-        line_no++;
     }
 
-    //Why checking these exceptions at the end
-    /*
-    becuase to check that any scope is ended or not.
-    */
-    if (class_state == true){
-        ClassEndError(class_name);
-        exception_counter++;
+    bool notBlockStatement(NODE_TYPE type){
+        bool state = 1;
+        if
+        (type == FOR_LOOP || type == WHILE_LOOP || type == IF_STATEMENT || type == ELIF_STATEMENT ||
+         type == ELSE_STATEMENT || type == FUNCTION_DECL || type == CLASS_DEFINITION
+        ){
+            state = 0;
+        }
+        return state;
     }
-    else if(fn_state == true){
-        FunctionEndError(fn_name);
-        exception_counter++;
+    
+    bool isBlockStatement(NODE_TYPE type){
+        bool state = 0;
+        if
+        (type == FOR_LOOP || type == WHILE_LOOP || type == IF_STATEMENT || type == ELIF_STATEMENT ||
+         type == ELSE_STATEMENT || type == FUNCTION_DECL || type == CLASS_DEFINITION
+        ){
+            state = 1;
+        }
+        return state;
     }
 
-    //If encountered any error so stop the exection.
-    if(exception_counter > 0){
-        printf("Could not compile due to %d previous errors.\n",exception_counter);
-        StopCompilation();
+
+    //Traverse and print the statements with their properties.
+    void PrintStatements(){
+        for(Statement statement : Statements){
+            printf("line : %d indent : %d type : %d (%s)\n",statement.number,statement.indent_level, statement.type, statement.statement.c_str());
+        }
     }
-    return array<str>({imports,addSemi(Rep(fn_code)),addSemi(Rep(nominal_code)),main_state});
-}
-#endif // PARSER_CSQ4_H
+    //This function is expecting that the Statements vector is already filled by the ParseLines function.
+    string ParseStatements(){
+        string code,fncode;
+        int max_line_indent = 0;
+        int last_indent = 0;
+        bool fnstate = 0;
+        NODE_TYPE last_stmt_type;
+        string last_stmt;
+        //This will be storing which keyword is used throughout the code.
+        vector<string> keyword_log;
+        Scope scope(0,PROGRAM);
+        Scope master_scope(0,PROGRAM);
+        Scope last_master_scope(0,PROGRAM);
+        //State 0.5: get the max indent of the statements.
+        for(Statement statement : Statements)
+            if(statement.indent_level > max_line_indent)
+                max_line_indent = statement.indent_level;
+            else
+                ignore;
+        //Stage 1: Parse.
+        //Traverse the statements
+        for(Statement statement : Statements){
+            //When indent levels are same as the scope.indent_level the statement is to be added.
+            if(scope.indent_level == statement.indent_level && master_scope.of != FUNCTION_DECL){
+                //The statement can also have certain types of node so we need to check via switch.
+                switch(statement.type){
+                    case EXPR_TYPE:{
+                        code += statement.statement;
+                        code += ";\n";
+                        break;                                        
+                    }
+                    case VAR_DECLARATION:{
+                        code += statement.statement;
+                        code += ";\n";
+                        break;                                    
+                    }
+                    case VAR_ASSIGNMENT:{
+                        code += statement.statement;
+                        code += ";\n";
+                        break;                                
+                    }
+                    case IF_STATEMENT:{
+                        if(scope.of == CLASS_DEFINITION){
+                            noStorageClass(statement.number, statement.raw_statement, scope);
+                        }
+                        else{
+                            code += statement.statement;
+                            code += "{\n";
+                            scope.indent_level = statement.indent_level + 1;
+                            scope.of = IF_STATEMENT;
+                            keyword_log.push_back("if");
+                        }
+                        break;                                
+                    }
+                    case ELIF_STATEMENT:{
+                        if(in("if",keyword_log)){
+                            code += statement.statement;
+                            code += "{\n";
+                            scope.indent_level = statement.indent_level+1;
+                            scope.of = ELIF_STATEMENT;
+                            keyword_log.push_back("elif");
+                        }
+                        else{
+                            elifUsedWithoutIf(statement.number);
+                        }
+                        break;                                
+                    }
+                    case ELSE_STATEMENT:{
+                        if(in("elif",keyword_log) || in("if",keyword_log)){
+                            code += statement.statement;
+                            code += "{\n";
+                            scope.indent_level = statement.indent_level+1;
+                            scope.of = ELSE_STATEMENT;
+                            keyword_log.push_back("else");
+                        }
+                        else{
+                            elseUsedWithoutIf(statement.number);
+                        }
+                        break;                                
+                    }
+                    case FUNCTION_DECL:{
+                        //First check that the function is defined in a correct place or not?
+                        switch(scope.of){
+                            case FUNCTION_DECL:{
+                                function_insideFunction(statement.number);
+                                break;
+                            }
+                            case IF_STATEMENT:{
+                                function_insideIfstmt(statement.number);
+                                break;
+                            }
+                            case ELIF_STATEMENT:{
+                                function_insideElif(statement.number);
+                                break;
+                            }
+                            case ELSE_STATEMENT:{
+                                function_insideElse(statement.number);
+                                break;
+                            }
+                            case FOR_LOOP:{
+                                function_insideFor(statement.number);
+                                break;
+                            }
+                            case WHILE_LOOP:{
+                                function_insideWhile(statement.number);
+                                break;
+                            }
+                            default:{
+                                scope.indent_level = statement.indent_level+1;
+                                scope.of = FUNCTION_DECL;
+                                master_scope.of = FUNCTION_DECL;
+                                master_scope.indent_level = scope.indent_level;
+                                fncode += statement.statement + "{\n";
+                                fnstate = 1;
+                                break;
+                            }
+                        }
+                        break;                                
+                    }
+                    case WHILE_LOOP:{
+                        scope.indent_level = statement.indent_level+1;
+                        scope.of = WHILE_LOOP;
+                        code += statement.statement + "{\n";
+                        break;                                
+                    }
+                    case FOR_LOOP:{
+                        scope.indent_level = statement.indent_level+1;
+                        scope.of = FOR_LOOP;
+                        code += statement.statement + "{\n";
+                        break;                                
+                    }
+                    default:{
+                        unrecognized_statement(statement.number, statement.raw_statement);
+                        break;
+                    }
+                }
+            }
+            else if(scope.indent_level != statement.indent_level && master_scope.of != FUNCTION_DECL){
+                //The decreased level = scope.indent_level - statement.indent_level
+                    int dlevel = scope.indent_level - statement.indent_level;
+                    for(int lvl = 0; lvl < dlevel; lvl++)
+                        code += "\n}\n";
+                
+                //Now we again have to check which type of statement
+                switch(statement.type){
+                    case EXPR_TYPE:{
+                        code += statement.statement;
+                        code += ";\n";
+                        break;                                        
+                    }
+                    case VAR_DECLARATION:{
+                        code += statement.statement;
+                        code += ";\n";
+                        break;                                    
+                    }
+                    case VAR_ASSIGNMENT:{
+                        code += statement.statement;
+                        code += ";\n";
+                        break;                                
+                    }
+                    case IF_STATEMENT:{
+                        if(scope.of == CLASS_DEFINITION){
+                            noStorageClass(statement.number, statement.raw_statement, scope);
+                        }
+                        else{
+                            code += statement.statement;
+                            code += "{";
+                            scope.indent_level = statement.indent_level + 1;
+                            scope.of = IF_STATEMENT;
+                            keyword_log.push_back("if");
+                        }
+                        break;                                
+                    }
+                    case ELIF_STATEMENT:{
+                        if(in("if",keyword_log)){
+                            code += statement.statement;
+                            code += "{\n";
+                            scope.indent_level = statement.indent_level+1;
+                            scope.of = ELIF_STATEMENT;
+                            keyword_log.push_back("elif");
+                        }
+                        else{
+                            elifUsedWithoutIf(statement.number);
+                        }
+                        break;                                
+                    }
+                    case ELSE_STATEMENT:{
+                        if(in("elif",keyword_log) || in("if",keyword_log)){
+                            code += statement.statement;
+                            code += "{\n";
+                            scope.indent_level = statement.indent_level+1;
+                            scope.of = ELSE_STATEMENT;
+                            keyword_log.push_back("else");
+                        }
+                        else{
+                            elseUsedWithoutIf(statement.number);
+                        }
+                        break;                                
+                    }
+                    case FUNCTION_DECL:{
+                        //First check that the function is defined in a correct place or not?
+                        switch(scope.of){
+                            case FUNCTION_DECL:{
+                                function_insideFunction(statement.number);
+                                break;
+                            }
+                            case IF_STATEMENT:{
+                                function_insideIfstmt(statement.number);
+                                break;
+                            }
+                            case ELIF_STATEMENT:{
+                                function_insideElif(statement.number);
+                                break;
+                            }
+                            case ELSE_STATEMENT:{
+                                function_insideElse(statement.number);
+                                break;
+                            }
+                            case FOR_LOOP:{
+                                function_insideFor(statement.number);
+                                break;
+                            }
+                            case WHILE_LOOP:{
+                                function_insideWhile(statement.number);
+                                break;
+                            }
+                            default:{
+                                scope.indent_level = statement.indent_level+1;
+                                scope.of = FUNCTION_DECL;
+                                master_scope = scope;
+                                code += statement.statement + "{\n";
+                                fnstate = 1;
+                                break;
+                            }
+                        }
+                        break;                                
+                    }
+                    case WHILE_LOOP:{
+                        scope.indent_level = statement.indent_level+1;
+                        scope.of = WHILE_LOOP;
+                        code += statement.statement + "{\n";
+                        break;                                
+                    }
+                    case FOR_LOOP:{
+                        scope.indent_level = statement.indent_level+1;
+                        scope.of = FOR_LOOP;
+                        code += statement.statement + "{\n";
+                        break;                                
+                    }
+                    default:{
+                        unrecognized_statement(statement.number, statement.raw_statement);
+                        break;
+                    }
+                }
+            }
+
+            //This section contains the statements required to parse functions down.
+
+            else if(master_scope.of == FUNCTION_DECL && scope.indent_level == statement.indent_level)
+            {
+                switch(statement.type)
+                {
+                    case VAR_DECLARATION:{
+                        fncode += statement.statement + ";\n";
+                        break;
+                    }
+                    case VAR_ASSIGNMENT:{
+                        fncode += statement.statement + ";\n";
+                        break;
+                    }
+                    case EXPR_TYPE:{
+                        fncode += statement.statement + ";\n";
+                        break;
+                    }
+                    case IF_STATEMENT:{
+                        if(master_scope.of == CLASS_DEFINITION){
+                            noStorageClass(statement.number, statement.raw_statement, scope);
+                        }
+                        else{
+                            fncode += statement.statement;
+                            fncode += "{\n";
+                            scope.indent_level = statement.indent_level + 1;
+                            scope.of = IF_STATEMENT;
+                            keyword_log.push_back("if");
+                        }
+                        break;   
+                    }
+
+                    case ELIF_STATEMENT:{
+                        if(in("if",keyword_log)){
+                            fncode += statement.statement;
+                            fncode += "{\n";
+                            scope.indent_level = statement.indent_level+1;
+                            scope.of = ELIF_STATEMENT;
+                            keyword_log.push_back("elif");
+                        }
+                        else{
+                            elifUsedWithoutIf(statement.number);
+                        }
+                        break;                                
+                    }
+
+                    case ELSE_STATEMENT:{
+                        if(in("elif",keyword_log) || in("if",keyword_log)){
+                            fncode += statement.statement;
+                            fncode += "{\n";
+                            scope.indent_level = statement.indent_level+1;
+                            scope.of = ELSE_STATEMENT;
+                            keyword_log.push_back("else");
+                        }
+                        else{
+                            elseUsedWithoutIf(statement.number);
+                        }
+                        break; 
+                    }
+                    case FOR_LOOP:{
+                        scope.indent_level = statement.indent_level+1;
+                        scope.of = FOR_LOOP;
+                        fncode += statement.statement + "{\n";
+                        break;      
+                    }
+                }
+            }
+            else if(master_scope.of == FUNCTION_DECL && scope.indent_level != statement.indent_level)
+            {
+                // the change of indent level.
+                int c_indent = scope.indent_level - statement.indent_level;
+                // add } till the c_indent
+                for(int i = 0; i < c_indent; i++)
+                    fncode += "}\n";
+                //Checking for the end of function scope.
+                if(statement.indent_level == master_scope.indent_level-1){
+                    master_scope = last_master_scope;
+                    master_scope.indent_level = statement.indent_level;
+                    last_master_scope.indent_level = master_scope.indent_level+1;
+                    last_master_scope.of = FUNCTION_DECL;
+                    scope.indent_level = master_scope.indent_level;
+                    scope.of = PROGRAM;
+                    Functions.push_back(fncode);
+                    fncode = "";
+                    //The statement can also have certain types of node so we need to check via switch.
+                    //Now the statement having indent level same as function decl so it need the parsing one more time.
+                    switch(statement.type){
+                        case EXPR_TYPE:{
+                            code += statement.statement;
+                            code += ";\n";
+                            break;                                        
+                        }
+                        case VAR_DECLARATION:{
+                            code += statement.statement;
+                            code += ";\n";
+                            break;                                    
+                        }
+                        case VAR_ASSIGNMENT:{
+                            code += statement.statement;
+                            code += ";\n";
+                            break;                                
+                        }
+                        case IF_STATEMENT:{
+                            if(scope.of == CLASS_DEFINITION){
+                                noStorageClass(statement.number, statement.raw_statement, scope);
+                            }
+                            else{
+                                code += statement.statement;
+                                code += "{\n";
+                                scope.indent_level = statement.indent_level + 1;
+                                scope.of = IF_STATEMENT;
+                                keyword_log.push_back("if");
+                            }
+                            break;                                
+                        }
+                        case ELIF_STATEMENT:{
+                            if(in("if",keyword_log)){
+                                code += statement.statement;
+                                code += "{\n";
+                                scope.indent_level = statement.indent_level+1;
+                                scope.of = ELIF_STATEMENT;
+                                keyword_log.push_back("elif");
+                            }
+                            else{
+                                elifUsedWithoutIf(statement.number);
+                            }
+                            break;                                
+                        }
+                        case ELSE_STATEMENT:{
+                            if(in("elif",keyword_log) || in("if",keyword_log)){
+                                code += statement.statement;
+                                code += "{\n";
+                                scope.indent_level = statement.indent_level+1;
+                                scope.of = ELSE_STATEMENT;
+                                keyword_log.push_back("else");
+                            }
+                            else{
+                                elseUsedWithoutIf(statement.number);
+                            }
+                            break;                                
+                        }
+                        case WHILE_LOOP:{
+                            scope.indent_level = statement.indent_level+1;
+                            scope.of = WHILE_LOOP;
+                            code += statement.statement + "{\n";
+                            break;                                
+                        }
+                        case FOR_LOOP:{
+                            scope.indent_level = statement.indent_level+1;
+                            scope.of = FOR_LOOP;
+                            code += statement.statement + "{\n";
+                            break;                                
+                        }
+                        case FUNCTION_DECL:{
+                            //First check that the function is defined in a correct place or not?
+                            switch(scope.of){
+                                default:{
+                                    scope.indent_level = statement.indent_level+1;
+                                    scope.of = FUNCTION_DECL;
+                                    master_scope.of = FUNCTION_DECL;
+                                    master_scope.indent_level = scope.indent_level;
+                                    fncode += statement.statement + "{\n";
+                                    fnstate = 1;
+                                    break;
+                                }
+                            }
+                            break;                                
+                        }
+                        default:{
+                            unrecognized_statement(statement.number, statement.raw_statement);
+                            break;
+                        }
+                    }
+                }
+                else{
+                    switch(statement.type)
+                    {
+                        case VAR_DECLARATION:{
+                            fncode += statement.statement + ";\n";
+                            break;
+                        }
+                        case VAR_ASSIGNMENT:{
+                            fncode += statement.statement + ";\n";
+                            break;
+                        }
+                        case EXPR_TYPE:{
+                            fncode += statement.statement + ";\n";
+                            break;
+                        }
+                        case IF_STATEMENT:{
+                            if(master_scope.of == CLASS_DEFINITION){
+                                noStorageClass(statement.number, statement.raw_statement, scope);
+                            }
+                            else{
+                                fncode += statement.statement;
+                                fncode += "{\n";
+                                scope.indent_level = statement.indent_level + 1;
+                                scope.of = IF_STATEMENT;
+                                keyword_log.push_back("if");
+                            }
+                            break;   
+                        }
+
+                        case ELIF_STATEMENT:{
+                            if(in("if",keyword_log)){
+                                fncode += statement.statement;
+                                fncode += "{\n";
+                                scope.indent_level = statement.indent_level+1;
+                                scope.of = ELIF_STATEMENT;
+                                keyword_log.push_back("elif");
+                            }
+                            else{
+                                elifUsedWithoutIf(statement.number);
+                            }
+                            break;                                
+                        }
+
+                        case ELSE_STATEMENT:{
+                            if(in("elif",keyword_log) || in("if",keyword_log)){
+                                fncode += statement.statement;
+                                fncode += "{\n";
+                                scope.indent_level = statement.indent_level+1;
+                                scope.of = ELSE_STATEMENT;
+                                keyword_log.push_back("else");
+                            }
+                            else{
+                                elseUsedWithoutIf(statement.number);
+                            }
+                            break; 
+                        }
+                        case FOR_LOOP:{
+                            scope.indent_level = statement.indent_level+1;
+                            scope.of = FOR_LOOP;
+                            fncode += statement.statement + "{\n";
+                            break;
+                        }
+                        case WHILE_LOOP:{
+                            scope.indent_level = statement.indent_level+1;
+                            scope.of = WHILE_LOOP;
+                            fncode += statement.statement + "{\n";
+                            break;                                
+                        }
+                        case FUNCTION_DECL:{
+                            function_insideFunction(statement.number);
+                        }
+                    }
+                }
+            }
+
+        }
+        return code;
+    }
+
+#endif // PARSEr_H_CSQ4
