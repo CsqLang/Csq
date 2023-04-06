@@ -45,7 +45,7 @@ string readCode(string path){
     return code;
 }
 
-void writeIR(string code, string path, string curr_dir, string name, string lang = ".cpp"){
+void writeIR(string code, string curr_dir, string name, string lang = ".cpp"){
     ofstream file(curr_dir + "/" + name + lang);
     file <<code << "\n";
     file.close();
@@ -90,6 +90,19 @@ void CompileToExec(string path, string name){
     }
     else if(clangpp == 1){
         CompileToClangPP(path, name);
+    }
+}
+
+void compile(string lang, string currdir, string name){
+    if(lang == "cpp"){
+        string raw_code = readCode(currdir + "/" + name + ".csq");
+        vector<TokenStream> tokens = Tokenizer(raw_code);
+        ParseLines(tokens);
+        string mcode = ParseStatements();
+        string fncode = combineFunctions();
+        string IR = formIR(mcode, fncode, currdir);
+        writeIR(IR, currdir,name);
+        CompileToGPP(currdir + "/" + name + ".cpp",name);
     }
 }
 
