@@ -27,8 +27,8 @@ string combineFunctions(){
 
 string formIR(string code, string fncode, string current_path){
     string IR = "#include \"" + current_path + "/IR/instructions.h\"\n";
-    IR += fncode + "\nint main(int argc, char const *argv[]){\n";
-    IR += code + "\nreturn 0;}\n";
+    IR += fncode + "\n";
+    IR += code + "\n";
     return IR;
 }
 
