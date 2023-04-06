@@ -588,17 +588,17 @@ which will be used by scope defining functions to get desired results.
                 switch(statement.type){
                     case EXPR_TYPE:{
                         code += statement.statement;
-                        code += "\n";
+                        code += ";\n";
                         break;                                        
                     }
                     case VAR_DECLARATION:{
                         code += statement.statement;
-                        code += "\n";
+                        code += ";\n";
                         break;                                    
                     }
                     case VAR_ASSIGNMENT:{
                         code += statement.statement;
-                        code += "\n";
+                        code += ";\n";
                         break;                                
                     }
                     case IF_STATEMENT:{
@@ -699,25 +699,25 @@ which will be used by scope defining functions to get desired results.
             }
             else if(scope.indent_level != statement.indent_level && master_scope.of != FUNCTION_DECL){
                 //The decreased level = scope.indent_level - statement.indent_level
-                int dlevel = scope.indent_level - statement.indent_level;
-                for(int lvl = 1; lvl <= dlevel; lvl++){
-                    code += "\n}\n";
-                }
+                    int dlevel = scope.indent_level - statement.indent_level;
+                    for(int lvl = 0; lvl < dlevel; lvl++)
+                        code += "\n}\n";
+                
                 //Now we again have to check which type of statement
                 switch(statement.type){
                     case EXPR_TYPE:{
                         code += statement.statement;
-                        code += "\n";
+                        code += ";\n";
                         break;                                        
                     }
                     case VAR_DECLARATION:{
                         code += statement.statement;
-                        code += "\n";
+                        code += ";\n";
                         break;                                    
                     }
                     case VAR_ASSIGNMENT:{
                         code += statement.statement;
-                        code += "\n";
+                        code += ";\n";
                         break;                                
                     }
                     case IF_STATEMENT:{
@@ -823,15 +823,15 @@ which will be used by scope defining functions to get desired results.
                 switch(statement.type)
                 {
                     case VAR_DECLARATION:{
-                        fncode += statement.statement + "\n";
+                        fncode += statement.statement + ";\n";
                         break;
                     }
                     case VAR_ASSIGNMENT:{
-                        fncode += statement.statement + "\n";
+                        fncode += statement.statement + ";\n";
                         break;
                     }
                     case EXPR_TYPE:{
-                        fncode += statement.statement + "\n";
+                        fncode += statement.statement + ";\n";
                         break;
                     }
                     case IF_STATEMENT:{
@@ -896,6 +896,8 @@ which will be used by scope defining functions to get desired results.
                     master_scope.indent_level = statement.indent_level;
                     last_master_scope.indent_level = master_scope.indent_level+1;
                     last_master_scope.of = FUNCTION_DECL;
+                    scope.indent_level = master_scope.indent_level;
+                    scope.of = PROGRAM;
                     Functions.push_back(fncode);
                     fncode = "";
                     //The statement can also have certain types of node so we need to check via switch.
@@ -903,17 +905,17 @@ which will be used by scope defining functions to get desired results.
                     switch(statement.type){
                         case EXPR_TYPE:{
                             code += statement.statement;
-                            code += "\n";
+                            code += ";\n";
                             break;                                        
                         }
                         case VAR_DECLARATION:{
                             code += statement.statement;
-                            code += "\n";
+                            code += ";\n";
                             break;                                    
                         }
                         case VAR_ASSIGNMENT:{
                             code += statement.statement;
-                            code += "\n";
+                            code += ";\n";
                             break;                                
                         }
                         case IF_STATEMENT:{
@@ -992,15 +994,15 @@ which will be used by scope defining functions to get desired results.
                     switch(statement.type)
                     {
                         case VAR_DECLARATION:{
-                            fncode += statement.statement + "\n";
+                            fncode += statement.statement + ";\n";
                             break;
                         }
                         case VAR_ASSIGNMENT:{
-                            fncode += statement.statement + "\n";
+                            fncode += statement.statement + ";\n";
                             break;
                         }
                         case EXPR_TYPE:{
-                            fncode += statement.statement + "\n";
+                            fncode += statement.statement + ";\n";
                             break;
                         }
                         case IF_STATEMENT:{
