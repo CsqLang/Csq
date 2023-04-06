@@ -2,6 +2,7 @@
 #define CSQ_VM_4
 #include "../Parser/parser.h"
 #include "../AST/ast.h"
+#include <fstream>
 
 enum TARGET_LANGUAGE{
     C,
@@ -29,6 +30,19 @@ string formIR(string code, string fncode, string current_path){
     IR += fncode + "\n";
     IR += code + "\n";
     return IR;
+}
+
+string readCode(string path){
+    string code,ln;
+    // Read from the text file
+    ifstream file(path);
+
+    while (getline (file, ln))
+        code += ln + " \n";
+    code.pop_back();
+    // Close the file
+    file.close();
+    return code;
 }
 
 void CompileToGPP(string path, string name){
