@@ -76,7 +76,7 @@
             if(ch != '\n')
                 current.push_back(ch);
             else{
-                lines.push_back(tokenize(current));
+                lines.push_back(tokenize(current + ";ignore"));
                 current = "";
             }
         }
