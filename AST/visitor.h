@@ -64,7 +64,12 @@ string FuncDecl_visitor(Ptr<FunctionDecl> node){
     shared_ptr<Block> block = make_shared<Block>();
     for(string statement : node->body.statements)
         addStatement(block,statement);
-    return "template<typename ParamType>\nFUN " + node->name + " ( " + params + ")\n";
+    if(node->params.size() > 0 && node->params[0]!=""){
+        return "template<typename ParamType>\nFUN " + node->name + " ( " + params + ")\n";
+    }
+    else{
+        return "FUN " + node->name + " ( " + params + ")\n";
+    }
 }
 
 string Expr_visitor(Ptr<Expr> node){
