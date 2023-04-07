@@ -78,6 +78,42 @@ struct i64 {
     }
 };
 
-
+struct f64 {
+    double data;
+    string __str__;
+    f64() { data = 0; __str__ = to_string(data); }
+    f64(double val) { data = val; __str__ = to_string(data); }
+    f64(const f64& val) { data = val.data; __str__ = to_string(data); }
+    f64 operator+(const f64& val) {
+        return f64(data + val.data);
+    }
+    f64 operator-(const f64& val) {
+        return f64(data + val.data);
+    }
+    f64 operator*(const f64& val) {
+        return f64(data + val.data);
+    }
+    f64 operator/(const f64& val) {
+        return f64(data / val.data);
+    }
+    bool operator==(const f64& val){
+        return data == val.data;
+    }
+    bool operator!=(const f64& val){
+        return data != val.data;
+    }
+    bool operator>(const f64& val){
+        return data > val.data;
+    }
+    bool operator<(const f64& val){
+        return data < val.data;
+    }
+    bool operator>=(const f64& val){
+        return data >= val.data;
+    }
+    bool operator<=(const f64& val){
+        return data <= val.data;
+    }
+};
 
 #endif // BUILTINS_CSQ4_2
