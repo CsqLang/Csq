@@ -101,6 +101,7 @@ void compile(string lang, string currdir, string name){
         string mcode = ParseStatements();
         string fncode = combineFunctions();
         string IR = formIR(mcode, fncode, currdir);
+        replaceAll(IR," . ",".");
         writeIR(IR, currdir,name);
         CompileToGPP(currdir + "/" + name + ".cpp",name);
     }
