@@ -82,9 +82,9 @@
         }
         return lines;
     }
-    void replaceAll(std::string& str, const std::string& oldStr, const std::string& newStr) {
+    void replaceAll(string& str, const string& oldStr, const string& newStr) {
         size_t pos = 0;
-        while ((pos = str.find(oldStr, pos)) != std::string::npos) {
+        while ((pos = str.find(oldStr, pos)) != string::npos) {
             str.replace(pos, oldStr.length(), newStr);
             pos += newStr.length();
         }
