@@ -116,4 +116,34 @@ struct f64 {
     }
 };
 
+struct str{
+    string __str__;
+    str(){__str__ = "";}
+    str(const char* str_){__str__ = str_;}
+    str(string str_){__str__ = str_;}
+    str(const str& str_){__str__ = str_.__str__;}
+    int len(){return __str__.size();}
+    str operator+(const str& val) {
+        return str(__str__ + val.__str__);
+    }
+};
+
+void print(int val){
+    printf("%d\n",val);
+}
+void print(float val){
+    printf("%f\n",val);
+}
+void print(double val){
+    printf("%lf\n",val);
+}
+void print(i32 val){
+    print(val.data);
+}
+void print(f64 val){
+    print(val.data);
+}
+void print(str val){
+    printf("%s\n",val.__str__.c_str());
+}
 #endif // BUILTINS_CSQ4_2
