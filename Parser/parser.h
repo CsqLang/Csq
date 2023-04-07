@@ -76,11 +76,18 @@
             if(ch != '\n')
                 current.push_back(ch);
             else{
-                lines.push_back(tokenize(current + ";ignore"));
+                lines.push_back(tokenize(current + ";ignore;"));
                 current = "";
             }
         }
         return lines;
+    }
+    void replaceAll(std::string& str, const std::string& oldStr, const std::string& newStr) {
+        size_t pos = 0;
+        while ((pos = str.find(oldStr, pos)) != std::string::npos) {
+            str.replace(pos, oldStr.length(), newStr);
+            pos += newStr.length();
+        }
     }
     //We can't directly use TokenStream as body of block so for that we use string.
     string TokenStreamToString(TokenStream tokens){
@@ -88,6 +95,7 @@
         for(Token token : tokens){
             result += token.token + " ";
         }
+
         return result;
     }
 
