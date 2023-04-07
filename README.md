@@ -27,3 +27,9 @@ def fx(a, b):
  return a + b
 x = fx(23,34)
 ```
+If you just want to create a function without any code so to prevent error use ignore keyword.
+```
+def fx():
+ ignore
+fx()
+```
