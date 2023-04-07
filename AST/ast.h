@@ -149,6 +149,17 @@ struct ElseStmt : Node{
     ElseStmt(){type = ELSE_STATEMENT;}
 };
 
+struct ClassDecl : Node{
+    string name;
+    string inherit_class;
+    ClassDecl(){}
+    ClassDecl(string name_, string inherit_class_){
+        name = name_;
+        inherit_class = inherit_class_;
+        type = CLASS_DEFINITION;
+    }
+};
+
 
 //Functions to add nodes for ease of use.
 
