@@ -95,7 +95,7 @@
         for(Token token : tokens){
             result += token.token + " ";
         }
-
+        
         return result;
     }
 
@@ -710,7 +710,8 @@ which will be used by scope defining functions to get desired results.
                     int dlevel = scope.indent_level - statement.indent_level;
                     for(int lvl = 0; lvl < dlevel; lvl++)
                         code += "\n}\n";
-                
+                    scope.indent_level = statement.indent_level;
+                    scope.of = last_master_scope.of;
                 //Now we again have to check which type of statement
                 switch(statement.type){
                     case EXPR_TYPE:{
