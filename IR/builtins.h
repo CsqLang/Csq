@@ -128,6 +128,28 @@ struct str{
     }
 };
 
+template<typename T> 
+struct list{
+    private:
+        vector<T> data;
+    public:
+        list(){}
+        list(vector<T> data_){data = data_;}
+        list(const list& ls){data = ls.data;}
+        void add(T val){
+            data.push_back(val);
+        }
+        T read(int index){
+            return data[index];
+        }
+        T operator[](int index){
+            return data[index];
+        }
+        int len(){
+            return data.size();
+        }
+};
+
 void print(int val){
     printf("%d\n",val);
 }
@@ -145,5 +167,27 @@ void print(f64 val){
 }
 void print(str val){
     printf("%s\n",val.__str__.c_str());
+}
+
+void print(list<i32> val){
+    printf("{ ");
+    for(int i = 0;i<val.len();i++){
+        printf("%d, ",val[i].data);
+    }
+    printf(" }\n");
+}
+void print(list<i64> val){
+    printf("{ ");
+    for(int i = 0;i<val.len();i++){
+        printf("%lld, ",val[i].data);
+    }
+    printf(" }\n");
+}
+void print(list<f64> val){
+    printf("{ ");
+    for(int i = 0;i<val.len();i++){
+        printf("%lf, ",val[i].data);
+    }
+    printf(" }\n");
 }
 #endif // BUILTINS_CSQ4_2
