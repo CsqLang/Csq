@@ -190,4 +190,10 @@ void print(list<f64> val){
     }
     printf(" }\n");
 }
+void print(initializer_list<int> ls){
+    printf("{ ");
+    for(int i : ls)
+        printf("%d, ",i);
+    printf(" }\n");
+}
 #endif // BUILTINS_CSQ4_2
