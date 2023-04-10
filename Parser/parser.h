@@ -27,12 +27,23 @@
     //Scope for the statements
     struct Scope{
         int indent_level;
+        int master_indent;
+        NODE_TYPE master_type;
+        bool ended;
         NODE_TYPE of;
         Scope(){}
-        Scope(int level, NODE_TYPE of_){
+        Scope(int level, NODE_TYPE of_, bool ended_,int _master_indent,NODE_TYPE _master_type){
             indent_level = level;
             of = of_;
+            ended = ended_;
+            master_indent = _master_indent;
+            master_type = _master_type;
         };
+    };
+
+    struct ScopeSet{
+        int indent_level;
+        vector<Scope> scopes;
     };
 
     //Struct to store infos about statements
@@ -385,7 +396,7 @@ which will be used by scope defining functions to get desired results.
             printf("Error:[%d] expected an end of condition.", error_count+1);
             error_count++;
         }
-        return node;
+        return node;//Master scope..
     }
 
     FunctionDecl ParseFuncDecl(TokenStream tokens){
@@ -453,7 +464,6 @@ which will be used by scope defining functions to get desired results.
         }
         return indent_level;
     }
-
     /*
     Indentation handling shall be done in such a way in which every
     line with certain indentation shall be stored as an object.
@@ -550,6 +560,23 @@ which will be used by scope defining functions to get desired results.
         return state;
     }
     
+    Scope master_scope(vector<Scope> scopes){
+        Scope master;
+        vector<ScopeSet> scope_sets;
+        int high = 0;
+        ScopeSet set;
+        for(Scope scope : scopes){
+            if(high < scope.indent_level){
+                high = scope.indent_level;
+                set.scopes.push_back(scope);
+                set.indent_level = high;
+            }
+            else{
+                
+            }
+        }
+    }
+
     bool isBlockStatement(NODE_TYPE type){
         bool state = 0;
         if
@@ -571,32 +598,7 @@ which will be used by scope defining functions to get desired results.
     //This function is expecting that the Statements vector is already filled by the ParseLines function.
     string ParseStatements(){
         string code, fncode;
-        vector<Scope> scopes;
-        Scope scope(0,PROGRAM);
-        Scope master(0,PROGRAM);
-        
-        //Traversing statement stacks.
-        for(Statement statement : Statements)
-        {
-            //Now looking for type of statement
-            switch(statement.type)
-            {
-                case VAR_DECLARATION:{
-                    if(scope.indent_level == statement.indent_level)
-                    {
-                        if(master.of == FUNCTION_DECL || master.of == CLASS_DEFINITION){
-                            fncode += statement.statement;
-                            fncode += ";\n";
-                        }
-                        else{
-                            code += statement.statement;
-                            code += ";\n";
-                        }
-                    }
-                }
-            }
-        }
-
+        Scope scope(0,PROGRAM,0,0,PROGRAM);
     }
 
 #endif // PARSEr_H_CSQ4
