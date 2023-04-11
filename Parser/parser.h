@@ -559,23 +559,7 @@ which will be used by scope defining functions to get desired results.
         }
         return state;
     }
-    
-    Scope master_scope(vector<Scope> scopes){
-        Scope master;
-        vector<ScopeSet> scope_sets;
-        int high = 0;
-        ScopeSet set;
-        for(Scope scope : scopes){
-            if(high < scope.indent_level){
-                high = scope.indent_level;
-                set.scopes.push_back(scope);
-                set.indent_level = high;
-            }
-            else{
-                
-            }
-        }
-    }
+
 
     bool isBlockStatement(NODE_TYPE type){
         bool state = 0;
@@ -633,11 +617,28 @@ which will be used by scope defining functions to get desired results.
                 case VAR_DECLARATION:{
                     if(last_open_scope(scope_stack).indent_level == statement.indent_level)
                     {
-                        code += statement.statement;
+                        code += statement.statement + "\n";
                     }
+                    else if(last_open_scope(scope_stack).indent_level-1 == statement.indent_level)
+                    {
+                        code += "}\n" + statement.statement + "\n";
+                    }
+                    break;
+                }
+                case VAR_ASSIGNMENT:{
+                    if(last_open_scope(scope_stack).indent_level == statement.indent_level)
+                    {
+                        code += statement.statement + "\n";
+                    }
+                    else if(last_open_scope(scope_stack).indent_level-1 == statement.indent_level)
+                    {
+                        code += "}\n" + statement.statement + "\n";
+                    }
+                    break;
                 }
             }
         }
+        return code;
     }
 
 #endif // PARSEr_H_CSQ4
