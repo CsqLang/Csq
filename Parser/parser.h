@@ -591,6 +591,18 @@ which will be used by scope defining functions to get desired results.
         }
         return last;
     }
+    int Find_index_of_scope(vector<Scope> scope_stack, Scope scope){
+        int index = 0;
+        for(Scope s : scope_stack){
+            if(scope.ended == s.ended && scope.ended == s.ended && scope.indent_level == s.indent_level && scope.master_indent == s.master_indent && s.master_type == scope.master_type && s.of == scope.of){
+                return index;
+            }
+            else{
+                index++;
+            }
+        }
+        return index;
+    }
 
     //This function is expecting that the Statements vector is already filled by the ParseLines function.
 
@@ -609,6 +621,7 @@ which will be used by scope defining functions to get desired results.
     string ParseStatements(){
         string code, fncode;
         Scope scope(0,PROGRAM,0,0,PROGRAM);
+        Scope master(0,PROGRAM,0,0,PROGRAM);
         vector<Scope> scope_stack = {scope};
         Statement last_statement;
         for(Statement statement : Statements){
@@ -622,6 +635,7 @@ which will be used by scope defining functions to get desired results.
                     else if(last_open_scope(scope_stack).indent_level-1 == statement.indent_level)
                     {
                         code += "}\n" + statement.statement + "\n";
+                        scope_stack[Find_index_of_scope(scope_stack,last_open_scope(scope_stack))].ended = 1;
                     }
                     break;
                 }
@@ -633,6 +647,35 @@ which will be used by scope defining functions to get desired results.
                     else if(last_open_scope(scope_stack).indent_level-1 == statement.indent_level)
                     {
                         code += "}\n" + statement.statement + "\n";
+                        scope_stack[Find_index_of_scope(scope_stack,last_open_scope(scope_stack))].ended = 1;
+                    }
+                    break;
+                }
+                case EXPR_TYPE:{
+                    if(last_open_scope(scope_stack).indent_level == statement.indent_level)
+                    {
+                        code += statement.statement + "\n";
+                    }
+                    else if(last_open_scope(scope_stack).indent_level-1 == statement.indent_level)
+                    {
+                        code += "}\n" + statement.statement + "\n";
+                        scope_stack[Find_index_of_scope(scope_stack,last_open_scope(scope_stack))].ended = 1;
+                    }
+                    break;
+                }
+                case IF_STATEMENT:{
+                    if(last_open_scope(scope_stack).indent_level == statement.indent_level)
+                    {
+                        code += statement.statement + "{\n";
+                        Scope scope(statement.indent_level + 1, IF_STATEMENT, 0, last_open_scope(scope_stack).indent_level,master.of);
+                        
+                    }
+                    else if(last_open_scope(scope_stack).indent_level-1 == statement.indent_level)
+                    {
+                        code += "}\n" + statement.statement + "\n";
+                        
+                        Scope scope(statement.indent_level + 1, IF_STATEMENT, 0, last_open_scope(scope_stack).indent_level,master.of);
+                        scope_stack[Find_index_of_scope(scope_stack,last_open_scope(scope_stack))].ended = 1;
                     }
                     break;
                 }
