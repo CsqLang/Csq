@@ -595,10 +595,49 @@ which will be used by scope defining functions to get desired results.
             printf("line : %d indent : %d type : %d (%s)\n",statement.number,statement.indent_level, statement.type, statement.statement.c_str());
         }
     }
+
+    //Seeking for last open scope
+
+    Scope last_open_scope(vector<Scope> scope_stack){
+        Scope last;
+        for(Scope scope : scope_stack){
+            if(scope.ended == 0){
+                last = scope;
+            }
+        }
+        return last;
+    }
+
     //This function is expecting that the Statements vector is already filled by the ParseLines function.
+
+    /*
+    for i in range(345):
+     for j in range(i):
+      print(j)
+     print("--------------------------------")
+
+    Statements:
+    (for i in range(345):, 0)
+    (for j in range(i):, 1)
+    (print(j),2)
+    (print("--------------------------------"),1)
+    */
     string ParseStatements(){
         string code, fncode;
         Scope scope(0,PROGRAM,0,0,PROGRAM);
+        vector<Scope> scope_stack = {scope};
+        Statement last_statement;
+        for(Statement statement : Statements){
+            switch(statement.type)
+            {
+                case VAR_DECLARATION:{
+                    if(last_open_scope(scope_stack).indent_level == statement.indent_level)
+                    {
+                        code += statement.statement;
+                    }
+                }
+            }
+        }
     }
 
 #endif // PARSEr_H_CSQ4
