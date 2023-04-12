@@ -490,6 +490,10 @@ which will be used by scope defining functions to get desired results.
                 else
                     tokens_.push_back(token);
                 tokens = tokens_;
+            // if(last_indent_level-1 == indent_level)
+            // {
+            //     Statements.push_back(Statement(statement_number,"ignore","ignore",EXPR_TYPE,indent_level));
+            // }
             if(isVarDecl(tokens)){
                 
                 //Now get AST node for the statement.
@@ -544,6 +548,7 @@ which will be used by scope defining functions to get desired results.
                NodePtr node = static_pointer_cast<Node>(node_); 
                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),EXPR_TYPE,indent_level));
             }
+            last_indent_level = indent_level;
             statement_number++;
         }
         
@@ -707,5 +712,5 @@ which will be used by scope defining functions to get desired results.
         }
         return code;
     }
-
+//Thinking
 #endif // PARSEr_H_CSQ4
