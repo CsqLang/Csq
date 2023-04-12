@@ -686,7 +686,23 @@ which will be used by scope defining functions to get desired results.
                     }
                     break;
                 }
-
+                case ELIF_STATEMENT: {
+                    if (last_open_scope(scope_stack).indent_level == statement.indent_level) {
+                        code += statement.statement + " {\n";
+                        Scope scope(statement.indent_level + 1, ELIF_STATEMENT, 0, last_open_scope(scope_stack).indent_level, master.of);
+                        scope_stack.push_back(scope);
+                    } 
+                    else if (last_open_scope(scope_stack).indent_level > statement.indent_level) {
+                        for (int i = 0; i < last_open_scope(scope_stack).indent_level - statement.indent_level; i++) {
+                            code += "}\n";
+                        }
+                        code += statement.statement + " {\n";
+                        Scope scope(statement.indent_level + 1, IF_STATEMENT, 0, last_open_scope(scope_stack).indent_level, master.of);
+                        scope_stack[Find_index_of_scope(scope_stack, last_open_scope(scope_stack))].ended = 1;
+                        scope_stack.push_back(scope);
+                    }
+                    break;
+                }
             }
         }
         return code;
