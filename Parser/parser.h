@@ -650,45 +650,32 @@ which will be used by scope defining functions to get desired results.
                     scope_stack.pop_back();
                 }
             }
+
+            //Indent handling
+            if(!(isBlockStatement(last_statement.type)) && last_statement.indent_level+1 == statement.indent_level)
+                unexpected_indent(statement.number,last_statement.raw_statement);
+
             //Check the type of the statement
             switch(statement.type)
             {
                 case EXPR_TYPE:{
-                    //Indent handling
-                    if(last_statement.indent_level+1 == statement.indent_level)
-                        unexpected_indent(statement.number,last_statement.raw_statement);
-                    else
-                    {
-                        code += statement.statement + ";\n";
-                    }
+                    code += statement.statement + ";\n";
                     break;
                 }
                 case VAR_DECLARATION:{
-                    //Indent handling
-                    if(last_statement.indent_level+1 == statement.indent_level)
-                        unexpected_indent(statement.number,last_statement.raw_statement);
-                    else
-                    {
-                        code += statement.statement + ";\n";
-                    }
+                    code += statement.statement + ";\n";
                     break;
                 }
                 case VAR_ASSIGNMENT:{
-                    //Indent handling
-                    if(last_statement.indent_level+1 == statement.indent_level)
-                        unexpected_indent(statement.number,last_statement.raw_statement);
-                    else
-                    {
-                        code += statement.statement + ";\n";
-                    }
+                    code += statement.statement + ";\n";
                     break;
                 }
                 case IF_STATEMENT:{
-                    
+                    code += statement.statement + "{\n";
                     break;
                 }
-                last_statement = statement;
             }
+            last_statement = statement;
         }
         return code;
     }
