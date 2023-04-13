@@ -625,22 +625,16 @@ which will be used by scope defining functions to get desired results.
         /*
         Reminder for tomorrow : To parse statements with scope handling use the facility to keep track of
         open scopes stored in scope_stack;
-        [1,2,23,4]
+        [1,2,3,4]
+        scope_required = 3
+        pop()
+        
         */
         for(Statement statement : Statements){
-            if(statement.indent_level != 0){
-                //Work until the statement's indent_level matches the scope's indent.
-                while(statement.indent_level != last_scope(scope_stack).indent_level+1){
-                    code += "}\n";
-                    scope_stack.pop_back();
-                }
+            while(statement.indent_level != last_scope(scope_stack).indent_level){
+                code += "}\n";
+                scope_stack.pop_back();
             }
-
-            //Indent handling
-            if(!(isBlockStatement(last_statement.type)) && last_statement.indent_level+1 == statement.indent_level)
-                unexpected_indent(statement.number,last_statement.raw_statement);
-
-            //Check the type of the statement
             switch(statement.type)
             {
                 case EXPR_TYPE:{
@@ -655,14 +649,7 @@ which will be used by scope defining functions to get desired results.
                     code += statement.statement + ";\n";
                     break;
                 }
-                case IF_STATEMENT:{
-                    code += statement.statement + "{\n";
-                    Scope curr_scope(statement.indent_level+1, IF_STATEMENT,0);
-                    scope_stack.push_back(curr_scope);
-                    break;
-                }
             }
-            last_statement = statement;
         }
         return code;
     }
