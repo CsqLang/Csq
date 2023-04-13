@@ -654,6 +654,21 @@ which will be used by scope defining functions to get desired results.
                     code += statement.statement + "{\n";
                     break;
                 }
+                case ELIF_STATEMENT:{
+                    scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
+                    code += statement.statement + "{\n";
+                    break;
+                }
+                case ELSE_STATEMENT:{
+                    scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
+                    code += statement.statement + "{\n";
+                    break;
+                }
+                case FOR_LOOP:{
+                    scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
+                    code += statement.statement + "{\n";
+                    break;
+                }
             }
         }
         return code;
