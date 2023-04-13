@@ -609,6 +609,10 @@ which will be used by scope defining functions to get desired results.
         return index;
     }
 
+    Scope last_scope(vector<Scope> scope){
+        return scope[scope.size()-1];
+    }
+
     //This function is expecting that the Statements vector is already filled by the ParseLines function.
 
     /*
@@ -624,93 +628,68 @@ which will be used by scope defining functions to get desired results.
     (print("--------------------------------"),1)
     */
     string ParseStatements(){
+        //Image of code
         string code, fncode;
+        //Some properties for scopes
         Scope scope(0,PROGRAM,0,0,PROGRAM);
         Scope master(0,PROGRAM,0,0,PROGRAM);
+        //To keep track of open scopes which are not yet closed.
         vector<Scope> scope_stack = {scope};
+        //To keep track of last statement which can we used to check whether indentation is required or not.
         Statement last_statement;
+        /*
+        Reminder for tomorrow : To parse statements with scope handling use the facility to keep track of
+        open scopes stored in scope_stack;
+        [1,2,23,4]
+        */
         for(Statement statement : Statements){
+            if(statement.indent_level != 0){
+                //Work until the statement's indent_level matches the scope's indent.
+                while(statement.indent_level != last_scope(scope_stack).indent_level+1){
+                    code += "}\n";
+                    scope_stack.pop_back();
+                }
+            }
+            //Check the type of the statement
             switch(statement.type)
             {
-                case VAR_DECLARATION:{
-                    if(last_open_scope(scope_stack).indent_level == statement.indent_level)
+                case EXPR_TYPE:{
+                    //Indent handling
+                    if(last_statement.indent_level+1 == statement.indent_level)
+                        unexpected_indent(statement.number,last_statement.raw_statement);
+                    else
                     {
-                        code += statement.statement + "\n";
+                        code += statement.statement + ";\n";
                     }
-                    else if(last_open_scope(scope_stack).indent_level-1 == statement.indent_level)
+                    break;
+                }
+                case VAR_DECLARATION:{
+                    //Indent handling
+                    if(last_statement.indent_level+1 == statement.indent_level)
+                        unexpected_indent(statement.number,last_statement.raw_statement);
+                    else
                     {
-                        for(int i = 0;i<last_open_scope(scope_stack).indent_level - statement.indent_level;i++)
-                            code += "}\n";
-                        code += statement.statement + "\n";
-                        scope_stack[Find_index_of_scope(scope_stack,last_open_scope(scope_stack))].ended = 1;
+                        code += statement.statement + ";\n";
                     }
                     break;
                 }
                 case VAR_ASSIGNMENT:{
-                    if(last_open_scope(scope_stack).indent_level == statement.indent_level)
+                    //Indent handling
+                    if(last_statement.indent_level+1 == statement.indent_level)
+                        unexpected_indent(statement.number,last_statement.raw_statement);
+                    else
                     {
-                        code += statement.statement + "\n";
-                    }
-                    else if(last_open_scope(scope_stack).indent_level-1 == statement.indent_level)
-                    {
-                        for(int i = 0;i<last_open_scope(scope_stack).indent_level - statement.indent_level;i++)
-                            code += "}\n";
-                        code += statement.statement + "\n";
-                        scope_stack[Find_index_of_scope(scope_stack,last_open_scope(scope_stack))].ended = 1;
+                        code += statement.statement + ";\n";
                     }
                     break;
                 }
-                case EXPR_TYPE:{
-                    if(last_open_scope(scope_stack).indent_level == statement.indent_level)
-                    {
-                        code += statement.statement + "\n";
-                    }
-                    else if(last_open_scope(scope_stack).indent_level-1 == statement.indent_level)
-                    {
-                        for(int i = 0;i<last_open_scope(scope_stack).indent_level - statement.indent_level;i++)
-                            code += "}\n";
-                        code += statement.statement + "\n";
-                        scope_stack[Find_index_of_scope(scope_stack,last_open_scope(scope_stack))].ended = 1;
-                    }
+                case IF_STATEMENT:{
+                    
                     break;
                 }
-                case IF_STATEMENT: {
-                    if (last_open_scope(scope_stack).indent_level == statement.indent_level) {
-                        code += statement.statement + " {\n";
-                        Scope scope(statement.indent_level + 1, IF_STATEMENT, 0, last_open_scope(scope_stack).indent_level, master.of);
-                        scope_stack.push_back(scope);
-                    } 
-                    else if (last_open_scope(scope_stack).indent_level > statement.indent_level) {
-                        for (int i = 0; i < last_open_scope(scope_stack).indent_level - statement.indent_level; i++) {
-                            code += "}\n";
-                        }
-                        code += statement.statement + " {\n";
-                        Scope scope(statement.indent_level + 1, IF_STATEMENT, 0, last_open_scope(scope_stack).indent_level, master.of);
-                        scope_stack[Find_index_of_scope(scope_stack, last_open_scope(scope_stack))].ended = 1;
-                        scope_stack.push_back(scope);
-                    }
-                    break;
-                }
-                case ELIF_STATEMENT: {
-                    if (last_open_scope(scope_stack).indent_level == statement.indent_level) {
-                        code += statement.statement + " {\n";
-                        Scope scope(statement.indent_level + 1, ELIF_STATEMENT, 0, last_open_scope(scope_stack).indent_level, master.of);
-                        scope_stack.push_back(scope);
-                    } 
-                    else if (last_open_scope(scope_stack).indent_level > statement.indent_level) {
-                        for (int i = 0; i < last_open_scope(scope_stack).indent_level - statement.indent_level; i++) {
-                            code += "}\n";
-                        }
-                        code += statement.statement + " {\n";
-                        Scope scope(statement.indent_level + 1, IF_STATEMENT, 0, last_open_scope(scope_stack).indent_level, master.of);
-                        scope_stack[Find_index_of_scope(scope_stack, last_open_scope(scope_stack))].ended = 1;
-                        scope_stack.push_back(scope);
-                    }
-                    break;
-                }
+                last_statement = statement;
             }
         }
         return code;
     }
-//Thinking
 #endif // PARSEr_H_CSQ4
