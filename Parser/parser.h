@@ -27,17 +27,14 @@
     //Scope for the statements
     struct Scope{
         int indent_level;
-        int master_indent;
-        NODE_TYPE master_type;
         bool ended;
         NODE_TYPE of;
         Scope(){}
-        Scope(int level, NODE_TYPE of_, bool ended_,int _master_indent,NODE_TYPE _master_type){
+        Scope(int level, NODE_TYPE of_, bool ended_){
             indent_level = level;
             of = of_;
             ended = ended_;
-            master_indent = _master_indent;
-            master_type = _master_type;
+
         };
     };
 
@@ -596,18 +593,6 @@ which will be used by scope defining functions to get desired results.
         }
         return last;
     }
-    int Find_index_of_scope(vector<Scope> scope_stack, Scope scope){
-        int index = 0;
-        for(Scope s : scope_stack){
-            if(scope.ended == s.ended && scope.ended == s.ended && scope.indent_level == s.indent_level && scope.master_indent == s.master_indent && s.master_type == scope.master_type && s.of == scope.of){
-                return index;
-            }
-            else{
-                index++;
-            }
-        }
-        return index;
-    }
 
     Scope last_scope(vector<Scope> scope){
         return scope[scope.size()-1];
@@ -631,8 +616,8 @@ which will be used by scope defining functions to get desired results.
         //Image of code
         string code, fncode;
         //Some properties for scopes
-        Scope scope(0,PROGRAM,0,0,PROGRAM);
-        Scope master(0,PROGRAM,0,0,PROGRAM);
+        Scope scope(0,PROGRAM,0);
+        Scope master(0,PROGRAM,0);
         //To keep track of open scopes which are not yet closed.
         vector<Scope> scope_stack = {scope};
         //To keep track of last statement which can we used to check whether indentation is required or not.
@@ -672,6 +657,8 @@ which will be used by scope defining functions to get desired results.
                 }
                 case IF_STATEMENT:{
                     code += statement.statement + "{\n";
+                    Scope curr_scope(statement.indent_level+1, IF_STATEMENT,0);
+                    scope_stack.push_back(curr_scope);
                     break;
                 }
             }
