@@ -5,8 +5,7 @@
     #include "../AST/ast.h"
     #include "../Memory/stack.h"
 
-    //Total count of errors.
-    int error_count = 0;
+    
     //Some alias
     typedef vector<Token> TokenStream;
     typedef vector<string> StringStream;
@@ -184,11 +183,6 @@
 
     //Errors for the bad code.
 
-    void error(int line, string msg){
-        printf("Error [%d]: at line %d, %s\n",error_count+1, line, msg.c_str());
-        error_count++;
-    }
-
     void unexpected_indent(int line, string last_stmt_type){
         error(line, "unexpected indent after " + last_stmt_type);
     }
@@ -217,7 +211,7 @@
     void function_insideFor(int line){
         error(line, "function is defined inside another ForLoop which is not allowed.");
     }
-    
+
     void noStorageClass(int line, string stmt, Scope scope){
         if(scope.of == CLASS_DEFINITION){
             error(line, "no storage class for the '" + stmt + "' inside a class.");
@@ -618,6 +612,8 @@ which will be used by scope defining functions to get desired results.
         //Some properties for scopes
         Scope scope(0,PROGRAM,0);
         Scope master(0,PROGRAM,0);
+        int function_indent = -1;
+        bool fnstate = 0;
         //To keep track of open scopes which are not yet closed.
         vector<Scope> scope_stack = {scope};
         //To keep track of last statement which can we used to check whether indentation is required or not.
@@ -631,10 +627,6 @@ which will be used by scope defining functions to get desired results.
         
         */
         for(Statement statement : Statements){
-            //If the user has used wrong type of indentation
-            if(notBlockStatement(last_statement.type)){
-                unexpected_indent(statement.number,last_statement.raw_statement);
-            }
 
             while(statement.indent_level != last_scope(scope_stack).indent_level){
                 code += "}\n";
