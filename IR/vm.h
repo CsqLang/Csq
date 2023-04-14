@@ -103,7 +103,12 @@ void compile(string lang, string currdir, string name){
         string IR = formIR(mcode, fncode, currdir);
         replaceAll(IR," . ",".");
         writeIR(IR, currdir,name);
-        CompileToGPP(currdir + "/" + name + ".cpp",name);
+        if(error_count > 0){
+            printf("Couldn't compile due to %d existing error.\n", error_count);
+        }
+        else{
+            CompileToGPP(currdir + "/" + name + ".cpp",name);
+        }
     }
 }
 
