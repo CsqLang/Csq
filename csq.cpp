@@ -13,7 +13,7 @@ int main(int argc, char const *argv[])
         }
         else{
             compile(argv[1],argv[3],argv[2]);
-            RunExecutable(string(argv[3]) + "/" + argv[2]);
+            if(error_count == 0){RunExecutable(string(argv[3]) + "/" + argv[2]);}
         }
     return 0;
 }
