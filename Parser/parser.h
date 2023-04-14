@@ -631,10 +631,17 @@ which will be used by scope defining functions to get desired results.
         
         */
         for(Statement statement : Statements){
+            //If the user has used wrong type of indentation
+            if(notBlockStatement(last_statement.type)){
+                unexpected_indent(statement.number,last_statement.raw_statement);
+            }
+
             while(statement.indent_level != last_scope(scope_stack).indent_level){
                 code += "}\n";
                 scope_stack.pop_back();
             }
+
+
             switch(statement.type)
             {
                 case EXPR_TYPE:{
@@ -665,6 +672,16 @@ which will be used by scope defining functions to get desired results.
                     break;
                 }
                 case FOR_LOOP:{
+                    scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
+                    code += statement.statement + "{\n";
+                    break;
+                }
+                case WHILE_LOOP:{
+                    scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
+                    code += statement.statement + "{\n";
+                    break;
+                }
+                case FUNCTION_DECL:{
                     scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
                     code += statement.statement + "{\n";
                     break;
