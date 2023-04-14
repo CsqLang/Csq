@@ -291,10 +291,32 @@ STOKEN symbolType(Token token){
     }
 }
 
+int TokenizerLine = 1;
+//Total count of errors.
+int error_count = 0;
+
+void error(int line, string msg){
+    printf("Error [%d]: at line %d, %s\n",error_count+1, line, msg.c_str());
+    error_count++;
+}
+
+
+//This function will be checking the count of tokens 
+int TokenCount(vector<Token> tokens, Token token)
+{
+    int count = 0;
+    for(Token t : tokens){
+        if(t.token == token.token && t.type)
+         count++;
+    }
+    return count;
+}
+
+
 
 vector<Token> tokenize(string source_code) {
     vector<Token> tokens;
-    string current_string, str_input;
+    string current_string, str_input, code_;
     int current_line = 1;
     //Indentation count;
     int IndentCount = 0;
@@ -498,6 +520,34 @@ vector<Token> tokenize(string source_code) {
             }
         }
     }
+
+    //Tokens for syntax check.
+    Token SY_Lparen, SY_Rparen, SY_Lbrac, SY_Rbrac, SY_Lbrace, SY_Rbrace;
+    SY_Lparen.token = "(";
+    SY_Lparen.type = SYMBOL;
+    SY_Rparen.token = ")";
+    SY_Rparen.type = SYMBOL;
+    SY_Lbrac.token = "[";
+    SY_Lbrac.type = SYMBOL;
+    SY_Rbrac.token = "]";
+    SY_Rbrac.type = SYMBOL;
+    SY_Lbrace.token = "{";
+    SY_Lbrace.type = SYMBOL;
+    SY_Rbrace.token = "}";
+    SY_Rbrace.type = SYMBOL;
+    if(TokenCount(filtered_Tokens, SY_Lparen) != TokenCount(filtered_Tokens, SY_Rparen)){
+        printf("Error[%d]: At line %d, parenthesis aren't correctly closed.\n",error_count, TokenizerLine);
+        error_count++;
+    }
+    else if(TokenCount(filtered_Tokens, SY_Lbrace) != TokenCount(filtered_Tokens, SY_Rbrace)){
+        printf("Error[%d]: At line %d, square brackets aren't correctly closed.\n",error_count, TokenizerLine);
+        error_count++;
+    }
+    else if(TokenCount(filtered_Tokens, SY_Lbrace) != TokenCount(filtered_Tokens, SY_Rbrace)){
+        printf("Error[%d]: At line %d, curly braces aren't correctly closed.\n",error_count, TokenizerLine);
+        error_count++;
+    }
+    TokenizerLine++;
 
     return filtered_Tokens;
 }
