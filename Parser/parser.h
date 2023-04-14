@@ -27,12 +27,20 @@
     //Scope for the statements
     struct Scope{
         int indent_level;
+        bool ended;
         NODE_TYPE of;
         Scope(){}
-        Scope(int level, NODE_TYPE of_){
+        Scope(int level, NODE_TYPE of_, bool ended_){
             indent_level = level;
             of = of_;
+            ended = ended_;
+
         };
+    };
+
+    struct ScopeSet{
+        int indent_level;
+        vector<Scope> scopes;
     };
 
     //Struct to store infos about statements
@@ -385,7 +393,7 @@ which will be used by scope defining functions to get desired results.
             printf("Error:[%d] expected an end of condition.", error_count+1);
             error_count++;
         }
-        return node;
+        return node;//Master scope..
     }
 
     FunctionDecl ParseFuncDecl(TokenStream tokens){
@@ -453,7 +461,6 @@ which will be used by scope defining functions to get desired results.
         }
         return indent_level;
     }
-
     /*
     Indentation handling shall be done in such a way in which every
     line with certain indentation shall be stored as an object.
@@ -480,6 +487,10 @@ which will be used by scope defining functions to get desired results.
                 else
                     tokens_.push_back(token);
                 tokens = tokens_;
+            // if(last_indent_level-1 == indent_level)
+            // {
+            //     Statements.push_back(Statement(statement_number,"ignore","ignore",EXPR_TYPE,indent_level));
+            // }
             if(isVarDecl(tokens)){
                 
                 //Now get AST node for the statement.
@@ -534,6 +545,7 @@ which will be used by scope defining functions to get desired results.
                NodePtr node = static_pointer_cast<Node>(node_); 
                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),EXPR_TYPE,indent_level));
             }
+            last_indent_level = indent_level;
             statement_number++;
         }
         
@@ -549,7 +561,8 @@ which will be used by scope defining functions to get desired results.
         }
         return state;
     }
-    
+
+
     bool isBlockStatement(NODE_TYPE type){
         bool state = 0;
         if
@@ -568,514 +581,113 @@ which will be used by scope defining functions to get desired results.
             printf("line : %d indent : %d type : %d (%s)\n",statement.number,statement.indent_level, statement.type, statement.statement.c_str());
         }
     }
+
+    //Seeking for last open scope
+
+    Scope last_open_scope(vector<Scope> scope_stack){
+        Scope last;
+        for(Scope scope : scope_stack){
+            if(scope.ended == 0){
+                last = scope;
+            }
+        }
+        return last;
+    }
+
+    Scope last_scope(vector<Scope> scope){
+        return scope[scope.size()-1];
+    }
+
     //This function is expecting that the Statements vector is already filled by the ParseLines function.
+
+    /*
+    for i in range(345):
+     for j in range(i):
+      print(j)
+     print("--------------------------------")
+
+    Statements:
+    (for i in range(345):, 0)
+    (for j in range(i):, 1)
+    (print(j),2)
+    (print("--------------------------------"),1)
+    */
     string ParseStatements(){
-        string code,fncode;
-        int max_line_indent = 0;
-        int last_indent = 0;
-        bool fnstate = 0;
-        NODE_TYPE last_stmt_type;
-        string last_stmt;
-        //This will be storing which keyword is used throughout the code.
-        vector<string> keyword_log;
-        Scope scope(0,PROGRAM);
-        Scope master_scope(0,PROGRAM);
-        Scope last_master_scope(0,PROGRAM);
-        //State 0.5: get the max indent of the statements.
-        for(Statement statement : Statements)
-            if(statement.indent_level > max_line_indent)
-                max_line_indent = statement.indent_level;
-            else
-                ignore;
-        //Stage 1: Parse.
-        //Traverse the statements
+        //Image of code
+        string code, fncode;
+        //Some properties for scopes
+        Scope scope(0,PROGRAM,0);
+        Scope master(0,PROGRAM,0);
+        //To keep track of open scopes which are not yet closed.
+        vector<Scope> scope_stack = {scope};
+        //To keep track of last statement which can we used to check whether indentation is required or not.
+        Statement last_statement;
+        /*
+        Reminder for tomorrow : To parse statements with scope handling use the facility to keep track of
+        open scopes stored in scope_stack;
+        [1,2,3,4]
+        scope_required = 3
+        pop()
+        
+        */
         for(Statement statement : Statements){
-            //When indent levels are same as the scope.indent_level the statement is to be added.
-            if(scope.indent_level == statement.indent_level && master_scope.of != FUNCTION_DECL){
-                //The statement can also have certain types of node so we need to check via switch.
-                switch(statement.type){
-                    case EXPR_TYPE:{
-                        code += statement.statement;
-                        code += ";\n";
-                        break;                                        
-                    }
-                    case VAR_DECLARATION:{
-                        code += statement.statement;
-                        code += ";\n";
-                        break;                                    
-                    }
-                    case VAR_ASSIGNMENT:{
-                        code += statement.statement;
-                        code += ";\n";
-                        break;                                
-                    }
-                    case IF_STATEMENT:{
-                        if(scope.of == CLASS_DEFINITION){
-                            noStorageClass(statement.number, statement.raw_statement, scope);
-                        }
-                        else{
-                            code += statement.statement;
-                            code += "{\n";
-                            scope.indent_level = statement.indent_level + 1;
-                            scope.of = IF_STATEMENT;
-                            keyword_log.push_back("if");
-                        }
-                        break;                                
-                    }
-                    case ELIF_STATEMENT:{
-                        if(in("if",keyword_log)){
-                            code += statement.statement;
-                            code += "{\n";
-                            scope.indent_level = statement.indent_level+1;
-                            scope.of = ELIF_STATEMENT;
-                            keyword_log.push_back("elif");
-                        }
-                        else{
-                            elifUsedWithoutIf(statement.number);
-                        }
-                        break;                                
-                    }
-                    case ELSE_STATEMENT:{
-                        if(in("elif",keyword_log) || in("if",keyword_log)){
-                            code += statement.statement;
-                            code += "{\n";
-                            scope.indent_level = statement.indent_level+1;
-                            scope.of = ELSE_STATEMENT;
-                            keyword_log.push_back("else");
-                        }
-                        else{
-                            elseUsedWithoutIf(statement.number);
-                        }
-                        break;                                
-                    }
-                    case FUNCTION_DECL:{
-                        //First check that the function is defined in a correct place or not?
-                        switch(scope.of){
-                            case FUNCTION_DECL:{
-                                function_insideFunction(statement.number);
-                                break;
-                            }
-                            case IF_STATEMENT:{
-                                function_insideIfstmt(statement.number);
-                                break;
-                            }
-                            case ELIF_STATEMENT:{
-                                function_insideElif(statement.number);
-                                break;
-                            }
-                            case ELSE_STATEMENT:{
-                                function_insideElse(statement.number);
-                                break;
-                            }
-                            case FOR_LOOP:{
-                                function_insideFor(statement.number);
-                                break;
-                            }
-                            case WHILE_LOOP:{
-                                function_insideWhile(statement.number);
-                                break;
-                            }
-                            default:{
-                                scope.indent_level = statement.indent_level+1;
-                                scope.of = FUNCTION_DECL;
-                                master_scope.of = FUNCTION_DECL;
-                                master_scope.indent_level = scope.indent_level;
-                                fncode += statement.statement + "{\n";
-                                fnstate = 1;
-                                break;
-                            }
-                        }
-                        break;                                
-                    }
-                    case WHILE_LOOP:{
-                        scope.indent_level = statement.indent_level+1;
-                        scope.of = WHILE_LOOP;
-                        code += statement.statement + "{\n";
-                        break;                                
-                    }
-                    case FOR_LOOP:{
-                        scope.indent_level = statement.indent_level+1;
-                        scope.of = FOR_LOOP;
-                        code += statement.statement + "{\n";
-                        break;                                
-                    }
-                    default:{
-                        unrecognized_statement(statement.number, statement.raw_statement);
-                        break;
-                    }
-                }
-            }
-            else if(scope.indent_level != statement.indent_level && master_scope.of != FUNCTION_DECL){
-                //The decreased level = scope.indent_level - statement.indent_level
-                    int dlevel = scope.indent_level - statement.indent_level;
-                    for(int lvl = 0; lvl < dlevel; lvl++)
-                        code += "\n}\n";
-                    scope.indent_level = statement.indent_level;
-                    scope.of = last_master_scope.of;
-                //Now we again have to check which type of statement
-                switch(statement.type){
-                    case EXPR_TYPE:{
-                        code += statement.statement;
-                        code += ";\n";
-                        break;                                        
-                    }
-                    case VAR_DECLARATION:{
-                        code += statement.statement;
-                        code += ";\n";
-                        break;                                    
-                    }
-                    case VAR_ASSIGNMENT:{
-                        code += statement.statement;
-                        code += ";\n";
-                        break;                                
-                    }
-                    case IF_STATEMENT:{
-                        if(scope.of == CLASS_DEFINITION){
-                            noStorageClass(statement.number, statement.raw_statement, scope);
-                        }
-                        else{
-                            code += statement.statement;
-                            code += "{";
-                            scope.indent_level = statement.indent_level + 1;
-                            scope.of = IF_STATEMENT;
-                            keyword_log.push_back("if");
-                        }
-                        break;                                
-                    }
-                    case ELIF_STATEMENT:{
-                        if(in("if",keyword_log)){
-                            code += statement.statement;
-                            code += "{\n";
-                            scope.indent_level = statement.indent_level+1;
-                            scope.of = ELIF_STATEMENT;
-                            keyword_log.push_back("elif");
-                        }
-                        else{
-                            elifUsedWithoutIf(statement.number);
-                        }
-                        break;                                
-                    }
-                    case ELSE_STATEMENT:{
-                        if(in("elif",keyword_log) || in("if",keyword_log)){
-                            code += statement.statement;
-                            code += "{\n";
-                            scope.indent_level = statement.indent_level+1;
-                            scope.of = ELSE_STATEMENT;
-                            keyword_log.push_back("else");
-                        }
-                        else{
-                            elseUsedWithoutIf(statement.number);
-                        }
-                        break;                                
-                    }
-                    case FUNCTION_DECL:{
-                        //First check that the function is defined in a correct place or not?
-                        switch(scope.of){
-                            case FUNCTION_DECL:{
-                                function_insideFunction(statement.number);
-                                break;
-                            }
-                            case IF_STATEMENT:{
-                                function_insideIfstmt(statement.number);
-                                break;
-                            }
-                            case ELIF_STATEMENT:{
-                                function_insideElif(statement.number);
-                                break;
-                            }
-                            case ELSE_STATEMENT:{
-                                function_insideElse(statement.number);
-                                break;
-                            }
-                            case FOR_LOOP:{
-                                function_insideFor(statement.number);
-                                break;
-                            }
-                            case WHILE_LOOP:{
-                                function_insideWhile(statement.number);
-                                break;
-                            }
-                            default:{
-                                scope.indent_level = statement.indent_level+1;
-                                scope.of = FUNCTION_DECL;
-                                master_scope = scope;
-                                code += statement.statement + "{\n";
-                                fnstate = 1;
-                                break;
-                            }
-                        }
-                        break;                                
-                    }
-                    case WHILE_LOOP:{
-                        scope.indent_level = statement.indent_level+1;
-                        scope.of = WHILE_LOOP;
-                        code += statement.statement + "{\n";
-                        break;                                
-                    }
-                    case FOR_LOOP:{
-                        scope.indent_level = statement.indent_level+1;
-                        scope.of = FOR_LOOP;
-                        code += statement.statement + "{\n";
-                        break;                                
-                    }
-                    default:{
-                        unrecognized_statement(statement.number, statement.raw_statement);
-                        break;
-                    }
-                }
+            //If the user has used wrong type of indentation
+            if(notBlockStatement(last_statement.type)){
+                unexpected_indent(statement.number,last_statement.raw_statement);
             }
 
-            //This section contains the statements required to parse functions down.
+            while(statement.indent_level != last_scope(scope_stack).indent_level){
+                code += "}\n";
+                scope_stack.pop_back();
+            }
 
-            else if(master_scope.of == FUNCTION_DECL && scope.indent_level == statement.indent_level)
+
+            switch(statement.type)
             {
-                switch(statement.type)
-                {
-                    case VAR_DECLARATION:{
-                        fncode += statement.statement + ";\n";
-                        break;
-                    }
-                    case VAR_ASSIGNMENT:{
-                        fncode += statement.statement + ";\n";
-                        break;
-                    }
-                    case EXPR_TYPE:{
-                        fncode += statement.statement + ";\n";
-                        break;
-                    }
-                    case IF_STATEMENT:{
-                        if(master_scope.of == CLASS_DEFINITION){
-                            noStorageClass(statement.number, statement.raw_statement, scope);
-                        }
-                        else{
-                            fncode += statement.statement;
-                            fncode += "{\n";
-                            scope.indent_level = statement.indent_level + 1;
-                            scope.of = IF_STATEMENT;
-                            keyword_log.push_back("if");
-                        }
-                        break;   
-                    }
-
-                    case ELIF_STATEMENT:{
-                        if(in("if",keyword_log)){
-                            fncode += statement.statement;
-                            fncode += "{\n";
-                            scope.indent_level = statement.indent_level+1;
-                            scope.of = ELIF_STATEMENT;
-                            keyword_log.push_back("elif");
-                        }
-                        else{
-                            elifUsedWithoutIf(statement.number);
-                        }
-                        break;                                
-                    }
-
-                    case ELSE_STATEMENT:{
-                        if(in("elif",keyword_log) || in("if",keyword_log)){
-                            fncode += statement.statement;
-                            fncode += "{\n";
-                            scope.indent_level = statement.indent_level+1;
-                            scope.of = ELSE_STATEMENT;
-                            keyword_log.push_back("else");
-                        }
-                        else{
-                            elseUsedWithoutIf(statement.number);
-                        }
-                        break; 
-                    }
-                    case FOR_LOOP:{
-                        scope.indent_level = statement.indent_level+1;
-                        scope.of = FOR_LOOP;
-                        fncode += statement.statement + "{\n";
-                        break;      
-                    }
+                case EXPR_TYPE:{
+                    code += statement.statement + ";\n";
+                    break;
+                }
+                case VAR_DECLARATION:{
+                    code += statement.statement + ";\n";
+                    break;
+                }
+                case VAR_ASSIGNMENT:{
+                    code += statement.statement + ";\n";
+                    break;
+                }
+                case IF_STATEMENT:{
+                    scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
+                    code += statement.statement + "{\n";
+                    break;
+                }
+                case ELIF_STATEMENT:{
+                    scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
+                    code += statement.statement + "{\n";
+                    break;
+                }
+                case ELSE_STATEMENT:{
+                    scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
+                    code += statement.statement + "{\n";
+                    break;
+                }
+                case FOR_LOOP:{
+                    scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
+                    code += statement.statement + "{\n";
+                    break;
+                }
+                case WHILE_LOOP:{
+                    scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
+                    code += statement.statement + "{\n";
+                    break;
+                }
+                case FUNCTION_DECL:{
+                    scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
+                    code += statement.statement + "{\n";
+                    break;
                 }
             }
-            else if(master_scope.of == FUNCTION_DECL && scope.indent_level != statement.indent_level)
-            {
-                // the change of indent level.
-                int c_indent = scope.indent_level - statement.indent_level;
-                // add } till the c_indent
-                for(int i = 0; i < c_indent; i++)
-                    fncode += "}\n";
-                //Checking for the end of function scope.
-                if(statement.indent_level == master_scope.indent_level-1){
-                    master_scope = last_master_scope;
-                    master_scope.indent_level = statement.indent_level;
-                    last_master_scope.indent_level = master_scope.indent_level+1;
-                    last_master_scope.of = FUNCTION_DECL;
-                    scope.indent_level = master_scope.indent_level;
-                    scope.of = PROGRAM;
-                    Functions.push_back(fncode);
-                    fncode = "";
-                    //The statement can also have certain types of node so we need to check via switch.
-                    //Now the statement having indent level same as function decl so it need the parsing one more time.
-                    switch(statement.type){
-                        case EXPR_TYPE:{
-                            code += statement.statement;
-                            code += ";\n";
-                            break;                                        
-                        }
-                        case VAR_DECLARATION:{
-                            code += statement.statement;
-                            code += ";\n";
-                            break;                                    
-                        }
-                        case VAR_ASSIGNMENT:{
-                            code += statement.statement;
-                            code += ";\n";
-                            break;                                
-                        }
-                        case IF_STATEMENT:{
-                            if(scope.of == CLASS_DEFINITION){
-                                noStorageClass(statement.number, statement.raw_statement, scope);
-                            }
-                            else{
-                                code += statement.statement;
-                                code += "{\n";
-                                scope.indent_level = statement.indent_level + 1;
-                                scope.of = IF_STATEMENT;
-                                keyword_log.push_back("if");
-                            }
-                            break;                                
-                        }
-                        case ELIF_STATEMENT:{
-                            if(in("if",keyword_log)){
-                                code += statement.statement;
-                                code += "{\n";
-                                scope.indent_level = statement.indent_level+1;
-                                scope.of = ELIF_STATEMENT;
-                                keyword_log.push_back("elif");
-                            }
-                            else{
-                                elifUsedWithoutIf(statement.number);
-                            }
-                            break;                                
-                        }
-                        case ELSE_STATEMENT:{
-                            if(in("elif",keyword_log) || in("if",keyword_log)){
-                                code += statement.statement;
-                                code += "{\n";
-                                scope.indent_level = statement.indent_level+1;
-                                scope.of = ELSE_STATEMENT;
-                                keyword_log.push_back("else");
-                            }
-                            else{
-                                elseUsedWithoutIf(statement.number);
-                            }
-                            break;                                
-                        }
-                        case WHILE_LOOP:{
-                            scope.indent_level = statement.indent_level+1;
-                            scope.of = WHILE_LOOP;
-                            code += statement.statement + "{\n";
-                            break;                                
-                        }
-                        case FOR_LOOP:{
-                            scope.indent_level = statement.indent_level+1;
-                            scope.of = FOR_LOOP;
-                            code += statement.statement + "{\n";
-                            break;                                
-                        }
-                        case FUNCTION_DECL:{
-                            //First check that the function is defined in a correct place or not?
-                            switch(scope.of){
-                                default:{
-                                    scope.indent_level = statement.indent_level+1;
-                                    scope.of = FUNCTION_DECL;
-                                    master_scope.of = FUNCTION_DECL;
-                                    master_scope.indent_level = scope.indent_level;
-                                    fncode += statement.statement + "{\n";
-                                    fnstate = 1;
-                                    break;
-                                }
-                            }
-                            break;                                
-                        }
-                        default:{
-                            unrecognized_statement(statement.number, statement.raw_statement);
-                            break;
-                        }
-                    }
-                }
-                else{
-                    switch(statement.type)
-                    {
-                        case VAR_DECLARATION:{
-                            fncode += statement.statement + ";\n";
-                            break;
-                        }
-                        case VAR_ASSIGNMENT:{
-                            fncode += statement.statement + ";\n";
-                            break;
-                        }
-                        case EXPR_TYPE:{
-                            fncode += statement.statement + ";\n";
-                            break;
-                        }
-                        case IF_STATEMENT:{
-                            if(master_scope.of == CLASS_DEFINITION){
-                                noStorageClass(statement.number, statement.raw_statement, scope);
-                            }
-                            else{
-                                fncode += statement.statement;
-                                fncode += "{\n";
-                                scope.indent_level = statement.indent_level + 1;
-                                scope.of = IF_STATEMENT;
-                                keyword_log.push_back("if");
-                            }
-                            break;   
-                        }
-
-                        case ELIF_STATEMENT:{
-                            if(in("if",keyword_log)){
-                                fncode += statement.statement;
-                                fncode += "{\n";
-                                scope.indent_level = statement.indent_level+1;
-                                scope.of = ELIF_STATEMENT;
-                                keyword_log.push_back("elif");
-                            }
-                            else{
-                                elifUsedWithoutIf(statement.number);
-                            }
-                            break;                                
-                        }
-
-                        case ELSE_STATEMENT:{
-                            if(in("elif",keyword_log) || in("if",keyword_log)){
-                                fncode += statement.statement;
-                                fncode += "{\n";
-                                scope.indent_level = statement.indent_level+1;
-                                scope.of = ELSE_STATEMENT;
-                                keyword_log.push_back("else");
-                            }
-                            else{
-                                elseUsedWithoutIf(statement.number);
-                            }
-                            break; 
-                        }
-                        case FOR_LOOP:{
-                            scope.indent_level = statement.indent_level+1;
-                            scope.of = FOR_LOOP;
-                            fncode += statement.statement + "{\n";
-                            break;
-                        }
-                        case WHILE_LOOP:{
-                            scope.indent_level = statement.indent_level+1;
-                            scope.of = WHILE_LOOP;
-                            fncode += statement.statement + "{\n";
-                            break;                                
-                        }
-                        case FUNCTION_DECL:{
-                            function_insideFunction(statement.number);
-                        }
-                    }
-                }
-            }
-
         }
         return code;
     }
-
 #endif // PARSEr_H_CSQ4
