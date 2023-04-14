@@ -20,41 +20,28 @@ Example:
 a = i32(49)
 b = a
 ```
-### Functions
-The syntax for function is inspired by Python here the scope is resolved by indentations.
+### Loops
+#### While Loop
 ```
-def fx(a, b):
- return a + b
-x = fx(23,34)
+i = 1
+while i <= 100:
+ print(i)
+ i = i+1
 ```
-If you just want to create a function without any code so to prevent error use ignore keyword.
+#### For Loop
 ```
-def fx():
- ignore
-fx()
+for i in range(1,100):
+ print(i)
 ```
-### Rules of coding in Csq4.2
-If you are not using more then one functions so you could write them like this directly:
+### If, Elif and Else statements
 ```
-def hi():
- print("Hi")
-a = 30
-if a == 30:
- print('30')
-```
-But when there are more functions so you have to write your main code into another function and call it at the end like this : 
-```
-def linear(x):
- return x
-def ReLU(x):
- if x > 0:
-  return x
+i = 1
+if i == 1:
+ i = 5
+ if i == 5:
+  print(5)
+ elif i == 3:
+  print(3)
  else:
-  return 0
-def start():
- x = 39
- fx = linear(x)
- fx = reLu(x)
-start()
+  print(0)
 ```
-Here start is the entry point function you can use any other function also.
