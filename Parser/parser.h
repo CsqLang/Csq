@@ -632,9 +632,6 @@ which will be used by scope defining functions to get desired results.
                 code += "}\n";
                 scope_stack.pop_back();
             }
-            if(statement.indent_level-1 == last_statement.indent_level){
-                unexpected_indent(statement.number, last_statement.raw_statement);
-            }
             //Checking the type of last_statement
             switch(statement.type)
             {
