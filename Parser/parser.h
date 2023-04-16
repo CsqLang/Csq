@@ -612,72 +612,113 @@ which will be used by scope defining functions to get desired results.
         //Some properties for scopes
         Scope scope(0,PROGRAM,0);
         Scope master(0,PROGRAM,0);
-        int function_indent = -1;
+        int function_indent;
         bool fnstate = 0;
         //To keep track of open scopes which are not yet closed.
         vector<Scope> scope_stack = {scope};
         //To keep track of last statement which can we used to check whether indentation is required or not.
         Statement last_statement;
-        /*
-        Reminder for tomorrow : To parse statements with scope handling use the facility to keep track of
-        open scopes stored in scope_stack;
-        [1,2,3,4]
-        scope_required = 3
-        pop()
-        
-        */
         for(Statement statement : Statements){
+                if(fnstate == 0){
+                    while(statement.indent_level != last_scope(scope_stack).indent_level){
+                        code += "}\n";
+                        scope_stack.pop_back(); 
+                    }
+                }
+                else{
+                    if(statement.indent_level == function_indent){
+                        fncode += "}\n";
+                        Functions.push_back(fncode);
+                        fncode = "";
+                        fnstate = 0;
+                    }
+                    else{
+                        while(statement.indent_level != last_scope(scope_stack).indent_level){
+                            fncode += "}\n";
+                            scope_stack.pop_back(); 
+                        }
+                    }
 
-            while(statement.indent_level != last_scope(scope_stack).indent_level){
-                code += "}\n";
-                scope_stack.pop_back();
-            }
-            //Checking the type of last_statement
-            switch(statement.type)
-            {
-                case EXPR_TYPE:{
-                    code += statement.statement + ";\n";
-                    break;
                 }
-                case VAR_DECLARATION:{
-                    code += statement.statement + ";\n";
-                    break;
+                printf("%d   %d\n",statement.type, fnstate);
+                //Checking the type of last_statement
+                switch(statement.type)
+                {
+                    case EXPR_TYPE:{
+                        if(fnstate == 0){
+                            code += statement.statement + ";\n";
+                        }
+                        else if(fnstate == 1){
+                            fncode += statement.statement + ";\n";
+                        }
+                        break;
+                    }
+                    case VAR_DECLARATION:{
+                        if(fnstate == 0){
+                            code += statement.statement + ";\n";
+                        }
+                        else{
+                            fncode += statement.statement + ";\n";
+                        }
+                        break;
+                    }
+                    case VAR_ASSIGNMENT:{
+                        if(fnstate == 0){
+                            code += statement.statement + ";\n";
+                        }
+                        else{
+                            fncode += statement.statement + ";\n";
+                        }
+                        break;
+                    }
+                    case IF_STATEMENT:{
+                        if(fnstate == 0){
+                            scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
+                            code += statement.statement + "{\n";
+                        }
+                        break;
+                    }
+                    case ELIF_STATEMENT:{
+                        if(fnstate == 0){
+                            scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
+                            code += statement.statement + "{\n";
+                        }
+                        break;
+                    }
+                    case ELSE_STATEMENT:{
+                        if(fnstate == 0){
+                            scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
+                            code += statement.statement + "{\n";
+                        }
+                        break;
+                    }
+                    case FOR_LOOP:{
+                        if(fnstate == 0){
+                            scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
+                            code += statement.statement + "{\n";
+                        }
+                        break;
+                    }
+                    case WHILE_LOOP:{
+                        if(fnstate == 0){
+                            scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
+                            code += statement.statement + "{\n";
+                        }
+                        break;
+                    }
+                    case FUNCTION_DECL:{
+                        if(fnstate == 0){
+                            scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
+                            fncode += statement.statement + "{\n";
+                            function_indent = statement.indent_level+1;
+                            fnstate = 1;
+                        }
+                        else{
+                            function_insideFunction(statement.number);
+                        }
+                        break;
+                    }
                 }
-                case VAR_ASSIGNMENT:{
-                    code += statement.statement + ";\n";
-                    break;
-                }
-                case IF_STATEMENT:{
-                    scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
-                    code += statement.statement + "{\n";
-                    break;
-                }
-                case ELIF_STATEMENT:{
-                    scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
-                    code += statement.statement + "{\n";
-                    break;
-                }
-                case ELSE_STATEMENT:{
-                    scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
-                    code += statement.statement + "{\n";
-                    break;
-                }
-                case FOR_LOOP:{
-                    scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
-                    code += statement.statement + "{\n";
-                    break;
-                }
-                case WHILE_LOOP:{
-                    scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
-                    code += statement.statement + "{\n";
-                    break;
-                }
-                case FUNCTION_DECL:{
-                    scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
-                    code += statement.statement + "{\n";
-                    break;
-                }
-            }
         }
         return code;
     }
