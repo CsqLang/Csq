@@ -56,7 +56,7 @@ string FuncDecl_visitor(Ptr<FunctionDecl> node){
     string params;
     if(node->params.size()>0 && node->params[0]!=""){
         for(string param : node->params){
-            params += "ParamType " + param + ", ";
+            params += "auto " + param + ", ";
         }
         params.pop_back();
         params.pop_back();
@@ -65,10 +65,10 @@ string FuncDecl_visitor(Ptr<FunctionDecl> node){
     for(string statement : node->body.statements)
         addStatement(block,statement);
     if(node->params.size() > 0 && node->params[0]!=""){
-        return "template<typename ParamType>\nFUN " + node->name + " ( " + params + ")\n";
+        return "FUN " + node->name + "= [&] ( " + params + ")\n";
     }
     else{
-        return "FUN " + node->name + " ( " + params + ")\n";
+        return "FUN " + node->name + " = [&]( " + params + ")\n";
     }
 }
 
