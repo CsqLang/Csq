@@ -191,6 +191,16 @@
         return state;
     }
 
+    bool isClassDecl(TokenStream tokens){
+        bool state = 0;
+        for(Token token : tokens)
+            if(token.token == "class" && token.type == KEYWORD)
+            {
+                state = true;
+                break;
+            }
+        return state;
+    }
     //Errors for the bad code.
 
     void unexpected_indent(int line, string last_stmt_type){
@@ -447,16 +457,43 @@ which will be used by scope defining functions to get desired results.
         return node;
     }
 
-    // //Function to parse scope of the particular indent_level;
-    // vector<Statement> ParseScope(vector<TokenStream> raw_tokens, string id = ""){
-    //     vector<Statement> statements;
-    //     int statNum = 1;
-    //     for(TokenStream tokenStream : raw_tokens){
-    //         statements.push_back(Statement(statNum, TokenStreamToString(tokenStream),getIndentLevel(tokenStream)));
-    //         statNum++;
-    //     }
-    //     return statements;
-    // }
+    ClassDecl ParseClassDecl(TokenStream tokens, int line){
+        ClassDecl node;
+        bool name, iclass;
+        iclass = 0;
+        for(Token token : tokens)
+        {
+            if(token.token == "class")
+                name = true;
+            else if(name == 1){
+                if(token.type != IDENTIFIER)
+                {
+                    printf("Error:[%d] At line %d, expected an identifier after class keyword.\n", error_count, line);
+                    error_count++;
+                }
+                else{
+                    node.name = token.token;
+                    if(tokens.size()>2){
+                        iclass = true;
+                    }
+                    name = 0;
+                }
+            }
+            else if(iclass){
+                if(token.type != IDENTIFIER)
+                {
+                    printf("Error:[%d] At line %d, expected an identifier for inherited class.\n", error_count, line);
+                    error_count++;
+                }
+                else{
+                    node.inherit_class = token.token;
+                    iclass = 0;
+                }
+            }
+            
+        }
+        return node;
+    }
 
     //This function is gonna return the deepest indent level.
     int DeepestIndentLevel(vector<TokenStream> tokens)
@@ -554,6 +591,11 @@ which will be used by scope defining functions to get desired results.
                auto node_ = make_shared<Break>(ParseBreakStmt(tokens));
                NodePtr node = static_pointer_cast<Node>(node_); 
                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),BREAK,indent_level));
+            }
+            else if(isClassDecl(tokens)){
+                auto node_ = make_shared<ClassDecl>(ParseClassDecl(tokens,statement_number));
+                NodePtr node = static_pointer_cast<Node>(node_); 
+                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),CLASS_DEFINITION,indent_level));
             }
             else{
                auto node_ = make_shared<Expr>(ParseExpr(tokens));
@@ -684,6 +726,11 @@ which will be used by scope defining functions to get desired results.
                         break;
                     }
                     case WHILE_LOOP:{
+                        scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
+                        code += statement.statement + "{\n";
+                        break;
+                    }
+                    case CLASS_DEFINITION:{
                         scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
                         code += statement.statement + "{\n";
                         break;
