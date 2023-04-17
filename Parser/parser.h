@@ -333,14 +333,27 @@ which will be used by scope defining functions to get desired results.
     VarDecl ParseVarDecl(TokenStream tokens){
         VarDecl node;
         bool value = false;
-        
+        bool type_ = false;
         vector<string> Variables_ = Variables;
         Variables_.push_back(tokens[0].token);
         Variables = Variables_;
         Variables_.empty();
         for(Token token : tokens)
-            if(!value && token.type == IDENTIFIER)
+            if(!value && token.type == IDENTIFIER && !type_)
                 node.name = token.token;
+            else if(!value && token.token == ":" && !type_){
+                type_ = 1;
+            }
+            else if(type_){
+                if(token.type != IDENTIFIER){
+                    printf("Error:[%d] expected an identifier after : .\n",error_count+1);
+                    error_count++;
+                }
+                else{
+                    node.type_infr = 0;
+                    node.type_ = token.token;
+                }
+            }
             else if(token.type == ASOPERATOR && !value)
                 value = true;
             else if(value)
@@ -671,6 +684,7 @@ which will be used by scope defining functions to get desired results.
         //Some properties for scopes
         Scope scope(0,PROGRAM,0);
         Scope master(0,PROGRAM,0);
+        bool class_ = 0;
         //To keep track of open scopes which are not yet closed.
         vector<Scope> scope_stack = {scope};
         //To keep track of last statement which can we used to check whether indentation is required or not.
@@ -729,11 +743,18 @@ which will be used by scope defining functions to get desired results.
                     case CLASS_DEFINITION:{
                         scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
                         code += statement.statement + "{\n";
+                        class_ = 1;
                         break;
                     }
                     case FUNCTION_DECL:{
                         scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
-                        code += statement.statement + "{\n";
+                        if(class_ ==1){
+                            replaceAll(statement.statement,"=[&]","");
+                            code += statement.statement + "{\n";
+                        }
+                        else{
+                            code += statement.statement + "{\n";
+                        }
                         break;
                     }
                     case BREAK:{
