@@ -461,36 +461,32 @@ which will be used by scope defining functions to get desired results.
         ClassDecl node;
         bool name, iclass;
         iclass = 0;
+        name = iclass;
         for(Token token : tokens)
         {
-            if(token.token == "class")
-                name = true;
-            else if(name == 1){
-                if(token.type != IDENTIFIER)
-                {
-                    printf("Error:[%d] At line %d, expected an identifier after class keyword.\n", error_count, line);
+            if(token.token == ":")
+            {break;}
+            else{
+                if(token.token == "class"){
+                    name = 1;
+                }
+                else if(token.type != IDENTIFIER && name == 1){
+                    printf("Error:[%d] At line %d, expected an identifier after class keyword.\n", error_count+1, line);
                     error_count++;
                 }
-                else{
+                else if(token.type != IDENTIFIER && iclass == 1){
+                    printf("Error:[%d] At line %d, expected an identifier.\n", error_count+1, line);
+                    error_count++;
+                }
+                else if(token.type == IDENTIFIER && name == 1){
                     node.name = token.token;
-                    if(tokens.size()>2){
-                        iclass = true;
-                    }
+                    iclass = 1;
                     name = 0;
                 }
-            }
-            else if(iclass){
-                if(token.type != IDENTIFIER)
-                {
-                    printf("Error:[%d] At line %d, expected an identifier for inherited class.\n", error_count, line);
-                    error_count++;
-                }
-                else{
+                else if(token.type == IDENTIFIER && iclass == 1){
                     node.inherit_class = token.token;
-                    iclass = 0;
                 }
             }
-            
         }
         return node;
     }
