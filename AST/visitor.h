@@ -81,7 +81,7 @@ string Expr_visitor(Ptr<Expr> node){
 
 string ClassDecl_visitor(Ptr<ClassDecl> node){
     string code;
-    code = "CLASS " + node->name + " ";
+    code += "CLASS " + node->name + " ";
     if(node->inherit_class != ""){
         code += " : " + node->inherit_class;
     }
