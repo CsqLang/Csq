@@ -27,6 +27,7 @@ typedef enum {
     ELIF_STATEMENT,
     ELSE_STATEMENT,
     FUN_ARGUMENT,
+    BREAK,
     PROGRAM, //The basic node type is Program which doesn't needs to be traversed.
 } NODE_TYPE;
 
@@ -54,6 +55,7 @@ struct IfStmt;
 struct ElifStmt;
 struct ElseStmt;
 struct FunArg;
+struct Break;
 // Definitions for above Node types
 
 struct Expr : Node{
@@ -78,6 +80,11 @@ struct VarDecl : Node{
     }
 };
 
+struct Break : Node{
+    Break(){
+        type = BREAK;
+    }
+};
 
 struct VarAssign : Node{
     string name;
