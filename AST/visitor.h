@@ -79,6 +79,15 @@ string Expr_visitor(Ptr<Expr> node){
     return node->expr;
 }
 
+string ClassDecl_visitor(Ptr<ClassDecl> node){
+    string code;
+    code = "CLASS " + node->name + " ";
+    if(node->inherit_class != ""){
+        code += " : " + node->inherit_class;
+    }
+    return code;
+}
+
 //Definition for visit function 
 string visit(const Ptr<Node>& node) {
     switch (node->type) {
