@@ -180,6 +180,16 @@
         return state;
     }
 
+    bool isBreakStmt(TokenStream tokens){
+        bool state = 0;
+        for(Token token : tokens)
+            if(token.token == "break" && token.type == KEYWORD)
+            {
+                state = true;
+                break;
+            }
+        return state;
+    }
 
     //Errors for the bad code.
 
@@ -233,10 +243,16 @@ which will be used by scope defining functions to get desired results.
     WhileLoop ParseWhileLoop(TokenStream tokens);//(Defined)
     VarDecl ParseVarDecl(TokenStream tokens);//(Defined)
     VarAssign ParseVarAssign(TokenStream tokens);//(Defined)
-    FunctionDecl ParseFuncDecl(TokenStream tokens);//(Undefined)
+    FunctionDecl ParseFuncDecl(TokenStream tokens);//(Defined)
     IfStmt ParseIfStmt(TokenStream tokens); //(Defined)
     ElifStmt ParseElifStmt(TokenStream tokens); //(Defined)
     ElseStmt ParseElseStmt(TokenStream tokens); //(Defined)
+    Break ParseBreakStmt(TokenStream tokens); //(Defined)
+
+    Break ParseBreakStmt(TokenStream tokens){
+        Break node;
+        return node;
+    }
 
     IfStmt ParseIfStmt(TokenStream tokens){ 
         IfStmt node;
@@ -534,6 +550,11 @@ which will be used by scope defining functions to get desired results.
                 NodePtr node = static_pointer_cast<Node>(node_);
                 Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),ELSE_STATEMENT,indent_level));
             }
+            else if(isBreakStmt(tokens)){
+               auto node_ = make_shared<Break>(ParseBreakStmt(tokens));
+               NodePtr node = static_pointer_cast<Node>(node_); 
+               Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),BREAK,indent_level));
+            }
             else{
                auto node_ = make_shared<Expr>(ParseExpr(tokens));
                NodePtr node = static_pointer_cast<Node>(node_); 
@@ -670,6 +691,10 @@ which will be used by scope defining functions to get desired results.
                     case FUNCTION_DECL:{
                         scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
                         code += statement.statement + "{\n";
+                        break;
+                    }
+                    case BREAK:{
+                        code += statement.statement + ";\n";
                         break;
                     }
                 }
