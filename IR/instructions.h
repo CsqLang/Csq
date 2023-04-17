@@ -15,6 +15,7 @@
 #define ELSE else
 #define SWITCH switch
 #define CASE case:
+#define BREAK break
 
 
 #endif // instructions_IRCsq4
