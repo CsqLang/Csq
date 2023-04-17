@@ -19,7 +19,12 @@ string Break_visitor(Ptr<Break> node);
 
 //Visitor for variable declaration and assignment
 string VarDecl_visitor(Ptr<VarDecl> node){
-    return "VAR " + node->name + " = " + node->value.expr;
+    if(node->type_infr){
+        return "VAR " + node->name + " = " + node->value.expr;
+    }
+    else{
+        return node->type_ + " " + node->name + " = " + node->value.expr;
+    }
 }
 string VarAssign_visitor(Ptr<VarAssign> node){
     return node->name + " = " + node->value.expr;
