@@ -159,7 +159,9 @@ struct ElseStmt : Node{
 struct ClassDecl : Node{
     string name;
     string inherit_class;
-    ClassDecl(){}
+    ClassDecl(){
+        type = CLASS_DEFINITION;
+    }
     ClassDecl(string name_, string inherit_class_){
         name = name_;
         inherit_class = inherit_class_;
