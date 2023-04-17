@@ -130,13 +130,15 @@ string visit(const Ptr<Node>& node) {
         case BREAK:{
             Ptr<Break> stmt = static_pointer_cast<Break>(node);
             return Break_visitor(stmt);
-        };
+        }
+        case CLASS_DEFINITION:{
+            Ptr<ClassDecl> stmt = static_pointer_cast<ClassDecl>(node);
+            return ClassDecl_visitor(stmt);
+        }
         default:
             Ptr<Expr> stmt = static_pointer_cast<Expr>(node);
             return Expr_visitor(stmt);
     }
 }
-
-
 
 #endif // VISITOR_H_CSQ4
