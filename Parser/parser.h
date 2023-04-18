@@ -10,6 +10,7 @@
     typedef vector<Token> TokenStream;
     typedef vector<string> StringStream;
     typedef Ptr<Node> NodePtr;
+
     //Tools required for parsing
 
     //Program node to store all the childs
@@ -195,6 +196,16 @@
         bool state = 0;
         for(Token token : tokens)
             if(token.token == "class" && token.type == KEYWORD)
+            {
+                state = true;
+                break;
+            }
+        return state;
+    }
+    bool isGroupDecl(TokenStream tokens){
+        bool state = 0;
+        for(Token token : tokens)
+            if(token.token == "group" && token.type == KEYWORD)
             {
                 state = true;
                 break;
@@ -504,6 +515,11 @@ which will be used by scope defining functions to get desired results.
                 node.params.push_back(param_);
                 param_ = "";
             }
+            else if(token.token == "->" && param == 0){}
+            else if(token.type == IDENTIFIER && param == 0){
+                node.return_type = token.token;
+                node.return_type_infr = 0;
+            }
             else if(token.token == ":"){
                 ended = true;
                 break;
@@ -544,6 +560,41 @@ which will be used by scope defining functions to get desired results.
                 }
                 else if(token.type == IDENTIFIER && iclass == 1){
                     node.inherit_class = token.token;
+                }
+            }
+        }
+        return node;
+    }
+
+    Group ParseGroupStmt(TokenStream tokens){
+        Group node;
+        bool end = false;
+        bool name = false;
+        bool over = false;
+        for(Token token : tokens){
+            if(token.token == "group" && !name && !end){
+                name = true;
+            }
+            else if(name){
+                if(token.type != IDENTIFIER){
+                    printf("Error:[%d] expected an identifier after group keyword.\n", error_count+1);
+                    error_count++;
+                }
+                else{
+                    node.name = token.token;
+                    name = 0;
+                    end = 1;
+                }
+            }
+            else if(end){
+                if(token.token != ":"){
+                    printf("Error:[%d] unexpected %s used in group declaration.\n", error_count+1, token.token.c_str());
+                    error_count++;
+                }
+                else{
+                    end = 0;
+                    over = 1;
+                    break;
                 }
             }
         }
@@ -652,6 +703,13 @@ which will be used by scope defining functions to get desired results.
                 NodePtr node = static_pointer_cast<Node>(node_); 
                 Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),CLASS_DEFINITION,indent_level));
             }
+            else if(isGroupDecl(tokens)){
+                auto node_ = make_shared<Group>(ParseGroupStmt(tokens));
+                NodePtr node = static_pointer_cast<Node>(node_); 
+                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),GROUP,indent_level));
+                Group_stack.push_back(node_->name);
+
+            }
             else{
                auto node_ = make_shared<Expr>(ParseExpr(tokens));
                NodePtr node = static_pointer_cast<Node>(node_); 
@@ -706,6 +764,15 @@ which will be used by scope defining functions to get desired results.
         return last;
     }
 
+    string create_group_object(){
+        string code;
+        for(string g : Group_stack)
+        {
+            code += g + " " + g + ";\n";
+        }
+        return code;
+    }
+
     Scope last_scope(vector<Scope> scope){
         return scope[scope.size()-1];
     }
@@ -737,9 +804,15 @@ which will be used by scope defining functions to get desired results.
         Statement last_statement;
         for(Statement statement : Statements){
                 while(statement.indent_level != last_scope(scope_stack).indent_level){
-                    if(last_scope(scope_stack).of == FUNCTION_DECL){
+                    if(last_scope(scope_stack).of == FUNCTION_DECL || last_scope(scope_stack).of == CLASS_DEFINITION){
                         code += "};\n";
                         scope_stack.pop_back(); 
+                    }
+                    else if(last_scope(scope_stack).of == GROUP){
+                        if(Group_stack.size()!=0){
+                            code += "};\n" +  create_group_object();
+                            scope_stack.pop_back();
+                        }
                     }
                     else{
                         code += "}\n";
@@ -805,6 +878,11 @@ which will be used by scope defining functions to get desired results.
                     }
                     case BREAK:{
                         code += statement.statement + ";\n";
+                        break;
+                    }
+                    case GROUP:{
+                        scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
+                        code += statement.statement + "{\npublic:\n";
                         break;
                     }
                 }
