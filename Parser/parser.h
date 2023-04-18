@@ -149,7 +149,7 @@
     }
     bool isVarDecl(TokenStream tokens){
         bool state = 0;
-        if(tokens[0].type == IDENTIFIER && tokens[1].token == "=" && !in(tokens[0].token,Variables))
+        if(tokens[0].type == IDENTIFIER && (tokens[1].token == "=" || tokens[1].token == ":") && !in(tokens[0].token,Variables))
             state = 1;
         return state;
     }
@@ -191,6 +191,16 @@
         return state;
     }
 
+    bool isClassDecl(TokenStream tokens){
+        bool state = 0;
+        for(Token token : tokens)
+            if(token.token == "class" && token.type == KEYWORD)
+            {
+                state = true;
+                break;
+            }
+        return state;
+    }
     //Errors for the bad code.
 
     void unexpected_indent(int line, string last_stmt_type){
@@ -320,24 +330,83 @@ which will be used by scope defining functions to get desired results.
         return node;
     }
 
+    // VarDecl ParseVarDecl(TokenStream tokens){
+    //     VarDecl node;
+    //     bool value = false;
+        
+    //     vector<string> Variables_ = Variables;
+    //     Variables_.push_back(tokens[0].token);
+    //     Variables = Variables_;
+    //     Variables_.empty();
+    //     for(Token token : tokens)
+    //         if(!value && token.type == IDENTIFIER)
+    //             node.name = token.token;
+    //         else if(token.type == ASOPERATOR && !value)
+    //             value = true;
+    //         else if(value)
+    //             node.value.expr += token.token + " ";
+    //     if(node.value.expr == ""){
+    //         printf("Error:[%d] expected a value after assignment operator.\n",error_count+1);
+    //         error_count++;
+    //     }
+    //     return node;
+    // }
     VarDecl ParseVarDecl(TokenStream tokens){
         VarDecl node;
         bool value = false;
-        
+        bool type_ = false;
+        bool equal_ = false;
         vector<string> Variables_ = Variables;
         Variables_.push_back(tokens[0].token);
         Variables = Variables_;
         Variables_.empty();
-        for(Token token : tokens)
-            if(!value && token.type == IDENTIFIER)
-                node.name = token.token;
-            else if(token.type == ASOPERATOR && !value)
-                value = true;
-            else if(value)
-                node.value.expr += token.token + " ";
-        if(node.value.expr == ""){
-            printf("Error:[%d] expected a value after assignment operator.\n",error_count+1);
-            error_count++;
+        if(tokens[1].token == ":"){
+            for(Token token : tokens){
+                if(token.type == IDENTIFIER && !type_ && !value){
+                    node.name = token.token;
+
+                }
+                else if(!type_ && !equal_ && !value && token.type != IDENTIFIER){
+                    if(token.token != ":"){
+                        printf("Error:[%d] unexpected %s after identifier.\n",error_count+1, token.token.c_str());
+                        error_count++;
+                    }
+                    else{
+                        type_ = true;
+                    }
+                }
+                else if(type_ && !value)
+                {
+                    if(token.type != IDENTIFIER){
+                        printf("Error:[%d] expected an identifier instead of %s.\n",error_count+1, token.token.c_str());
+                        break;
+                    }
+                    else{
+                        node.type_ = token.token;
+                        node.type_infr = 0;
+                        equal_ = 1;
+                        type_ = false;
+                    }
+                }
+
+                else if(!type_ && equal_ && token.token == "="){
+                    value = 1;
+                    equal_ = 0;
+                }
+                else if(value && !equal_){
+                    node.value.expr += token.token;
+                }
+
+            }
+        }
+        else{
+            for(Token token : tokens)
+                if(!value && token.type == IDENTIFIER)
+                    node.name = token.token;
+                else if(token.type == ASOPERATOR && !value)
+                    value = true;
+                else if(value)
+                    node.value.expr += token.token + " ";
         }
         return node;
     }
@@ -447,16 +516,39 @@ which will be used by scope defining functions to get desired results.
         return node;
     }
 
-    // //Function to parse scope of the particular indent_level;
-    // vector<Statement> ParseScope(vector<TokenStream> raw_tokens, string id = ""){
-    //     vector<Statement> statements;
-    //     int statNum = 1;
-    //     for(TokenStream tokenStream : raw_tokens){
-    //         statements.push_back(Statement(statNum, TokenStreamToString(tokenStream),getIndentLevel(tokenStream)));
-    //         statNum++;
-    //     }
-    //     return statements;
-    // }
+    ClassDecl ParseClassDecl(TokenStream tokens, int line){
+        ClassDecl node;
+        bool name, iclass;
+        iclass = 0;
+        name = iclass;
+        for(Token token : tokens)
+        {
+            if(token.token == ":")
+            {break;}
+            else{
+                if(token.token == "class"){
+                    name = 1;
+                }
+                else if(token.type != IDENTIFIER && name == 1){
+                    printf("Error:[%d] At line %d, expected an identifier after class keyword.\n", error_count+1, line);
+                    error_count++;
+                }
+                else if(token.type != IDENTIFIER && iclass == 1){
+                    printf("Error:[%d] At line %d, expected an identifier.\n", error_count+1, line);
+                    error_count++;
+                }
+                else if(token.type == IDENTIFIER && name == 1){
+                    node.name = token.token;
+                    iclass = 1;
+                    name = 0;
+                }
+                else if(token.type == IDENTIFIER && iclass == 1){
+                    node.inherit_class = token.token;
+                }
+            }
+        }
+        return node;
+    }
 
     //This function is gonna return the deepest indent level.
     int DeepestIndentLevel(vector<TokenStream> tokens)
@@ -555,6 +647,11 @@ which will be used by scope defining functions to get desired results.
                NodePtr node = static_pointer_cast<Node>(node_); 
                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),BREAK,indent_level));
             }
+            else if(isClassDecl(tokens)){
+                auto node_ = make_shared<ClassDecl>(ParseClassDecl(tokens,statement_number));
+                NodePtr node = static_pointer_cast<Node>(node_); 
+                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),CLASS_DEFINITION,indent_level));
+            }
             else{
                auto node_ = make_shared<Expr>(ParseExpr(tokens));
                NodePtr node = static_pointer_cast<Node>(node_); 
@@ -633,6 +730,7 @@ which will be used by scope defining functions to get desired results.
         //Some properties for scopes
         Scope scope(0,PROGRAM,0);
         Scope master(0,PROGRAM,0);
+        bool class_ = 0;
         //To keep track of open scopes which are not yet closed.
         vector<Scope> scope_stack = {scope};
         //To keep track of last statement which can we used to check whether indentation is required or not.
@@ -688,9 +786,21 @@ which will be used by scope defining functions to get desired results.
                         code += statement.statement + "{\n";
                         break;
                     }
-                    case FUNCTION_DECL:{
+                    case CLASS_DEFINITION:{
                         scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
                         code += statement.statement + "{\n";
+                        class_ = 1;
+                        break;
+                    }
+                    case FUNCTION_DECL:{
+                        scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
+                        if(class_ ==1){
+                            replaceAll(statement.statement,"=[&]","");
+                            code += statement.statement + "{\n";
+                        }
+                        else{
+                            code += statement.statement + "{\n";
+                        }
                         break;
                     }
                     case BREAK:{

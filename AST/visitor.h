@@ -19,7 +19,12 @@ string Break_visitor(Ptr<Break> node);
 
 //Visitor for variable declaration and assignment
 string VarDecl_visitor(Ptr<VarDecl> node){
-    return "VAR " + node->name + " = " + node->value.expr;
+    if(node->type_infr){
+        return "VAR " + node->name + " = " + node->value.expr;
+    }
+    else{
+        return node->type_ + " " + node->name + " = " + node->value.expr;
+    }
 }
 string VarAssign_visitor(Ptr<VarAssign> node){
     return node->name + " = " + node->value.expr;
@@ -79,6 +84,15 @@ string Expr_visitor(Ptr<Expr> node){
     return node->expr;
 }
 
+string ClassDecl_visitor(Ptr<ClassDecl> node){
+    string code;
+    code += "CLASS " + node->name + " ";
+    if(node->inherit_class != ""){
+        code += " : " + node->inherit_class;
+    }
+    return code;
+}
+
 //Definition for visit function 
 string visit(const Ptr<Node>& node) {
     switch (node->type) {
@@ -121,13 +135,15 @@ string visit(const Ptr<Node>& node) {
         case BREAK:{
             Ptr<Break> stmt = static_pointer_cast<Break>(node);
             return Break_visitor(stmt);
-        };
+        }
+        case CLASS_DEFINITION:{
+            Ptr<ClassDecl> stmt = static_pointer_cast<ClassDecl>(node);
+            return ClassDecl_visitor(stmt);
+        }
         default:
             Ptr<Expr> stmt = static_pointer_cast<Expr>(node);
             return Expr_visitor(stmt);
     }
 }
-
-
 
 #endif // VISITOR_H_CSQ4

@@ -67,10 +67,18 @@ struct Expr : Node{
 struct VarDecl : Node{
     string name;
     Expr value;
-    VarDecl(string name_, string value_){
+    bool type_infr;
+    string type_;
+    VarDecl(string name_, string value_, string type_ = ""){
         name = name_;
         value = value_;
         type = VAR_DECLARATION;
+        if(type_ == ""){
+            type_infr = true;
+        }
+        else{
+            type_infr = false;
+        }
     }
     VarDecl(){
         name = "";
@@ -159,7 +167,9 @@ struct ElseStmt : Node{
 struct ClassDecl : Node{
     string name;
     string inherit_class;
-    ClassDecl(){}
+    ClassDecl(){
+        type = CLASS_DEFINITION;
+    }
     ClassDecl(string name_, string inherit_class_){
         name = name_;
         inherit_class = inherit_class_;
