@@ -149,7 +149,7 @@
     }
     bool isVarDecl(TokenStream tokens){
         bool state = 0;
-        if(tokens[0].type == IDENTIFIER && tokens[1].token == "=" && !in(tokens[0].token,Variables))
+        if(tokens[0].type == IDENTIFIER && (tokens[1].token == "=" || tokens[1].token == ":") && !in(tokens[0].token,Variables))
             state = 1;
         return state;
     }
@@ -330,37 +330,83 @@ which will be used by scope defining functions to get desired results.
         return node;
     }
 
+    // VarDecl ParseVarDecl(TokenStream tokens){
+    //     VarDecl node;
+    //     bool value = false;
+        
+    //     vector<string> Variables_ = Variables;
+    //     Variables_.push_back(tokens[0].token);
+    //     Variables = Variables_;
+    //     Variables_.empty();
+    //     for(Token token : tokens)
+    //         if(!value && token.type == IDENTIFIER)
+    //             node.name = token.token;
+    //         else if(token.type == ASOPERATOR && !value)
+    //             value = true;
+    //         else if(value)
+    //             node.value.expr += token.token + " ";
+    //     if(node.value.expr == ""){
+    //         printf("Error:[%d] expected a value after assignment operator.\n",error_count+1);
+    //         error_count++;
+    //     }
+    //     return node;
+    // }
     VarDecl ParseVarDecl(TokenStream tokens){
         VarDecl node;
         bool value = false;
         bool type_ = false;
+        bool equal_ = false;
         vector<string> Variables_ = Variables;
         Variables_.push_back(tokens[0].token);
         Variables = Variables_;
         Variables_.empty();
-        for(Token token : tokens)
-            if(!value && token.type == IDENTIFIER && !type_)
-                node.name = token.token;
-            else if(!value && token.token == ":" && !type_){
-                type_ = 1;
-            }
-            else if(type_){
-                if(token.type != IDENTIFIER){
-                    printf("Error:[%d] expected an identifier after : .\n",error_count+1);
-                    error_count++;
+        if(tokens[1].token == ":"){
+            for(Token token : tokens){
+                if(token.type == IDENTIFIER && !type_ && !value){
+                    node.name = token.token;
+
                 }
-                else{
-                    node.type_infr = 0;
-                    node.type_ = token.token;
+                else if(!type_ && !equal_ && !value && token.type != IDENTIFIER){
+                    if(token.token != ":"){
+                        printf("Error:[%d] unexpected %s after identifier.\n",error_count+1, token.token.c_str());
+                        error_count++;
+                    }
+                    else{
+                        type_ = true;
+                    }
                 }
+                else if(type_ && !value)
+                {
+                    if(token.type != IDENTIFIER){
+                        printf("Error:[%d] expected an identifier instead of %s.\n",error_count+1, token.token.c_str());
+                        break;
+                    }
+                    else{
+                        node.type_ = token.token;
+                        node.type_infr = 0;
+                        equal_ = 1;
+                        type_ = false;
+                    }
+                }
+
+                else if(!type_ && equal_ && token.token == "="){
+                    value = 1;
+                    equal_ = 0;
+                }
+                else if(value && !equal_){
+                    node.value.expr += token.token;
+                }
+
             }
-            else if(token.type == ASOPERATOR && !value)
-                value = true;
-            else if(value)
-                node.value.expr += token.token + " ";
-        if(node.value.expr == ""){
-            printf("Error:[%d] expected a value after assignment operator.\n",error_count+1);
-            error_count++;
+        }
+        else{
+            for(Token token : tokens)
+                if(!value && token.type == IDENTIFIER)
+                    node.name = token.token;
+                else if(token.type == ASOPERATOR && !value)
+                    value = true;
+                else if(value)
+                    node.value.expr += token.token + " ";
         }
         return node;
     }
