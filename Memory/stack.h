@@ -4,6 +4,7 @@
 
 vector<string> Variables;
 vector<string> Functions;
+vector<string> Group_stack;
 
 int FunctionStackLength(){
     return Functions.size();
