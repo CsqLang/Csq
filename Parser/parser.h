@@ -766,10 +766,9 @@ which will be used by scope defining functions to get desired results.
 
     string create_group_object(){
         string code;
-        for(string g : Group_stack)
-        {
-            code += g + " " + g + ";\n";
-        }
+        string g = Group_stack[0];
+        code += g + " " + g + ";\n";
+        Group_stack.empty();
         return code;
     }
 
