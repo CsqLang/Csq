@@ -28,6 +28,7 @@ typedef enum {
     ELSE_STATEMENT,
     FUN_ARGUMENT,
     BREAK,
+    GROUP,
     PROGRAM, //The basic node type is Program which doesn't needs to be traversed.
 } NODE_TYPE;
 
@@ -56,6 +57,7 @@ struct ElifStmt;
 struct ElseStmt;
 struct FunArg;
 struct Break;
+struct Group;
 // Definitions for above Node types
 
 struct Expr : Node{
@@ -117,16 +119,26 @@ struct Block : Node{
 
 struct FunctionDecl : Node{
     string name;
+    string return_type;
+    bool return_type_infr;
     vector<string> params = {};
     Block body;
     FunctionDecl(){
         type = FUNCTION_DECL;
         name = "";
     }
-    FunctionDecl(string name_, vector<string> params_){
+    FunctionDecl(string name_, vector<string> params_, string return_type_=""){
         type = FUNCTION_DECL;
         name = name_;
         params = params_;
+        if(return_type_ == ""){
+            return_type = "";
+            return_type_infr = 1;
+        }
+        else{
+            return_type = return_type_;
+            return_type_infr = 0;
+        }
     }
 };
 
@@ -177,6 +189,14 @@ struct ClassDecl : Node{
     }
 };
 
+struct Group : Node{
+    string name;
+    Group(){type = GROUP;}
+    Group(string name_){
+        name = name_;
+        type = GROUP;
+    }
+};
 
 //Functions to add nodes for ease of use.
 
