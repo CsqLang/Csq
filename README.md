@@ -18,6 +18,8 @@ Syntax:
 Example:
 ```
 a = i32(49)
+a = i32{49}
+a:i32 = 49
 b = a
 ```
 ### Loops
