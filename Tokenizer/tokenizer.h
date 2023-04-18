@@ -23,7 +23,8 @@ enum TokenType {
     COMMENT =10,
     INDENT = 11,
     NEWLINE = 12,
-    UNKNOWN = 13,
+    ACCESS_OPERATOR = 13,
+    UNKNOWN = 14,
 };
 
 //This enum field will give even more detail about symbols excluding identifiers, numbrs and keywords
@@ -447,6 +448,13 @@ vector<Token> tokenize(string source_code) {
                         filtered_Tokens.push_back(token);
                         i = i + 2;
                     }
+                    case GREATER:{
+                        Token token;
+                        token.token = "->";
+                        token.type = ASOPERATOR;
+                        filtered_Tokens.push_back(token);
+                        i = i + 2;
+                    }
                 }
             }
             case STAR:{
@@ -510,6 +518,17 @@ vector<Token> tokenize(string source_code) {
                         Token token;
                         token.token = "||";
                         token.type = COPERATOR;
+                        filtered_Tokens.push_back(token);
+                        i = i + 2;
+                    }
+                }
+            }
+            case COLAN:{
+                switch(symbolType(tokens[i+1])){
+                    case COLAN:{
+                        Token token;
+                        token.token = "::";
+                        token.type = ACCESS_OPERATOR;
                         filtered_Tokens.push_back(token);
                         i = i + 2;
                     }
