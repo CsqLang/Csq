@@ -47,3 +47,8 @@ if i == 1:
  else:
   print(0)
 ```
+### Functions
+```
+def myfun():
+ print('inside myfun')
+```
