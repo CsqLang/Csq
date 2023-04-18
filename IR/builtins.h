@@ -148,7 +148,13 @@ struct list{
         int len(){
             return data.size();
         }
+        //Iterators for for each loop.
+        T* begin() { return &this->data[0];}
+        const T* begin() const { return &this->data[0];}
+        T* end() { return &this->data[this->data.size()]; }
+        const T* end() const { return &this->data[this->data.size()];}
 };
+
 
 void print(int val){
     printf("%d\n",val);
@@ -196,4 +202,21 @@ void print(initializer_list<int> ls){
         printf("%d, ",i);
     printf(" }\n");
 }
+
+list<i32> range(i32 end_){
+    list<i32> d;
+    for(i32 i = 0;i< end_.data;i.data++){
+        d.add(i);
+    }
+    return d;
+}   
+
+list<i32> range(i32 start, i32 end_){
+    list<i32> d;
+    for(i32 i = start;i< end_.data;i.data++){
+        d.add(i);
+    }
+    return d;
+}
+
 #endif // BUILTINS_CSQ4_2
