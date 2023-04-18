@@ -52,3 +52,11 @@ if i == 1:
 def myfun():
  print('inside myfun')
 ```
+### Classes
+The classes in Csq are public and they currently doesn't allow functions inside them.
+```
+class mytype:
+ data:i32 = 0
+obj = mytype()
+obj.data = 494
+```
