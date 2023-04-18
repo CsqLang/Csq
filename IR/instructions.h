@@ -16,6 +16,7 @@
 #define SWITCH switch
 #define CASE case:
 #define BREAK break
+#define GROUP class 
 
 
 #endif // instructions_IRCsq4
