@@ -65,6 +65,7 @@ vector<string> KEYWORDS_TABLE =
 "break",
 "continue",
 "ignore",
+"group"
 };
 
 
