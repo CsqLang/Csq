@@ -34,6 +34,7 @@ string formIR(string code, string fncode, string current_path){
 
 string readCode(string path){
     string code,ln;
+
     // Read from the text file
     ifstream file(path);
 
