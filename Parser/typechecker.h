@@ -40,6 +40,29 @@ vector<MemberTCInfo> CollectTypes(string type){
     }
     return types;
 }
+MemberTCInfo SearchIdentifierGetInfo(string identifier){
+    MemberTCInfo prop;
+    bool found = 0;
+    for(MemberVarProperty p : variables_prop){
+        if(p.name == identifier){
+            prop.name = p.name;
+            prop.type = p.type;
+            found = 1;
+            break;
+        }
+    }
+    if(!found){
+        for(MethodProperty p : methods_prop){
+            if(p.name == identifier){
+                prop.name = p.name;
+                prop.type = p.type;
+                found = 1;
+                break;
+            }
+        }
+    }
+    return prop;
+}
 
 void TypeChecker(string op1, string op2, string op1type, string op2type)
 {
