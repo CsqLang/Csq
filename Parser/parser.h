@@ -4,6 +4,7 @@
     #include "../Tokenizer/tokenizer.h"
     #include "../AST/ast.h"
     #include "../Memory/stack.h"
+    #include "typechecker.h"
 
     
     //Some alias
@@ -335,9 +336,33 @@ which will be used by scope defining functions to get desired results.
         return node;
     }
 
-    Expr ParseExpr(TokenStream tokens){
+    Expr ParseExpr(TokenStream tokens, int line){
         Expr node;
         node.expr = TokenStreamToString(tokens);
+        int tok_index = 0;
+        string identifier_type,identifier_name;
+        string stmt_type = "NONE";
+        for(Token token : tokens){
+            if(token.type == IDENTIFIER)
+            {
+                if(!in(token.token, Identifiers))
+                {
+                    error(line,"identifier '" + token.token + "' is not defined.");
+                }
+                else{
+                    MemberTCInfo TC = SearchIdentifierGetInfo(token.token);
+                    if((stmt_type != "NONE") || (stmt_type != TC.type)){
+                        //Check the types of stmt_type.
+                        vector<MemberTCInfo> typeTable = CollectTypes(stmt_type);
+                        if(!inTypeTable(typeTable,stmt_type)){
+                            error(line,"invalid type usage between '" + stmt_type + "' and '" + TC.type + "'.");
+                        }
+                    }
+                    
+                }
+                
+            }
+        }
         return node;
     }
 
@@ -354,7 +379,6 @@ which will be used by scope defining functions to get desired results.
             for(Token token : tokens){
                 if(token.type == IDENTIFIER && !type_ && !value){
                     node.name = token.token;
-
                 }
                 else if(!type_ && !equal_ && !value && token.type != IDENTIFIER){
                     if(token.token != ":"){
@@ -395,6 +419,9 @@ which will be used by scope defining functions to get desired results.
                     value = true;
                 else if(value)
                     node.value.expr += token.token + " ";
+        }
+        if(node.name != ""){
+            Identifiers.push_back(node.name);
         }
         return node;
     }
@@ -457,6 +484,11 @@ which will be used by scope defining functions to get desired results.
         if(condition){
             error(line, "expected an end of condition.");
         }
+        else{
+            if(node.iter_name != ""){
+                Identifiers.push_back(node.iter_name);
+            }
+        }
         return node;//Master scope..
     }
 
@@ -503,6 +535,11 @@ which will be used by scope defining functions to get desired results.
             error(line, "expected an end of param.");
             printf("Hint: put a ) after params.\n");
         }
+        else{
+            if(node.name != ""){
+                Identifiers.push_back(node.name);
+            }
+        }
         return node;
     }
 
@@ -536,6 +573,9 @@ which will be used by scope defining functions to get desired results.
                     node.inherit_class = token.token;
                 }
             }
+        }
+        if(node.name != ""){
+            Identifiers.push_back(node.name);
         }
         return node;
     }
@@ -581,6 +621,11 @@ which will be used by scope defining functions to get desired results.
         if(end){
             printf("Error:[%d] at line %d, group declaration is not closed expected a : .\n",error_count+1, line);
                 error_count++;
+        }
+        else{
+            if(node.name != ""){
+                Identifiers.push_back(node.name);
+            }
         }
         return node;
     }
@@ -723,7 +768,7 @@ which will be used by scope defining functions to get desired results.
                 Group_stack.push_back(node_->name);
             }
             else{
-               auto node_ = make_shared<Expr>(ParseExpr(tokens));
+               auto node_ = make_shared<Expr>(ParseExpr(tokens,statement_number));
                NodePtr node = static_pointer_cast<Node>(node_); 
                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),EXPR_TYPE,indent_level));
             }
