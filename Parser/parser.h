@@ -294,13 +294,11 @@ which will be used by scope defining functions to get desired results.
             }
         if(node.condition.expr == ""){
             error(line, "expected an expression, after keyword if.");
-            printf("Hint:[%d] add a condition after if keyword.\n",error_count+1);
-            error_count++;
+            printf("Hint: add a condition after if keyword.\n");
         }
         if(condition){
             error(line, "the if statement hasn't ended sucessfuly.");
-            printf("Hint:[%d] add a colon after condition.\n", error_count+1);
-            error_count++;
+            printf("Hint: add a colon after condition.\n");
         }
         return node;
     }
@@ -320,13 +318,11 @@ which will be used by scope defining functions to get desired results.
             }
         if(node.condition.expr == ""){
             error(line, "expected an expression, after keyword elif.");
-            printf("Hint:[%d] add a condition after elif keyword.\n",error_count+1);
-            error_count++;
+            printf("Hint: add a condition after elif keyword.\n");
         }
         if(condition){
             error(line, "the elif statement hasn't ended sucessfuly.");
-            printf("Hint:[%d] add a colon after condition.\n",error_count+1);
-            error_count++;
+            printf("Hint: add a colon after condition.\n");
         }
         return node;
     }
@@ -335,7 +331,6 @@ which will be used by scope defining functions to get desired results.
         ElseStmt node;
         if(tokens[1].token != ":"){
             error(line, "expected a : after else.");
-            error_count++;
         }
         return node;
     }
@@ -364,7 +359,6 @@ which will be used by scope defining functions to get desired results.
                 else if(!type_ && !equal_ && !value && token.type != IDENTIFIER){
                     if(token.token != ":"){
                         error(line, "unexpected " + token.token + " after identifier.");
-                        error_count++;
                     }
                     else{
                         type_ = true;
@@ -391,7 +385,6 @@ which will be used by scope defining functions to get desired results.
                 else if(value && !equal_){
                     node.value.expr += token.token;
                 }
-
             }
         }
         else{
@@ -418,7 +411,6 @@ which will be used by scope defining functions to get desired results.
                 node.value.expr += token.token + " ";
         if(node.value.expr == ""){
             error(line, "expected a value after assignment operator.");
-            error_count++;
         }
         return node;
     }
@@ -438,12 +430,11 @@ which will be used by scope defining functions to get desired results.
         }
         if(condition){
             error(line, "expected a colon after conditon.");
-            error_count++;
         }
         return node;
     }
 
-    ForLoop ParseForLoop(TokenStream tokens){
+    ForLoop ParseForLoop(TokenStream tokens, int line){
         ForLoop node;
         bool condition = false;
         bool iter = false;
@@ -464,13 +455,12 @@ which will be used by scope defining functions to get desired results.
                 break;
             }
         if(condition){
-            printf("Error:[%d] expected an end of condition.", error_count+1);
-            error_count++;
+            error(line, "expected an end of condition.");
         }
         return node;//Master scope..
     }
 
-    FunctionDecl ParseFuncDecl(TokenStream tokens){
+    FunctionDecl ParseFuncDecl(TokenStream tokens, int line){
         FunctionDecl node;
         bool param = false;
         bool name = false;
@@ -510,8 +500,8 @@ which will be used by scope defining functions to get desired results.
             }
         }
         if(param){
-            printf("Error:[%d] expected an end of param.\nHint: put a ) after params.\n", error_count+1);
-            error_count++;
+            error(line, "expected an end of param.");
+            printf("Hint: put a ) after params.\n");
         }
         return node;
     }
@@ -549,6 +539,8 @@ which will be used by scope defining functions to get desired results.
         }
         return node;
     }
+
+    //Function to parse group declarations.
     Group ParseGroupStmt(TokenStream tokens, int line){
         Group node;
         bool end = false;
@@ -632,28 +624,13 @@ which will be used by scope defining functions to get desired results.
                 else
                     tokens_.push_back(token);
             tokens = tokens_;
-            // tokens.pop_back();
-            // tokens.pop_back();
-            // tokens.pop_back();
-            // if(last_indent_level-1 == indent_level)
-            // {
-            //     Statements.push_back(Statement(statement_number,"ignore","ignore",EXPR_TYPE,indent_level));
-            // }
             if(isVarDecl(tokens)){
                 
                 tokens.pop_back();
                 tokens.pop_back();
                 tokens.pop_back();
                 //Now get AST node for the statement.
-                auto node_ = make_shared<VarDecl>(ParseVarDecl(tokens));
-                // string tokens__;
-                // for(Token token : tokens){
-                //     tokens__ += "'" + token.token + "',";
-                // }
-                // ofstream file;
-                // file.open("tst.txt");
-                // file <<tokens__ << "\n";
-                // file.close();
+                auto node_ = make_shared<VarDecl>(ParseVarDecl(tokens, statement_number));
                 NodePtr node = static_pointer_cast<Node>(node_);
                 Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),VAR_DECLARATION,indent_level));
             }
@@ -662,7 +639,7 @@ which will be used by scope defining functions to get desired results.
                 tokens.pop_back();
                 tokens.pop_back();
                 //Now get AST node for the statement.
-                auto node_ = make_shared<VarAssign>(ParseVarAssign(tokens));
+                auto node_ = make_shared<VarAssign>(ParseVarAssign(tokens, statement_number));
                 NodePtr node = static_pointer_cast<Node>(node_);
                 Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),VAR_ASSIGNMENT,indent_level));
             }
@@ -671,7 +648,7 @@ which will be used by scope defining functions to get desired results.
                 tokens.pop_back();
                 tokens.pop_back();
                 //Now get AST node for the statement.
-                auto node_ = make_shared<FunctionDecl>(ParseFuncDecl(tokens));
+                auto node_ = make_shared<FunctionDecl>(ParseFuncDecl(tokens, statement_number));
                 NodePtr node = static_pointer_cast<Node>(node_);
                 Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),FUNCTION_DECL,indent_level));
             }
@@ -680,7 +657,7 @@ which will be used by scope defining functions to get desired results.
                 tokens.pop_back();
                 tokens.pop_back();
                 //Now get AST node for the statement.
-                auto node_ = make_shared<ForLoop>(ParseForLoop(tokens));
+                auto node_ = make_shared<ForLoop>(ParseForLoop(tokens, statement_number));
                 NodePtr node = static_pointer_cast<Node>(node_);
                 Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),FOR_LOOP,indent_level));
             }
@@ -689,7 +666,7 @@ which will be used by scope defining functions to get desired results.
                 tokens.pop_back();
                 tokens.pop_back();
                 //Now get AST node for the statement.
-                auto node_ = make_shared<WhileLoop>(ParseWhileLoop(tokens));
+                auto node_ = make_shared<WhileLoop>(ParseWhileLoop(tokens, statement_number));
                 NodePtr node = static_pointer_cast<Node>(node_);
                 Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),WHILE_LOOP,indent_level));
             }
