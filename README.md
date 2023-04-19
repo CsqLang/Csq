@@ -11,6 +11,7 @@ This the updated version of 4.2 which is having more concise syntax than the 4.1
 
 ### Variables
 In Csq4.2 a variable's data is allocated on stack by default but to store it's data into heap we could use builtin types to do so.
+We could also use type annotation for explicit typing.
 Syntax:
 ```
 <name> = <value>
