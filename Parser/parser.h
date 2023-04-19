@@ -319,7 +319,7 @@ which will be used by scope defining functions to get desired results.
                 break;
             }
         if(node.condition.expr == ""){
-            error(line, "expected an expression, after keyword elif.\n");
+            error(line, "expected an expression, after keyword elif.");
             printf("Hint:[%d] add a condition after elif keyword.\n",error_count+1);
             error_count++;
         }
@@ -346,7 +346,7 @@ which will be used by scope defining functions to get desired results.
         return node;
     }
 
-    VarDecl ParseVarDecl(TokenStream tokens){
+    VarDecl ParseVarDecl(TokenStream tokens, int line){
         VarDecl node;
         bool value = false;
         bool type_ = false;
@@ -363,7 +363,7 @@ which will be used by scope defining functions to get desired results.
                 }
                 else if(!type_ && !equal_ && !value && token.type != IDENTIFIER){
                     if(token.token != ":"){
-                        printf("Error:[%d] unexpected %s after identifier.\n",error_count+1, token.token.c_str());
+                        error(line, "unexpected " + token.token + " after identifier.");
                         error_count++;
                     }
                     else{
@@ -373,7 +373,7 @@ which will be used by scope defining functions to get desired results.
                 else if(type_ && !value)
                 {
                     if(token.type != IDENTIFIER){
-                        printf("Error:[%d] expected an identifier instead of %s.\n",error_count+1, token.token.c_str());
+                        error(line, "expected an identifier instead of " + token.token + ".");
                         break;
                     }
                     else{
@@ -406,7 +406,7 @@ which will be used by scope defining functions to get desired results.
         return node;
     }
 
-    VarAssign ParseVarAssign(TokenStream tokens){
+    VarAssign ParseVarAssign(TokenStream tokens, int line){
         VarAssign node;
         bool value = false;
         for(Token token : tokens)
@@ -417,13 +417,13 @@ which will be used by scope defining functions to get desired results.
             else if(value)
                 node.value.expr += token.token + " ";
         if(node.value.expr == ""){
-            printf("Error:[%d] expected a value after assignment operator.\n",error_count+1);
+            error(line, "expected a value after assignment operator.");
             error_count++;
         }
         return node;
     }
 
-    WhileLoop ParseWhileLoop(TokenStream tokens){
+    WhileLoop ParseWhileLoop(TokenStream tokens,int line){
         WhileLoop node;
         bool condition = false;
         for(Token token : tokens){
@@ -437,7 +437,7 @@ which will be used by scope defining functions to get desired results.
             }
         }
         if(condition){
-            printf("Error:[%d] expected a colon after conditon.\n",error_count+1);
+            error(line, "expected a colon after conditon.");
             error_count++;
         }
         return node;
@@ -549,7 +549,6 @@ which will be used by scope defining functions to get desired results.
         }
         return node;
     }
-#include <fstream>
     Group ParseGroupStmt(TokenStream tokens, int line){
         Group node;
         bool end = false;
