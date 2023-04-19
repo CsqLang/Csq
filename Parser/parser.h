@@ -565,19 +565,21 @@ which will be used by scope defining functions to get desired results.
         }
         return node;
     }
-
-    Group ParseGroupStmt(TokenStream tokens){
+#include <fstream>
+    Group ParseGroupStmt(TokenStream tokens, int line){
         Group node;
         bool end = false;
         bool name = false;
         bool over = false;
+        
+
         for(Token token : tokens){
             if(token.token == "group" && !name && !end){
                 name = true;
             }
             else if(name){
                 if(token.type != IDENTIFIER){
-                    printf("Error:[%d] expected an identifier after group keyword.\n", error_count+1);
+                    printf("Error:[%d] at line %d, expected an identifier after group keyword.\n", error_count+1, line);
                     error_count++;
                 }
                 else{
@@ -588,15 +590,22 @@ which will be used by scope defining functions to get desired results.
             }
             else if(end){
                 if(token.token != ":"){
-                    printf("Error:[%d] unexpected %s used in group declaration.\n", error_count+1, token.token.c_str());
+                    printf("Error:[%d] at line %d, unexpected %s used in group declaration.\n", error_count+1, line, token.token.c_str());
                     error_count++;
                 }
                 else{
                     end = 0;
                     over = 1;
-                    break;
                 }
             }
+            else if(over){
+                printf("Error:[%d] at line %d, unexpected %s used in group declaration.\n",error_count+1, line, token.token.c_str());
+                error_count++;
+            }
+        }
+        if(end){
+            printf("Error:[%d] at line %d, group declaration is not closed expected a : .\n",error_count+1, line);
+                error_count++;
         }
         return node;
     }
@@ -639,78 +648,124 @@ which will be used by scope defining functions to get desired results.
                     ignore;
                 else
                     tokens_.push_back(token);
-                tokens = tokens_;
+            tokens = tokens_;
+            // tokens.pop_back();
+            // tokens.pop_back();
+            // tokens.pop_back();
             // if(last_indent_level-1 == indent_level)
             // {
             //     Statements.push_back(Statement(statement_number,"ignore","ignore",EXPR_TYPE,indent_level));
             // }
             if(isVarDecl(tokens)){
                 
+                tokens.pop_back();
+                tokens.pop_back();
+                tokens.pop_back();
                 //Now get AST node for the statement.
                 auto node_ = make_shared<VarDecl>(ParseVarDecl(tokens));
+                // string tokens__;
+                // for(Token token : tokens){
+                //     tokens__ += "'" + token.token + "',";
+                // }
+                // ofstream file;
+                // file.open("tst.txt");
+                // file <<tokens__ << "\n";
+                // file.close();
                 NodePtr node = static_pointer_cast<Node>(node_);
                 Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),VAR_DECLARATION,indent_level));
             }
             else if(isVarAssign(tokens)){
+                tokens.pop_back();
+                tokens.pop_back();
+                tokens.pop_back();
                 //Now get AST node for the statement.
                 auto node_ = make_shared<VarAssign>(ParseVarAssign(tokens));
                 NodePtr node = static_pointer_cast<Node>(node_);
                 Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),VAR_ASSIGNMENT,indent_level));
             }
             else if(isFunDecl(tokens)){
+                tokens.pop_back();
+                tokens.pop_back();
+                tokens.pop_back();
                 //Now get AST node for the statement.
                 auto node_ = make_shared<FunctionDecl>(ParseFuncDecl(tokens));
                 NodePtr node = static_pointer_cast<Node>(node_);
                 Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),FUNCTION_DECL,indent_level));
             }
             else if(isForStmt(tokens)){
+                tokens.pop_back();
+                tokens.pop_back();
+                tokens.pop_back();
                 //Now get AST node for the statement.
                 auto node_ = make_shared<ForLoop>(ParseForLoop(tokens));
                 NodePtr node = static_pointer_cast<Node>(node_);
                 Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),FOR_LOOP,indent_level));
             }
             else if(isWhileStmt(tokens)){
+                tokens.pop_back();
+                tokens.pop_back();
+                tokens.pop_back();
                 //Now get AST node for the statement.
                 auto node_ = make_shared<WhileLoop>(ParseWhileLoop(tokens));
                 NodePtr node = static_pointer_cast<Node>(node_);
                 Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),WHILE_LOOP,indent_level));
             }
             else if(isIfStmt(tokens)){
+                // tokens.pop_back();
+                // tokens.pop_back();
+                // tokens.pop_back();
                 //Now get AST node for the statement.
                 auto node_ = make_shared<IfStmt>(ParseIfStmt(tokens));
                 NodePtr node = static_pointer_cast<Node>(node_);
                 Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),IF_STATEMENT,indent_level));
             }
             else if(isElifStmt(tokens)){
+                tokens.pop_back();
+                tokens.pop_back();
+                tokens.pop_back();
                 //Now get AST node for the statement.
                 auto node_ = make_shared<ElifStmt>(ParseElifStmt(tokens));
                 NodePtr node = static_pointer_cast<Node>(node_);
                 Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),ELIF_STATEMENT,indent_level));
             }
             else if(isElseStmt(tokens)){
+                tokens.pop_back();
+                tokens.pop_back();
+                tokens.pop_back();
                 //Now get AST node for the statement.
                 auto node_ = make_shared<ElseStmt>(ParseElseStmt(tokens));
                 NodePtr node = static_pointer_cast<Node>(node_);
                 Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),ELSE_STATEMENT,indent_level));
             }
             else if(isBreakStmt(tokens)){
+                tokens.pop_back();
+                tokens.pop_back();
+                tokens.pop_back();
                auto node_ = make_shared<Break>(ParseBreakStmt(tokens));
                NodePtr node = static_pointer_cast<Node>(node_); 
                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),BREAK,indent_level));
             }
             else if(isClassDecl(tokens)){
+                tokens.pop_back();
+                tokens.pop_back();
+                tokens.pop_back();
                 auto node_ = make_shared<ClassDecl>(ParseClassDecl(tokens,statement_number));
                 NodePtr node = static_pointer_cast<Node>(node_); 
                 Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),CLASS_DEFINITION,indent_level));
             }
             else if(isGroupDecl(tokens)){
-                auto node_ = make_shared<Group>(ParseGroupStmt(tokens));
+                tokens.pop_back();
+                tokens.pop_back();
+                tokens.pop_back();
+                auto node_ = make_shared<Group>(ParseGroupStmt(tokens,statement_number));
                 NodePtr node = static_pointer_cast<Node>(node_); 
                 Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),GROUP,indent_level));
                 Group_stack.push_back(node_->name);
-
             }
             else{
+            //    tokens.pop_back();
+            //    tokens.pop_back();
+            //    tokens.pop_back();
                auto node_ = make_shared<Expr>(ParseExpr(tokens));
                NodePtr node = static_pointer_cast<Node>(node_); 
                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),EXPR_TYPE,indent_level));
@@ -766,10 +821,8 @@ which will be used by scope defining functions to get desired results.
 
     string create_group_object(){
         string code;
-        for(string g : Group_stack)
-        {
-            code += g + " " + g + ";\n";
-        }
+        string g = Group_stack[0];
+        code += g + " " + g + ";\n";
         return code;
     }
 
