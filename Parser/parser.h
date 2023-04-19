@@ -1,892 +1,563 @@
-#if !defined(PARSEr_H_CSQ4)
-#define PARSEr_H_CSQ4
-    //Imports
-    #include "../Tokenizer/tokenizer.h"
-    #include "../AST/ast.h"
-    #include "../Memory/stack.h"
-
-    
-    //Some alias
-    typedef vector<Token> TokenStream;
-    typedef vector<string> StringStream;
-    typedef Ptr<Node> NodePtr;
-
-    //Tools required for parsing
-
-    //Program node to store all the childs
-    typedef struct : Node{
-        vector<Block> statements;
-        void addChild(Block child){
-            statements.push_back(child);
-        }
-    }Program;
-    //Root for all nodes.
-    Program root;
-
-
-    //Scope for the statements
-    struct Scope{
-        int indent_level;
-        bool ended;
-        NODE_TYPE of;
-        Scope(){}
-        Scope(int level, NODE_TYPE of_, bool ended_){
-            indent_level = level;
-            of = of_;
-            ended = ended_;
-
-        };
-    };
-
-    struct ScopeSet{
-        int indent_level;
-        vector<Scope> scopes;
-    };
-
-    //Struct to store infos about statements
-    struct Statement{
-        int indent_level;
-        int number;
-        string statement;
-        string raw_statement;
-        NODE_TYPE type;
-        Statement(){}
-        Statement(int statement_num,string raw, string statement_, NODE_TYPE type_, int indent_level_){
-            number = statement_num;
-            statement = statement_;
-            raw_statement = raw;
-            indent_level = indent_level_;
-            type = type_;
-        }
-    };
-
-    //Getting current indentation level.
-    int getIndentLevel(TokenStream tokens){
-        int indent_level = 0;
-        if(tokens[0].type != INDENT)
-            return indent_level;
-        else{
-            for(Token token : tokens){
-                if(token.type == INDENT)
-                    indent_level++;
-                else
-                    break; 
-            }
-            return indent_level;
-        }
-    }
-
-    vector<TokenStream> Tokenizer(string code){
-        code += "\n";
-        vector<TokenStream> lines;
-        string current = "";
-        for(char ch : code){
-            if(ch != '\n')
-                current.push_back(ch);
-            else{
-                lines.push_back(tokenize(current + ";ignore;"));
-                current = "";
-            }
-        }
-        return lines;
-    }
-    void replaceAll(string& str, const string& oldStr, const string& newStr) {
-        size_t pos = 0;
-        while ((pos = str.find(oldStr, pos)) != string::npos) {
-            str.replace(pos, oldStr.length(), newStr);
-            pos += newStr.length();
-        }
-    }
-    //We can't directly use TokenStream as body of block so for that we use string.
-    string TokenStreamToString(TokenStream tokens){
-        string result;
-        for(Token token : tokens){
-            result += token.token + " ";
-        }
-        
-        return result;
-    }
-
-
-    bool isIfStmt(TokenStream tokens){
-        bool state = 0;
-        for(Token token : tokens)
-            if(token.token == "if" && token.type == KEYWORD)
-            {
-                state = true;
-                break;
-            }
-        return state;
-    }
-    bool isElifStmt(TokenStream tokens){
-        bool state = 0;
-        for(Token token : tokens)
-            if(token.token == "elif" && token.type == KEYWORD)
-            {
-                state = true;
-                break;
-            }
-        return state;
-    }
-    bool isElseStmt(TokenStream tokens){
-        bool state = 0;
-        for(Token token : tokens)
-            if(token.token == "else" && token.type == KEYWORD)
-            {
-                state = true;
-                break;
-            }
-        return state;
-    }
-    bool isFunDecl(TokenStream tokens){
-        bool state = 0;
-        for(Token token : tokens)
-            if(token.token == "def" && token.type == KEYWORD)
-            {
-                state = true;
-                break;
-            }
-        return state;
-    }
-    bool isVarDecl(TokenStream tokens){
-        bool state = 0;
-        if(tokens[0].type == IDENTIFIER && (tokens[1].token == "=" || tokens[1].token == ":") && !in(tokens[0].token,Variables))
-            state = 1;
-        return state;
-    }
-    bool isVarAssign(TokenStream tokens){
-        bool state = 0;
-        if(tokens[0].type == IDENTIFIER && tokens[1].token == "=" && in(tokens[0].token,Variables))
-            state = 1;
-        return state;
-    }
-    bool isWhileStmt(TokenStream tokens){
-        bool state = 0;
-        for(Token token : tokens)
-            if(token.token == "while" && token.type == KEYWORD)
-            {
-                state = true;
-                break;
-            }
-        return state;
-    }
-    bool isForStmt(TokenStream tokens){
-        bool state = 0;
-        for(Token token : tokens)
-            if(token.token == "for" && token.type == KEYWORD)
-            {
-                state = true;
-                break;
-            }
-        return state;
-    }
-
-    bool isBreakStmt(TokenStream tokens){
-        bool state = 0;
-        for(Token token : tokens)
-            if(token.token == "break" && token.type == KEYWORD)
-            {
-                state = true;
-                break;
-            }
-        return state;
-    }
-
-    bool isClassDecl(TokenStream tokens){
-        bool state = 0;
-        for(Token token : tokens)
-            if(token.token == "class" && token.type == KEYWORD)
-            {
-                state = true;
-                break;
-            }
-        return state;
-    }
-    bool isGroupDecl(TokenStream tokens){
-        bool state = 0;
-        for(Token token : tokens)
-            if(token.token == "group" && token.type == KEYWORD)
-            {
-                state = true;
-                break;
-            }
-        return state;
-    }
-    //Errors for the bad code.
-
-    void unexpected_indent(int line, string last_stmt_type){
-        error(line, "unexpected indent after " + last_stmt_type);
-    }
-
-    void expected_indent(int line, string last_stmt_type){
-        error(line, "expected an indent after " + last_stmt_type);
-    }
-    void unrecognized_statement(int line, string stmt){
-        error(line, "unrecognized statement '" + stmt + "'.");
-    }
-    void function_insideIfstmt(int line){
-        error(line, "function is defined inside IfStmt which is not allowed.");
-    }
-    void function_insideElif(int line){
-        error(line, "function is defined inside ElifStmt which is not allowed.");
-    }
-    void function_insideElse(int line){
-        error(line, "function is defined inside ElseStmt which is not allowed.");
-    }
-    void function_insideFunction(int line){
-        error(line, "function is defined inside another function which is not allowed.");
-    }
-    void function_insideWhile(int line){
-        error(line, "function is defined inside WhileLoop which is not allowed.");
-    }
-    void function_insideFor(int line){
-        error(line, "function is defined inside another ForLoop which is not allowed.");
-    }
-
-    void noStorageClass(int line, string stmt, Scope scope){
-        if(scope.of == CLASS_DEFINITION){
-            error(line, "no storage class for the '" + stmt + "' inside a class.");
-        }
-    }
-    void elifUsedWithoutIf(int line){
-        error(line, "elif defined without any if statement before.");
-    }
-    void elseUsedWithoutIf(int line){
-        error(line, "else defined without any if or elif statement before.");
-    }
-
 /*
-In this field the actual parsing will be done
-and the process is that the functions will parse and generate AST node 
-which will be used by scope defining functions to get desired results.
+----------------------------------------------The tokenizer for Csq4---------------------------------------------------
 */
-    ForLoop ParseForLoop(TokenStream tokens);//(Defined)
-    WhileLoop ParseWhileLoop(TokenStream tokens);//(Defined)
-    VarDecl ParseVarDecl(TokenStream tokens);//(Defined)
-    VarAssign ParseVarAssign(TokenStream tokens);//(Defined)
-    FunctionDecl ParseFuncDecl(TokenStream tokens);//(Defined)
-    IfStmt ParseIfStmt(TokenStream tokens); //(Defined)
-    ElifStmt ParseElifStmt(TokenStream tokens); //(Defined)
-    ElseStmt ParseElseStmt(TokenStream tokens); //(Defined)
-    Break ParseBreakStmt(TokenStream tokens); //(Defined)
+#if !defined(tokenizer_Csq4)
+#define tokenizer_Csq4
+//Importing grammar and token type
+#include "../Grammar/grammar.h"
+#define ignore
 
-    Break ParseBreakStmt(TokenStream tokens){
-        Break node;
-        return node;
-    }
+#define MAX_INDENT_LEVEL 500
 
-    IfStmt ParseIfStmt(TokenStream tokens){ 
-        IfStmt node;
-        bool condition = false;
+//Types of token
+enum TokenType {
+    KEYWORD = 1,
+    IDENTIFIER = 2,
+    STR = 3,
+    VALUE = 4,
+    SYMBOL = 5,
+    AROPERATOR = 6,
+    ASOPERATOR = 7,
+    COPERATOR = 8,
+    LOPERATOR = 9,
+    COMMENT =10,
+    INDENT = 11,
+    NEWLINE = 12,
+    ACCESS_OPERATOR = 13,
+    UNKNOWN = 14,
+};
 
-        for(int i = 0; i<tokens.size(); i++)
-            if(tokens[i].token == "if" && tokens[i].type == KEYWORD && condition == 0)
-                condition = true;
-            else if(condition && tokens[i].token != ":")
-                node.condition.expr += tokens[i].token;
-            else if(condition && tokens[i].token == ":")
-            {
-                condition = false;
-                break;
-            }
-        if(node.condition.expr == ""){
-            printf("Error:[%d] expected an expression, after keyword if.\n",error_count+1);
-            printf("Hint:[%d] add a condition after if keyword.\n",error_count+1);
-            error_count++;
+//This enum field will give even more detail about symbols excluding identifiers, numbrs and keywords
+typedef enum{
+    LBRACE = 1,
+    RBRACE = 2,
+    LPAREN = 3,
+    RPAREN = 4,
+    LBRACK = 5,
+    RBRACK = 6,
+    PERCENT = 7,
+    EQUAL = 8,
+    TILDE = 9,
+    COMMA = 10,
+    GREATER = 11,
+    LESSER = 12,
+    SEMI = 13,
+    COLAN = 14,
+    PLUS = 15,
+    MINUS = 16,
+    STAR = 17,
+    BSLASH = 18,
+    HASHTAG = 19,
+    AMPER = 20,
+    VBAR = 21,
+    NOT = 22,
+    HAT = 23,
+    NOTSYMBOL = 24,
+    DOT = 25,
+    OR = 26,
+    AND = 27,
+    MOD = 28,
+    FSLASH = 29,
+}STOKEN;
+
+//Struct for tokens
+struct Token{
+    string token;
+    TokenType type;
+};  
+
+//This function will be returning an object to Token struct.
+Token addToken(TokenType type, string value){
+    Token token;
+    token.token = value;
+    token.type = type;
+    return token;
+}
+
+//This function will return a bool state which will decide whether an item is present in vector or not.
+bool in(string item, vector<string> ls){
+    bool state = false;
+    for(auto item_ : ls)
+        if(item == item_){
+            state = true;
+            break;
         }
-        if(condition){
-            printf("Error:[%d] the if statement hasn't ended sucessfuly.\nHint:[%d] add a colon after condition.\n",error_count+1, error_count+1);
-            error_count++;
-        }
-        return node;
+    return state;
+}
+
+//Checking is it an identifier
+bool isIdentifier(string val) {
+    regex identifier_regex(IDENTIFIERS);
+    return regex_match(val, identifier_regex);
+}
+bool isInt(string val){
+    regex int_regex(INTEGER);
+    return regex_match(val, int_regex);
+}
+bool isDecimal(string val){
+    regex Decimal_regex(DECIMAL);
+    return regex_match(val, Decimal_regex);
+}
+
+bool isValue(string val){
+    bool state = false;
+    if(isDecimal(val) || isInt(val)){
+        state = true;
     }
+    return state;
+}
 
-    ElifStmt ParseElifStmt(TokenStream tokens){
-        ElifStmt node;
-        bool condition = false;
-        for(int i = 0; i<tokens.size(); i++)
-            if(tokens[i].token == "elif" && tokens[i].type == KEYWORD && condition == 0)
-                condition = true;
-            else if(condition && tokens[i].token != ":")
-                node.condition.expr += tokens[i].token;
-            else if(condition && tokens[i].token == ":")
-            {
-                condition = false;
-                break;
-            }
-        if(node.condition.expr == ""){
-            printf("Error:[%d] expected an expression, after keyword elif.\n",error_count+1);
-            printf("Hint:[%d] add a condition after elif keyword.\n",error_count+1);
-            error_count++;
-        }
-        if(condition){
-            printf("Error:[%d] the elif statement hasn't ended sucessfuly.\nHint:[%d] add a colon after condition.\n",error_count+1, error_count+1);
-            error_count++;
-        }
-        return node;
+bool isComment(string val){
+    bool state = val == "#";
+    return state;
+}
+//Is operator
+bool isLogicalOperator(string val){
+    bool state = false;
+    if(in(val,LOGICAL_OPERATORS)){
+        state = true;
     }
+    return state;
+}
+bool isAssignmentOperator(string val){
+    bool state = false;
+    if(in(val,ASSIGNMENT_OPERATORS)){
+        state = true;
+    }
+    return state;
+}
+bool isComparisonOperator(string val){
+    bool state = false;
+    if(in(val,COMPARISON_OPERATORS)){
+        state = true;
+    }
+    return state;
+}
+bool isArithmeticOperator(string val){
+    bool state = false;
+    if(in(val, ARITHMETIC_OPERATORS)){
+        state = true;
+    }
+    return state;
+}
 
-    ElseStmt ParseElseStmt(TokenStream tokens){
-        ElseStmt node;
-        if(tokens[1].token != ":"){
-            printf("Error:[%d] expected a : after else.\n",error_count+1);
-            error_count++;
+bool isOperator(string val){
+    bool state = false;
+    if(isArithmeticOperator(val) || isLogicalOperator(val) || isAssignmentOperator(val) || isComparisonOperator(val)){
+        state = true;
+    }
+    return state;
+}
+
+bool isSymbol(string val){
+    bool state = false;
+    if(in(val,SYMBOLS)){
+        state = true;
+    }
+    return state;
+}
+
+bool isSymbolLaterals(string val){
+    bool state = false;
+    if(isSymbol(val) || isOperator(val)){
+        state = true;
+    }
+    return state;
+}
+
+bool isKeyword(string val){
+    bool state = false;
+    if(in(val, KEYWORDS_TABLE)){
+        state = true;
+    }
+    return state;
+}
+
+
+
+
+//This is the checking section which will take a token and then check it's type.
+Token check(string val,int line){
+    Token token;
+    if(isKeyword(val)){
+        token.token = val;
+        token.type = KEYWORD;
+    }
+    else if(isOperator(val)){
+        if(isArithmeticOperator(val)){
+            token.token = val;
+            token.type = AROPERATOR;
         }
-        return node;
+        else if(isLogicalOperator(val)){
+            token.token = val;
+            token.type = LOPERATOR;
+        }
+        else if(isAssignmentOperator(val)){
+            token.token = val;
+            token.type = ASOPERATOR;
+        }
+        else if(isComparisonOperator(val)){
+            token.token = val;
+            token.type = COPERATOR;
+        }
     }
-
-    Expr ParseExpr(TokenStream tokens){
-        Expr node;
-        node.expr = TokenStreamToString(tokens);
-        return node;
+    else if(isValue(val)){
+        token.token = val;
+        token.type = VALUE;
     }
+    else if(isIdentifier(val)){
+        token.token = val;
+        token.type = IDENTIFIER;
+    }
+    else if(isSymbol(val)){
+        token.token = val;
+        token.type = SYMBOL;
+    }
+    else{
+        token.token = val;
+        token.type = UNKNOWN;
+    }
+    return token;
+}
 
-    // VarDecl ParseVarDecl(TokenStream tokens){
-    //     VarDecl node;
-    //     bool value = false;
-        
-    //     vector<string> Variables_ = Variables;
-    //     Variables_.push_back(tokens[0].token);
-    //     Variables = Variables_;
-    //     Variables_.empty();
-    //     for(Token token : tokens)
-    //         if(!value && token.type == IDENTIFIER)
-    //             node.name = token.token;
-    //         else if(token.type == ASOPERATOR && !value)
-    //             value = true;
-    //         else if(value)
-    //             node.value.expr += token.token + " ";
-    //     if(node.value.expr == ""){
-    //         printf("Error:[%d] expected a value after assignment operator.\n",error_count+1);
-    //         error_count++;
-    //     }
-    //     return node;
-    // }
-    VarDecl ParseVarDecl(TokenStream tokens){
-        VarDecl node;
-        bool value = false;
-        bool type_ = false;
-        bool equal_ = false;
-        vector<string> Variables_ = Variables;
-        Variables_.push_back(tokens[0].token);
-        Variables = Variables_;
-        Variables_.empty();
-        if(tokens[1].token == ":"){
-            for(Token token : tokens){
-                if(token.type == IDENTIFIER && !type_ && !value){
-                    node.name = token.token;
+//This function will return a brief info about the symbols.
+STOKEN symbolType(Token token){
+    switch(token.type){
+        case ASOPERATOR:{
+            if(token.token == "=")
+                return EQUAL;
+        }
+        case AROPERATOR:{
+            if(token.token == "+")
+                return PLUS;
+            else if(token.token == "-")
+                return MINUS;
+            else if(token.token == "*")
+                return STAR;
+            else if(token.token == "/")
+                return FSLASH;
+            else if(token.token == "%")
+                return MOD;
+            else if(token.token == "^")
+                return HAT;
+        }
+        case SYMBOL:{
+            if(token.token == "!")
+                return NOT;
+            else if(token.token == "|")
+                return VBAR;
+            else if(token.token == "&")
+                return AMPER;
+            else if(token.token == "{")
+                return LBRACE;
+            else if(token.token == "}")
+                return RBRACE;
+            else if(token.token == "(")
+                return LPAREN;
+            else if(token.token == ")")
+                return RPAREN;
+            else if(token.token == "[")
+                return LBRACK;
+            else if(token.token == "]")
+                return RBRACK;
+            else if(token.token == ".")
+                return DOT;
+            else if(token.token == ",")
+                return COMMA;
+            else if(token.token == ":")
+                return COLAN;
+            else if(token.token == ";")
+                return SEMI;
+            else if(token.token == "~")
+                return TILDE;
+        }
+        case LOPERATOR:{
+            if(token.token == "or")
+                return OR;
+            else if(token.token == "and")
+                return AND;
+            else if(token.token == "not")
+                return NOT;
+        }
+        case COPERATOR:{
+            if(token.token == ">")
+                return GREATER;
+            else if(token.token == "<")
+                return LESSER;
+            
+        }
+        default:{
+            return NOTSYMBOL;
+        }
+    }
+}
 
+int TokenizerLine = 1;
+//Total count of errors.
+int error_count = 0;
+
+void error(int line, string msg){
+    printf("Error [%d]: at line %d, %s\n",error_count+1, line, msg.c_str());
+    error_count++;
+}
+
+
+//This function will be checking the count of tokens 
+int TokenCount(vector<Token> tokens, Token token)
+{
+    int count = 0;
+    for(Token t : tokens){
+        if(t.token == token.token && t.type)
+         count++;
+    }
+    return count;
+}
+
+
+
+vector<Token> tokenize(string source_code) {
+    vector<Token> tokens;
+    string current_string, str_input, code_;
+    int current_line = 1;
+    //Indentation count;
+    int IndentCount = 0;
+    //Some states
+    bool indent_ended = true;
+    bool indentation_present = false;
+    bool char_start = false;
+    bool string_presence = false;
+    bool comment = false;
+    if(source_code[0] == '#')
+        ignore;
+    else{
+        //Checking for indentation.
+        //This string will store the code without indentations.
+        if(source_code[0] == ' '){
+            indentation_present = true;
+            string temp_source;
+            for(int i = 0;i<source_code.length();i++){
+                if(source_code[i] == ' ' && char_start == false){
+                    Token indent;
+                    indent.token = ' ';
+                    IndentCount++;
+                    indent.type = INDENT;
+                    tokens.push_back(indent);
+                    indent_ended = false; 
                 }
-                else if(!type_ && !equal_ && !value && token.type != IDENTIFIER){
-                    if(token.token != ":"){
-                        printf("Error:[%d] unexpected %s after identifier.\n",error_count+1, token.token.c_str());
-                        error_count++;
+                else if(source_code[i] != ' ' && char_start == false && indent_ended == false){
+                    indent_ended = true;
+                    temp_source.push_back(source_code[i]);
+                    char_start = true;
+                }
+                else if(char_start == 1)
+                    temp_source.push_back(source_code[i]);
+            }
+            source_code = temp_source;
+        }
+        for (int i = 0; i < source_code.length(); i++) {
+            char c = source_code[i];
+            if ((c == ' ' || c == '\n' || c == '\t' || isSymbolLaterals(string(1, c))) && string_presence == false) { // if whitespace or symbol character, handle separately
+                if (c == '\n') {
+                    current_line++;
+                    Token newline;
+                    newline.token = "\n";
+                    newline.type = NEWLINE;
+                    tokens.push_back(newline);
+                }
+                if (current_string.length() > 0) { // if non-empty string, check if it matches any operator, keyword, or value
+                    Token token = check(current_string, current_line);
+                    tokens.push_back(token);
+                    current_string = "";
+                }
+                if (isSymbolLaterals(string(1, c))) { // handle symbol
+                    tokens.push_back(check(string(1,c),current_line));
+                }
+            }
+            else if((c == '"' || c == '\'') && string_presence == false){
+                string_presence = true;
+            }
+            else if((c == '"' || c == '\'') && string_presence == true){
+                Token tok;
+                tok.token = "\""+str_input+"\"";
+                tok.type = STR;
+                tokens.push_back(tok);
+                string_presence = false;
+            }
+            else if((c != '"' || c != '\'') && string_presence == true){
+                str_input.push_back(c);
+            }
+            else { // if non-whitespace or symbol character, append to current string
+                current_string += c;
+            }
+        }
+
+        if (current_string.length() > 0) { // process the last string
+            Token token = check(current_string, current_line);
+            tokens.push_back(token);
+        }
+
+        if (string_presence) { // handle unclosed string literal
+            printf("Error: unclosed string literal at line %d\n", current_line);
+            exit(1);
+        }
+    }
+
+    vector<Token> filtered_Tokens;
+    for(int i = 0;i<tokens.size();i++){
+        switch(symbolType(tokens[i])){
+            case NOT:{
+                switch(symbolType(tokens[i+1])){
+                    case EQUAL:{
+                        Token token;
+                        token.token = "!=";
+                        token.type = COPERATOR;
+                        filtered_Tokens.push_back(token);
+                        i = i + 2;
                     }
-                    else{
-                        type_ = true;
-                    }
                 }
-                else if(type_ && !value)
-                {
-                    if(token.type != IDENTIFIER){
-                        printf("Error:[%d] expected an identifier instead of %s.\n",error_count+1, token.token.c_str());
-                        break;
-                    }
-                    else{
-                        node.type_ = token.token;
-                        node.type_infr = 0;
-                        equal_ = 1;
-                        type_ = false;
-                    }
-                }
-
-                else if(!type_ && equal_ && token.token == "="){
-                    value = 1;
-                    equal_ = 0;
-                }
-                else if(value && !equal_){
-                    node.value.expr += token.token;
-                }
-
-            }
-        }
-        else{
-            for(Token token : tokens)
-                if(!value && token.type == IDENTIFIER)
-                    node.name = token.token;
-                else if(token.type == ASOPERATOR && !value)
-                    value = true;
-                else if(value)
-                    node.value.expr += token.token + " ";
-        }
-        return node;
-    }
-
-    VarAssign ParseVarAssign(TokenStream tokens){
-        VarAssign node;
-        bool value = false;
-        for(Token token : tokens)
-            if(!value && token.type == IDENTIFIER)
-                node.name = token.token;
-            else if(token.type == ASOPERATOR && !value)
-                value = true;
-            else if(value)
-                node.value.expr += token.token + " ";
-        if(node.value.expr == ""){
-            printf("Error:[%d] expected a value after assignment operator.\n",error_count+1);
-            error_count++;
-        }
-        return node;
-    }
-
-    WhileLoop ParseWhileLoop(TokenStream tokens){
-        WhileLoop node;
-        bool condition = false;
-        for(Token token : tokens){
-            if(token.token == "while" && token.type == KEYWORD)
-                condition = true;
-            else if(condition && token.token != ":")
-                node.condition.expr += token.token + " ";
-            else if(condition && token.token == ":"){
-                condition = false;
-                break;
-            }
-        }
-        if(condition){
-            printf("Error:[%d] expected a colon after conditon.\n",error_count+1);
-            error_count++;
-        }
-        return node;
-    }
-
-    ForLoop ParseForLoop(TokenStream tokens){
-        ForLoop node;
-        bool condition = false;
-        bool iter = false;
-        for(Token token : tokens)
-            if(token.token == "for" && !condition)
-                iter = true;
-            else if(iter && token.token != "in" && !condition)
-                node.iter_name += token.token;
-            else if(iter && token.token == "in" && !condition){
-                iter = false;
-                condition = true;
-            }
-            else if(condition && token.token != ":"){
-                node.condition.expr += token.token + " ";
-            }
-            else if(condition && token.token == ":"){
-                condition = 0;
-                break;
-            }
-        if(condition){
-            printf("Error:[%d] expected an end of condition.", error_count+1);
-            error_count++;
-        }
-        return node;//Master scope..
-    }
-
-    FunctionDecl ParseFuncDecl(TokenStream tokens){
-        FunctionDecl node;
-        bool param = false;
-        bool name = false;
-        bool ended = false;
-        string param_;
-        for(Token token : tokens){
-            if(token.token == "def" && !name && !param){
-                name = 1;
-            }
-            else if(name && token.token != "(" && !param){
-                node.name += token.token;
-            }
-            else if(name && token.token == "(" && !param){
-                name = 0;
-                param = 1;
-            }
-            else if(param && token.token != "," && token.token != ")"){
-                param_ += token.token;
-            }
-            else if(param && token.token == ","){
-                node.params.push_back(param_);
-                param_ = "";
-            }
-            else if(param && token.token == ")"){
-                param = 0;
-                node.params.push_back(param_);
-                param_ = "";
-            }
-            else if(token.token == "->" && param == 0){}
-            else if(token.type == IDENTIFIER && param == 0){
-                node.return_type = token.token;
-                node.return_type_infr = 0;
-            }
-            else if(token.token == ":"){
-                ended = true;
-                break;
-            }
-        }
-        if(param){
-            printf("Error:[%d] expected an end of param.\nHint: put a ) after params.\n", error_count+1);
-            error_count++;
-        }
-        return node;
-    }
-
-    ClassDecl ParseClassDecl(TokenStream tokens, int line){
-        ClassDecl node;
-        bool name, iclass;
-        iclass = 0;
-        name = iclass;
-        for(Token token : tokens)
-        {
-            if(token.token == ":")
-            {break;}
-            else{
-                if(token.token == "class"){
-                    name = 1;
-                }
-                else if(token.type != IDENTIFIER && name == 1){
-                    printf("Error:[%d] At line %d, expected an identifier after class keyword.\n", error_count+1, line);
-                    error_count++;
-                }
-                else if(token.type != IDENTIFIER && iclass == 1){
-                    printf("Error:[%d] At line %d, expected an identifier.\n", error_count+1, line);
-                    error_count++;
-                }
-                else if(token.type == IDENTIFIER && name == 1){
-                    node.name = token.token;
-                    iclass = 1;
-                    name = 0;
-                }
-                else if(token.type == IDENTIFIER && iclass == 1){
-                    node.inherit_class = token.token;
-                }
-            }
-        }
-        return node;
-    }
-
-    Group ParseGroupStmt(TokenStream tokens){
-        Group node;
-        bool end = false;
-        bool name = false;
-        bool over = false;
-        for(Token token : tokens){
-            if(token.token == "group" && !name && !end){
-                name = true;
-            }
-            else if(name){
-                if(token.type != IDENTIFIER){
-                    printf("Error:[%d] expected an identifier after group keyword.\n", error_count+1);
-                    error_count++;
-                }
-                else{
-                    node.name = token.token;
-                    name = 0;
-                    end = 1;
-                }
-            }
-            else if(end){
-                if(token.token != ":"){
-                    printf("Error:[%d] unexpected %s used in group declaration.\n", error_count+1, token.token.c_str());
-                    error_count++;
-                }
-                else{
-                    end = 0;
-                    over = 1;
-                    break;
-                }
-            }
-        }
-        return node;
-    }
-
-    //This function is gonna return the deepest indent level.
-    int DeepestIndentLevel(vector<TokenStream> tokens)
-    {
-        int indent_level = 0;
-        for(TokenStream tokenStream : tokens)
-        {
-            if(getIndentLevel(tokenStream) > indent_level){
-                indent_level = getIndentLevel(tokenStream);
-            }
-            else{}
-        }
-        return indent_level;
-    }
-    /*
-    Indentation handling shall be done in such a way in which every
-    line with certain indentation shall be stored as an object.
-    */
-    //Define vector for all indentation levels
-    vector<Statement> Statements;
-
-    //Ultimate parsing statement.
-    void ParseLines(TokenStream tokens);
-    void ParseLines(vector<TokenStream> code_tokens){
-        int statement_number = 1;
-        Token line_end_token;
-        line_end_token.token = "ignore";
-        line_end_token.type = KEYWORD;
-        int last_indent_level = 0;
-        code_tokens.push_back(TokenStream({line_end_token}));
-        for(TokenStream tokens : code_tokens){
-            int indent_level = getIndentLevel(tokens);
-            //Now remove all indent tokens present since we now know the indent level.
-            TokenStream tokens_;
-            for(Token token : tokens)
-                if(token.type == INDENT)
-                    ignore;
-                else
-                    tokens_.push_back(token);
-                tokens = tokens_;
-            // if(last_indent_level-1 == indent_level)
-            // {
-            //     Statements.push_back(Statement(statement_number,"ignore","ignore",EXPR_TYPE,indent_level));
-            // }
-            if(isVarDecl(tokens)){
                 
-                //Now get AST node for the statement.
-                auto node_ = make_shared<VarDecl>(ParseVarDecl(tokens));
-                NodePtr node = static_pointer_cast<Node>(node_);
-                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),VAR_DECLARATION,indent_level));
             }
-            else if(isVarAssign(tokens)){
-                //Now get AST node for the statement.
-                auto node_ = make_shared<VarAssign>(ParseVarAssign(tokens));
-                NodePtr node = static_pointer_cast<Node>(node_);
-                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),VAR_ASSIGNMENT,indent_level));
-            }
-            else if(isFunDecl(tokens)){
-                //Now get AST node for the statement.
-                auto node_ = make_shared<FunctionDecl>(ParseFuncDecl(tokens));
-                NodePtr node = static_pointer_cast<Node>(node_);
-                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),FUNCTION_DECL,indent_level));
-            }
-            else if(isForStmt(tokens)){
-                //Now get AST node for the statement.
-                auto node_ = make_shared<ForLoop>(ParseForLoop(tokens));
-                NodePtr node = static_pointer_cast<Node>(node_);
-                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),FOR_LOOP,indent_level));
-            }
-            else if(isWhileStmt(tokens)){
-                //Now get AST node for the statement.
-                auto node_ = make_shared<WhileLoop>(ParseWhileLoop(tokens));
-                NodePtr node = static_pointer_cast<Node>(node_);
-                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),WHILE_LOOP,indent_level));
-            }
-            else if(isIfStmt(tokens)){
-                //Now get AST node for the statement.
-                auto node_ = make_shared<IfStmt>(ParseIfStmt(tokens));
-                NodePtr node = static_pointer_cast<Node>(node_);
-                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),IF_STATEMENT,indent_level));
-            }
-            else if(isElifStmt(tokens)){
-                //Now get AST node for the statement.
-                auto node_ = make_shared<ElifStmt>(ParseElifStmt(tokens));
-                NodePtr node = static_pointer_cast<Node>(node_);
-                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),ELIF_STATEMENT,indent_level));
-            }
-            else if(isElseStmt(tokens)){
-                //Now get AST node for the statement.
-                auto node_ = make_shared<ElseStmt>(ParseElseStmt(tokens));
-                NodePtr node = static_pointer_cast<Node>(node_);
-                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),ELSE_STATEMENT,indent_level));
-            }
-            else if(isBreakStmt(tokens)){
-               auto node_ = make_shared<Break>(ParseBreakStmt(tokens));
-               NodePtr node = static_pointer_cast<Node>(node_); 
-               Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),BREAK,indent_level));
-            }
-            else if(isClassDecl(tokens)){
-                auto node_ = make_shared<ClassDecl>(ParseClassDecl(tokens,statement_number));
-                NodePtr node = static_pointer_cast<Node>(node_); 
-                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),CLASS_DEFINITION,indent_level));
-            }
-            else if(isGroupDecl(tokens)){
-                auto node_ = make_shared<Group>(ParseGroupStmt(tokens));
-                NodePtr node = static_pointer_cast<Node>(node_); 
-                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),GROUP,indent_level));
-                Group_stack.push_back(node_->name);
-
-            }
-            else{
-               auto node_ = make_shared<Expr>(ParseExpr(tokens));
-               NodePtr node = static_pointer_cast<Node>(node_); 
-               Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),EXPR_TYPE,indent_level));
-            }
-            last_indent_level = indent_level;
-            statement_number++;
-        }
-        
-    }
-
-    bool notBlockStatement(NODE_TYPE type){
-        bool state = 1;
-        if
-        (type == FOR_LOOP || type == WHILE_LOOP || type == IF_STATEMENT || type == ELIF_STATEMENT ||
-         type == ELSE_STATEMENT || type == FUNCTION_DECL || type == CLASS_DEFINITION
-        ){
-            state = 0;
-        }
-        return state;
-    }
-
-
-    bool isBlockStatement(NODE_TYPE type){
-        bool state = 0;
-        if
-        (type == FOR_LOOP || type == WHILE_LOOP || type == IF_STATEMENT || type == ELIF_STATEMENT ||
-         type == ELSE_STATEMENT || type == FUNCTION_DECL || type == CLASS_DEFINITION
-        ){
-            state = 1;
-        }
-        return state;
-    }
-
-
-    //Traverse and print the statements with their properties.
-    void PrintStatements(){
-        for(Statement statement : Statements){
-            printf("line : %d indent : %d type : %d (%s)\n",statement.number,statement.indent_level, statement.type, statement.statement.c_str());
-        }
-    }
-
-    //Seeking for last open scope
-
-    Scope last_open_scope(vector<Scope> scope_stack){
-        Scope last;
-        for(Scope scope : scope_stack){
-            if(scope.ended == 0){
-                last = scope;
-            }
-        }
-        return last;
-    }
-
-    string create_group_object(){
-        string code;
-        for(string g : Group_stack)
-        {
-            code += g + " " + g + ";\n";
-        }
-        return code;
-    }
-
-    Scope last_scope(vector<Scope> scope){
-        return scope[scope.size()-1];
-    }
-
-    //This function is expecting that the Statements vector is already filled by the ParseLines function.
-
-    /*
-    for i in range(345):
-     for j in range(i):
-      print(j)
-     print("--------------------------------")
-
-    Statements:
-    (for i in range(345):, 0)
-    (for j in range(i):, 1)
-    (print(j),2)
-    (print("--------------------------------"),1)
-    */
-    string ParseStatements(){
-        //Image of code
-        string code, fncode;
-        //Some properties for scopes
-        Scope scope(0,PROGRAM,0);
-        Scope master(0,PROGRAM,0);
-        bool class_ = 0;
-        //To keep track of open scopes which are not yet closed.
-        vector<Scope> scope_stack = {scope};
-        //To keep track of last statement which can we used to check whether indentation is required or not.
-        Statement last_statement;
-        for(Statement statement : Statements){
-                while(statement.indent_level != last_scope(scope_stack).indent_level){
-                    if(last_scope(scope_stack).of == FUNCTION_DECL || last_scope(scope_stack).of == CLASS_DEFINITION){
-                        code += "};\n";
-                        scope_stack.pop_back(); 
-                    }
-                    else if(last_scope(scope_stack).of == GROUP){
-                        if(Group_stack.size()!=0){
-                            code += "};\n" +  create_group_object();
-                            scope_stack.pop_back();
-                        }
-                    }
-                    else{
-                        code += "}\n";
-                        scope_stack.pop_back(); 
+            case EQUAL:{
+                switch(symbolType(tokens[i+1])){
+                    case EQUAL:{
+                        Token token;
+                        token.token = "==";
+                        token.type = COPERATOR;
+                        filtered_Tokens.push_back(token);
+                        i = i + 2;
                     }
                 }
-                //Checking the type of last_statement
-                switch(statement.type)
-                {
-                    case EXPR_TYPE:{
-                        code += statement.statement + ";\n";
-                        break;
-                    }
-                    case VAR_DECLARATION:{
-                        code += statement.statement + ";\n";
-                        break;
-                    }
-                    case VAR_ASSIGNMENT:{
-                        code += statement.statement + ";\n";
-                        break;
-                    }
-                    case IF_STATEMENT:{
-                        scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
-                        code += statement.statement + "{\n";
-                        break;
-                    }
-                    case ELIF_STATEMENT:{
-                        scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
-                        code += statement.statement + "{\n";
-                        break;
-                    }
-                    case ELSE_STATEMENT:{
-                        scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
-                        code += statement.statement + "{\n";
-                        break;
-                    }
-                    case FOR_LOOP:{
-                        scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
-                        code += statement.statement + "{\n";
-                        break;
-                    }
-                    case WHILE_LOOP:{
-                        scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
-                        code += statement.statement + "{\n";
-                        break;
-                    }
-                    case CLASS_DEFINITION:{
-                        scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
-                        code += statement.statement + "{\npublic:\n";
-                        class_ = 1;
-                        break;
-                    }
-                    case FUNCTION_DECL:{
-                        scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
-                        if(class_ ==1){
-                            replaceAll(statement.statement,"=[&]","");
-                            code += statement.statement + "{\n";
-                        }
-                        else{
-                            code += statement.statement + "{\n";
-                        }
-                        break;
-                    }
-                    case BREAK:{
-                        code += statement.statement + ";\n";
-                        break;
-                    }
-                    case GROUP:{
-                        scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
-                        code += statement.statement + "{\npublic:\n";
-                        break;
+            }
+            case PLUS:{
+                switch(symbolType(tokens[i+1])){
+                    case EQUAL:{
+                        Token token;
+                        token.token = "+=";
+                        token.type = ASOPERATOR;
+                        filtered_Tokens.push_back(token);
+                        i = i + 2;
                     }
                 }
+            }
+            case MINUS:{
+                switch(symbolType(tokens[i+1])){
+                    case EQUAL:{
+                        Token token;
+                        token.token = "-=";
+                        token.type = ASOPERATOR;
+                        filtered_Tokens.push_back(token);
+                        i = i + 2;
+                    }
+                    case GREATER:{
+                        Token token;
+                        token.token = "->";
+                        token.type = ASOPERATOR;
+                        filtered_Tokens.push_back(token);
+                        i = i + 2;
+                    }
+                }
+            }
+            case STAR:{
+                switch(symbolType(tokens[i+1])){
+                    case EQUAL:{
+                        Token token;
+                        token.token = "*=";
+                        token.type = ASOPERATOR;
+                        filtered_Tokens.push_back(token);
+                        i = i + 2;
+                    }
+                }
+            }
+            case FSLASH:{
+                switch(symbolType(tokens[i+1])){
+                    case EQUAL:{
+                        Token token;
+                        token.token = "/=";
+                        token.type = ASOPERATOR;
+                        filtered_Tokens.push_back(token);
+                        i = i + 2;
+                    }
+                }
+            }
+            case GREATER:{
+                switch(symbolType(tokens[i+1])){
+                    case EQUAL:{
+                        Token token;
+                        token.token = ">=";
+                        token.type = COPERATOR;
+                        filtered_Tokens.push_back(token);
+                        i = i + 2;
+                    }
+                }
+            }
+            case LESSER:{
+                switch(symbolType(tokens[i+1])){
+                    case EQUAL:{
+                        Token token;
+                        token.token = "<=";
+                        token.type = COPERATOR;
+                        filtered_Tokens.push_back(token);
+                        i = i + 2;
+                    }
+                }
+            }
+            case AMPER:{
+                switch(symbolType(tokens[i+1])){
+                    case AMPER:{
+                        Token token;
+                        token.token = "&&";
+                        token.type = COPERATOR;
+                        filtered_Tokens.push_back(token);
+                        i = i + 2;
+                    }
+                }
+            }
+            case VBAR:{
+                switch(symbolType(tokens[i+1])){
+                    case VBAR:{
+                        Token token;
+                        token.token = "||";
+                        token.type = COPERATOR;
+                        filtered_Tokens.push_back(token);
+                        i = i + 2;
+                    }
+                }
+            }
+            default:{
+                filtered_Tokens.push_back(tokens[i]);
+            }
         }
-        return code;
     }
-#endif // PARSEr_H_CSQ4
+
+    //Tokens for syntax check.
+    Token SY_Lparen, SY_Rparen, SY_Lbrac, SY_Rbrac, SY_Lbrace, SY_Rbrace;
+    SY_Lparen.token = "(";
+    SY_Lparen.type = SYMBOL;
+    SY_Rparen.token = ")";
+    SY_Rparen.type = SYMBOL;
+    SY_Lbrac.token = "[";
+    SY_Lbrac.type = SYMBOL;
+    SY_Rbrac.token = "]";
+    SY_Rbrac.type = SYMBOL;
+    SY_Lbrace.token = "{";
+    SY_Lbrace.type = SYMBOL;
+    SY_Rbrace.token = "}";
+    SY_Rbrace.type = SYMBOL;
+    if(TokenCount(filtered_Tokens, SY_Lparen) != TokenCount(filtered_Tokens, SY_Rparen)){
+        printf("Error[%d]: At line %d, parenthesis aren't correctly closed.\n",error_count, TokenizerLine);
+        error_count++;
+    }
+    else if(TokenCount(filtered_Tokens, SY_Lbrace) != TokenCount(filtered_Tokens, SY_Rbrace)){
+        printf("Error[%d]: At line %d, square brackets aren't correctly closed.\n",error_count, TokenizerLine);
+        error_count++;
+    }
+    else if(TokenCount(filtered_Tokens, SY_Lbrace) != TokenCount(filtered_Tokens, SY_Rbrace)){
+        printf("Error[%d]: At line %d, curly braces aren't correctly closed.\n",error_count, TokenizerLine);
+        error_count++;
+    }
+    TokenizerLine++;
+
+    return filtered_Tokens;
+}
+
+#endif // tokenizer_Csq4
