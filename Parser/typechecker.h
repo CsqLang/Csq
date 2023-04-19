@@ -64,6 +64,17 @@ MemberTCInfo SearchIdentifierGetInfo(string identifier){
     return prop;
 }
 
+bool inTypeTable(vector<MemberTCInfo> typeTable, string type){
+    bool s = 0;
+    for(MemberTCInfo t : typeTable){
+        if(t.type == type){
+            s = 1;
+            break;
+        }
+    }
+    return s;
+}
+
 void TypeChecker(string op1, string op2, string op1type, string op2type)
 {
     //Now it's also possible that a class is allowing different types to be stored so we have to factor them.
