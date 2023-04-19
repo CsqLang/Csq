@@ -1,6 +1,11 @@
 #if !defined(BUILTINS_CSQ4_2)
 #define BUILTINS_CSQ4_2
-#include "vm.h"
+// #include "vm.h"
+#include "instructions.h"
+#include <stdio.h>
+#include <string>
+#include <vector>
+using namespace std;
 
 struct i32{
     int data;
@@ -211,12 +216,18 @@ list<i32> range(i32 end_){
     return d;
 }   
 
-list<i32> range(i32 start, i32 end_){
-    list<i32> d;
-    for(i32 i = start;i< end_.data;i.data++){
-        d.add(i);
+#include <numeric>
+
+std::vector<int> range(int start, int end_) {
+    std::vector<int> result(end_ - start);
+    for(int i = start; i < end_; i++) {
+        result[i - start] = i;
     }
-    return d;
+    return result;
 }
+
+
+
+
 
 #endif // BUILTINS_CSQ4_2
