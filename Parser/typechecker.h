@@ -12,9 +12,33 @@ a:i32 = 384
 b:f64 = a //Error
 */
 
-vector<string> CollectTypes(string type){
-    vector<string> types;
-    
+struct MemberTCInfo{
+    string name;
+    string type;
+};
+
+vector<MemberTCInfo> CollectTypes(string type){
+    vector<MemberTCInfo> types;
+    ClassProp target_type;
+    for(ClassProp class_ : Classes){
+        if(class_.name == type){
+            target_type = class_;
+            break;
+        }
+    }
+    for(MemberVarProperty prop : target_type.member_vars){
+        MemberTCInfo i;
+        i.name = prop.name;
+        i.type = prop.type;
+        types.push_back(i);
+    }
+    for(MethodProperty prop : target_type.methods){
+        MemberTCInfo i;
+        i.name = prop.name;
+        i.type = prop.type;
+        types.push_back(i);
+    }
+    return types;
 }
 
 void TypeChecker(string op1, string op2, string op1type, string op2type)
