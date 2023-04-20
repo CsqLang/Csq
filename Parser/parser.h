@@ -340,43 +340,14 @@ which will be used by scope defining functions to get desired results.
         Expr node;
         node.expr = TokenStreamToString(tokens);
         int tok_index = 0;
-        string identifier_type,identifier_name;
-        string stmt_type = "NONE";
         for(int i=0;i<tokens.size();i++){
             Token token = tokens[i];
             if(token.type == IDENTIFIER){
                 if(in(token.token, Identifiers)){
-                    //Check the member type
-                    MemberTCInfo member = SearchIdentifierGetInfo(token.token);
-                    if(stmt_type == "NONE" && member.type != "NONE"){
-                        stmt_type = member.type;
-                    }
-                    else if(stmt_type == member.type){
-                        stmt_type = member.type;
-                    }
-                    else{
-                        //Now factor the types available
-                        vector<MemberTCInfo> member_table = CollectTypes(member.type);
-                        //Now check whether identifier is used as access tool for member in it.
-                        if(tokens[i+1].token == "."){
-                            if(tokens[i+2].type != IDENTIFIER){
-                                error(line, "invalid syntax '"+ tokens[i+2].token + "' for accessing members of " + token.token +".");
-                            }
-                            else{
-                                //Now check whether member is present in class or not?
-                                if(isMemberPresent(member_table,tokens[i+2].token)){
-                                    
-                                }
-                                else{
-                                    error(line, tokens[i+2].token + " is not the member of " + token.token + ".");
-                                }
-                            }
-                        }
-                    }
+
                 }
-                //Identifier used is not in the stack means it's undefined.
                 else{
-                    error(line, "undefined identifier '"+ token.token + "'.");
+                    
                 }
             }
         }
