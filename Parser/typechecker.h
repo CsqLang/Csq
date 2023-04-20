@@ -42,6 +42,8 @@ vector<MemberTCInfo> CollectTypes(string type){
 }
 MemberTCInfo SearchIdentifierGetInfo(string identifier){
     MemberTCInfo prop;
+    prop.name = identifier;
+    prop.type = "NONE";
     bool found = 0;
     for(MemberVarProperty p : variables_prop){
         if(p.name == identifier){
@@ -68,6 +70,17 @@ bool inTypeTable(vector<MemberTCInfo> typeTable, string type){
     bool s = 0;
     for(MemberTCInfo t : typeTable){
         if(t.type == type){
+            s = 1;
+            break;
+        }
+    }
+    return s;
+}
+
+bool isMemberPresent(vector<MemberTCInfo> types, string target){
+    bool s = false;
+    for(MemberTCInfo t : types){
+        if(t.name == target){
             s = 1;
             break;
         }
