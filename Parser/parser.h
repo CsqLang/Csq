@@ -444,6 +444,7 @@ which will be used by scope defining functions to get desired results.
 
     VarAssign ParseVarAssign(TokenStream tokens, int line){
         VarAssign node;
+        TokenStream value_expr;
         bool value = false;
         for(Token token : tokens)
             if(!value && token.type == IDENTIFIER)
@@ -451,10 +452,11 @@ which will be used by scope defining functions to get desired results.
             else if(token.type == ASOPERATOR && !value)
                 value = true;
             else if(value)
-                node.value.expr += token.token + " ";
+                value_expr.push_back(token);
         if(node.value.expr == ""){
             error(line, "expected a value after assignment operator.");
         }
+        node.value = ParseExpr(value_expr,line);
         return node;
     }
 
