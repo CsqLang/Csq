@@ -483,6 +483,7 @@ which will be used by scope defining functions to get desired results.
         ForLoop node;
         bool condition = false;
         bool iter = false;
+        TokenStream condition_expr;
         for(Token token : tokens)
             if(token.token == "for" && !condition)
                 iter = true;
@@ -493,7 +494,7 @@ which will be used by scope defining functions to get desired results.
                 condition = true;
             }
             else if(condition && token.token != ":"){
-                node.condition.expr += token.token + " ";
+                condition_expr.push_back(token);
             }
             else if(condition && token.token == ":"){
                 condition = 0;
@@ -506,6 +507,7 @@ which will be used by scope defining functions to get desired results.
             if(node.iter_name != ""){
                 Identifiers.push_back(node.iter_name);
             }
+            node.condition = ParseExpr(condition_expr, line);
         }
         return node;//Master scope..
     }
