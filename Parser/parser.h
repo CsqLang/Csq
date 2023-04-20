@@ -340,14 +340,30 @@ which will be used by scope defining functions to get desired results.
         Expr node;
         node.expr = TokenStreamToString(tokens);
         int tok_index = 0;
+        //This portion of code will be checking errors in the expr
         for(int i=0;i<tokens.size();i++){
             Token token = tokens[i];
             if(token.type == IDENTIFIER){
+                MemberTCInfo info = SearchIdentifierGetInfo(token.token);
+                vector<MemberTCInfo> members = CollectTypes(info.type);
                 if(in(token.token, Identifiers)){
-
+                    if(tokens[i+1].token == "."){
+                        if(tokens[i+2].type != IDENTIFIER){
+                            error(line,"syntax error at '" + tokens[i+2].token +"' in '" + token.token + tokens[i+1].token + tokens[i+2].token + "'.");
+                        }
+                        else{
+                            if(info.type != "NONE"){
+                                if(!isMemberPresent(members, tokens[i+2].token)){
+                                    error(line, info.type + " object has no attribute " + tokens[i+2].token + ".");
+                                }
+                                else{}
+                            }
+                        }
+                    }
+                    i += 2;
                 }
                 else{
-                    
+                    error(line, "undefined identifier '" + token.token + "' used.");
                 }
             }
         }
