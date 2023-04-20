@@ -342,25 +342,16 @@ which will be used by scope defining functions to get desired results.
         int tok_index = 0;
         string identifier_type,identifier_name;
         string stmt_type = "NONE";
-        for(Token token : tokens){
-            if(token.type == IDENTIFIER)
-            {
-                if(!in(token.token, Identifiers))
-                {
-                    error(line,"identifier '" + token.token + "' is not defined.");
+        for(int i=0;i<tokens.size();i++){
+            Token token = tokens[i];
+            if(token.type == IDENTIFIER){
+                if(in(token.token, Identifiers)){
+                    //pursue ....
                 }
+                //Identifier used is not in the stack means it's undefined.
                 else{
-                    MemberTCInfo TC = SearchIdentifierGetInfo(token.token);
-                    if((stmt_type != "NONE") || (stmt_type != TC.type)){
-                        //Check the types of stmt_type.
-                        vector<MemberTCInfo> typeTable = CollectTypes(stmt_type);
-                        if(!inTypeTable(typeTable,stmt_type)){
-                            error(line,"invalid type usage between '" + stmt_type + "' and '" + TC.type + "'.");
-                        }
-                    }
                     
                 }
-                
             }
         }
         return node;
@@ -422,6 +413,14 @@ which will be used by scope defining functions to get desired results.
         }
         if(node.name != ""){
             Identifiers.push_back(node.name);
+            MemberVarProperty var;
+            var.name = node.name;
+            if(node.type_ == ""){
+                var.type = "NONE";
+            }
+            else{
+                var.type = node.type_;
+            }
         }
         return node;
     }
