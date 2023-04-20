@@ -346,7 +346,28 @@ which will be used by scope defining functions to get desired results.
             Token token = tokens[i];
             if(token.type == IDENTIFIER){
                 if(in(token.token, Identifiers)){
-                    //pursue ....
+                    //Check the member type
+                    MemberTCInfo member = SearchIdentifierGetInfo(token.token);
+                    if(stmt_type == "NONE" && member.type != "NONE"){
+                        stmt_type = member.type;
+                    }
+                    else if(stmt_type == member.type){
+                        stmt_type = member.type;
+                    }
+                    else{
+                        //Now factor the types available
+                        vector<MemberTCInfo> member_table = CollectTypes(member.type);
+                        //Now check whether identifier is used as access tool for member in it.
+                        if(tokens[i+1].token == "."){
+                            if(tokens[i+2].type != IDENTIFIER){
+                                error(line, "invalid syntax '"+ tokens[i+2].token + "' for accessing members of " + token.token +".");
+                            }
+                            else{
+                                //Now check whether member is present in class or not?
+                                
+                            }
+                        }
+                    }
                 }
                 //Identifier used is not in the stack means it's undefined.
                 else{
