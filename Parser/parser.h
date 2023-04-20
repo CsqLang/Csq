@@ -462,12 +462,13 @@ which will be used by scope defining functions to get desired results.
 
     WhileLoop ParseWhileLoop(TokenStream tokens,int line){
         WhileLoop node;
+        TokenStream condition_expr;
         bool condition = false;
         for(Token token : tokens){
             if(token.token == "while" && token.type == KEYWORD)
                 condition = true;
             else if(condition && token.token != ":")
-                node.condition.expr += token.token + " ";
+                condition_expr.push_back(token);
             else if(condition && token.token == ":"){
                 condition = false;
                 break;
@@ -476,6 +477,7 @@ which will be used by scope defining functions to get desired results.
         if(condition){
             error(line, "expected a colon after conditon.");
         }
+        node.condition = ParseExpr(condition_expr, line);
         return node;
     }
 
