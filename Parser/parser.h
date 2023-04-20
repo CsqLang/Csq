@@ -562,6 +562,9 @@ which will be used by scope defining functions to get desired results.
                 Identifiers.push_back(node.name);
             }
         }
+        for(string param : node.params){
+            Identifiers.push_back(param);
+        }
         return node;
     }
 
