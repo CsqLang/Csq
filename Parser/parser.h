@@ -364,7 +364,12 @@ which will be used by scope defining functions to get desired results.
                             }
                             else{
                                 //Now check whether member is present in class or not?
-                                
+                                if(isMemberPresent(member_table,tokens[i+2].token)){
+                                    
+                                }
+                                else{
+                                    error(line, tokens[i+2].token + " is not the member of " + token.token + ".");
+                                }
                             }
                         }
                     }
