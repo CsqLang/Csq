@@ -949,6 +949,7 @@ which will be used by scope defining functions to get desired results.
                     case FUNCTION_DECL:{
                         scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
                         if(class_ ==1){
+                            ParseFuncDecl(tokenize(statement.raw_statement)).name;
                             replaceAll(statement.statement,"=[&]","");
                             code += statement.statement + "{\n";
                         }
