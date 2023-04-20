@@ -375,6 +375,7 @@ which will be used by scope defining functions to get desired results.
         bool value = false;
         bool type_ = false;
         bool equal_ = false;
+        TokenStream value_expr;
         vector<string> Variables_ = Variables;
         Variables_.push_back(tokens[0].token);
         Variables = Variables_;
@@ -411,7 +412,7 @@ which will be used by scope defining functions to get desired results.
                     equal_ = 0;
                 }
                 else if(value && !equal_){
-                    node.value.expr += token.token;
+                    value_expr.push_back(token);
                 }
             }
         }
@@ -422,18 +423,20 @@ which will be used by scope defining functions to get desired results.
                 else if(token.type == ASOPERATOR && !value)
                     value = true;
                 else if(value)
-                    node.value.expr += token.token + " ";
+                    value_expr.push_back(token);
         }
         if(node.name != ""){
             Identifiers.push_back(node.name);
             MemberVarProperty var;
             var.name = node.name;
+            node.value = ParseExpr(value_expr,line);
             if(node.type_ == ""){
                 var.type = "NONE";
             }
             else{
                 var.type = node.type_;
             }
+            variables_prop.push_back(var);
         }
         return node;
     }
