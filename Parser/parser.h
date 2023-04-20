@@ -350,7 +350,7 @@ which will be used by scope defining functions to get desired results.
                 }
                 //Identifier used is not in the stack means it's undefined.
                 else{
-                    
+                    error(line, "undefined identifier '"+ token.token + "'.");
                 }
             }
         }
