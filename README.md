@@ -61,3 +61,7 @@ class mytype:
 obj = mytype()
 obj.data = 494
 ```
+### Group statement
+similar to classes but it doesn't need any object it can be used to store variables.
+```
+```
