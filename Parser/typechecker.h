@@ -85,6 +85,9 @@ vector<string> AllIdentifiers(){
     for(MethodProperty meth: methods_prop){
         identifiers__.push_back(meth.name);
     }
+    for(ClassProp meth: Classes){
+        identifiers__.push_back(meth.name);
+    }
     return identifiers__;
 }
 
