@@ -22,10 +22,14 @@ struct ClassProp{
     vector<MemberVarProperty> member_vars;
     vector<MethodProperty> methods;
 };
-vector<MethodProperty> methods;
-vector<MemberVarProperty> variables;
+vector<MethodProperty> methods_prop;
+vector<MemberVarProperty> variables_prop;
 vector<ClassProp> Classes;
 //Predefining some because they are already defined and encapsulated in headerfile
 vector<string> Identifiers = {"print","range","i32","i64","f64","list","int","double"};
+
+void addIdentifier(string identifier){
+    Identifiers.push_back(identifier);
+}
 
 #endif // Stack_H
