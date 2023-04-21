@@ -77,6 +77,17 @@ bool inTypeTable(vector<MemberTCInfo> typeTable, string type){
     return s;
 }
 
+vector<string> AllIdentifiers(){
+    vector<string> identifiers__;
+    for(MemberVarProperty var: variables_prop){
+        identifiers__.push_back(var.name);
+    }
+    for(MethodProperty meth: methods_prop){
+        identifiers__.push_back(meth.name);
+    }
+    return identifiers__;
+}
+
 bool isMemberPresent(vector<MemberTCInfo> types, string target){
     bool s = false;
     for(MemberTCInfo t : types){
