@@ -456,7 +456,7 @@ which will be used by scope defining functions to get desired results.
                 value = true;
             else if(value)
                 value_expr.push_back(token);
-        if(node.value.expr == ""){
+        if(value_expr.size() == 0){
             error(line, "expected a value after assignment operator.");
         }
         node.value = ParseExpr(value_expr,line);
