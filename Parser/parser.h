@@ -564,14 +564,14 @@ which will be used by scope defining functions to get desired results.
             if(node.name != ""){
                 Identifiers.push_back(node.name);
             }
-            for(string param : node.params){
-                ParseVarDecl(tokenize(param),line);
+            if(node.params.size()!= 0){
+                for(string param : node.params){
+                    if(param != ""){
+                        ParseVarDecl(tokenize(param),line);
+                    }
+                }
             }
         }
-        // for(string param : node.params){
-            
-            
-        // }
         return node;
     }
 
