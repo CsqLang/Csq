@@ -37,17 +37,25 @@ for i in range(1,100):
  print(i)
 ```
 ### If, Elif and Else statements
+#### If
 ```
-i = 1
-if i == 1:
- i = 5
- if i == 5:
-  print(5)
- elif i == 3:
-  print(3)
- else:
-  print(0)
+if 1:
+ print('Hi')
 ```
+#### Elif
+```
+if 1:
+ print('Hi')
+elif 0:
+ print("Bye")
+```
+#### Else
+```
+if 1:
+ print('Hi')
+else:
+ print('Bye')
+ ```
 ### Functions
 ```
 def myfun():
