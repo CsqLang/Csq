@@ -21,3 +21,5 @@ This node type represents if statements.
 This node type represents elif statements.
 <li>ElseStmt</li>
 This node type represents else statements.
+<li>Break<li>
+This node type represents the break statements to interupt the control statement.
