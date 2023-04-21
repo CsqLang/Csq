@@ -348,7 +348,7 @@ which will be used by scope defining functions to get desired results.
                 MemberTCInfo info = SearchIdentifierGetInfo(token.token);
                 // printf("type:'%s', ",info.type.c_str());
                 vector<MemberTCInfo> members = CollectTypes(info.type);
-                if(in(token.token, AllIdentifiers()) || in(token.token, Identifiers)){
+                if(in(token.token, AllIdentifiers())){
                     if(tokens[i+1].token == "."){
                         if(tokens[i+2].type != IDENTIFIER){
                             error(line,"syntax error at '" + tokens[i+2].token +"' in '" + token.token + tokens[i+1].token + tokens[i+2].token + "'.");
@@ -510,7 +510,10 @@ which will be used by scope defining functions to get desired results.
         }
         else{
             if(node.iter_name != ""){
-                Identifiers.push_back(node.iter_name);
+                MemberVarProperty prop;
+                prop.name = node.iter_name;
+                prop.type = "NONE";
+                variables_prop.push_back(prop);
             }
             node.condition = ParseExpr(condition_expr, line);
         }
@@ -703,7 +706,6 @@ which will be used by scope defining functions to get desired results.
                     tokens_.push_back(token);
             tokens = tokens_;
             if(isVarDecl(tokens)){
-                
                 tokens.pop_back();
                 tokens.pop_back();
                 tokens.pop_back();
@@ -865,6 +867,18 @@ which will be used by scope defining functions to get desired results.
         return scope[scope.size()-1];
     }
 
+    void PopLastOccurenceIdentifier(string identifier){
+        int index = -1;
+        for(int i = 0;i<Identifiers.size();i++){
+            if(Identifiers[i] == identifier){
+                index = i;
+            }
+        }
+        if (index != -1) {
+            Identifiers.erase(Identifiers.begin() + index);
+        }
+    }
+
     //This function is expecting that the Statements vector is already filled by the ParseLines function.
 
     /*
@@ -915,7 +929,13 @@ which will be used by scope defining functions to get desired results.
                         break;
                     }
                     case VAR_DECLARATION:{
-                        code += statement.statement + ";\n";
+                        if(class_){
+                            code += statement.statement + ";\n";
+                            
+                        }
+                        else{
+                            code += statement.statement + ";\n";
+                        }
                         break;
                     }
                     case VAR_ASSIGNMENT:{
