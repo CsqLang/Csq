@@ -344,23 +344,25 @@ which will be used by scope defining functions to get desired results.
         for(int i=0;i<tokens.size();i++){
             Token token = tokens[i];
             if(token.type == IDENTIFIER){
+                // printf("token:'%s', ",token.token.c_str());
                 MemberTCInfo info = SearchIdentifierGetInfo(token.token);
+                // printf("type:'%s', ",info.type.c_str());
                 vector<MemberTCInfo> members = CollectTypes(info.type);
-                if(in(token.token, Identifiers)){
+                if(in(token.token, AllIdentifiers()) || in(token.token, Identifiers)){
                     if(tokens[i+1].token == "."){
                         if(tokens[i+2].type != IDENTIFIER){
                             error(line,"syntax error at '" + tokens[i+2].token +"' in '" + token.token + tokens[i+1].token + tokens[i+2].token + "'.");
                         }
                         else{
-                            if(info.type != "NONE"){
+                            if(info.type != "NONE" && info.type != ""){
                                 if(!isMemberPresent(members, tokens[i+2].token)){
                                     error(line, info.type + " object has no attribute " + tokens[i+2].token + ".");
                                 }
                                 else{}
                             }
                         }
+                        i += 2;
                     }
-                    i += 2;
                 }
                 else{
                     error(line, "undefined identifier '" + token.token + "' used.");
@@ -535,6 +537,11 @@ which will be used by scope defining functions to get desired results.
                 param_ += token.token;
             }
             else if(param && token.token == ","){
+                Identifiers.push_back(param_);
+                MemberVarProperty var;
+                var.name = param_;
+                var.type = "NONE";
+                variables_prop.push_back(var);
                 node.params.push_back(param_);
                 param_ = "";
             }
@@ -562,9 +569,10 @@ which will be used by scope defining functions to get desired results.
                 Identifiers.push_back(node.name);
             }
         }
-        for(string param : node.params){
-            Identifiers.push_back(param);
-        }
+        // for(string param : node.params){
+            
+            
+        // }
         return node;
     }
 
@@ -949,7 +957,7 @@ which will be used by scope defining functions to get desired results.
                     case FUNCTION_DECL:{
                         scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
                         if(class_ ==1){
-                            ParseFuncDecl(tokenize(statement.raw_statement)).name;
+                            // ParseFuncDecl(tokenize(statement.raw_statement)).name;
                             replaceAll(statement.statement,"=[&]","");
                             code += statement.statement + "{\n";
                         }
