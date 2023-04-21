@@ -6,7 +6,8 @@
 
 enum TARGET_LANGUAGE{
     C,
-    CPP
+    CPP,
+    JS
 };
 
 enum TARGET_COMPILER{
