@@ -32,4 +32,18 @@ void addIdentifier(string identifier){
     Identifiers.push_back(identifier);
 }
 
+void load_builtins(){
+    //Print function
+    MethodProperty print;
+    print.name = "print";
+    print.params = {"val"};
+    print.type = "NONE";
+    methods_prop.push_back(print);
+    //Range function
+    MethodProperty range;
+    range.name = "range";
+    range.type = "NONE";
+    methods_prop.push_back(range);
+}
+
 #endif // Stack_H
