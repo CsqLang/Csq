@@ -27,7 +27,7 @@ enum TokenType {
     UNKNOWN = 14,
 };
 
-//This enum field will give even more detail about symbols excluding identifiers, numbrs and keywords
+//This enum field will give even more detail about symbols excluding identifiers, numbers and keywords
 typedef enum{
     LBRACE = 1,
     RBRACE = 2,
@@ -518,17 +518,6 @@ vector<Token> tokenize(string source_code) {
                         Token token;
                         token.token = "||";
                         token.type = COPERATOR;
-                        filtered_Tokens.push_back(token);
-                        i = i + 2;
-                    }
-                }
-            }
-            case COLAN:{
-                switch(symbolType(tokens[i+1])){
-                    case COLAN:{
-                        Token token;
-                        token.token = "::";
-                        token.type = ACCESS_OPERATOR;
                         filtered_Tokens.push_back(token);
                         i = i + 2;
                     }
