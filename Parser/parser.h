@@ -434,6 +434,7 @@ which will be used by scope defining functions to get desired results.
             node.value = ParseExpr(value_expr,line);
             if(node.type_ == ""){
                 var.type = "NONE";
+                
                 node.type_infr = 1;
             }
             else{
