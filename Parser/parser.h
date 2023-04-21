@@ -261,15 +261,15 @@ In this field the actual parsing will be done
 and the process is that the functions will parse and generate AST node 
 which will be used by scope defining functions to get desired results.
 */
-    ForLoop ParseForLoop(TokenStream tokens);//(Defined)
-    WhileLoop ParseWhileLoop(TokenStream tokens);//(Defined)
-    VarDecl ParseVarDecl(TokenStream tokens);//(Defined)
-    VarAssign ParseVarAssign(TokenStream tokens);//(Defined)
-    FunctionDecl ParseFuncDecl(TokenStream tokens);//(Defined)
-    IfStmt ParseIfStmt(TokenStream tokens); //(Defined)
-    ElifStmt ParseElifStmt(TokenStream tokens); //(Defined)
-    ElseStmt ParseElseStmt(TokenStream tokens); //(Defined)
-    Break ParseBreakStmt(TokenStream tokens); //(Defined)
+    ForLoop ParseForLoop(TokenStream tokens,int line);//(Defined)
+    WhileLoop ParseWhileLoop(TokenStream tokens,int line);//(Defined)
+    VarDecl ParseVarDecl(TokenStream tokens,int line);//(Defined)
+    VarAssign ParseVarAssign(TokenStream tokens,int line);//(Defined)
+    FunctionDecl ParseFuncDecl(TokenStream tokens,int line);//(Defined)
+    IfStmt ParseIfStmt(TokenStream tokens,int line); //(Defined)
+    ElifStmt ParseElifStmt(TokenStream tokens,int line); //(Defined)
+    ElseStmt ParseElseStmt(TokenStream tokens,int line); //(Defined)
+    Break ParseBreakStmt(TokenStream tokens,int line); //(Defined)
 
     Break ParseBreakStmt(TokenStream tokens, int line){
         Break node;
@@ -434,7 +434,7 @@ which will be used by scope defining functions to get desired results.
             node.value = ParseExpr(value_expr,line);
             if(node.type_ == ""){
                 var.type = "NONE";
-                
+
                 node.type_infr = 1;
             }
             else{
@@ -538,11 +538,6 @@ which will be used by scope defining functions to get desired results.
                 param_ += token.token;
             }
             else if(param && token.token == ","){
-                Identifiers.push_back(param_);
-                MemberVarProperty var;
-                var.name = param_;
-                var.type = "NONE";
-                variables_prop.push_back(var);
                 node.params.push_back(param_);
                 param_ = "";
             }
@@ -568,6 +563,9 @@ which will be used by scope defining functions to get desired results.
         else{
             if(node.name != ""){
                 Identifiers.push_back(node.name);
+            }
+            for(string param : node.params){
+                ParseVarDecl(tokenize(param),line);
             }
         }
         // for(string param : node.params){
