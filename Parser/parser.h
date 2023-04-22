@@ -566,6 +566,11 @@ which will be used by scope defining functions to get desired results.
         else{
             if(node.name != ""){
                 Identifiers.push_back(node.name);
+                MethodProperty p;
+                p.name = node.name;
+                p.type = "NONE";
+                p.params = node.params;
+                methods_prop.push_back(p);
             }
             if(node.params.size()!= 0){
                 for(string param : node.params){
