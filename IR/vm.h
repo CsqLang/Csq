@@ -27,7 +27,7 @@ string combineFunctions(){
 }
 
 string formIR(string code, string fncode, string current_path){
-    string IR = "#include \"" + current_path + "/IR/instructions.h\"\n";
+    string IR = "#include \"" + current_path + "/Csq4/IR/instructions.h\"\n";
     IR += "\nint main(int argc, char *argv[]){\n";
     IR += code + "\nreturn 0;}\n";
     return IR;
@@ -53,8 +53,8 @@ void writeIR(string code, string curr_dir, string name, string lang = ".cpp"){
     file.close();
 }
 
-void CompileToGPP(string path, string name){
-    string command = "g++ " + path + " -o " + name;
+void CompileToGPP(string path, string name,string curr){
+    string command = "cd " + curr + " && g++ " + path + " -o " + name;
     system(command.c_str());
 }
 
@@ -75,7 +75,7 @@ void CompileToClang(string path, string name){
 
 void RunExecutable(string path){
     string command = path;
-    system(command.c_str());
+    system((command).c_str());
 }
 
 bool gcc,gpp,clang,clangpp;
@@ -85,7 +85,7 @@ void CompileToExec(string path, string name){
         CompileToGCC(path, name);
     }
     else if(gpp == 1){
-        CompileToGPP(path, name);
+        // CompileToGPP(path, name, );
     }
     else if(clang == 1){
         CompileToClang(path, name);
@@ -109,7 +109,7 @@ void compile(string lang, string currdir, string name){
             printf("Couldn't compile due to %d existing error.\n", error_count);
         }
         else{
-            CompileToGPP(currdir + "/" + name + ".cpp",name);
+            CompileToGPP(currdir + "/" + name + ".cpp",name, currdir);
         }
     }
 }
