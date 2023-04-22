@@ -12,8 +12,12 @@ int main(int argc, char const *argv[])
             printf("Expected 3 args : <lang> <name> <current dir>\n");
         }
         else{
+            load_builtins();
             compile(argv[1],argv[3],argv[2]);
-            if(error_count == 0){RunExecutable(string(argv[3]) + "/" + argv[2]);}
+            if(error_count == 0){
+                
+                RunExecutable(string(argv[3]) + "/" + argv[2]);
+            }
         }
     return 0;
 }
