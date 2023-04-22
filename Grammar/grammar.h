@@ -45,6 +45,7 @@ vector<string> KEYWORDS_TABLE =
 "def",
 "for",
 "while",
+"return",
 "ends",
 "endc",
 "macro",
