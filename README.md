@@ -66,19 +66,3 @@ else:
 def myfun():
  print('inside myfun')
 ```
-### Classes
-The classes in Csq are public and they currently doesn't allow functions inside them.
-```
-class mytype:
- data:i32 = 0
-obj = mytype()
-obj.data = 494
-```
-### Group statement
-similar to classes but it doesn't need any object it can be used to store variables.
-```
-group mygroup:
- a:i32 = 495
- b:i32 = 49
-print(mygroup.a)
-```
