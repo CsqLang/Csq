@@ -13,6 +13,7 @@ int main(int argc, char const *argv[])
         }
         else{
             load_builtins();
+            Pcurrent_dir = argv[3];
             compile(argv[1],argv[3],argv[2]);
             if(error_count == 0){
                 
