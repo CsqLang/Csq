@@ -6,6 +6,9 @@
     #include "../Memory/stack.h"
     #include "typechecker.h"
 
+    //Current director
+    string Pcurrent_dir;
+
     
     //Some alias
     typedef vector<Token> TokenStream;
@@ -60,6 +63,14 @@
             type = type_;
         }
     };
+
+    /*
+    Indentation handling shall be done in such a way in which every
+    line with certain indentation shall be stored as an object.
+    */
+    //
+    //Define vector for all indentation levels
+    vector<Statement> Statements;
 
     //Getting current indentation level.
     int getIndentLevel(TokenStream tokens){
@@ -207,6 +218,17 @@
         bool state = 0;
         for(Token token : tokens)
             if(token.token == "group" && token.type == KEYWORD)
+            {
+                state = true;
+                break;
+            }
+        return state;
+    }
+
+    bool isImportStmt(TokenStream tokens){
+        bool state = 0;
+        for(Token token : tokens)
+            if(token.token == "import" && token.type == KEYWORD)
             {
                 state = true;
                 break;
@@ -683,13 +705,10 @@ which will be used by scope defining functions to get desired results.
         }
         return indent_level;
     }
-    /*
-    Indentation handling shall be done in such a way in which every
-    line with certain indentation shall be stored as an object.
-    */
-    //
-    //Define vector for all indentation levels
-    vector<Statement> Statements;
+
+    Import ParseImportStmt(TokenStream tokens, int line);
+    //Defines all imports
+    string imported_code;
 
     //Ultimate parsing statement.
     void ParseLines(TokenStream tokens);
@@ -807,6 +826,14 @@ which will be used by scope defining functions to get desired results.
                 Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),GROUP,indent_level));
                 Group_stack.push_back(node_->name);
             }
+            else if(isImportStmt(tokens)){
+                tokens.pop_back();
+                tokens.pop_back();
+                tokens.pop_back();
+                auto node_ = make_shared<Import>(ParseImportStmt(tokens,statement_number));
+                NodePtr node = static_pointer_cast<Node>(node_); 
+                imported_code += node_->code + "\n";
+            }
             else{
                auto node_ = make_shared<Expr>(ParseExpr(tokens,statement_number));
                NodePtr node = static_pointer_cast<Node>(node_); 
@@ -901,6 +928,7 @@ which will be used by scope defining functions to get desired results.
     string ParseStatements(){
         //Image of code
         string code, fncode;
+        code = imported_code;
         //Some properties for scopes
         Scope scope(0,PROGRAM,0);
         Scope master(0,PROGRAM,0);
@@ -1001,6 +1029,35 @@ which will be used by scope defining functions to get desired results.
                     }
                 }
         }
+        imported_code = "";
         return code;
     }
+
+    #include "../IR/vm.h"
+
+    Import ParseImportStmt(TokenStream tokens, int line){
+        Import node;
+        bool path = 0;
+        //First capture the name and path of the file
+        for(Token token : tokens){
+            if(token.token == "import" && path == 0){path = 1;}
+            else if(token.token == "import" && path == 1){
+                error(line, "couldn't use import keyword as path to the module.");
+            }
+            else if(path && token.type != KEYWORD){
+                node.path += token.token;
+            }
+            else if(path && token.type == KEYWORD){
+                error(line, "couldn't use a keyword as path to the module.");
+            }
+        }
+        string path_ = Pcurrent_dir + "/" + node.path + ".csq";
+        //Read the code in it.
+        string read_code = readCode(path_);
+        ParseLines(Tokenizer(read_code));
+        node.code = ParseStatements();
+        Statements = {};
+        return node;
+    }
+
 #endif // PARSEr_H_CSQ4
