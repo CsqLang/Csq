@@ -44,6 +44,44 @@ void load_builtins(){
     range.name = "range";
     range.type = "NONE";
     methods_prop.push_back(range);
+    //i32 class
+    ClassProp i32_;
+    i32_.name = "i32";
+    Classes.push_back(i32_);
+    //str
+    ClassProp str_;
+    str_.name = "str";
+    Classes.push_back(str_);
+    MethodProperty len_;
+    len_.name = "len";
+    len_.type = "NONE";
+    methods_prop.push_back(len_);
+    //f64
+    ClassProp f64_;
+    f64_.name = "f64";
+    Classes.push_back(f64_);
+    //list
+    ClassProp list_;
+    list_.name = "list";
+    Classes.push_back(list_);
+    MethodProperty add_;
+    add_.name = "add";
+    add_.type = "NONE";
+    methods_prop.push_back(add_);
+    MethodProperty read_;
+    read_.name = "read";
+    read_.type = "NONE";
+    methods_prop.push_back(read_);
+    //int
+    ClassProp int_;
+    int_.name = "int";
+    Classes.push_back(int_);
+    ClassProp double_;
+    double_.name = "double";
+    Classes.push_back(double_);
+    ClassProp heap_;
+    heap_.name = "heap";
+    Classes.push_back(heap_);
 }
 
 #endif // Stack_H
