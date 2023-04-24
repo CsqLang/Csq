@@ -360,36 +360,50 @@ which will be used by scope defining functions to get desired results.
 
     Expr ParseExpr(TokenStream tokens, int line){
         Expr node;
-        node.expr = TokenStreamToString(tokens);
-        int tok_index = 0;
-        //This portion of code will be checking errors in the expr
-        for(int i=0;i<tokens.size();i++){
-            Token token = tokens[i];
-            if(token.type == IDENTIFIER){
-                // printf("token:'%s', ",token.token.c_str());
-                MemberTCInfo info = SearchIdentifierGetInfo(token.token);
-                // printf("type:'%s', ",info.type.c_str());
-                vector<MemberTCInfo> members = CollectTypes(info.type);
-                if(in(token.token, AllIdentifiers())){
-                    if(tokens[i+1].token == "."){
-                        if(tokens[i+2].type != IDENTIFIER){
-                            error(line,"syntax error at '" + tokens[i+2].token +"' in '" + token.token + tokens[i+1].token + tokens[i+2].token + "'.");
+        if(tokens.size() != 0)
+        {
+            Token last_token;
+            for(int i = 0;i<tokens.size();i++){
+                Token token = tokens[i];
+                if(token.type == IDENTIFIER){
+                    if(in(token.token,AllIdentifiers())){
+                        if(tokens[i+1].token == "."){
+                            MemberTCInfo info = SearchIdentifierGetInfo(token.token);
+                            if(tokens[i+2].type != IDENTIFIER){
+                                error(line,"unexpected . after " + token.token + ".");
+                            }
+                            else{
+                                if(info.type == "NONE"){
+                                    node.expr += token.token + "." + tokens[i+2].token;
+                                }
+                                else{
+                                    vector<MemberTCInfo> members = CollectTypes(info.type);
+                                    if(!isMemberPresent(members, tokens[i+2].token)){
+                                        error(line, info.type + " object has no attribute " + tokens[i+2].token + ".");
+                                    }
+                                    else{
+                                        node.expr += token.token + "." + tokens[i+2].token;
+                                    }
+                                }
+                            }
+                            i = i+2;
                         }
                         else{
-                            if(info.type != "NONE" && info.type != ""){
-                                if(!isMemberPresent(members, tokens[i+2].token)){
-                                    error(line, info.type + " object has no attribute " + tokens[i+2].token + ".");
-                                }
-                                else{}
-                            }
+                            node.expr += token.token;
                         }
-                        i += 2;
+
+                    }
+                    else{
+                        error(line, "undefined identifier " + token.token + ".");
                     }
                 }
                 else{
-                    error(line, "undefined identifier '" + token.token + "' used.");
+                    
                 }
             }
+        }
+        else{
+            error(line,"expected an expression.");
         }
         return node;
     }
@@ -527,17 +541,16 @@ which will be used by scope defining functions to get desired results.
                 condition = 0;
                 break;
             }
+        
         if(condition){
             error(line, "expected an end of condition.");
         }
         else{
-            if(node.iter_name != ""){
                 MemberVarProperty prop;
                 prop.name = node.iter_name;
                 prop.type = "NONE";
                 variables_prop.push_back(prop);
-            }
-            node.condition = ParseExpr(condition_expr, line);
+            node.condition = ParseExpr(condition_expr,line);
         }
         return node;//Master scope..
     }
@@ -720,6 +733,7 @@ which will be used by scope defining functions to get desired results.
         int last_indent_level = 0;
         code_tokens.push_back(TokenStream({line_end_token}));
         for(TokenStream tokens : code_tokens){
+
             int indent_level = getIndentLevel(tokens);
             //Now remove all indent tokens present since we now know the indent level.
             TokenStream tokens_;
