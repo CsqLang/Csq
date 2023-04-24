@@ -25,6 +25,7 @@ enum TokenType {
     NEWLINE = 12,
     ACCESS_OPERATOR = 13,
     UNKNOWN = 14,
+    BLANK = 15,
 };
 
 //This enum field will give even more detail about symbols excluding identifiers, numbers and keywords
@@ -318,6 +319,10 @@ int TokenCount(vector<Token> tokens, Token token)
 vector<Token> tokenize(string source_code) {
     vector<Token> tokens;
     string current_string, str_input, code_;
+
+    if(source_code == " ;ignore;"){
+        source_code = "ignore";
+    }
     int current_line = 1;
     //Indentation count;
     int IndentCount = 0;
@@ -556,7 +561,6 @@ vector<Token> tokenize(string source_code) {
         error_count++;
     }
     TokenizerLine++;
-
     return filtered_Tokens;
 }
 
