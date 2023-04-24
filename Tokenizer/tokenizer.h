@@ -332,8 +332,12 @@ vector<Token> tokenize(string source_code) {
     bool char_start = false;
     bool string_presence = false;
     bool comment = false;
-    if(source_code[0] == '#')
-        ignore;
+    if(source_code[0] == '#'){
+        Token t;
+        t.token = "ignore";
+        t.type = KEYWORD;
+        tokens = {t};
+    }
     else{
         //Checking for indentation.
         //This string will store the code without indentations.
