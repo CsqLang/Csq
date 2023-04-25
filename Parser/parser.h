@@ -377,18 +377,7 @@ which will be used by scope defining functions to get desired results.
                                 error(line,"unexpected . after " + token.token + ".");
                             }
                             else{
-                                if(info.type == "NONE"){
-                                    node.expr += token.token + "." + tokens[i+2].token;
-                                }
-                                else{
-                                    vector<MemberTCInfo> members = CollectTypes(info.type);
-                                    if(!isMemberPresent(members, tokens[i+2].token)){
-                                        error(line, info.type + " object has no attribute " + tokens[i+2].token + ".");
-                                    }
-                                    else{
-                                        node.expr += token.token + "." + tokens[i+2].token;
-                                    }
-                                }
+                                node.expr += token.token + "." + tokens[i+2].token;
                             }
                             i = i+2;
                         }
@@ -658,6 +647,10 @@ which will be used by scope defining functions to get desired results.
         }
         if(node.name != ""){
             Identifiers.push_back(node.name);
+            ClassProp prop;
+            prop.inheritted_class = node.inherit_class;
+            prop.name = node.name;
+            Classes.push_back(prop);
         }
         return node;
     }
