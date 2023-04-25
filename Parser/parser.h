@@ -1024,25 +1024,31 @@ which will be used by scope defining functions to get desired results.
     Import ParseImportStmt(TokenStream tokens, int line){
         Import node;
         bool path = 0;
+        bool error_ = 0;
         //First capture the name and path of the file
         for(Token token : tokens){
             if(token.token == "import" && path == 0){path = 1;}
             else if(token.token == "import" && path == 1){
                 error(line, "couldn't use import keyword as path to the module.");
+                error_ = 1;
             }
             else if(path && token.type != KEYWORD){
                 node.path += token.token;
             }
             else if(path && token.type == KEYWORD){
                 error(line, "couldn't use a keyword as path to the module.");
+                error_ = 1;
             }
         }
-        string path_ = Pcurrent_dir + "/" + node.path + ".csq";
-        //Read the code in it.
-        string read_code = readCode(path_);
-        ParseLines(Tokenizer(read_code));
-        node.code = ParseStatements();
-        Statements = {};
+        if(!error_){
+            string path_ = Pcurrent_dir + "/" + node.path + ".csq";
+            //Read the code in it.
+            string read_code = readCode(path_);
+            ParseLines(Tokenizer(read_code));
+            node.code = ParseStatements();
+            Statements = {};
+        }
+        
         return node;
     }
 
