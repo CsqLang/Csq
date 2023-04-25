@@ -5,7 +5,6 @@
     #include "../AST/ast.h"
     #include "../Memory/stack.h"
     #include "typechecker.h"
-
     //Current director
     string Pcurrent_dir;
 
@@ -14,7 +13,8 @@
     typedef vector<Token> TokenStream;
     typedef vector<string> StringStream;
     typedef Ptr<Node> NodePtr;
-
+    //Indentation map for variables
+    map<int, StringStream> variable_stack;
     //Tools required for parsing
 
     //Program node to store all the childs
@@ -63,6 +63,17 @@
             type = type_;
         }
     };
+    //Variable scope check;
+    bool Var_checkIsDefined(int indent_level, string var_name){
+        bool state = 0;
+        for(int i = 0;i<=indent_level;i++){
+            if(in(var_name, variable_stack[i])){
+                state = 1;
+                break;
+            }
+        }
+        return state;
+    }
 
     /*
     Indentation handling shall be done in such a way in which every
@@ -160,15 +171,18 @@
             }
         return state;
     }
-    bool isVarDecl(TokenStream tokens){
+    bool isVarDecl(TokenStream tokens, int indent_level){
         bool state = 0;
-        if(tokens[0].type == IDENTIFIER && (tokens[1].token == "=" || tokens[1].token == ":") && !in(tokens[0].token,Variables))
+        if(
+            tokens[0].type == IDENTIFIER && (tokens[1].token == "=" 
+            || tokens[1].token == ":") && !Var_checkIsDefined(indent_level,tokens[0].token))
             state = 1;
         return state;
     }
-    bool isVarAssign(TokenStream tokens){
+    bool isVarAssign(TokenStream tokens, int indent_level){
         bool state = 0;
-        if(tokens[0].type == IDENTIFIER && tokens[1].token == "=" && in(tokens[0].token,Variables))
+        if(tokens[0].type == IDENTIFIER && tokens[1].token == "=" &&
+           Var_checkIsDefined(indent_level,tokens[0].token))
             state = 1;
         return state;
     }
@@ -283,16 +297,6 @@ In this field the actual parsing will be done
 and the process is that the functions will parse and generate AST node 
 which will be used by scope defining functions to get desired results.
 */
-    ForLoop ParseForLoop(TokenStream tokens,int line);//(Defined)
-    WhileLoop ParseWhileLoop(TokenStream tokens,int line);//(Defined)
-    VarDecl ParseVarDecl(TokenStream tokens,int line);//(Defined)
-    VarAssign ParseVarAssign(TokenStream tokens,int line);//(Defined)
-    FunctionDecl ParseFuncDecl(TokenStream tokens,int line);//(Defined)
-    IfStmt ParseIfStmt(TokenStream tokens,int line); //(Defined)
-    ElifStmt ParseElifStmt(TokenStream tokens,int line); //(Defined)
-    ElseStmt ParseElseStmt(TokenStream tokens,int line); //(Defined)
-    Break ParseBreakStmt(TokenStream tokens,int line); //(Defined)
-
     Break ParseBreakStmt(TokenStream tokens, int line){
         Break node;
         if(tokens.size()>1){
@@ -398,7 +402,7 @@ which will be used by scope defining functions to get desired results.
                     }
                 }
                 else{
-                    
+                    node.expr += token.token;
                 }
             }
         }
@@ -408,7 +412,7 @@ which will be used by scope defining functions to get desired results.
         return node;
     }
 
-    VarDecl ParseVarDecl(TokenStream tokens, int line){
+    VarDecl ParseVarDecl(TokenStream tokens,int indent, int line){
         VarDecl node;
         bool value = false;
         bool type_ = false;
@@ -418,6 +422,8 @@ which will be used by scope defining functions to get desired results.
         Variables_.push_back(tokens[0].token);
         Variables = Variables_;
         Variables_.empty();
+
+
         if(tokens[1].token == ":"){
             for(Token token : tokens){
                 if(token.type == IDENTIFIER && !type_ && !value){
@@ -477,6 +483,7 @@ which will be used by scope defining functions to get desired results.
                 var.type = node.type_;
             }
             variables_prop.push_back(var);
+            variable_stack[indent].push_back(node.name);
         }
         return node;
     }
@@ -555,7 +562,7 @@ which will be used by scope defining functions to get desired results.
         return node;//Master scope..
     }
 
-    FunctionDecl ParseFuncDecl(TokenStream tokens, int line){
+    FunctionDecl ParseFuncDecl(TokenStream tokens,int indent_level, int line){
         FunctionDecl node;
         bool param = false;
         bool name = false;
@@ -610,7 +617,7 @@ which will be used by scope defining functions to get desired results.
             if(node.params.size()!= 0){
                 for(string param : node.params){
                     if(param != ""){
-                        ParseVarDecl(tokenize(param),line);
+                        ParseVarDecl(tokenize(param),indent_level,line);
                     }
                 }
             }
@@ -705,6 +712,9 @@ which will be used by scope defining functions to get desired results.
         return node;
     }
 
+
+    /**********************************************************************************************************************************************************************/
+
     //This function is gonna return the deepest indent level.
     int DeepestIndentLevel(vector<TokenStream> tokens)
     {
@@ -732,6 +742,7 @@ which will be used by scope defining functions to get desired results.
         line_end_token.type = KEYWORD;
         int last_indent_level = 0;
         code_tokens.push_back(TokenStream({line_end_token}));
+        //Look for each line.
         for(TokenStream tokens : code_tokens){
 
             int indent_level = getIndentLevel(tokens);
@@ -743,16 +754,17 @@ which will be used by scope defining functions to get desired results.
                 else
                     tokens_.push_back(token);
             tokens = tokens_;
-            if(isVarDecl(tokens)){
+            //Now check for token types and parse them seper
+            if(isVarDecl(tokens, indent_level)){
                 tokens.pop_back();
                 tokens.pop_back();
                 tokens.pop_back();
                 //Now get AST node for the statement.
-                auto node_ = make_shared<VarDecl>(ParseVarDecl(tokens, statement_number));
+                auto node_ = make_shared<VarDecl>(ParseVarDecl(tokens,indent_level, statement_number));
                 NodePtr node = static_pointer_cast<Node>(node_);
                 Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),VAR_DECLARATION,indent_level));
             }
-            else if(isVarAssign(tokens)){
+            else if(isVarAssign(tokens, indent_level)){
                 tokens.pop_back();
                 tokens.pop_back();
                 tokens.pop_back();
@@ -766,7 +778,7 @@ which will be used by scope defining functions to get desired results.
                 tokens.pop_back();
                 tokens.pop_back();
                 //Now get AST node for the statement.
-                auto node_ = make_shared<FunctionDecl>(ParseFuncDecl(tokens, statement_number));
+                auto node_ = make_shared<FunctionDecl>(ParseFuncDecl(tokens,indent_level+1, statement_number));
                 NodePtr node = static_pointer_cast<Node>(node_);
                 Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),FUNCTION_DECL,indent_level));
             }
@@ -882,14 +894,6 @@ which will be used by scope defining functions to get desired results.
         return state;
     }
 
-
-    //Traverse and print the statements with their properties.
-    void PrintStatements(){
-        for(Statement statement : Statements){
-            printf("line : %d indent : %d type : %d (%s)\n",statement.number,statement.indent_level, statement.type, statement.statement.c_str());
-        }
-    }
-
     //Seeking for last open scope
 
     Scope last_open_scope(vector<Scope> scope_stack){
@@ -913,32 +917,7 @@ which will be used by scope defining functions to get desired results.
         return scope[scope.size()-1];
     }
 
-    void PopLastOccurenceIdentifier(string identifier){
-        int index = -1;
-        for(int i = 0;i<Identifiers.size();i++){
-            if(Identifiers[i] == identifier){
-                index = i;
-            }
-        }
-        if (index != -1) {
-            Identifiers.erase(Identifiers.begin() + index);
-        }
-    }
-
-    //This function is expecting that the Statements vector is already filled by the ParseLines function.
-
-    /*
-    for i in range(345):
-     for j in range(i):
-      print(j)
-     print("--------------------------------")
-
-    Statements:
-    (for i in range(345):, 0)
-    (for j in range(i):, 1)
-    (print(j),2)
-    (print("--------------------------------"),1)
-    */
+    //Last parsing stage which will return transpiled code and work with indentations.
     string ParseStatements(){
         //Image of code
         string code, fncode;
