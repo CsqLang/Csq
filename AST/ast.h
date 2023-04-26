@@ -219,6 +219,7 @@ struct Group : Node{
 
 struct OneLiner : Node{
     string code;
+    vector<vector<Token>> lines;
     OneLiner(){type = ONE_LINER;}      
     OneLiner(string code_){
         type = ONE_LINER;
