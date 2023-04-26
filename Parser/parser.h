@@ -403,77 +403,83 @@ which will be used by scope defining functions to get desired results.
 
     VarDecl ParseVarDecl(TokenStream tokens,int indent, int line){
         VarDecl node;
-        bool value = false;
         bool type_ = false;
         bool equal_ = false;
         TokenStream value_expr;
-        vector<string> Variables_ = Variables;
-        Variables_.push_back(tokens[0].token);
-        Variables = Variables_;
-        Variables_.empty();
-
 
         if(tokens[1].token == ":"){
-            for(Token token : tokens){
-                if(token.type == IDENTIFIER && !type_ && !value){
-                    node.name = token.token;
-                }
-                else if(!type_ && !equal_ && !value && token.type != IDENTIFIER){
-                    if(token.token != ":"){
-                        error(line, "unexpected " + token.token + " after identifier.");
-                    }
-                    else{
-                        type_ = true;
-                    }
-                }
-                else if(type_ && !value)
-                {
-                    if(token.type != IDENTIFIER){
-                        error(line, "expected an identifier instead of " + token.token + ".");
-                        break;
-                    }
-                    else{
-                        node.type_ = token.token;
-                        node.type_infr = 0;
-                        equal_ = 1;
-                        type_ = false;
-                    }
-                }
+            type_  = 1;
+        }
 
-                else if(!type_ && equal_ && token.token == "="){
-                    value = 1;
-                    equal_ = 0;
+        if(type_){
+            bool t_comes = 0;
+            bool n_comes = 1;
+            bool v_comes = 0;
+            for(Token token : tokens){
+                if(n_comes){
+                    if(token.type != IDENTIFIER){
+                        error(line, "expected an identifier.");
+                    }
+                    else{
+                        node.name = token.token;
+                        n_comes = 0;
+                    }
                 }
-                else if(value && !equal_){
+                else if(!n_comes && !t_comes && token.token == ":"){
+                    t_comes = 1;
+                }
+                else if(t_comes){
+                    if(token.token != "=" && token.token != ">="){
+                        node.type_ += token.token;
+                    }
+                    else{
+                        t_comes = 0;
+                        v_comes = 1;
+                        if(token.token == ">="){
+                            node.type_ += ">";
+                        }
+                    }
+                }
+                else if(v_comes){
                     value_expr.push_back(token);
                 }
             }
         }
         else{
-            for(Token token : tokens)
-                if(!value && token.type == IDENTIFIER)
-                    node.name = token.token;
-                else if(token.type == ASOPERATOR && !value)
-                    value = true;
-                else if(value)
+            //Infr the type:
+            bool t_comes = 0;
+            bool n_comes = 1;
+            bool v_comes = 0;
+            for(Token token : tokens){
+                if(n_comes){
+                    if(token.type != IDENTIFIER){
+                        error(line, "expected an identifier.");
+                    }
+                    else{
+                        node.name = token.token;
+                        n_comes = 0;
+                    }
+                }
+                else if(!n_comes && !t_comes && token.token == "="){
+                    v_comes = 1;
+                }
+                else if(v_comes){
                     value_expr.push_back(token);
-        }
-        if(node.name != ""){
-            Identifiers.push_back(node.name);
-            MemberVarProperty var;
-            var.name = node.name;
-            node.value = ParseExpr(value_expr,line);
-            if(node.type_ == ""){
-                var.type = "NONE";
-
-                node.type_infr = 1;
+                }
             }
-            else{
-                var.type = node.type_;
-            }
-            variables_prop.push_back(var);
-            variable_stack[indent].push_back(node.name);
         }
+        MemberVarProperty prop;
+        prop.name = node.name;
+        if(type_){
+            prop.name = node.type_;
+            node.type_infr = 0;
+        }
+        else{
+            prop.name = "NONE";
+            node.type_infr = 1;
+        }
+        node.value = ParseExpr(value_expr, line);
+        variable_stack[indent].push_back(node.name);
         return node;
     }
 
@@ -950,7 +956,6 @@ which will be used by scope defining functions to get desired results.
                     case VAR_DECLARATION:{
                         if(class_){
                             code += statement.statement + ";\n";
-                            
                         }
                         else{
                             code += statement.statement + ";\n";
@@ -1051,5 +1056,7 @@ which will be used by scope defining functions to get desired results.
         
         return node;
     }
+
+    
 
 #endif // PARSEr_H_CSQ4
