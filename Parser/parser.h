@@ -738,7 +738,6 @@ which will be used by scope defining functions to get desired results.
     }
 
     Import ParseImportStmt(TokenStream tokens, int line);
-    OneLiner ParseOneLiner(TokenStream tokens, int indent, int line);
     //Defines all imports
     string imported_code;
 
@@ -867,13 +866,6 @@ which will be used by scope defining functions to get desired results.
                 auto node_ = make_shared<Import>(ParseImportStmt(tokens,statement_number));
                 NodePtr node = static_pointer_cast<Node>(node_); 
                 imported_code += node_->code + "\n";
-            }
-            else if(isOneliner(tokens)){
-                tokens.pop_back();
-                tokens.pop_back();
-                tokens.pop_back();
-                auto node = (ParseOneLiner(tokens,indent_level,statement_number));
-                Statements.push_back(Statement(statement_number,"",node.code,ONE_LINER,indent_level));
             }
             else{
                auto node_ = make_shared<Expr>(ParseExpr(tokens,statement_number));
@@ -1034,8 +1026,8 @@ which will be used by scope defining functions to get desired results.
                         code += statement.statement + "{\npublic:\n";
                         break;
                     }
-                    case ONE_LINER:{
-                        code += statement.statement + "\n";
+                    default:{
+                        error(statement.number, "unknow node type " + to_string(statement.type));
                     }
                 }
         }
@@ -1076,28 +1068,28 @@ which will be used by scope defining functions to get desired results.
         return node;
     }
 
-    OneLiner ParseOneLiner(TokenStream tokens, int indent, int line){
-        OneLiner node;
-        Token Semi;
-        Semi.token = ";";
-        Semi.type = SYMBOL;
-        tokens.push_back(Semi);
-        TokenStream line_;
-        for(Token token : tokens){
-            if(token.token != ";"){
-                line_.push_back(token);
-            }
-            else{
-                node.lines.push_back(line_);
-                line_.empty();
-            }
-        }
-        ParseLines(node.lines);
-        node.code = ParseStatements();
-        for(int i  = 0;i<node.lines.size();i++){
-            Statements.pop_back();
-        }
-        return node;
-    }
+    // OneLiner ParseOneLiner(TokenStream tokens, int indent, int line){
+    //     OneLiner node;
+    //     Token Semi;
+    //     Semi.token = ";";
+    //     Semi.type = SYMBOL;
+    //     tokens.push_back(Semi);
+    //     TokenStream line_;
+    //     for(Token token : tokens){
+    //         if(token.token != ";"){
+    //             line_.push_back(token);
+    //         }
+    //         else{
+    //             node.lines.push_back(line_);
+    //             line_.empty();
+    //         }
+    //     }
+    //     ParseLines(node.lines);
+    //     node.code = ParseStatements();
+    //     for(int i  = 0;i<node.lines.size();i++){
+    //         Statements.pop_back();
+    //     }
+    //     return node;
+    // }
 
 #endif // PARSEr_H_CSQ4
