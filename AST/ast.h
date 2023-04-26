@@ -29,6 +29,7 @@ typedef enum {
     FUN_ARGUMENT,
     BREAK,
     GROUP,
+    ONE_LINER,
     IMPORT,
     PROGRAM, //The basic node type is Program which doesn't needs to be traversed.
 } NODE_TYPE;
@@ -60,6 +61,7 @@ struct FunArg;
 struct Break;
 struct Group;
 struct Import;
+struct OneLiner;
 // Definitions for above Node types
 
 struct Expr : Node{
@@ -95,12 +97,15 @@ struct VarDecl : Node{
 struct Import : Node{
     string path;
     string alias;
-    vector<TokenStream> code;
-    Import(){}
-    Import(string path_, string alias_ = ""){
-        code = Tokenizer(readCode(path_));
+    string code;
+    Import(){
+        type = IMPORT;
+    }
+    Import(string path_, string code_, string alias_ = ""){
+        code = code_;
         path = path_;
         alias = alias_;
+        type = IMPORT;
     }   
 };
 
@@ -210,6 +215,15 @@ struct Group : Node{
         name = name_;
         type = GROUP;
     }
+};
+
+struct OneLiner : Node{
+    string code;
+    OneLiner(){type = ONE_LINER;}      
+    OneLiner(string code_){
+        type = ONE_LINER;
+        code = code_;
+    }      
 };
 
 //Functions to add nodes for ease of use.
