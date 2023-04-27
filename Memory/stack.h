@@ -80,6 +80,9 @@ void load_builtins(){
     ClassProp int_;
     int_.name = "int";
     Classes.push_back(int_);
+    ClassProp map_;
+    map_.name = "map";
+    Classes.push_back(map_);
     ClassProp double_;
     double_.name = "double";
     Classes.push_back(double_);
