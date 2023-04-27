@@ -68,6 +68,10 @@ void load_builtins(){
     add_.name = "add";
     add_.type = "NONE";
     methods_prop.push_back(add_);
+    MethodProperty sort_;
+    sort_.name = "sort";
+    sort_.type = "NONE";
+    methods_prop.push_back(sort_);
     MethodProperty read_;
     read_.name = "read";
     read_.type = "NONE";
