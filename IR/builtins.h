@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
+#include <algorithm>
 using namespace std;
 
 struct i32{
@@ -153,6 +154,10 @@ struct list{
         int len(){
             return data.size();
         }
+        // Sort a vector in ascending order using std::sort
+        void sort() {
+            std::sort(data.begin(), data.end());
+        }
         //Iterators for for each loop.
         T* begin() { return &this->data[0];}
         const T* begin() const { return &this->data[0];}
@@ -184,6 +189,13 @@ void print(list<i32> val){
     printf("{ ");
     for(int i = 0;i<val.len();i++){
         printf("%d, ",val[i].data);
+    }
+    printf(" }\n");
+}
+void print(list<int> val){
+    printf("{ ");
+    for(int i = 0;i<val.len();i++){
+        printf("%d, ",val[i]);
     }
     printf(" }\n");
 }
