@@ -480,15 +480,17 @@ which will be used by scope defining functions to get desired results.
         MemberVarProperty prop;
         prop.name = node.name;
         if(type_){
-            prop.name = node.type_;
+            prop.name = node.name;
+            prop.type = node.type_;
             node.type_infr = 0;
         }
         else{
-            prop.name = "NONE";
+            prop.type = "NONE";
             node.type_infr = 1;
         }
         node.value = ParseExpr(value_expr, line);
         variable_stack[indent].push_back(node.name);
+        variables_prop.push_back(prop);
         return node;
     }
 
@@ -1067,29 +1069,5 @@ which will be used by scope defining functions to get desired results.
         
         return node;
     }
-
-    // OneLiner ParseOneLiner(TokenStream tokens, int indent, int line){
-    //     OneLiner node;
-    //     Token Semi;
-    //     Semi.token = ";";
-    //     Semi.type = SYMBOL;
-    //     tokens.push_back(Semi);
-    //     TokenStream line_;
-    //     for(Token token : tokens){
-    //         if(token.token != ";"){
-    //             line_.push_back(token);
-    //         }
-    //         else{
-    //             node.lines.push_back(line_);
-    //             line_.empty();
-    //         }
-    //     }
-    //     ParseLines(node.lines);
-    //     node.code = ParseStatements();
-    //     for(int i  = 0;i<node.lines.size();i++){
-    //         Statements.pop_back();
-    //     }
-    //     return node;
-    // }
 
 #endif // PARSEr_H_CSQ4
