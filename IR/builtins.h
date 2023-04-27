@@ -239,6 +239,29 @@ std::vector<int> range(int start, int end_) {
 }
 
 
+#include <unordered_map>
+template<typename K,typename V>
+class map {
+private:
+    unordered_map<K,V> data;
+
+public:
+    void add(K key, V value) {
+        data[key] = value;
+    }
+
+    V get(K key) {
+        return data[key];
+    }
+
+    void remove(K key) {
+        if (data.find(key) != data.end()) {
+            data.erase(key);
+        } else {
+            printf("Key not found.");
+        }
+    }
+};
 
 
 
