@@ -924,6 +924,7 @@ which will be used by scope defining functions to get desired results.
         Statement last_statement;
         for(Statement statement : Statements){
                 while(statement.indent_level != last_scope(scope_stack).indent_level){
+                    variable_stack.erase(last_scope(scope_stack).indent_level);
                     if(last_scope(scope_stack).of == FUNCTION_DECL || last_scope(scope_stack).of == CLASS_DEFINITION){
                         code += "};\n";
                         scope_stack.pop_back(); 
