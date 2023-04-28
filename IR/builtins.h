@@ -132,6 +132,12 @@ struct str{
     str operator+(const str& val) {
         return str(__str__ + val.__str__);
     }
+    bool operator==(const str& val) {
+        return __str__ == val.__str__;
+    }
+    bool operator!=(const str& val) {
+        return __str__ != val.__str__;
+    }
 };
 
 template<typename T> 
@@ -239,29 +245,49 @@ std::vector<int> range(int start, int end_) {
 }
 
 
-#include <unordered_map>
-template<typename K,typename V>
-class map {
+template <typename KeyType, typename ValueType>
+class dict {
 private:
-    unordered_map<K,V> data;
+    // Define a struct to hold key-value pairs
+    struct Pair {
+        KeyType key;
+        ValueType value;
+    };
+
+    std::vector<Pair> pairs;
 
 public:
-    void add(K key, V value) {
-        data[key] = value;
-    }
-
-    V get(K key) {
-        return data[key];
-    }
-
-    void remove(K key) {
-        if (data.find(key) != data.end()) {
-            data.erase(key);
-        } else {
-            printf("Key not found.");
+    // Add a key-value pair to the map
+    void insert(KeyType key, ValueType value) {
+        // Check if the key already exists in the map
+        for (auto pair : pairs) {
+            if (pair.key == key) {
+                // If it does, update the value for that key
+                pair.value = value;
+                return;
+            }
         }
+
+        // If the key doesn't exist, add a new pair to the vector
+        pairs.push_back({key, value});
+    }
+
+    // Retrieve the value for a given key
+    ValueType& operator[](const KeyType& key) {
+        // Search for the key in the vector
+        for (auto& pair : pairs) {
+            if (pair.key == key) {
+                // If found, return the associated value
+                return pair.value;
+            }
+        }
+
+        // If not found, add a new pair to the vector with a default value
+        pairs.push_back({key, ValueType()});
+        return pairs.back().value;
     }
 };
+
 
 
 
