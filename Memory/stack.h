@@ -76,12 +76,16 @@ void load_builtins(){
     read_.name = "read";
     read_.type = "NONE";
     methods_prop.push_back(read_);
+    MethodProperty insert_;
+    insert_.name = "insert";
+    insert_.type = "NONE";
+    methods_prop.push_back(insert_);
     //int
     ClassProp int_;
     int_.name = "int";
     Classes.push_back(int_);
     ClassProp map_;
-    map_.name = "map";
+    map_.name = "dict";
     Classes.push_back(map_);
     ClassProp double_;
     double_.name = "double";
