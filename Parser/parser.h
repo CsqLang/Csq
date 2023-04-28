@@ -372,40 +372,23 @@ which will be used by scope defining functions to get desired results.
     }
 
     Expr ParseExpr(TokenStream tokens, int line){
-        Expr node;
-        if(tokens.size() != 0)
-        {
-            Token last_token;
-            for(int i = 0;i<tokens.size();i++){
-                Token token = tokens[i];
-                if(token.type == IDENTIFIER){
-                    if(in(token.token,AllIdentifiers())){
-                        if(tokens[i+1].token == "."){
-                            MemberTCInfo info = SearchIdentifierGetInfo(token.token);
-                            if(tokens[i+2].type != IDENTIFIER){
-                                error(line,"unexpected . after " + token.token + ".");
-                            }
-                            else{
-                                node.expr += token.token + "." + tokens[i+2].token;
-                            }
-                            i = i+2;
-                        }
-                        else{
-                            node.expr += token.token;
-                        }
-
-                    }
-                    else{
-                        error(line, "undefined identifier " + token.token + ".");
-                    }
+        // Expr node = TokenStreamToString(tokens);
+        Expr node = Expr("");
+        for(int i = 0;i < tokens.size(); i++){
+            if(tokens[i].type == KEYWORD){
+                node.expr += tokens[i].token + " ";
+            }
+            else if(tokens[i].type == IDENTIFIER){
+                if(in(tokens[i].token, AllIdentifiers())){
+                    node.expr += tokens[i].token + " ";
                 }
                 else{
-                    node.expr += token.token;
+                    error(line, "undefined name " + tokens[i].token + ".");
                 }
             }
-        }
-        else{
-            error(line,"expected an expression.");
+            else{
+                node.expr += tokens[i].token + " ";
+            }
         }
         return node;
     }
