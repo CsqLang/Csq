@@ -928,6 +928,9 @@ which will be used by scope defining functions to get desired results.
                     if(last_scope(scope_stack).of == FUNCTION_DECL || last_scope(scope_stack).of == CLASS_DEFINITION){
                         code += "};\n";
                         scope_stack.pop_back(); 
+                        if(last_scope(scope_stack).of == CLASS_DEFINITION){
+                            class_ = 0;
+                        }
                     }
                     else if(last_scope(scope_stack).of == GROUP){
                         if(Group_stack.size()!=0){
