@@ -16,7 +16,7 @@ This the updated version of 4.2 which is having more concise syntax than the 4.1
 
 ### Variables
 In Csq4.2 a variable's data is allocated on stack by default but to store it's data into heap we could use builtin types to do so.
-We could also use type annotation for explicit typing.
+We could also use type annotation for explicit typing. But it will make you feel like dynamic typing since type annotation is only strictly recommended to use explicit typing inside classes.
 Syntax:
 ```
 <name> = <value>
@@ -65,4 +65,9 @@ else:
 ```
 def myfun():
  print('inside myfun')
+```
+There is a functionality in Csq that the functions defined doesn't require any function overloading since it's param can be use for any type but return type should be same in all cases.
+```
+def myfun(a = {}):
+ print(a)
 ```
