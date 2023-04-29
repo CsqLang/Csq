@@ -393,7 +393,7 @@ which will be used by scope defining functions to get desired results.
         return node;
     }
 
-    VarDecl ParseVarDecl(TokenStream tokens,int indent, int line){
+    VarDecl ParseVarDecl(TokenStream tokens,int indent, int line, int num){
         VarDecl node;
         bool type_ = false;
         bool equal_ = false;
@@ -472,7 +472,7 @@ which will be used by scope defining functions to get desired results.
             node.type_infr = 1;
         }
         node.value = ParseExpr(value_expr, line);
-        variable_stack[indent].push_back(node.name);
+        variable_stack[1000+indent+num].push_back(node.name);
         variables_prop.push_back(prop);
         return node;
     }
@@ -606,7 +606,7 @@ which will be used by scope defining functions to get desired results.
             if(node.params.size()!= 0){
                 for(string param : node.params){
                     if(param != ""){
-                        ParseVarDecl(tokenize(param),indent_level,line);
+                        ParseVarDecl(tokenize(param),indent_level,line,line);
                     }
                 }
             }
@@ -752,7 +752,7 @@ which will be used by scope defining functions to get desired results.
                 tokens.pop_back();
                 tokens.pop_back();
                 //Now get AST node for the statement.
-                auto node_ = make_shared<VarDecl>(ParseVarDecl(tokens,indent_level, statement_number));
+                auto node_ = make_shared<VarDecl>(ParseVarDecl(tokens,indent_level, statement_number,statement_number));
                 NodePtr node = static_pointer_cast<Node>(node_);
                 Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),VAR_DECLARATION,indent_level));
             }
@@ -924,7 +924,7 @@ which will be used by scope defining functions to get desired results.
         Statement last_statement;
         for(Statement statement : Statements){
                 while(statement.indent_level != last_scope(scope_stack).indent_level){
-                    variable_stack.erase(last_scope(scope_stack).indent_level);
+                    variable_stack.erase(1000+last_scope(scope_stack).indent_level+statement.number);
                     if(last_scope(scope_stack).of == FUNCTION_DECL || last_scope(scope_stack).of == CLASS_DEFINITION){
                         code += "};\n";
                         scope_stack.pop_back(); 
