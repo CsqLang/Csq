@@ -258,6 +258,14 @@
         return state;
     }
 
+    bool isReturnStmt(TokenStream tokens){
+        bool state = 0;
+        for(Token token : tokens){
+            if(token.token == "return"){state = 1;break;}
+        }
+        return state;
+    }
+
     //Errors for the bad code.
 
     void unexpected_indent(int line, string last_stmt_type){
@@ -306,6 +314,28 @@ In this field the actual parsing will be done
 and the process is that the functions will parse and generate AST node 
 which will be used by scope defining functions to get desired results.
 */
+    Expr ParseExpr(TokenStream tokens, int line){
+        // Expr node = TokenStreamToString(tokens);
+        Expr node = Expr("");
+        for(int i = 0;i < tokens.size(); i++){
+            if(tokens[i].type == KEYWORD){
+                node.expr += tokens[i].token + " ";
+            }
+            else if(tokens[i].type == IDENTIFIER){
+                if(in(tokens[i].token, AllIdentifiers())){
+                    node.expr += tokens[i].token + " ";
+                }
+                else{
+                    error(line, "undefined name " + tokens[i].token + ".");
+                }
+            }
+            else{
+                node.expr += tokens[i].token + " ";
+            }
+        }
+        return node;
+    }
+
     Break ParseBreakStmt(TokenStream tokens, int line){
         Break node;
         if(tokens.size()>1){
@@ -335,6 +365,25 @@ which will be used by scope defining functions to get desired results.
         if(condition){
             error(line, "the if statement hasn't ended sucessfuly.");
             printf("Hint: add a colon after condition.\n");
+        }
+        return node;
+    }
+
+    ReturnStmt ParseReturnStmt(TokenStream tokens, int line){
+        ReturnStmt node;
+        TokenStream token_;
+        bool v = 0;
+                printf("In retrun ");
+        for(Token token : tokens){
+            if(token.token == "return" && token.type == KEYWORD && !v){
+                v = 1;
+            }
+            else if(v && token.type == KEYWORD){
+                error(line, "invalid use of keyword " + token.token + " in return stmt.");
+            }
+            else{
+                node.expr.expr += token.token;
+            }
         }
         return node;
     }
@@ -371,27 +420,6 @@ which will be used by scope defining functions to get desired results.
         return node;
     }
 
-    Expr ParseExpr(TokenStream tokens, int line){
-        // Expr node = TokenStreamToString(tokens);
-        Expr node = Expr("");
-        for(int i = 0;i < tokens.size(); i++){
-            if(tokens[i].type == KEYWORD){
-                node.expr += tokens[i].token + " ";
-            }
-            else if(tokens[i].type == IDENTIFIER){
-                if(in(tokens[i].token, AllIdentifiers())){
-                    node.expr += tokens[i].token + " ";
-                }
-                else{
-                    error(line, "undefined name " + tokens[i].token + ".");
-                }
-            }
-            else{
-                node.expr += tokens[i].token + " ";
-            }
-        }
-        return node;
-    }
 
     VarDecl ParseVarDecl(TokenStream tokens,int indent, int line, int num){
         VarDecl node;
@@ -542,10 +570,10 @@ which will be used by scope defining functions to get desired results.
             error(line, "expected an end of condition.");
         }
         else{
-                MemberVarProperty prop;
-                prop.name = node.iter_name;
-                prop.type = "NONE";
-                variables_prop.push_back(prop);
+            MemberVarProperty prop;
+            prop.name = node.iter_name;
+            prop.type = "NONE";
+            variables_prop.push_back(prop);
             node.condition = ParseExpr(condition_expr,line);
         }
         return node;//Master scope..
@@ -606,7 +634,7 @@ which will be used by scope defining functions to get desired results.
             if(node.params.size()!= 0){
                 for(string param : node.params){
                     if(param != ""){
-                        ParseVarDecl(tokenize(param),indent_level,line,line);
+                        ParseVarDecl(tokenize(param),indent_level+1,line,line);
                     }
                 }
             }
@@ -728,6 +756,7 @@ which will be used by scope defining functions to get desired results.
 
     //Ultimate parsing statement.
     void ParseLines(vector<TokenStream> code_tokens){
+                printf("In parselines ");
         int statement_number = 1;
         Token line_end_token;
         line_end_token.token = "ignore";
@@ -843,6 +872,14 @@ which will be used by scope defining functions to get desired results.
                 NodePtr node = static_pointer_cast<Node>(node_); 
                 Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),GROUP,indent_level));
                 Group_stack.push_back(node_->name);
+            }
+            else if(isReturnStmt(tokens)){
+                tokens.pop_back();
+                tokens.pop_back();
+                tokens.pop_back();
+                auto node_ = make_shared<ReturnStmt>(ParseReturnStmt(tokens,statement_number));
+                NodePtr node = static_pointer_cast<Node>(node_); 
+                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),RETURN_STMT,indent_level));
             }
             else if(isImportStmt(tokens)){
                 tokens.pop_back();
@@ -993,6 +1030,9 @@ which will be used by scope defining functions to get desired results.
                         code += statement.statement + "{\npublic:\n";
                         class_ = 1;
                         break;
+                    }
+                    case RETURN_STMT:{
+                        code += statement.statement + ";";
                     }
                     case FUNCTION_DECL:{
                         scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
