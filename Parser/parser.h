@@ -373,7 +373,6 @@ which will be used by scope defining functions to get desired results.
         ReturnStmt node;
         TokenStream token_;
         bool v = 0;
-                printf("In retrun ");
         for(Token token : tokens){
             if(token.token == "return" && token.type == KEYWORD && !v){
                 v = 1;
@@ -382,9 +381,10 @@ which will be used by scope defining functions to get desired results.
                 error(line, "invalid use of keyword " + token.token + " in return stmt.");
             }
             else{
-                node.expr.expr += token.token;
+                token_.push_back(token);
             }
         }
+        node.expr = ParseExpr(tokens, line);
         return node;
     }
 
@@ -756,7 +756,6 @@ which will be used by scope defining functions to get desired results.
 
     //Ultimate parsing statement.
     void ParseLines(vector<TokenStream> code_tokens){
-                printf("In parselines ");
         int statement_number = 1;
         Token line_end_token;
         line_end_token.token = "ignore";
@@ -1032,7 +1031,7 @@ which will be used by scope defining functions to get desired results.
                         break;
                     }
                     case RETURN_STMT:{
-                        code += statement.statement + ";";
+                        code += statement.statement;
                     }
                     case FUNCTION_DECL:{
                         scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
