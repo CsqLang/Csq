@@ -30,6 +30,7 @@ typedef enum {
     BREAK,
     GROUP,
     ONE_LINER,
+    RETURN_STMT,
     IMPORT,
     PROGRAM, //The basic node type is Program which doesn't needs to be traversed.
 } NODE_TYPE;
@@ -62,8 +63,12 @@ struct Break;
 struct Group;
 struct Import;
 struct OneLiner;
+struct ReturnStmt;
 // Definitions for above Node types
-
+//Expr node type is the combination of different types of statements like
+//*Function call
+//*Value
+//*Binary and Unary expressions
 struct Expr : Node{
     string expr;
     Expr(){type = EXPR_TYPE; expr = "";}
@@ -91,6 +96,17 @@ struct VarDecl : Node{
         value = Expr();
         type = VAR_DECLARATION;
 
+    }
+};
+
+struct ReturnStmt : Node{
+    Expr expr;
+    ReturnStmt(){
+        type = RETURN_STMT;
+    }
+    ReturnStmt(Expr exp){
+        type = RETURN_STMT;
+        expr = exp;
     }
 };
 
