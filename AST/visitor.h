@@ -16,6 +16,7 @@ string WhileLoop_visitor(Ptr<WhileLoop> node);
 string ClassDecl_visitor(Ptr<ClassDecl> node);
 string Block_visitor(Ptr<Block> node);
 string Break_visitor(Ptr<Break> node);
+string ReturnStmt_visitor(Ptr<ReturnStmt> node);
 
 //Visitor for variable declaration and assignment
 string VarDecl_visitor(Ptr<VarDecl> node){
@@ -84,6 +85,10 @@ string Expr_visitor(Ptr<Expr> node){
     return node->expr;
 }
 
+string ReturnStmt_visitor(Ptr<ReturnStmt> node){
+    return "return " + node->expr.expr + ";\n";
+}
+
 string ClassDecl_visitor(Ptr<ClassDecl> node){
     string code;
     code += "CLASS " + node->name + " ";
@@ -136,6 +141,10 @@ string visit(const Ptr<Node>& node) {
             Ptr<Break> stmt = static_pointer_cast<Break>(node);
             return Break_visitor(stmt);
         }
+        case RETURN_STMT:{
+            Ptr<ReturnStmt> stmt = static_pointer_cast<ReturnStmt>(node);
+            return ReturnStmt_visitor(stmt);
+        } 
         case CLASS_DEFINITION:{
             Ptr<ClassDecl> stmt = static_pointer_cast<ClassDecl>(node);
             return ClassDecl_visitor(stmt);
