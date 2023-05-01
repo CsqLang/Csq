@@ -347,17 +347,18 @@ which will be used by scope defining functions to get desired results.
     IfStmt ParseIfStmt(TokenStream tokens, int line){ 
         IfStmt node;
         bool condition = false;
-
+        TokenStream condition_expr;
         for(int i = 0; i<tokens.size(); i++)
             if(tokens[i].token == "if" && tokens[i].type == KEYWORD && condition == 0)
                 condition = true;
             else if(condition && tokens[i].token != ":")
-                node.condition.expr += tokens[i].token;
+                condition_expr.push_back(tokens[i]);
             else if(condition && tokens[i].token == ":")
             {
                 condition = false;
                 break;
             }
+        node.condition = ParseExpr(condition_expr,line);
         if(node.condition.expr == ""){
             error(line, "expected an expression, after keyword if.");
             printf("Hint: add a condition after if keyword.\n");
@@ -391,16 +392,18 @@ which will be used by scope defining functions to get desired results.
     ElifStmt ParseElifStmt(TokenStream tokens, int line){
         ElifStmt node;
         bool condition = false;
+        TokenStream condition_expr;
         for(int i = 0; i<tokens.size(); i++)
             if(tokens[i].token == "elif" && tokens[i].type == KEYWORD && condition == 0)
                 condition = true;
             else if(condition && tokens[i].token != ":")
-                node.condition.expr += tokens[i].token;
+                condition_expr.push_back(tokens[i]);
             else if(condition && tokens[i].token == ":")
             {
                 condition = false;
                 break;
             }
+        node.condition = ParseExpr(condition_expr,line);
         if(node.condition.expr == ""){
             error(line, "expected an expression, after keyword elif.");
             printf("Hint: add a condition after elif keyword.\n");
