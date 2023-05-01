@@ -390,6 +390,7 @@ vector<Token> tokenize(string source_code) {
                 tok.token = "\""+str_input+"\"";
                 tok.type = STR;
                 tokens.push_back(tok);
+                str_input = "";
                 string_presence = false;
             }
             else if((c != '"' || c != '\'') && string_presence == true){
