@@ -75,6 +75,18 @@
         return state;
     }
 
+    //For Testing puropse only --------------------------------
+    void print_VarStack(){
+        for(int i = 0;i<variable_stack.size();i++){
+            printf("%d : ",i);
+            for(string v : variable_stack[i]){
+                printf("%s, ", v.c_str());
+            }
+            printf("\n");
+        }
+    }
+    //---------------------------------------------------------
+
     /*
     Indentation handling shall be done in such a way in which every
     line with certain indentation shall be stored as an object.
@@ -175,14 +187,14 @@
         bool state = 0;
         if(
             tokens[0].type == IDENTIFIER && (tokens[1].token == "=" 
-            || tokens[1].token == ":") && !Var_checkIsDefined(indent_level,tokens[0].token))
+            || tokens[1].token == ":") && !Var_checkIsDefined(1000+indent_level,tokens[0].token))
             state = 1;
         return state;
     }
     bool isVarAssign(TokenStream tokens, int indent_level){
         bool state = 0;
         if(tokens[0].type == IDENTIFIER && tokens[1].token == "=" &&
-           Var_checkIsDefined(indent_level,tokens[0].token))
+           Var_checkIsDefined(1000+indent_level,tokens[0].token))
             state = 1;
         return state;
     }
@@ -381,11 +393,11 @@ which will be used by scope defining functions to get desired results.
             else if(v && token.type == KEYWORD){
                 error(line, "invalid use of keyword " + token.token + " in return stmt.");
             }
-            else{
+            else if(v){
                 token_.push_back(token);
             }
         }
-        node.expr = ParseExpr(tokens, line);
+        node.expr = ParseExpr(token_, line);
         return node;
     }
 
@@ -692,7 +704,6 @@ which will be used by scope defining functions to get desired results.
         bool end = false;
         bool name = false;
         bool over = false;
-        
 
         for(Token token : tokens){
             if(token.token == "group" && !name && !end){
@@ -950,6 +961,7 @@ which will be used by scope defining functions to get desired results.
 
     //Last parsing stage which will return transpiled code and work with indentations.
     string ParseStatements(){
+        // print_VarStack();
         //Image of code
         string code, fncode;
         code = imported_code;
@@ -963,6 +975,7 @@ which will be used by scope defining functions to get desired results.
         Statement last_statement;
         for(Statement statement : Statements){
                 while(statement.indent_level != last_scope(scope_stack).indent_level){
+                    //Here 1000 is added because of the encoding
                     variable_stack.erase(1000+last_scope(scope_stack).indent_level+statement.number);
                     if(last_scope(scope_stack).of == FUNCTION_DECL || last_scope(scope_stack).of == CLASS_DEFINITION){
                         code += "};\n";
