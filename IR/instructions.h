@@ -12,6 +12,7 @@
 #define IN :
 #define IF if
 #define ELIF else if
+#define RETURN return
 #define ELSE else
 #define SWITCH switch
 #define CASE case:
