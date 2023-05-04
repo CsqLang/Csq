@@ -86,7 +86,8 @@ string Expr_visitor(Ptr<Expr> node){
 }
 
 string ReturnStmt_visitor(Ptr<ReturnStmt> node){
-    return "return " + node->expr.expr + ";\n";
+    // printf("'%s'\n\n",node->expr.expr.c_str());
+    return "RETURN " + node->expr.expr + ";\n";
 }
 
 string ClassDecl_visitor(Ptr<ClassDecl> node){
