@@ -252,15 +252,20 @@ private:
     struct Pair {
         KeyType key;
         ValueType value;
+
+        // Define a comparison operator for pairs
+        bool operator==(const Pair& other) const {
+            return key == other.key && value == other.value;
+        }
     };
 
     std::vector<Pair> pairs;
 
 public:
     // Add a key-value pair to the map
-    void insert(KeyType key, ValueType value) {
+    void insert(const KeyType& key, const ValueType& value) {
         // Check if the key already exists in the map
-        for (auto pair : pairs) {
+        for (auto& pair : pairs) {
             if (pair.key == key) {
                 // If it does, update the value for that key
                 pair.value = value;
@@ -286,9 +291,35 @@ public:
         pairs.push_back({key, ValueType()});
         return pairs.back().value;
     }
+
+    // Define an equality operator for maps
+    bool operator==(const dict& other) const {
+        return pairs == other.pairs;
+    }
+
+    // Define a less-than operator for maps
+    bool operator<(const dict& other) const {
+        return pairs < other.pairs;
+    }
 };
 
+void echo(str s){
+    printf("%s", s.__str__.c_str());
+}
+void echo(int v){
+    printf("%d", v);
+}
+void echo(i32 v){
+    printf("%d", v.data);
+}
+void echo(i64 v){
+    printf("%lld", v.data);
+}
+void echo(f64 s){
+    printf("%lf", s.data);
+}
 
+#define type(p) typeid(p).name()
 
 
 #endif // BUILTINS_CSQ4_2
