@@ -72,6 +72,10 @@ void load_builtins(){
     sort_.name = "sort";
     sort_.type = "NONE";
     methods_prop.push_back(sort_);
+    MethodProperty echo_;
+    echo_.name = "echo";
+    echo_.type = "NONE";
+    methods_prop.push_back(echo_);
     MethodProperty read_;
     read_.name = "read";
     read_.type = "NONE";
