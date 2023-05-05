@@ -62,22 +62,43 @@ string WhileLoop_visitor(Ptr<WhileLoop> node){
 
 //Visitor for Function declarations.
 string FuncDecl_visitor(Ptr<FunctionDecl> node){
-    string params;
-    if(node->params.size()>0 && node->params[0]!=""){
-        for(string param : node->params){
-            params += "auto " + param + ", ";
+    if(node->return_type_infr){
+        string params;
+        if(node->params.size()>0 && node->params[0]!=""){
+            for(string param : node->params){
+                params += "auto " + param + ", ";
+            }
+            params.pop_back();
+            params.pop_back();
         }
-        params.pop_back();
-        params.pop_back();
-    }
-    shared_ptr<Block> block = make_shared<Block>();
-    for(string statement : node->body.statements)
-        addStatement(block,statement);
-    if(node->params.size() > 0 && node->params[0]!=""){
-        return "FUN " + node->name + "= [&] ( " + params + ")\n";
+        shared_ptr<Block> block = make_shared<Block>();
+        for(string statement : node->body.statements)
+            addStatement(block,statement);
+        if(node->params.size() > 0 && node->params[0]!=""){
+            return "FUN " + node->name + "= [&] ( " + params + ")\n";
+        }
+        else{
+            return "FUN " + node->name + " = [&]( " + params + ")\n";
+        }
     }
     else{
-        return "FUN " + node->name + " = [&]( " + params + ")\n";
+        string params;
+        if(node->params.size()>0 && node->params[0]!=""){
+            for(string param : node->params){
+                params += "auto " + param + ", ";
+            }
+            params.pop_back();
+            params.pop_back();
+        }
+        shared_ptr<Block> block = make_shared<Block>();
+        for(string statement : node->body.statements)
+            addStatement(block,statement);
+        if(node->params.size() > 0 && node->params[0]!=""){
+            return node->return_type + " " + node->name + "( " + params + ")\n";
+        }
+        else{
+            return node->return_type + " " + node->name + "( " + params + ")\n";
+        }
     }
 }
 
