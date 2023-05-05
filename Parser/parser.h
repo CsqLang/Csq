@@ -1114,6 +1114,9 @@ which will be used by scope defining functions to get desired results.
             string path_ = Pcurrent_dir + "/" + node.path + ".csq";
             //Read the code in it.
             string read_code = readCode(path_);
+            if(read_code == ""){
+                printf("Error: Module %s not found.\n", path_.c_str());
+            }
             ParseLines(Tokenizer(read_code));
             node.code = ParseStatements();
             Statements = {};
