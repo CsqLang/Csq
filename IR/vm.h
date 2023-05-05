@@ -33,11 +33,16 @@ string formIR(string code, string fncode, string current_path){
     return IR;
 }
 
+
 string readCode(string path){
     string code,ln;
 
     // Read from the text file
     ifstream file(path);
+    
+    if (!file) {
+        return "";
+    }
 
     while (getline (file, ln))
         code += ln + " \n";
