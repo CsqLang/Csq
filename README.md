@@ -2,7 +2,7 @@
 <h1> Csq 4.2</h1>
 Hey there,
 This the updated version of 4.2 which is having more concise syntax than the 4.1 and better compiler handling provided by AST.
-
+For brief : csqlang.github.io/
 ## New Features
 <li>Use of stack memory by default</li>
 <li>Use of indentations for scope repr</li>
