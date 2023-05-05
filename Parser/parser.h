@@ -768,7 +768,7 @@ which will be used by scope defining functions to get desired results.
     //Defines all imports
     string imported_code;
 
-    //Ultimate parsing statement.
+    //This function will do actual parsing and appends the results into Statement vector which could be futher assembled by ParseStatements function.
     void ParseLines(vector<TokenStream> code_tokens){
         int statement_number = 1;
         Token line_end_token;
@@ -948,6 +948,7 @@ which will be used by scope defining functions to get desired results.
         return last;
     }
 
+    //Create an instance of group statement.
     string create_group_object(){
         string code;
         string g = Group_stack[0];
@@ -955,13 +956,13 @@ which will be used by scope defining functions to get desired results.
         return code;
     }
 
+    //Returns the last scope present in the given scope vector.
     Scope last_scope(vector<Scope> scope){
         return scope[scope.size()-1];
     }
 
     //Last parsing stage which will return transpiled code and work with indentations.
     string ParseStatements(){
-        // print_VarStack();
         //Image of code
         string code, fncode;
         code = imported_code;
@@ -975,7 +976,7 @@ which will be used by scope defining functions to get desired results.
         Statement last_statement;
         for(Statement statement : Statements){
                 while(statement.indent_level != last_scope(scope_stack).indent_level){
-                    //Here 1000 is added because of the encoding
+                    //Here 1000 is added to encode the indentation level and avoid the conflict with same indents.
                     variable_stack.erase(1000+last_scope(scope_stack).indent_level+statement.number);
                     if(last_scope(scope_stack).of == FUNCTION_DECL || last_scope(scope_stack).of == CLASS_DEFINITION){
                         code += "};\n";
@@ -995,59 +996,64 @@ which will be used by scope defining functions to get desired results.
                         scope_stack.pop_back(); 
                     }
                 }
-                //Checking the type of last_statement
+                //Checking the type of current statement and generating code accordingly.
                 switch(statement.type)
                 {
                     case EXPR_TYPE:{
                         code += statement.statement + ";\n";
+                        last_statement = statement;
                         break;
                     }
                     case VAR_DECLARATION:{
-                        if(class_){
                             code += statement.statement + ";\n";
-                        }
-                        else{
-                            code += statement.statement + ";\n";
-                        }
+                            last_statement = statement;
                         break;
                     }
                     case VAR_ASSIGNMENT:{
                         code += statement.statement + ";\n";
+                        last_statement = statement;
                         break;
                     }
                     case IF_STATEMENT:{
                         scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
                         code += statement.statement + "{\n";
+                        last_statement = statement;
                         break;
                     }
                     case ELIF_STATEMENT:{
                         scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
                         code += statement.statement + "{\n";
+                        last_statement = statement;
                         break;
                     }
                     case ELSE_STATEMENT:{
                         scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
                         code += statement.statement + "{\n";
+                        last_statement = statement;
                         break;
                     }
                     case FOR_LOOP:{
                         scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
                         code += statement.statement + "{\n";
+                        last_statement = statement;
                         break;
                     }
                     case WHILE_LOOP:{
                         scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
                         code += statement.statement + "{\n";
+                        last_statement = statement;
                         break;
                     }
                     case CLASS_DEFINITION:{
                         scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
                         code += statement.statement + "{\npublic:\n";
                         class_ = 1;
+                        last_statement = statement;
                         break;
                     }
                     case RETURN_STMT:{
                         code += statement.statement;
+                        last_statement = statement;
                     }
                     case FUNCTION_DECL:{
                         scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
@@ -1055,19 +1061,23 @@ which will be used by scope defining functions to get desired results.
                             // ParseFuncDecl(tokenize(statement.raw_statement)).name;
                             replaceAll(statement.statement,"=[&]","");
                             code += statement.statement + "{\n";
+                            last_statement = statement;
                         }
                         else{
                             code += statement.statement + "{\n";
+                            last_statement = statement;
                         }
                         break;
                     }
                     case BREAK:{
                         code += statement.statement + ";\n";
+                        last_statement = statement;
                         break;
                     }
                     case GROUP:{
                         scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
                         code += statement.statement + "{\npublic:\n";
+                        last_statement = statement;
                         break;
                     }
                     default:{
