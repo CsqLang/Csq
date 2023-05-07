@@ -156,13 +156,13 @@ struct FunctionDecl : Node{
     string name;
     string return_type;
     bool return_type_infr;
-    vector<string> params = {};
+    vector<VarDecl> params = {};
     Block body;
     FunctionDecl(){
         type = FUNCTION_DECL;
         name = "";
     }
-    FunctionDecl(string name_, vector<string> params_, string return_type_=""){
+    FunctionDecl(string name_, vector<VarDecl> params_, string return_type_=""){
         type = FUNCTION_DECL;
         name = name_;
         params = params_;
@@ -281,9 +281,6 @@ Ptr<Node> addNode(FunctionDecl decl){
 
 void addStatement(Ptr<Block> block, string statement){
     block->statements.push_back(statement);
-}
-void addParam(Ptr<FunctionDecl> fun, string param){
-    fun->params.push_back(param);
 }
 
 
