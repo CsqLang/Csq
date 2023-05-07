@@ -596,66 +596,125 @@ which will be used by scope defining functions to get desired results.
 
     FunctionDecl ParseFuncDecl(TokenStream tokens,int indent_level, int line){
         FunctionDecl node;
-        bool param = false;
-        bool name = false;
-        bool ended = false;
-        string param_;
-        for(Token token : tokens){
-            if(token.token == "def" && !name && !param){
+        //Setting some properties
+        node.return_type = "";
+        node.return_type_infr = 1;
+        //States:
+        bool name = 0;
+        bool param = 0;
+        bool ends = 0;
+        bool type = 0;
+        bool error_c = 0;
+        TokenStream param_;
+        //Traversing the stream and parsing the function decl statement.
+        for(int i = 0;i<tokens.size();i++)
+        {
+            Token token = tokens[i];
+
+            if(token.token == "def")
+            {
+                //Checking whether def is defined before the name or not
+                if(name || param || type){
+                    error(line, "invalid use of def keyword, expected before function name.");
+                    error_c = 1;
+                    break;
+                }
+                else
                 name = 1;
             }
-            else if(name && token.token != "(" && !param){
-                node.name += token.token;
+            else if(name)
+            {
+                if(token.type == IDENTIFIER){
+                    node.name = token.token;
+                    name = 0;
+                }
+                else{
+                    error(line, "expected an identifier as function name.");
+                    error_c = 1;
+                    break;
+                }
             }
-            else if(name && token.token == "(" && !param){
-                name = 0;
-                param = 1;
+            else if(!name && !param && token.token == "(")
+            {
+                if(tokens[i+1].token != ")"){
+                    param = 1;
+                }
+                else{
+                    i++;
+                }
             }
-            else if(param && token.token != "," && token.token != ")"){
-                param_ += token.token;
+            else if(param)
+            {
+                if(token.token == ",")
+                {
+                    if(param_.size() == 0)
+                    {
+                        error(line, "invalid token ',' used.");
+                        error_c = 1;
+                        break;
+                    }
+                    else
+                    {
+                        //VarDecl node
+                        VarDecl param_node = ParseVarDecl(param_,indent_level,line,line);
+                        node.params.push_back(param_node);
+                        param_ = {};
+                    }
+                }
+                else if(token.token == ")")
+                {
+                    VarDecl param_node = ParseVarDecl(param_,indent_level,line,line);
+                    node.params.push_back(param_node);
+                    param_ = {};
+                    param = 0;
+                }
+                else{
+                    param_.push_back(token);
+                }
             }
-            else if(param && token.token == ","){
-                node.params.push_back(param_);
-                param_ = "";
+            else if(token.token == ":")
+            {
+                if(!param && !name && !type){
+                ends = 1;
+                }
             }
-            else if(param && token.token == ")"){
-                param = 0;
-                node.params.push_back(param_);
-                param_ = "";
+            else if(!param && token.token == "->")
+            {
+                type = 1;
             }
-            else if(token.token == "->" && param == 0){}
-            else if(token.type == IDENTIFIER && param == 0){
-                node.return_type = token.token;
-                node.return_type_infr = 0;
+            else if(type)
+            {
+                if(token.type != IDENTIFIER)
+                {
+                    error(line, "expected an identifier as return type.");
+                    error_c = 1;
+                    break;
+                }
+                else
+                {
+                    node.return_type = token.token;
+                    node.return_type_infr = 0;
+                    type = 0;
+                }
             }
-            else if(token.token == ":"){
-                ended = true;
+            else if(ends)
+            {
+                error(line, "invalid token after function end.");
+                error_c = 1;
                 break;
             }
         }
-        if(param){
-            error(line, "expected an end of param.");
-            printf("Hint: put a ) after params.\n");
+        if(!error_c){
+            //Add the function to property stack to avoid any potential undefined identifier error.
+            MethodProperty prop;
+            prop.name = node.name;
+            prop.type = node.return_type;
+            methods_prop.push_back(prop);
         }
-        else{
-            if(node.name != ""){
-                Identifiers.push_back(node.name);
-                MethodProperty p;
-                p.name = node.name;
-                p.type = "NONE";
-                p.params = node.params;
-                methods_prop.push_back(p);
-            }
-            if(node.params.size()!= 0){
-                for(string param : node.params){
-                    if(param != ""){
-                        ParseVarDecl(tokenize(param),indent_level+1,line,line);
-                    }
-                }
-            }
-        }
+        //Finally return the processed function node.
         return node;
     }
+
 
     ClassDecl ParseClassDecl(TokenStream tokens, int line){
         ClassDecl node;
@@ -1117,6 +1176,7 @@ which will be used by scope defining functions to get desired results.
             if(read_code == ""){
                 printf("Error: Module %s not found.\n", path_.c_str());
             }
+            //To use the imported code we have to do recursive parsing by using Parse functions to parse them.
             ParseLines(Tokenizer(read_code));
             node.code = ParseStatements();
             Statements = {};
