@@ -675,8 +675,9 @@ which will be used by scope defining functions to get desired results.
             }
             else if(token.token == ":")
             {
-                if(!param && !name && !type){
-                ends = 1;
+                if(!param && !name){
+                    ends = 1;
+                    type = 0;
                 }
             }
             else if(!param && token.token == "->")
@@ -685,18 +686,8 @@ which will be used by scope defining functions to get desired results.
             }
             else if(type)
             {
-                if(token.type != IDENTIFIER)
-                {
-                    error(line, "expected an identifier as return type.");
-                    error_c = 1;
-                    break;
-                }
-                else
-                {
-                    node.return_type = token.token;
-                    node.return_type_infr = 0;
-                    type = 0;
-                }
+                node.return_type += token.token;
+                node.return_type_infr = 0;
             }
             else if(ends)
             {
