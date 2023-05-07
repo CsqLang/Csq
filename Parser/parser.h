@@ -66,7 +66,8 @@
     //Variable scope check;
     bool Var_checkIsDefined(int indent_level, string var_name){
         bool state = 0;
-        for(int i = 0;i<=indent_level;i++){
+        
+        for(int i = 1000;i<=indent_level+1000;i++){
             if(in(var_name, variable_stack[i])){
                 state = 1;
                 break;
