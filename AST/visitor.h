@@ -4,7 +4,6 @@
 
 #include "ast.h"
 
-
 string VarDecl_visitor(Ptr<VarDecl> node);
 string VarAssign_visitor(Ptr<VarAssign> node);
 string FuncDecl_visitor(Ptr<FunctionDecl> node);
@@ -62,44 +61,35 @@ string WhileLoop_visitor(Ptr<WhileLoop> node){
 
 //Visitor for Function declarations.
 string FuncDecl_visitor(Ptr<FunctionDecl> node){
-    if(node->return_type_infr){
-        string params;
-        if(node->params.size()>0 && node->params[0]!=""){
-            for(string param : node->params){
-                params += "auto " + param + ", ";
-            }
+    string code = "";
+    if(node->return_type_infr == 1)
+    {
+        string params = "";
+        if(node->params.size() > 0){
+            for(VarDecl param : node->params)
+            if(param.type_infr == 0)
+                params += param.type_ + " " + param.name + " = " + param.value.expr + ",";
+            else
+                params += "VAR " + param.name + " = " + param.value.expr + ",";
             params.pop_back();
-            params.pop_back();
         }
-        shared_ptr<Block> block = make_shared<Block>();
-        for(string statement : node->body.statements)
-            addStatement(block,statement);
-        if(node->params.size() > 0 && node->params[0]!=""){
-            return "FUN " + node->name + "= [&] ( " + params + ")\n";
-        }
-        else{
-            return "FUN " + node->name + " = [&]( " + params + ")\n";
-        }
+        
+        code += "FUN " + node->name + "=[&](" + params + ")";
     }
-    else{
+    else
+    {
         string params;
-        if(node->params.size()>0 && node->params[0]!=""){
-            for(string param : node->params){
-                params += "auto " + param + ", ";
-            }
+        if(node->params.size() > 0){
+            for(VarDecl param : node->params)
+            if(param.type_infr == 0)
+                params += param.type_ + " " + param.name + " = " + param.value.expr + ",";
+            else
+                params += "VAR " + param.name + " = " + param.value.expr + ",";
             params.pop_back();
-            params.pop_back();
         }
-        shared_ptr<Block> block = make_shared<Block>();
-        for(string statement : node->body.statements)
-            addStatement(block,statement);
-        if(node->params.size() > 0 && node->params[0]!=""){
-            return node->return_type + " " + node->name + "( " + params + ")\n";
-        }
-        else{
-            return node->return_type + " " + node->name + "( " + params + ")\n";
-        }
+        code += node->return_type + " " + node->name + "(" + params + ")";
     }
+    return code;
 }
 
 string Expr_visitor(Ptr<Expr> node){
