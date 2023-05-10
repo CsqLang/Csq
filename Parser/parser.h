@@ -1,1180 +1,472 @@
-#if !defined(PARSEr_H_CSQ4)
-#define PARSEr_H_CSQ4
-    //Imports
-    #include "../Tokenizer/tokenizer.h"
-    #include "../AST/ast.h"
-    #include "../Memory/stack.h"
-    #include "typechecker.h"
-    //Current director
-    string Pcurrent_dir;
+#if !defined(PARSER_CSQ4)
+#define PARSER_CSQ4
 
-    
-    //Some alias
-    typedef vector<Token> TokenStream;
-    typedef vector<string> StringStream;
-    typedef Ptr<Node> NodePtr;
-    //Indentation map for variables
-    map<int, StringStream> variable_stack;
-    //Tools required for parsing
+#include "../AST/ast.h"
+#include <map>
 
-    //Program node to store all the childs
-    typedef struct : Node{
-        vector<Block> statements;
-        void addChild(Block child){
-            statements.push_back(child);
-        }
-    }Program;
-    //Root for all nodes.
-    Program root;
+//Parent directory:
+string Pcurrent_dir;
+
+typedef vector<Token> TokenStream;
+typedef vector<Token> StringStream;
+typedef shared_ptr<Node> NodePtr;
+//Abstract type for all variables
+struct Variable{
+    string name;
+    string type;
+};
+//Abstract type for all functions
+struct Function{
+    string name;
+    string type;
+    vector<Variable> params;
+};
+
+//Abstract type for all classes defined some predefined are int, float and str
+struct Class{
+    string name;
+    string inherit_class;
+    vector<Variable> variables;
+    vector<Function> methods;
+};
 
 
-    //Scope for the statements
-    struct Scope{
-        int indent_level;
-        bool ended;
-        NODE_TYPE of;
-        Scope(){}
-        Scope(int level, NODE_TYPE of_, bool ended_){
-            indent_level = level;
-            of = of_;
-            ended = ended_;
+//Symbol table type
+enum SymbolType{
+    ST_FUNCTION,
+    ST_VARIABLE,
+    ST_CLASS,
+};
 
-        };
-    };
+//Symbol table
+struct SymbolTable{
+    map<int,map<string,Variable>> variables;
+    map<int,map<string,Class>> classes;
+    map<int,map<string,Function>> functions;
 
-    struct ScopeSet{
-        int indent_level;
-        vector<Scope> scopes;
-    };
-
-    //Struct to store infos about statements
-    struct Statement{
-        int indent_level;
-        int number;
-        string statement;
-        string raw_statement;
-        NODE_TYPE type;
-        Statement(){}
-        Statement(int statement_num,string raw, string statement_, NODE_TYPE type_, int indent_level_){
-            number = statement_num;
-            statement = statement_;
-            raw_statement = raw;
-            indent_level = indent_level_;
-            type = type_;
-        }
-    };
-    //Variable scope check;
-    bool Var_checkIsDefined(int indent_level, string var_name){
-        bool state = 0;
-        
-        for(int i = 1000;i<=indent_level+1000;i++){
-            if(in(var_name, variable_stack[i])){
-                state = 1;
-                break;
-            }
-        }
-        return state;
+    //Helper functions
+    void addVariable(int parent, int current_scope, Variable variable){
+        variables[(1000*parent) + current_scope][variable.name] = variable;
     }
-
-    //For Testing puropse only --------------------------------
-    void print_VarStack(){
-        for(int i = 0;i<variable_stack.size();i++){
-            printf("%d : ",i);
-            for(string v : variable_stack[i]){
-                printf("%s, ", v.c_str());
-            }
-            printf("\n");
-        }
+    void addFunction(int parent, int current_scope, Function function){
+        functions[(1000*parent) + current_scope][function.name] = function;
     }
-    //---------------------------------------------------------
-
+    void addClass(int parent, int current_scope, Class class_){
+        classes[(1000*parent) + current_scope][class_.name] = class_;
+    }
+    //Checking certain symbol in the symbol table
     /*
-    Indentation handling shall be done in such a way in which every
-    line with certain indentation shall be stored as an object.
+    Now the main problem appears, when there are two different scopes with same indent level
+    so there will be a conflict between their members so to solve it we could do encoding :
+    scope1 : function fn level = 1
+    symbol table key : 1001
+    scope2 : function fn2 level = 1
+    symbol table key : 2001
+
     */
-    //
-    //Define vector for all indentation levels
-    vector<Statement> Statements;
-
-    //Getting current indentation level.
-    int getIndentLevel(TokenStream tokens){
-        int indent_level = 0;
-        if(tokens[0].type != INDENT)
-            return indent_level;
-        else{
-            for(Token token : tokens){
-                if(token.type == INDENT)
-                    indent_level++;
-                else
-                    break; 
-            }
-            return indent_level;
-        }
-    }
-
-    vector<TokenStream> Tokenizer(string code){
-        code += "\n";
-        vector<TokenStream> lines;
-        string current = "";
-        for(char ch : code){
-            if(ch != '\n')
-                current.push_back(ch);
-            else{
-                lines.push_back(tokenize(current + ";ignore;"));
-                current = "";
-            }
-        }
-        return lines;
-    }
-    void replaceAll(string& str, const string& oldStr, const string& newStr) {
-        size_t pos = 0;
-        while ((pos = str.find(oldStr, pos)) != string::npos) {
-            str.replace(pos, oldStr.length(), newStr);
-            pos += newStr.length();
-        }
-    }
-    //We can't directly use TokenStream as body of block so for that we use string.
-    string TokenStreamToString(TokenStream tokens){
-        string result;
-        for(Token token : tokens){
-            result += token.token + " ";
-        }
-        
-        return result;
-    }
-
-
-    bool isIfStmt(TokenStream tokens){
-        bool state = 0;
-        for(Token token : tokens)
-            if(token.token == "if" && token.type == KEYWORD)
-            {
-                state = true;
-                break;
-            }
-        return state;
-    }
-    bool isElifStmt(TokenStream tokens){
-        bool state = 0;
-        for(Token token : tokens)
-            if(token.token == "elif" && token.type == KEYWORD)
-            {
-                state = true;
-                break;
-            }
-        return state;
-    }
-    bool isElseStmt(TokenStream tokens){
-        bool state = 0;
-        for(Token token : tokens)
-            if(token.token == "else" && token.type == KEYWORD)
-            {
-                state = true;
-                break;
-            }
-        return state;
-    }
-    bool isFunDecl(TokenStream tokens){
-        bool state = 0;
-        for(Token token : tokens)
-            if(token.token == "def" && token.type == KEYWORD)
-            {
-                state = true;
-                break;
-            }
-        return state;
-    }
-    bool isVarDecl(TokenStream tokens, int indent_level){
-        bool state = 0;
-        if(
-            tokens[0].type == IDENTIFIER && (tokens[1].token == "=" 
-            || tokens[1].token == ":") && !Var_checkIsDefined(1000+indent_level,tokens[0].token))
-            state = 1;
-        return state;
-    }
-    bool isVarAssign(TokenStream tokens, int indent_level){
-        bool state = 0;
-        if(tokens[0].type == IDENTIFIER && tokens[1].token == "=" &&
-           Var_checkIsDefined(1000+indent_level,tokens[0].token))
-            state = 1;
-        return state;
-    }
-    bool isWhileStmt(TokenStream tokens){
-        bool state = 0;
-        for(Token token : tokens)
-            if(token.token == "while" && token.type == KEYWORD)
-            {
-                state = true;
-                break;
-            }
-        return state;
-    }
-    bool isForStmt(TokenStream tokens){
-        bool state = 0;
-        for(Token token : tokens)
-            if(token.token == "for" && token.type == KEYWORD)
-            {
-                state = true;
-                break;
-            }
-        return state;
-    }
-
-    bool isBreakStmt(TokenStream tokens){
-        bool state = 0;
-        for(Token token : tokens)
-            if(token.token == "break" && token.type == KEYWORD)
-            {
-                state = true;
-                break;
-            }
-        return state;
-    }
-
-    bool isClassDecl(TokenStream tokens){
-        bool state = 0;
-        for(Token token : tokens)
-            if(token.token == "class" && token.type == KEYWORD)
-            {
-                state = true;
-                break;
-            }
-        return state;
-    }
-    bool isGroupDecl(TokenStream tokens){
-        bool state = 0;
-        for(Token token : tokens)
-            if(token.token == "group" && token.type == KEYWORD)
-            {
-                state = true;
-                break;
-            }
-        return state;
-    }
-
-    bool isImportStmt(TokenStream tokens){
-        bool state = 0;
-        for(Token token : tokens)
-            if(token.token == "import" && token.type == KEYWORD)
-            {
-                state = true;
-                break;
-            }
-        return state;
-    }
-
-    bool isOneliner(TokenStream tokens){
-        bool state = 0;
-        for(Token token : tokens){
-            if(token.token == ";"){state = 1;break;}
-        }
-        return state;
-    }
-
-    bool isReturnStmt(TokenStream tokens){
-        bool state = 0;
-        for(Token token : tokens){
-            if(token.token == "return"){state = 1;break;}
-        }
-        return state;
-    }
-
-    //Errors for the bad code.
-
-    void unexpected_indent(int line, string last_stmt_type){
-        error(line, "unexpected indent after " + last_stmt_type);
-    }
-
-    void expected_indent(int line, string last_stmt_type){
-        error(line, "expected an indent after " + last_stmt_type);
-    }
-    void unrecognized_statement(int line, string stmt){
-        error(line, "unrecognized statement '" + stmt + "'.");
-    }
-    void function_insideIfstmt(int line){
-        error(line, "function is defined inside IfStmt which is not allowed.");
-    }
-    void function_insideElif(int line){
-        error(line, "function is defined inside ElifStmt which is not allowed.");
-    }
-    void function_insideElse(int line){
-        error(line, "function is defined inside ElseStmt which is not allowed.");
-    }
-    void function_insideFunction(int line){
-        error(line, "function is defined inside another function which is not allowed.");
-    }
-    void function_insideWhile(int line){
-        error(line, "function is defined inside WhileLoop which is not allowed.");
-    }
-    void function_insideFor(int line){
-        error(line, "function is defined inside another ForLoop which is not allowed.");
-    }
-
-    void noStorageClass(int line, string stmt, Scope scope){
-        if(scope.of == CLASS_DEFINITION){
-            error(line, "no storage class for the '" + stmt + "' inside a class.");
-        }
-    }
-    void elifUsedWithoutIf(int line){
-        error(line, "elif defined without any if statement before.");
-    }
-    void elseUsedWithoutIf(int line){
-        error(line, "else defined without any if or elif statement before.");
-    }
-
-/*
-In this field the actual parsing will be done
-and the process is that the functions will parse and generate AST node 
-which will be used by scope defining functions to get desired results.
-*/
-    Expr ParseExpr(TokenStream tokens, int line){
-        // Expr node = TokenStreamToString(tokens);
-        Expr node = Expr("");
-        for(int i = 0;i < tokens.size(); i++){
-            if(tokens[i].type == KEYWORD){
-                node.expr += tokens[i].token + " ";
-            }
-            else if(tokens[i].type == IDENTIFIER){
-                if(in(tokens[i].token, AllIdentifiers())){
-                    node.expr += tokens[i].token + " ";
-                }
-                else{
-                    error(line, "undefined name " + tokens[i].token + ".");
-                }
-            }
-            else{
-                node.expr += tokens[i].token + " ";
-            }
-        }
-        return node;
-    }
-
-    Break ParseBreakStmt(TokenStream tokens, int line){
-        Break node;
-        if(tokens.size()>1){
-            error(line, "unexpected token after break statement.");
-        }
-        return node;
-    }
-
-    IfStmt ParseIfStmt(TokenStream tokens, int line){ 
-        IfStmt node;
-        bool condition = false;
-        TokenStream condition_expr;
-        for(int i = 0; i<tokens.size(); i++)
-            if(tokens[i].token == "if" && tokens[i].type == KEYWORD && condition == 0)
-                condition = true;
-            else if(condition && tokens[i].token != ":")
-                condition_expr.push_back(tokens[i]);
-            else if(condition && tokens[i].token == ":")
-            {
-                condition = false;
-                break;
-            }
-        node.condition = ParseExpr(condition_expr,line);
-        if(node.condition.expr == ""){
-            error(line, "expected an expression, after keyword if.");
-            printf("Hint: add a condition after if keyword.\n");
-        }
-        if(condition){
-            error(line, "the if statement hasn't ended sucessfuly.");
-            printf("Hint: add a colon after condition.\n");
-        }
-        return node;
-    }
-
-    ReturnStmt ParseReturnStmt(TokenStream tokens, int line){
-        ReturnStmt node;
-        TokenStream token_;
-        bool v = 0;
-        for(Token token : tokens){
-            if(token.token == "return" && token.type == KEYWORD && !v){
-                v = 1;
-            }
-            else if(v && token.type == KEYWORD){
-                error(line, "invalid use of keyword " + token.token + " in return stmt.");
-            }
-            else if(v){
-                token_.push_back(token);
-            }
-        }
-        node.expr = ParseExpr(token_, line);
-        return node;
-    }
-
-    ElifStmt ParseElifStmt(TokenStream tokens, int line){
-        ElifStmt node;
-        bool condition = false;
-        TokenStream condition_expr;
-        for(int i = 0; i<tokens.size(); i++)
-            if(tokens[i].token == "elif" && tokens[i].type == KEYWORD && condition == 0)
-                condition = true;
-            else if(condition && tokens[i].token != ":")
-                condition_expr.push_back(tokens[i]);
-            else if(condition && tokens[i].token == ":")
-            {
-                condition = false;
-                break;
-            }
-        node.condition = ParseExpr(condition_expr,line);
-        if(node.condition.expr == ""){
-            error(line, "expected an expression, after keyword elif.");
-            printf("Hint: add a condition after elif keyword.\n");
-        }
-        if(condition){
-            error(line, "the elif statement hasn't ended sucessfuly.");
-            printf("Hint: add a colon after condition.\n");
-        }
-        return node;
-    }
-
-    ElseStmt ParseElseStmt(TokenStream tokens, int line){
-        ElseStmt node;
-        if(tokens[1].token != ":"){
-            error(line, "expected a : after else.");
-        }
-        return node;
-    }
-
-
-    VarDecl ParseVarDecl(TokenStream tokens,int indent, int line, int num){
-        VarDecl node;
-        bool type_ = false;
-        bool equal_ = false;
-        TokenStream value_expr;
-
-        if(tokens[1].token == ":"){
-            type_  = 1;
-        }
-
-        if(type_){
-            bool t_comes = 0;
-            bool n_comes = 1;
-            bool v_comes = 0;
-            for(Token token : tokens){
-                if(n_comes){
-                    if(token.type != IDENTIFIER){
-                        error(line, "expected an identifier.");
-                    }
-                    else{
-                        node.name = token.token;
-                        n_comes = 0;
-                    }
-                }
-                else if(!n_comes && !t_comes && token.token == ":"){
-                    t_comes = 1;
-                }
-                else if(t_comes){
-                    if(token.token != "=" && token.token != ">="){
-                        node.type_ += token.token;
-                    }
-                    else{
-                        t_comes = 0;
-                        v_comes = 1;
-                        if(token.token == ">="){
-                            node.type_ += ">";
-                        }
-                    }
-                }
-                else if(v_comes){
-                    value_expr.push_back(token);
-                }
-            }
-        }
-        else{
-            //Infr the type:
-            bool t_comes = 0;
-            bool n_comes = 1;
-            bool v_comes = 0;
-            for(Token token : tokens){
-                if(n_comes){
-                    if(token.type != IDENTIFIER){
-                        error(line, "expected an identifier.");
-                    }
-                    else{
-                        node.name = token.token;
-                        n_comes = 0;
-                    }
-                }
-                else if(!n_comes && !t_comes && token.token == "="){
-                    v_comes = 1;
-                }
-                else if(v_comes){
-                    value_expr.push_back(token);
-                }
-            }
-        }
-        MemberVarProperty prop;
-        prop.name = node.name;
-        if(type_){
-            prop.name = node.name;
-            prop.type = node.type_;
-            node.type_infr = 0;
-        }
-        else{
-            prop.type = "NONE";
-            node.type_infr = 1;
-        }
-        node.value = ParseExpr(value_expr, line);
-        variable_stack[1000+indent+num].push_back(node.name);
-        variables_prop.push_back(prop);
-        return node;
-    }
-
-    VarAssign ParseVarAssign(TokenStream tokens, int line){
-        VarAssign node;
-        TokenStream value_expr;
-        bool value = false;
-        for(Token token : tokens)
-            if(!value && token.type == IDENTIFIER)
-                node.name = token.token;
-            else if(token.type == ASOPERATOR && !value)
-                value = true;
-            else if(value)
-                value_expr.push_back(token);
-        if(value_expr.size() == 0){
-            error(line, "expected a value after assignment operator.");
-        }
-        node.value = ParseExpr(value_expr,line);
-        return node;
-    }
-
-    WhileLoop ParseWhileLoop(TokenStream tokens,int line){
-        WhileLoop node;
-        TokenStream condition_expr;
-        bool condition = false;
-        for(Token token : tokens){
-            if(token.token == "while" && token.type == KEYWORD)
-                condition = true;
-            else if(condition && token.token != ":")
-                condition_expr.push_back(token);
-            else if(condition && token.token == ":"){
-                condition = false;
-                break;
-            }
-        }
-        if(condition){
-            error(line, "expected a colon after conditon.");
-        }
-        node.condition = ParseExpr(condition_expr, line);
-        return node;
-    }
-
-    ForLoop ParseForLoop(TokenStream tokens, int line){
-        ForLoop node;
-        bool condition = false;
-        bool iter = false;
-        TokenStream condition_expr;
-        for(Token token : tokens)
-            if(token.token == "for" && !condition)
-                iter = true;
-            else if(iter && token.token != "in" && !condition)
-                node.iter_name += token.token;
-            else if(iter && token.token == "in" && !condition){
-                iter = false;
-                condition = true;
-            }
-            else if(condition && token.token != ":"){
-                condition_expr.push_back(token);
-            }
-            else if(condition && token.token == ":"){
-                condition = 0;
-                break;
-            }
-        
-        if(condition){
-            error(line, "expected an end of condition.");
-        }
-        else{
-            MemberVarProperty prop;
-            prop.name = node.iter_name;
-            prop.type = "NONE";
-            variables_prop.push_back(prop);
-            node.condition = ParseExpr(condition_expr,line);
-        }
-        return node;//Master scope..
-    }
-
-    FunctionDecl ParseFuncDecl(TokenStream tokens,int indent_level, int line){
-        FunctionDecl node;
-        //Setting some properties
-        node.return_type = "";
-        node.return_type_infr = 1;
-        //States:
-        bool name = 0;
-        bool param = 0;
-        bool ends = 0;
-        bool type = 0;
-        bool error_c = 0;
-        TokenStream param_;
-        //Traversing the stream and parsing the function decl statement.
-        for(int i = 0;i<tokens.size();i++)
+    bool isPresent(int current_scope, string symbol, SymbolType type){
+        if(type == ST_VARIABLE)
         {
-            Token token = tokens[i];
+            bool state = 0;
+            for(int i = int(current_scope/1000);i<=current_scope;i++){
+                for(pair<string, Variable> var : variables[i]){
+                    if(var.first == symbol){
+                        state = 1;
+                        break;
+                    }
+                }
+            }
+            return state;
+        }
+        else if(type == ST_FUNCTION)
+        {
+            bool state = 0;
+            for(int i = int(current_scope/1000);i<=current_scope;i++){
+                for(pair<string, Function> fun : functions[i]){
+                    if(fun.first == symbol){
+                        state = 1;
+                        break;
+                    }
+                }
+            }
+            return state;
+        }
+        else{
+            bool state = 0;
+            for(int i = int(current_scope/1000);i<=current_scope;i++){
+                for(pair<string, Class> c : classes[i]){
+                    if(c.first == symbol){
+                        state = 1;
+                        break;
+                    }
+                }
+            }
+            return state;
+        }
+    }
+    Variable getVariable(string name, int current_index){
+        return variables[current_index][name];
+    }
+    Class getClass(string name, int current_index){
+        return classes[current_index][name];
+    }
+    bool isClassPresent(string name, int current_scope){
+        bool state = 0;
+            for(int i = int(current_scope/1000);i<=current_scope;i++){
+                for(pair<string, Class> c : classes[i]){
+                    if(c.first == name){
+                        state = 1;
+                        break;
+                    }
+                }
+            }
+        return state;
+    }
+    bool isVariablePresent(string name, int current_scope){
+        bool state = 0;
+            for(int i = int(current_scope/1000);i<=current_scope;i++){
+                for(pair<string, Variable> var : variables[i]){
+                    if(var.first == name){
+                        state = 1;
+                        break;
+                    }
+                }
+            }
+        return state;
+    }
+};SymbolTable table;
 
-            if(token.token == "def")
-            {
-                //Checking whether def is defined before the name or not
-                if(name || param || type){
-                    error(line, "invalid use of def keyword, expected before function name.");
-                    error_c = 1;
-                    break;
-                }
-                else
-                name = 1;
-            }
-            else if(name)
-            {
-                if(token.type == IDENTIFIER){
-                    node.name = token.token;
-                    name = 0;
+bool isIdentifierDefined(string identifier, int current_scope){
+    bool state = false;
+
+    if(table.isPresent(current_scope, identifier,ST_VARIABLE)){
+        state = true;
+    }
+    else if(table.isPresent(current_scope, identifier,ST_FUNCTION)){
+        state = true;
+    }
+    else if(table.isPresent(current_scope, identifier,ST_CLASS)){
+        state = true;
+    }
+    return state;
+}
+bool MemberPresent(string var_name,string member, int indent_level, int parent){
+    bool state = 0;
+    Class class_ = table.getClass(table.getVariable(var_name, (parent*1000)+indent_level).type,(parent*1000)+indent_level);
+    for(Function fn : class_.methods){
+        if(fn.name == member){
+            state = 1;
+        }
+    }
+    for(Variable var : class_.variables){
+        if(var.name == member){
+            state = 1;
+        }
+    }
+    return state;
+}
+
+//This function will load builtins since they are defined in C headerfile not in direct Csq module.
+void load_builtins_to_table(){
+    Function print;
+    print.name = "print";
+    print.type = "void";
+    table.addFunction(1,0,print);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+//Tokenizer for each line seperation
+vector<TokenStream> Tokenizer(string code){
+    code += "\n";
+    vector<TokenStream> lines;
+    string current = "";
+    for(char ch : code){
+        if(ch != '\n')
+            current.push_back(ch);
+        else{
+            lines.push_back(tokenize(current + ";ignore;"));
+            current = "";
+        }
+    }
+    return lines;
+}
+//All different types of function for parsing down different statements.
+
+Expr ParseExpr(TokenStream tokens, int line, int indent_level, int parent){
+    Expr node;
+
+    for(int i = 0;i<tokens.size();i++)
+    {
+        if(tokens[i].type == IDENTIFIER){
+            if(isIdentifierDefined(tokens[i].token,(parent*1000)+indent_level)){
+                string name = tokens[i].token;
+                if(tokens[i+1].token == "."){
+                    if(tokens[i+2].type == IDENTIFIER){
+                        //Checking that the member accessed is present in the symbol table or not.
+                        if(MemberPresent(name, tokens[i+2].token,indent_level,parent)){
+                            node.expr += tokens[i+2].token;
+                        }
+                        i += 2;
+                    }
+                    else{
+                        error(line,"expected an identifier after '.'.");
+                    }
+                    node.expr += ".";
                 }
                 else{
-                    error(line, "expected an identifier as function name.");
-                    error_c = 1;
-                    break;
-                }
-            }
-            else if(!name && !param && token.token == "(")
-            {
-                if(tokens[i+1].token != ")"){
-                    param = 1;
-                }
-                else{
+                    node.expr += tokens[i].token +" "+ tokens[1].token;
                     i++;
                 }
-            }
-            else if(param)
-            {
-                if(token.token == ",")
-                {
-                    if(param_.size() == 0)
-                    {
-                        error(line, "invalid token ',' used.");
-                        error_c = 1;
-                        break;
-                    }
-                    else
-                    {
-                        //VarDecl node
-                        VarDecl param_node = ParseVarDecl(param_,indent_level,line,line);
-                        node.params.push_back(param_node);
-                        param_ = {};
-                    }
-                }
-                else if(token.token == ")")
-                {
-                    VarDecl param_node = ParseVarDecl(param_,indent_level,line,line);
-                    node.params.push_back(param_node);
-                    param_ = {};
-                    param = 0;
-                }
-                else{
-                    param_.push_back(token);
-                }
-            }
-            else if(token.token == ":")
-            {
-                if(!param && !name){
-                    ends = 1;
-                    type = 0;
-                }
-            }
-            else if(!param && token.token == "->")
-            {
-                type = 1;
-            }
-            else if(type)
-            {
-                node.return_type += token.token;
-                node.return_type_infr = 0;
-            }
-            else if(ends)
-            {
-                error(line, "invalid token after function end.");
-                error_c = 1;
-                break;
-            }
-        }
-        if(!error_c){
-            //Add the function to property stack to avoid any potential undefined identifier error.
-            MethodProperty prop;
-            prop.name = node.name;
-            prop.type = node.return_type;
-            methods_prop.push_back(prop);
-        }
-        //Finally return the processed function node.
-        return node;
-    }
 
-
-    ClassDecl ParseClassDecl(TokenStream tokens, int line){
-        ClassDecl node;
-        bool name, iclass;
-        iclass = 0;
-        name = iclass;
-        for(Token token : tokens)
-        {
-            if(token.token == ":")
-            {break;}
+            }
             else{
-                if(token.token == "class"){
-                    name = 1;
-                }
-                else if(token.type != IDENTIFIER && name == 1){
-                    printf("Error:[%d] At line %d, expected an identifier after class keyword.\n", error_count+1, line);
-                    error_count++;
-                }
-                else if(token.type != IDENTIFIER && iclass == 1){
-                    printf("Error:[%d] At line %d, expected an identifier.\n", error_count+1, line);
-                    error_count++;
-                }
-                else if(token.type == IDENTIFIER && name == 1){
-                    node.name = token.token;
-                    iclass = 1;
-                    name = 0;
-                }
-                else if(token.type == IDENTIFIER && iclass == 1){
-                    node.inherit_class = token.token;
-                }
+                error(line,"undefined identifier '"+tokens[i].token + "'.");
             }
-        }
-        if(node.name != ""){
-            Identifiers.push_back(node.name);
-            ClassProp prop;
-            prop.inheritted_class = node.inherit_class;
-            prop.name = node.name;
-            Classes.push_back(prop);
-        }
-        return node;
-    }
-
-    //Function to parse group declarations.
-    Group ParseGroupStmt(TokenStream tokens, int line){
-        Group node;
-        bool end = false;
-        bool name = false;
-        bool over = false;
-
-        for(Token token : tokens){
-            if(token.token == "group" && !name && !end){
-                name = true;
-            }
-            else if(name){
-                if(token.type != IDENTIFIER){
-                    printf("Error:[%d] at line %d, expected an identifier after group keyword.\n", error_count+1, line);
-                    error_count++;
-                }
-                else{
-                    node.name = token.token;
-                    name = 0;
-                    end = 1;
-                }
-            }
-            else if(end){
-                if(token.token != ":"){
-                    printf("Error:[%d] at line %d, unexpected %s used in group declaration.\n", error_count+1, line, token.token.c_str());
-                    error_count++;
-                }
-                else{
-                    end = 0;
-                    over = 1;
-                }
-            }
-            else if(over){
-                printf("Error:[%d] at line %d, unexpected %s used in group declaration.\n",error_count+1, line, token.token.c_str());
-                error_count++;
-            }
-        }
-        if(end){
-            printf("Error:[%d] at line %d, group declaration is not closed expected a : .\n",error_count+1, line);
-                error_count++;
         }
         else{
-            if(node.name != ""){
-                Identifiers.push_back(node.name);
-            }
+            node.expr += tokens[i].token + " ";
         }
-        return node;
     }
 
+    return node;
+}
 
-    /**********************************************************************************************************************************************************************/
-
-    //This function is gonna return the deepest indent level.
-    int DeepestIndentLevel(vector<TokenStream> tokens)
-    {
-        int indent_level = 0;
-        for(TokenStream tokenStream : tokens)
-        {
-            if(getIndentLevel(tokenStream) > indent_level){
-                indent_level = getIndentLevel(tokenStream);
-            }
-            else{}
+VarDecl ParseVarDecl(TokenStream tokens, int line, int indent_level, int parent){
+    VarDecl node;
+    TokenStream val_expr;
+    //Default type:
+    node.type_ = "NONE";
+    /*
+        Grammar for VarDecl:
+        <identifier> : <type> = <value>
+        or
+        <identifier> = <value>
+    */
+    //States
+    bool name = 1;
+    bool type = 0;
+    bool value = 0;
+    bool error_c = 0;
+    
+    //Parse:
+    for(Token token : tokens){
+        if(name){
+            //In previous parser code we were using a condition to check whether first token is identifier or not but we don't 
+            //need it since it's done by isVarDecl function during checking.
+            node.name = token.token;
+            name = 0;
         }
-        return indent_level;
-    }
-
-    Import ParseImportStmt(TokenStream tokens, int line);
-    //Defines all imports
-    string imported_code;
-
-    //This function will do actual parsing and appends the results into Statement vector which could be futher assembled by ParseStatements function.
-    void ParseLines(vector<TokenStream> code_tokens){
-        int statement_number = 1;
-        Token line_end_token;
-        line_end_token.token = "ignore";
-        line_end_token.type = KEYWORD;
-        int last_indent_level = 0;
-        code_tokens.push_back(TokenStream({line_end_token}));
-        //Look for each line.
-        for(TokenStream tokens : code_tokens){
-
-            int indent_level = getIndentLevel(tokens);
-            //Now remove all indent tokens present since we now know the indent level.
-            TokenStream tokens_;
-            for(Token token : tokens)
-                if(token.type == INDENT)
-                    ignore;
-                else
-                    tokens_.push_back(token);
-            tokens = tokens_;
-            //Now check for token types and parse them seper
-            if(isVarDecl(tokens, indent_level)){
-                tokens.pop_back();
-                tokens.pop_back();
-                tokens.pop_back();
-                //Now get AST node for the statement.
-                auto node_ = make_shared<VarDecl>(ParseVarDecl(tokens,indent_level, statement_number,statement_number));
-                NodePtr node = static_pointer_cast<Node>(node_);
-                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),VAR_DECLARATION,indent_level));
-            }
-            else if(isVarAssign(tokens, indent_level)){
-                tokens.pop_back();
-                tokens.pop_back();
-                tokens.pop_back();
-                //Now get AST node for the statement.
-                auto node_ = make_shared<VarAssign>(ParseVarAssign(tokens, statement_number));
-                NodePtr node = static_pointer_cast<Node>(node_);
-                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),VAR_ASSIGNMENT,indent_level));
-            }
-            else if(isFunDecl(tokens)){
-                tokens.pop_back();
-                tokens.pop_back();
-                tokens.pop_back();
-                //Now get AST node for the statement.
-                auto node_ = make_shared<FunctionDecl>(ParseFuncDecl(tokens,indent_level+1, statement_number));
-                NodePtr node = static_pointer_cast<Node>(node_);
-                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),FUNCTION_DECL,indent_level));
-            }
-            else if(isForStmt(tokens)){
-                tokens.pop_back();
-                tokens.pop_back();
-                tokens.pop_back();
-                //Now get AST node for the statement.
-                auto node_ = make_shared<ForLoop>(ParseForLoop(tokens, statement_number));
-                NodePtr node = static_pointer_cast<Node>(node_);
-                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),FOR_LOOP,indent_level));
-            }
-            else if(isWhileStmt(tokens)){
-                tokens.pop_back();
-                tokens.pop_back();
-                tokens.pop_back();
-                //Now get AST node for the statement.
-                auto node_ = make_shared<WhileLoop>(ParseWhileLoop(tokens, statement_number));
-                NodePtr node = static_pointer_cast<Node>(node_);
-                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),WHILE_LOOP,indent_level));
-            }
-            else if(isIfStmt(tokens)){
-                tokens.pop_back();
-                tokens.pop_back();
-                tokens.pop_back();
-                //Now get AST node for the statement.
-                auto node_ = make_shared<IfStmt>(ParseIfStmt(tokens,statement_number));
-                NodePtr node = static_pointer_cast<Node>(node_);
-                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),IF_STATEMENT,indent_level));
-            }
-            else if(isElifStmt(tokens)){
-                tokens.pop_back();
-                tokens.pop_back();
-                tokens.pop_back();
-                //Now get AST node for the statement.
-                auto node_ = make_shared<ElifStmt>(ParseElifStmt(tokens,statement_number));
-                NodePtr node = static_pointer_cast<Node>(node_);
-                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),ELIF_STATEMENT,indent_level));
-            }
-            else if(isElseStmt(tokens)){
-                tokens.pop_back();
-                tokens.pop_back();
-                tokens.pop_back();
-                //Now get AST node for the statement.
-                auto node_ = make_shared<ElseStmt>(ParseElseStmt(tokens,statement_number));
-                NodePtr node = static_pointer_cast<Node>(node_);
-                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),ELSE_STATEMENT,indent_level));
-            }
-            else if(isBreakStmt(tokens)){
-                tokens.pop_back();
-                tokens.pop_back();
-                tokens.pop_back();
-               auto node_ = make_shared<Break>(ParseBreakStmt(tokens,statement_number));
-               NodePtr node = static_pointer_cast<Node>(node_); 
-               Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),BREAK,indent_level));
-            }
-            else if(isClassDecl(tokens)){
-                tokens.pop_back();
-                tokens.pop_back();
-                tokens.pop_back();
-                auto node_ = make_shared<ClassDecl>(ParseClassDecl(tokens,statement_number));
-                NodePtr node = static_pointer_cast<Node>(node_); 
-                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),CLASS_DEFINITION,indent_level));
-            }
-            else if(isGroupDecl(tokens)){
-                tokens.pop_back();
-                tokens.pop_back();
-                tokens.pop_back();
-                auto node_ = make_shared<Group>(ParseGroupStmt(tokens,statement_number));
-                NodePtr node = static_pointer_cast<Node>(node_); 
-                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),GROUP,indent_level));
-                Group_stack.push_back(node_->name);
-            }
-            else if(isReturnStmt(tokens)){
-                tokens.pop_back();
-                tokens.pop_back();
-                tokens.pop_back();
-                auto node_ = make_shared<ReturnStmt>(ParseReturnStmt(tokens,statement_number));
-                NodePtr node = static_pointer_cast<Node>(node_); 
-                Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),RETURN_STMT,indent_level));
-            }
-            else if(isImportStmt(tokens)){
-                tokens.pop_back();
-                tokens.pop_back();
-                tokens.pop_back();
-                auto node_ = make_shared<Import>(ParseImportStmt(tokens,statement_number));
-                NodePtr node = static_pointer_cast<Node>(node_); 
-                imported_code += node_->code + "\n";
+        else if(token.token == ":"){
+            if(type){
+                error(line,"invalid use of : token as a type.");
             }
             else{
-               auto node_ = make_shared<Expr>(ParseExpr(tokens,statement_number));
-               NodePtr node = static_pointer_cast<Node>(node_); 
-               Statements.push_back(Statement(statement_number,TokenStreamToString(tokens),visit(node),EXPR_TYPE,indent_level));
+                type = 1;
             }
-            last_indent_level = indent_level;
-            statement_number++;
         }
+        else if(type){
+            if(token.token == "<" || token.token == ">" || token.type == IDENTIFIER){
+
+            }
+            else{
+                error(line,"invalid use of " + token.token + "token as a type.");
+            }
+        }
+        else if(token.token == "="){
+            if(type){
+                type = 0;
+                value = 1;
+            }
+            else if(value){
+                error(line,"invalid use of = as rvalue, did you mean == ?");
+            }
+        }
+        else{
+            val_expr.push_back(token);
+        }
+    }
+    node.value = ParseExpr(val_expr,line,indent_level,parent);
+    //Type checking
+    if(node.type_ != "NONE"){
+        if(!table.isPresent((parent*1000)+indent_level,node.type_,ST_CLASS)){
+            error(line, "undefined type '"+node.type_+"'.");
+        }
+    }
+    //Add it to symbol table:
+    if(error_c == 0){
         
     }
+    return node;
+}
 
-    bool notBlockStatement(NODE_TYPE type){
-        bool state = 1;
-        if
-        (type == FOR_LOOP || type == WHILE_LOOP || type == IF_STATEMENT || type == ELIF_STATEMENT ||
-         type == ELSE_STATEMENT || type == FUNCTION_DECL || type == CLASS_DEFINITION
-        ){
-            state = 0;
-        }
-        return state;
-    }
-
-
-    bool isBlockStatement(NODE_TYPE type){
-        bool state = 0;
-        if
-        (type == FOR_LOOP || type == WHILE_LOOP || type == IF_STATEMENT || type == ELIF_STATEMENT ||
-         type == ELSE_STATEMENT || type == FUNCTION_DECL || type == CLASS_DEFINITION
-        ){
-            state = 1;
-        }
-        return state;
-    }
-
-    //Seeking for last open scope
-
-    Scope last_open_scope(vector<Scope> scope_stack){
-        Scope last;
-        for(Scope scope : scope_stack){
-            if(scope.ended == 0){
-                last = scope;
+VarAssign ParseVarAssign(TokenStream tokens,int line,int parent, int indent){
+    VarAssign node;
+    TokenStream val_expr;
+    //States
+    bool name = 1;
+    bool value = 0;
+    bool error_c = 0;
+    for(Token token : tokens){
+        if(name){
+            if(token.type == IDENTIFIER){
+                node.name = token.token;
+                name = 0;
+                value = 1;
+            }
+            else{
+                error(line, "expected an identifier");
+                error_c = 1;
             }
         }
-        return last;
-    }
-
-    //Create an instance of group statement.
-    string create_group_object(){
-        string code;
-        string g = Group_stack[0];
-        code += g + " " + g + ";\n";
-        return code;
-    }
-
-    //Returns the last scope present in the given scope vector.
-    Scope last_scope(vector<Scope> scope){
-        return scope[scope.size()-1];
-    }
-
-    //Last parsing stage which will return transpiled code and work with indentations.
-    string ParseStatements(){
-        //Image of code
-        string code, fncode;
-        code = imported_code;
-        //Some properties for scopes
-        Scope scope(0,PROGRAM,0);
-        Scope master(0,PROGRAM,0);
-        bool class_ = 0;
-        //To keep track of open scopes which are not yet closed.
-        vector<Scope> scope_stack = {scope};
-        //To keep track of last statement which can we used to check whether indentation is required or not.
-        Statement last_statement;
-        for(Statement statement : Statements){
-                while(statement.indent_level != last_scope(scope_stack).indent_level){
-                    //Here 1000 is added to encode the indentation level and avoid the conflict with same indents.
-                    variable_stack.erase(1000+last_scope(scope_stack).indent_level+statement.number);
-                    if(last_scope(scope_stack).of == FUNCTION_DECL || last_scope(scope_stack).of == CLASS_DEFINITION){
-                        code += "};\n";
-                        scope_stack.pop_back(); 
-                        if(last_scope(scope_stack).of == CLASS_DEFINITION){
-                            class_ = 0;
-                        }
-                    }
-                    else if(last_scope(scope_stack).of == GROUP){
-                        if(Group_stack.size()!=0){
-                            code += "};\n" +  create_group_object();
-                            scope_stack.pop_back();
-                        }
-                    }
-                    else{
-                        code += "}\n";
-                        scope_stack.pop_back(); 
-                    }
-                }
-                //Checking the type of current statement and generating code accordingly.
-                switch(statement.type)
-                {
-                    case EXPR_TYPE:{
-                        code += statement.statement + ";\n";
-                        last_statement = statement;
-                        break;
-                    }
-                    case VAR_DECLARATION:{
-                            code += statement.statement + ";\n";
-                            last_statement = statement;
-                        break;
-                    }
-                    case VAR_ASSIGNMENT:{
-                        code += statement.statement + ";\n";
-                        last_statement = statement;
-                        break;
-                    }
-                    case IF_STATEMENT:{
-                        scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
-                        code += statement.statement + "{\n";
-                        last_statement = statement;
-                        break;
-                    }
-                    case ELIF_STATEMENT:{
-                        scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
-                        code += statement.statement + "{\n";
-                        last_statement = statement;
-                        break;
-                    }
-                    case ELSE_STATEMENT:{
-                        scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
-                        code += statement.statement + "{\n";
-                        last_statement = statement;
-                        break;
-                    }
-                    case FOR_LOOP:{
-                        scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
-                        code += statement.statement + "{\n";
-                        last_statement = statement;
-                        break;
-                    }
-                    case WHILE_LOOP:{
-                        scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
-                        code += statement.statement + "{\n";
-                        last_statement = statement;
-                        break;
-                    }
-                    case CLASS_DEFINITION:{
-                        scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
-                        code += statement.statement + "{\npublic:\n";
-                        class_ = 1;
-                        last_statement = statement;
-                        break;
-                    }
-                    case RETURN_STMT:{
-                        code += statement.statement;
-                        last_statement = statement;
-                    }
-                    case FUNCTION_DECL:{
-                        scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
-                        if(class_ ==1){
-                            // ParseFuncDecl(tokenize(statement.raw_statement)).name;
-                            replaceAll(statement.statement,"=[&]","");
-                            code += statement.statement + "{\n";
-                            last_statement = statement;
-                        }
-                        else{
-                            code += statement.statement + "{\n";
-                            last_statement = statement;
-                        }
-                        break;
-                    }
-                    case BREAK:{
-                        code += statement.statement + ";\n";
-                        last_statement = statement;
-                        break;
-                    }
-                    case GROUP:{
-                        scope_stack.push_back(Scope(statement.indent_level+1, statement.type, 0));
-                        code += statement.statement + "{\npublic:\n";
-                        last_statement = statement;
-                        break;
-                    }
-                    default:{
-                        error(statement.number, "unknow node type " + to_string(statement.type));
-                    }
-                }
+        else if(value){
+            val_expr.push_back(token);
         }
-        imported_code = "";
-        return code;
     }
+    if(!error_c){
+        node.value = ParseExpr(val_expr, line, indent, parent);
+    }
+    else{}
+    return node;
+}
 
-    #include "../IR/vm.h"
+//////////////////////////////////////////////////////////////////
+bool isVarDecl(TokenStream tokens, int current_scope){
+    bool state = 0;
+    if(tokens[0].type == IDENTIFIER && (tokens[1].token == ":" || tokens[1].token == "=") && !table.isVariablePresent(tokens[0].token,current_scope))
+     state = 1;
+    return state;
+}
+bool isVarAssign(TokenStream tokens, int current_scope){
+    bool state = 0;
+    if(tokens[0].type == IDENTIFIER && (tokens[1].token == "=") && table.isVariablePresent(tokens[0].token,current_scope))
+     state = 1;
+    return state;
+}
 
-    Import ParseImportStmt(TokenStream tokens, int line){
-        Import node;
-        bool path = 0;
-        bool error_ = 0;
-        //First capture the name and path of the file
-        for(Token token : tokens){
-            if(token.token == "import" && path == 0){path = 1;}
-            else if(token.token == "import" && path == 1){
-                error(line, "couldn't use import keyword as path to the module.");
-                error_ = 1;
+
+#define castToNode static_pointer_cast<Node>
+#define castToVarDecl static_pointer_cast<VarDecl>
+#define castToVarAssign static_pointer_cast<VarAssign>
+#define castToExpr static_pointer_cast<Expr>
+#define castToFunctionDecl static_pointer_cast<FunctionDecl>
+#define castToClassDecl static_pointer_cast<ClassDecl>;
+#define castToForLoop static_pointer_cast<ForLoop>;
+#define castToWhileLoop static_pointer_cast<WhileLoop>;
+#define castToIfStmt static_pointer_cast<IfStmt>;
+#define castToElifStmt static_pointer_cast<ElifStmt>;
+#define castToElseStmt static_pointer_cast<ElseStmt>;
+#define castToFunArg static_pointer_cast<FunArg>;
+#define castToBreak static_pointer_cast<Break>;
+#define castToGroup static_pointer_cast<Group>;
+#define castToImport static_pointer_cast<Import>;
+#define castToOneLiner static_pointer_cast<OneLiner>;
+#define castToReturnStmt static_pointer_cast<ReturnStmt>;
+#define castToVarDecl static_pointer_cast<VarDecl>
+#define makeSharedVarDecl make_shared<VarDecl>
+#define makeSharedVarAssign make_shared<VarAssign>
+#define makeSharedExpr make_shared<Expr>
+#define makeSharedFunctionDecl make_shared<FunctionDecl>
+#define makeSharedClassDecl make_shared<ClassDecl>;
+#define makeSharedForLoop make_shared<ForLoop>;
+#define makeSharedWhileLoop make_shared<WhileLoop>;
+#define makeSharedIfStmt make_shared<IfStmt>;
+#define makeSharedElifStmt make_shared<ElifStmt>;
+#define makeSharedElseStmt make_shared<ElseStmt>;
+#define makeSharedFunArg make_shared<FunArg>;
+#define makeSharedBreak make_shared<Break>;
+#define makeSharedGroup make_shared<Group>;
+#define makeSharedImport make_shared<Import>;
+#define makeSharedOneLiner make_shared<OneLiner>;
+#define makeSharedReturnStmt make_shared<ReturnStmt>;
+
+NODE_TYPE StatementType(TokenStream tokens, int en_scope){
+    NODE_TYPE type;
+    if(isVarDecl(tokens,en_scope)){
+        type = VAR_DECLARATION;
+    }
+    else if(isVarAssign(tokens,en_scope)){
+        type = VAR_ASSIGNMENT;
+    }
+    else{
+        type = EXPR_TYPE;
+    }
+    return type;
+}
+int getIndentLevel(TokenStream tokens){
+    int indent = 0;
+    for(Token token : tokens){
+        if(token.type == INDENT)
+            indent++;
+    }return indent;
+}
+TokenStream removeIndent(TokenStream tokens){
+    TokenStream newTokens;
+    bool indent = 0;
+    if(tokens[0].type == INDENT){
+        indent = 1;
+    }
+    for(Token token : tokens){
+        if(token.type == INDENT ){
+            
+        }
+        else if(indent && token.type != INDENT){
+            indent = 0;
+            newTokens.push_back(token);
+        }
+        else if(!indent){
+            newTokens.push_back(token);
+        }
+    }
+    return newTokens;
+}
+
+//Parser function.
+string Parse(vector<TokenStream> code_)
+{
+    //Load builtins
+    load_builtins_to_table();
+    //Resulting code
+    string code;
+    //States
+    //Scope representation
+    int parent_scope = 1;
+    int line_no = 1;
+    int scope = 0;
+    //Use switch
+    //Parsing
+    for(TokenStream line : code_)
+    {
+        //Get indent and remove the indent
+        scope = getIndentLevel(line);
+        line = removeIndent(line);
+        //Encoded scope for effective scope management
+        int en_scope = (parent_scope*1000) + scope;
+        switch(StatementType(line,en_scope))
+        {
+            case VAR_DECLARATION:{
+                line.pop_back();
+                line.pop_back();
+                line.pop_back();
+                VarDecl node = ParseVarDecl(line,line_no,scope,parent_scope);
+                NodePtr nodePtr = castToNode(makeSharedVarDecl(node));
+                code += visit(nodePtr) + "\n";
             }
-            else if(path && token.type != KEYWORD){
-                node.path += token.token;
+            case VAR_ASSIGNMENT:{
+                line.pop_back();
+                line.pop_back();
+                line.pop_back();
+                VarAssign node = ParseVarAssign(line,line_no,scope,parent_scope);
+                NodePtr nodePtr = castToNode(makeSharedVarAssign(node));
+                code += visit(nodePtr) + "\n";
             }
-            else if(path && token.type == KEYWORD){
-                error(line, "couldn't use a keyword as path to the module.");
-                error_ = 1;
+            case EXPR_TYPE:{
+                Expr node = ParseExpr(line,line_no,scope,parent_scope);
+                NodePtr nodePtr = castToNode(makeSharedExpr(node));
+                code += visit(nodePtr) + "\n";
             }
         }
-        if(!error_){
-            string path_ = Pcurrent_dir + "/" + node.path + ".csq";
-            //Read the code in it.
-            string read_code = readCode(path_);
-            if(read_code == ""){
-                printf("Error: Module %s not found.\n", path_.c_str());
-            }
-            //To use the imported code we have to do recursive parsing by using Parse functions to parse them.
-            ParseLines(Tokenizer(read_code));
-            node.code = ParseStatements();
-            Statements = {};
-        }
-        
-        return node;
     }
+    return code;
+}
 
-#endif // PARSEr_H_CSQ4
+#endif // PARSER_CSQ4
