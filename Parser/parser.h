@@ -197,33 +197,26 @@ Expr ParseExpr(TokenStream tokens, int line, int indent_level, int parent){
 
     for(int i = 0;i<tokens.size();i++)
     {
-        if(tokens[i].type == IDENTIFIER){
-            if(isIdentifierDefined(tokens[i].token,(parent*1000)+indent_level)){
-                string name = tokens[i].token;
-                if(tokens[i+1].token == "."){
-                    if(tokens[i+2].type == IDENTIFIER){
-                        //Checking that the member accessed is present in the symbol table or not.
-                        if(MemberPresent(name, tokens[i+2].token,indent_level,parent)){
-                            node.expr += tokens[i+2].token;
-                        }
-                        i += 2;
+        if(tokens[i].type == IDENTIFIER)
+        {
+            if(tokens[i+1].token == ".")
+            {
+                if(tokens[i+2].type == IDENTIFIER)
+                {
+                    if(MemberPresent(tokens[i].token,tokens[i+2].token,indent_level,parent)){
+                        node.expr += tokens[i].token + "." + tokens[i+2].token;
+                        i+=2;
                     }
-                    else{
-                        error(line,"expected an identifier after '.'.");
-                    }
-                    node.expr += ".";
                 }
-                else{
-                    node.expr += tokens[i].token +" "+ tokens[1].token;
-                    i++;
-                }
-
+                else{error(line,"expected an identifier.");}
+            }  
+            else
+            {
+                node.expr += tokens[i].token + " ";
             }
-            else{
-                error(line,"undefined identifier '"+tokens[i].token + "'.");
-            }
-        }
-        else{
+        }   
+        else if(tokens[i].token != ".")
+        {
             node.expr += tokens[i].token + " ";
         }
     }
@@ -236,6 +229,7 @@ VarDecl ParseVarDecl(TokenStream tokens, int line, int indent_level, int parent)
     TokenStream val_expr;
     //Default type:
     node.type_ = "NONE";
+    node.type_infr = 1;
     /*
         Grammar for VarDecl:
         <identifier> : <type> = <value>
@@ -262,11 +256,13 @@ VarDecl ParseVarDecl(TokenStream tokens, int line, int indent_level, int parent)
             }
             else{
                 type = 1;
+                node.type_ = "";
+                node.type_infr = 0;
             }
         }
-        else if(type){
+        else if(type && token.token != "="){
             if(token.token == "<" || token.token == ">" || token.type == IDENTIFIER){
-
+                node.type_ += token.token;
             }
             else{
                 error(line,"invalid use of " + token.token + "token as a type.");
@@ -282,10 +278,9 @@ VarDecl ParseVarDecl(TokenStream tokens, int line, int indent_level, int parent)
             }
         }
         else{
-            val_expr.push_back(token);
+            node.value.expr += (token.token);
         }
     }
-    node.value = ParseExpr(val_expr,line,indent_level,parent);
     //Type checking
     if(node.type_ != "NONE"){
         if(!table.isPresent((parent*1000)+indent_level,node.type_,ST_CLASS)){
@@ -293,8 +288,13 @@ VarDecl ParseVarDecl(TokenStream tokens, int line, int indent_level, int parent)
         }
     }
     //Add it to symbol table:
+
     if(error_c == 0){
-        
+        Variable var;
+        var.name = node.name;
+        var.type = node.type_;
+        table.addVariable(parent,indent_level,var);
+
     }
     return node;
 }
@@ -319,13 +319,13 @@ VarAssign ParseVarAssign(TokenStream tokens,int line,int parent, int indent){
             }
         }
         else if(value){
-            val_expr.push_back(token);
+            node.value.expr += token.token;
         }
     }
-    if(!error_c){
-        node.value = ParseExpr(val_expr, line, indent, parent);
-    }
-    else{}
+    // if(!error_c){
+    //     node.value = ParseExpr(val_expr, line, indent, parent);
+    // }
+    // else{}
     return node;
 }
 
@@ -378,9 +378,13 @@ bool isVarAssign(TokenStream tokens, int current_scope){
 #define makeSharedImport make_shared<Import>;
 #define makeSharedOneLiner make_shared<OneLiner>;
 #define makeSharedReturnStmt make_shared<ReturnStmt>;
+#define printVectorSize(vect) printf("%ld\n",vect.size())
+#define printi(i) printf("%d\n",i)
+#define prints(i) printf("%s\n",i.c_str())
 
 NODE_TYPE StatementType(TokenStream tokens, int en_scope){
     NODE_TYPE type;
+    
     if(isVarDecl(tokens,en_scope)){
         type = VAR_DECLARATION;
     }
@@ -420,53 +424,35 @@ TokenStream removeIndent(TokenStream tokens){
     return newTokens;
 }
 
-//Parser function.
-string Parse(vector<TokenStream> code_)
+
+string Parse(vector<TokenStream> code)
 {
-    //Load builtins
     load_builtins_to_table();
-    //Resulting code
-    string code;
-    //States
-    //Scope representation
-    int parent_scope = 1;
-    int line_no = 1;
+    string codeString = "";
     int scope = 0;
-    //Use switch
-    //Parsing
-    for(TokenStream line : code_)
+    int parent = 1;
+    int line_no = 1;
+    for(TokenStream line : code)
     {
-        //Get indent and remove the indent
-        scope = getIndentLevel(line);
-        line = removeIndent(line);
-        //Encoded scope for effective scope management
-        int en_scope = (parent_scope*1000) + scope;
-        switch(StatementType(line,en_scope))
-        {
-            case VAR_DECLARATION:{
-                line.pop_back();
-                line.pop_back();
-                line.pop_back();
-                VarDecl node = ParseVarDecl(line,line_no,scope,parent_scope);
-                NodePtr nodePtr = castToNode(makeSharedVarDecl(node));
-                code += visit(nodePtr) + "\n";
+        switch(StatementType(line,(parent*1000)+scope)){
+            case VAR_DECLARATION:
+            {
+                VarDecl node = ParseVarDecl(line,line_no,scope,parent);
+                codeString += VarDecl_visitor(makeSharedVarDecl(node))+"\n";
+                line_no++;
+                break;
             }
-            case VAR_ASSIGNMENT:{
-                line.pop_back();
-                line.pop_back();
-                line.pop_back();
-                VarAssign node = ParseVarAssign(line,line_no,scope,parent_scope);
-                NodePtr nodePtr = castToNode(makeSharedVarAssign(node));
-                code += visit(nodePtr) + "\n";
-            }
-            case EXPR_TYPE:{
-                Expr node = ParseExpr(line,line_no,scope,parent_scope);
-                NodePtr nodePtr = castToNode(makeSharedExpr(node));
-                code += visit(nodePtr) + "\n";
+            case EXPR_TYPE:
+            {
+                Expr node = ParseExpr(line,line_no,scope,parent);
+                codeString += Expr_visitor(makeSharedExpr(node))+"\n";
+                line_no++;
+                break;
             }
         }
     }
-    return code;
+
+    return codeString;
 }
 
 #endif // PARSER_CSQ4
