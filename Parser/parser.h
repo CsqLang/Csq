@@ -246,24 +246,29 @@ Expr ParseRValue(TokenStream tokens,string lType, int line, int indent_level, in
     {
         if(tokens[i].type == IDENTIFIER)
         {
-            if(tokens[i+1].token == ".")
-            {
-                if(tokens[i+2].type == IDENTIFIER)
+            if(isIdentifierDefined(tokens[i].token,(parent*1000)+indent_level)){
+                if(tokens[i+1].token == ".")
                 {
-                    if(lType == "NONE"){
-                        node.expr += tokens[i].token + "." + tokens[i+2].token;
-                        i+=2;
+                    if(tokens[i+2].type == IDENTIFIER)
+                    {
+                        if(lType == "NONE"){
+                            node.expr += tokens[i].token + "." + tokens[i+2].token;
+                            i+=2;
+                        }
+                        else if(MemberPresent(tokens[i].token,tokens[i+2].token,indent_level,parent)){
+                            node.expr += tokens[i].token + "." + tokens[i+2].token;
+                            i+=2;
+                        }
                     }
-                    else if(MemberPresent(tokens[i].token,tokens[i+2].token,indent_level,parent)){
-                        node.expr += tokens[i].token + "." + tokens[i+2].token;
-                        i+=2;
-                    }
+                    else{error(line,"expected an identifier.");}
+                }  
+                else
+                {
+                    node.expr += tokens[i].token + " ";
                 }
-                else{error(line,"expected an identifier.");}
-            }  
-            else
-            {
-                node.expr += tokens[i].token + " ";
+            }
+            else{
+                error(line,"undefined identifier '" + tokens[i].token + "'.");
             }
         }   
         else if(tokens[i].token != ".")
@@ -329,7 +334,7 @@ VarDecl ParseVarDecl(TokenStream tokens, int line, int indent_level, int parent)
             }
         }
         else{
-            node.value.expr += (token.token);
+            val_expr.push_back(token);
         }
     }
     //Type checking
@@ -337,6 +342,12 @@ VarDecl ParseVarDecl(TokenStream tokens, int line, int indent_level, int parent)
         if(!table.isPresent((parent*1000)+indent_level,node.type_,ST_CLASS)){
             error(line, "undefined type '"+node.type_+"'.");
         }
+        else{
+            node.value = ParseRValue(val_expr,node.type_,line,indent_level,parent);
+        }
+    }
+    else{
+        node.value = ParseRValue(val_expr,"NONE",line,indent_level,parent);
     }
     //Add it to symbol table:
 
@@ -353,6 +364,7 @@ VarDecl ParseVarDecl(TokenStream tokens, int line, int indent_level, int parent)
 VarAssign ParseVarAssign(TokenStream tokens,int line,int parent, int indent){
     VarAssign node;
     TokenStream val_expr;
+    Variable var = table.getVariable(tokens[0].token,(parent*1000)+indent);
     //States
     bool name = 1;
     bool value = 0;
@@ -362,21 +374,23 @@ VarAssign ParseVarAssign(TokenStream tokens,int line,int parent, int indent){
             if(token.type == IDENTIFIER){
                 node.name = token.token;
                 name = 0;
-                value = 1;
             }
             else{
                 error(line, "expected an identifier");
                 error_c = 1;
             }
         }
+        else if(token.token == "=" && !name && !value){
+            value = 1;
+        }
         else if(value){
-            node.value.expr += token.token;
+            val_expr.push_back(token);
         }
     }
-    // if(!error_c){
-    //     node.value = ParseExpr(val_expr, line, indent, parent);
-    // }
-    // else{}
+    if(!error_c){
+        node.value = ParseRValue(val_expr,var.type,line,indent,parent);
+    }
+    else{}
     return node;
 }
 
@@ -417,6 +431,7 @@ int getIndentLevel(TokenStream tokens){
             indent++;
     }return indent;
 }
+//Remove all the indentation.
 TokenStream removeIndent(TokenStream tokens){
     TokenStream newTokens;
     bool indent = 0;
@@ -438,7 +453,7 @@ TokenStream removeIndent(TokenStream tokens){
     return newTokens;
 }
 
-
+//Parser
 string Parse(vector<TokenStream> code)
 {
     //Load the C written builtins
@@ -452,7 +467,6 @@ string Parse(vector<TokenStream> code)
     //////////////////////////////
     for(TokenStream line : code)
     {
-
         //Get the current scope by finding indents
         scope = getIndentLevel(line);
         //Removing all indentation from the stream
@@ -469,6 +483,12 @@ string Parse(vector<TokenStream> code)
                 line_no++;
                 break;
             }
+            case VAR_ASSIGNMENT:{
+                
+                VarAssign node = ParseVarAssign(line,line_no,scope,parent);
+                codeString += VarAssign_visitor(node)+"\n";
+                line_no++;
+            }
             case EXPR_TYPE:
             {
                 Expr node = ParseExpr(line,line_no,scope,parent);
@@ -478,7 +498,6 @@ string Parse(vector<TokenStream> code)
             }
         }
     }
-
     return codeString;
 }
 
