@@ -165,6 +165,21 @@ bool MemberPresent(string var_name,string member, int indent_level, int parent){
     }
     return state;
 }
+bool MemberPresentOf(string type,string member, int indent_level, int parent){
+    bool state = 0;
+    Class class_ = table.getClass(type, (parent*1000)+indent_level);
+    for(Function fn : class_.methods){
+        if(fn.name == member){
+            state = 1;
+        }
+    }
+    for(Variable var : class_.variables){
+        if(var.name == member){
+            state = 1;
+        }
+    }
+    return state;
+}
 
 //This function will load builtins since they are defined in C headerfile not in direct Csq module.
 void load_builtins_to_table(){
@@ -204,6 +219,42 @@ Expr ParseExpr(TokenStream tokens, int line, int indent_level, int parent){
                 if(tokens[i+2].type == IDENTIFIER)
                 {
                     if(MemberPresent(tokens[i].token,tokens[i+2].token,indent_level,parent)){
+                        node.expr += tokens[i].token + "." + tokens[i+2].token;
+                        i+=2;
+                    }
+                }
+                else{error(line,"expected an identifier.");}
+            }  
+            else
+            {
+                node.expr += tokens[i].token + " ";
+            }
+        }   
+        else if(tokens[i].token != ".")
+        {
+            node.expr += tokens[i].token + " ";
+        }
+    }
+
+    return node;
+}
+// All through both ParseExpr and ParseRValue returns same thing but this one is made for variable parsing 
+Expr ParseRValue(TokenStream tokens,string lType, int line, int indent_level, int parent){
+    Expr node;
+
+    for(int i = 0;i<tokens.size();i++)
+    {
+        if(tokens[i].type == IDENTIFIER)
+        {
+            if(tokens[i+1].token == ".")
+            {
+                if(tokens[i+2].type == IDENTIFIER)
+                {
+                    if(lType == "NONE"){
+                        node.expr += tokens[i].token + "." + tokens[i+2].token;
+                        i+=2;
+                    }
+                    else if(MemberPresent(tokens[i].token,tokens[i+2].token,indent_level,parent)){
                         node.expr += tokens[i].token + "." + tokens[i+2].token;
                         i+=2;
                     }
@@ -344,43 +395,6 @@ bool isVarAssign(TokenStream tokens, int current_scope){
 }
 
 
-#define castToNode static_pointer_cast<Node>
-#define castToVarDecl static_pointer_cast<VarDecl>
-#define castToVarAssign static_pointer_cast<VarAssign>
-#define castToExpr static_pointer_cast<Expr>
-#define castToFunctionDecl static_pointer_cast<FunctionDecl>
-#define castToClassDecl static_pointer_cast<ClassDecl>;
-#define castToForLoop static_pointer_cast<ForLoop>;
-#define castToWhileLoop static_pointer_cast<WhileLoop>;
-#define castToIfStmt static_pointer_cast<IfStmt>;
-#define castToElifStmt static_pointer_cast<ElifStmt>;
-#define castToElseStmt static_pointer_cast<ElseStmt>;
-#define castToFunArg static_pointer_cast<FunArg>;
-#define castToBreak static_pointer_cast<Break>;
-#define castToGroup static_pointer_cast<Group>;
-#define castToImport static_pointer_cast<Import>;
-#define castToOneLiner static_pointer_cast<OneLiner>;
-#define castToReturnStmt static_pointer_cast<ReturnStmt>;
-#define castToVarDecl static_pointer_cast<VarDecl>
-#define makeSharedVarDecl make_shared<VarDecl>
-#define makeSharedVarAssign make_shared<VarAssign>
-#define makeSharedExpr make_shared<Expr>
-#define makeSharedFunctionDecl make_shared<FunctionDecl>
-#define makeSharedClassDecl make_shared<ClassDecl>;
-#define makeSharedForLoop make_shared<ForLoop>;
-#define makeSharedWhileLoop make_shared<WhileLoop>;
-#define makeSharedIfStmt make_shared<IfStmt>;
-#define makeSharedElifStmt make_shared<ElifStmt>;
-#define makeSharedElseStmt make_shared<ElseStmt>;
-#define makeSharedFunArg make_shared<FunArg>;
-#define makeSharedBreak make_shared<Break>;
-#define makeSharedGroup make_shared<Group>;
-#define makeSharedImport make_shared<Import>;
-#define makeSharedOneLiner make_shared<OneLiner>;
-#define makeSharedReturnStmt make_shared<ReturnStmt>;
-#define printVectorSize(vect) printf("%ld\n",vect.size())
-#define printi(i) printf("%d\n",i)
-#define prints(i) printf("%s\n",i.c_str())
 
 NODE_TYPE StatementType(TokenStream tokens, int en_scope){
     NODE_TYPE type;
@@ -427,25 +441,38 @@ TokenStream removeIndent(TokenStream tokens){
 
 string Parse(vector<TokenStream> code)
 {
+    //Load the C written builtins
     load_builtins_to_table();
+    //Resulting code
     string codeString = "";
+    //Scope managers
     int scope = 0;
     int parent = 1;
     int line_no = 1;
+    //////////////////////////////
     for(TokenStream line : code)
     {
-        switch(StatementType(line,(parent*1000)+scope)){
+
+        //Get the current scope by finding indents
+        scope = getIndentLevel(line);
+        //Removing all indentation from the stream
+        line = removeIndent(line);
+
+        //The encoding of scope will be helping to distinguish between different scopes 
+        //Process : (<parent> * 1000) + <current_scope>
+        int en_scope = (parent*1000)+scope;
+        switch(StatementType(line,en_scope)){
             case VAR_DECLARATION:
             {
                 VarDecl node = ParseVarDecl(line,line_no,scope,parent);
-                codeString += VarDecl_visitor(makeSharedVarDecl(node))+"\n";
+                codeString += VarDecl_visitor(node)+"\n";
                 line_no++;
                 break;
             }
             case EXPR_TYPE:
             {
                 Expr node = ParseExpr(line,line_no,scope,parent);
-                codeString += Expr_visitor(makeSharedExpr(node))+"\n";
+                codeString += Expr_visitor(node)+"\n";
                 line_no++;
                 break;
             }
