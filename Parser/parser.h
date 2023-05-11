@@ -63,6 +63,12 @@ struct SymbolTable{
     scope2 : function fn2 level = 1
     symbol table key : 2001
 
+    def fn():  //Encoding : 1001
+     ...        
+    def fn2(): //Encoding : 2001
+     if 1: //Encoding 2002
+      a = 94
+
     */
     bool isPresent(int current_scope, string symbol, SymbolType type){
         if(type == ST_VARIABLE)
@@ -70,6 +76,14 @@ struct SymbolTable{
             bool state = 0;
             for(int i = int(current_scope/1000);i<=current_scope;i++){
                 for(pair<string, Variable> var : variables[i]){
+                    if(var.first == symbol){
+                        state = 1;
+                        break;
+                    }
+                }
+            }
+            if(!state){
+                for(pair<string, Variable> var: variables[1000]){
                     if(var.first == symbol){
                         state = 1;
                         break;
@@ -89,12 +103,28 @@ struct SymbolTable{
                     }
                 }
             }
+            if(!state){
+                for(pair<string, Function> fun : functions[1000]){
+                    if(fun.first == symbol){
+                        state = 1;
+                        break;
+                    }
+                }
+            }
             return state;
         }
         else{
             bool state = 0;
             for(int i = int(current_scope/1000);i<=current_scope;i++){
                 for(pair<string, Class> c : classes[i]){
+                    if(c.first == symbol){
+                        state = 1;
+                        break;
+                    }
+                }
+            }
+            if(!state){
+                for(pair<string, Class> c : classes[1000]){
                     if(c.first == symbol){
                         state = 1;
                         break;
@@ -393,6 +423,31 @@ VarAssign ParseVarAssign(TokenStream tokens,int line,int parent, int indent){
     else{}
     return node;
 }
+//As Rvalue parser this also returns Expr node but will work particularly for conditions.
+Expr ParseCondition(TokenStream tokens, int line, int indent_level, int parent){
+    Expr node;
+    for(Token token : tokens)
+    {
+        if(token.type == IDENTIFIER)
+        {
+            if(isIdentifierDefined(token.token,(parent*1000)+indent_level)){
+                node.expr += token.token + " ";
+            }
+            else{
+                error(line,"undefined identifier '" + token.token + "'.");
+            }
+        }
+        else{
+            if(token.type != ASOPERATOR){
+                node.expr += token.token + " ";
+            }
+            else{
+                error(line,"couldn't use assignment operator as condition.");
+            }
+        }
+    }
+    return node;
+}
 
 //////////////////////////////////////////////////////////////////
 bool isVarDecl(TokenStream tokens, int current_scope){
@@ -408,7 +463,26 @@ bool isVarAssign(TokenStream tokens, int current_scope){
     return state;
 }
 
+bool isIfStmt(TokenStream tokens){
+    bool state = 0;
+    if(tokens[0].token == "if")
+        state = 1;
+    return state;
+}
 
+bool isElifStmt(TokenStream tokens){
+    bool state = 0;
+    if(tokens[0].token == "elif")
+        state = 1;
+    return state;
+}
+
+bool isElseStmt(TokenStream tokens){
+    bool state = 0;
+    if(tokens[0].token == "else")
+        state = 1;
+    return state;
+}
 
 NODE_TYPE StatementType(TokenStream tokens, int en_scope){
     NODE_TYPE type;
@@ -488,6 +562,9 @@ string Parse(vector<TokenStream> code)
                 VarAssign node = ParseVarAssign(line,line_no,scope,parent);
                 codeString += VarAssign_visitor(node)+"\n";
                 line_no++;
+            }
+            case IF_STATEMENT:{
+                
             }
             case EXPR_TYPE:
             {
