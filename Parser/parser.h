@@ -270,6 +270,45 @@ IfStmt ParseIfStmt(TokenStream tokens, int indent, int parent, int line){
     return node;
 }
 
+ElifStmt ParseElifStmt(TokenStream tokens, int indent, int parent, int line){
+    ElifStmt node;
+    TokenStream condition_expr;
+    //States
+    bool condition = 0;
+    bool end = 0;
+
+    for(Token token : tokens)
+    {
+        if(token.token == "elif")
+        {
+            if(!condition && !end)
+                condition = 1;
+            else if(condition)
+                error(line, "invalid use of elif keyword in condtion.");
+            else if(end)
+                error(line, "invalid use of elif keyword after if statement ends.\nHint:For another elif stmt write from newline.");
+        }
+        else if(token.token == ":"){
+            if(condition){
+                condition = 0;
+                node.condition = ParseCondition(condition_expr,line,indent,parent);
+                end = 1;
+            }
+            else{
+                error(line,"unexpected token ':'.");
+            }
+        }
+        else if(condition)
+        {
+            condition_expr.push_back(token);
+        }
+    }
+
+    return node;
+}
+
+
+
 //////////////////////////////////////////////////////////////////
 bool isVarDecl(TokenStream tokens, int current_scope){
     bool state = 0;
@@ -380,12 +419,14 @@ string Parse(vector<TokenStream> code)
             }
             case VAR_ASSIGNMENT:{
                 
-                VarAssign node = ParseVarAssign(line,line_no,scope,parent);
+                VarAssign node = ParseVarAssign(line,line_no,parent, scope);
                 codeString += VarAssign_visitor(node)+"\n";
                 line_no++;
             }
             case IF_STATEMENT:{
-                
+                IfStmt node = ParseIfStmt(line,scope,parent,line_no);
+                codeString += IfStmt_visitor(node)+"\n";
+                line_no++;
             }
             case EXPR_TYPE:
             {
