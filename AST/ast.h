@@ -6,12 +6,7 @@
 #include "../Tokenizer/tokenizer.h"
 #include "../Memory/stack.h"
 #include <memory>
-#include <stack>
 using namespace std;
-
-//Alias for shared_ptr;
-#define Ptr shared_ptr
-
 
 //Node types
 typedef enum {
@@ -242,47 +237,6 @@ struct OneLiner : Node{
         code = code_;
     }      
 };
-
-//Functions to add nodes for ease of use.
-
-Ptr<Node> addNode(VarDecl decl){
-    auto node = make_shared<VarDecl>();
-    node->name = decl.name;
-    node->value = decl.value;
-    return static_pointer_cast<Node>(node);
-}
-
-Ptr<Node> addNode(VarAssign decl){
-    auto node = make_shared<VarAssign>();
-    node->name = decl.name;
-    node->value = decl.value;
-    return static_pointer_cast<Node>(node);
-}
-
-Ptr<Node> addNode(Expr decl){
-    auto node = make_shared<Expr>();
-    node->expr = decl.expr;
-    return static_pointer_cast<Node>(node);
-}
-
-Ptr<Node> addNode(Block decl){
-    auto node = make_shared<Block>();
-    node->statements = decl.statements;
-    return static_pointer_cast<Node>(node);
-}
-
-Ptr<Node> addNode(FunctionDecl decl){
-    auto node = make_shared<FunctionDecl>();
-    node->body = decl.body;
-    node->name = decl.name;
-    node->params = decl.params;
-    return static_pointer_cast<Node>(node);
-}
-
-void addStatement(Ptr<Block> block, string statement){
-    block->statements.push_back(statement);
-}
-
 
 //Importing visitor containing all utilities to visit AST.
 #include "visitor.h"
