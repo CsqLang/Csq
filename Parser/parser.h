@@ -449,6 +449,43 @@ Expr ParseCondition(TokenStream tokens, int line, int indent_level, int parent){
     return node;
 }
 
+IfStmt ParseIfStmt(TokenStream tokens, int indent, int parent, int line){
+    IfStmt node;
+    TokenStream condition_expr;
+    //States
+    bool condition = 0;
+    bool end = 0;
+
+    for(Token token : tokens)
+    {
+        if(token.token == "if")
+        {
+            if(!condition && !end)
+                condition = 1;
+            else if(condition)
+                error(line, "invalid use of if keyword in condtion.");
+            else if(end)
+                error(line, "invalid use of if keyword after if statement ends.\nHint:For another if stmt write from newline.");
+        }
+        else if(token.token == ":"){
+            if(condition){
+                condition = 0;
+                node.condition = ParseCondition(condition_expr,line,indent,parent);
+                end = 1;
+            }
+            else{
+                error(line,"unexpected token ':'.");
+            }
+        }
+        else if(condition)
+        {
+            condition_expr.push_back(token);
+        }
+    }
+
+    return node;
+}
+
 //////////////////////////////////////////////////////////////////
 bool isVarDecl(TokenStream tokens, int current_scope){
     bool state = 0;
