@@ -144,7 +144,37 @@ VarDecl ParseVarDecl(TokenStream tokens, int line){
     }
 
     node.value = ParseRValue(val_expr,line);
+    Variable var;
+    var.name = node.name;
+    var.type = node.type_;
+    table.addVariable(node.name, var);
+    return node;
+}
 
+VarAssign ParseVarAssign(TokenStream tokens, int line){
+    VarAssign node;
+    bool name = 1;
+    bool value = 0;
+    TokenStream val_expr;
+
+    for(Token token : tokens){
+        if(name){
+            if(token.type == IDENTIFIER){
+                node.name = token.token;
+                name = 0;
+            }
+            else{
+                error(line,"expected an identifier.");
+            }
+        }
+        else if(!value && !name && token.token == "="){
+            value = 1;
+        }
+        else if(value){
+            val_expr.push_back(token);
+        }
+    }
+    node.value = ParseRValue(val_expr,line);
     return node;
 }
 
@@ -228,12 +258,25 @@ string Parse(vector<TokenStream> code)
         //Removing all indentation from the stream
         line = removeIndent(line);
 
+        line.pop_back();
+        line.pop_back();
+        line.pop_back();
         //The encoding of scope will be helping to distinguish between different scopes 
         //Process : (<parent> * 1000) + <current_scope>
         switch(StatementType(line)){
             case VAR_DECLARATION:{
                 VarDecl node = ParseVarDecl(line,line_no);
                 codeString += VarDecl_visitor(node) + ";\n";
+                break;
+            }
+            case VAR_ASSIGNMENT:{
+                VarAssign node = ParseVarAssign(line,line_no);
+                codeString += VarAssign_visitor(node) + ";\n";
+                break;
+            }
+            case EXPR_TYPE:{
+                Expr node = ParseExpr(line,line_no);
+                codeString += Expr_visitor(node) + ";\n";
                 break;
             }
         }
