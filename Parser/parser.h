@@ -104,7 +104,7 @@ VarDecl ParseVarDecl(TokenStream tokens, int line){
     bool name = 1;
     bool type = 0;
     bool value = 0;
-
+    bool error_c = 0;
     for(Token token : tokens){
         if(name)
         {
@@ -114,7 +114,8 @@ VarDecl ParseVarDecl(TokenStream tokens, int line){
                 name = 0;
             }
             else{
-                error(line,"expected an identifier as the name for the variable.");
+                error(line,"expected an identifier but got '" + token.token + "'.");
+                error_c = 1;
                 name = 0;
             }
         }
@@ -128,6 +129,7 @@ VarDecl ParseVarDecl(TokenStream tokens, int line){
             }
             else{
                 error(line,"invalid syntax : '" + node.name + " " + token.token + "'.");
+                error_c = 1;
                 type = 0;
                 value = 1;
             }
@@ -142,6 +144,7 @@ VarDecl ParseVarDecl(TokenStream tokens, int line){
             }
             else{
                 error(line,"invalid token '"+token.token + "' used as a type.");
+                error_c = 1;
             }
         }
         else if(token.token == "=" && type){
@@ -153,6 +156,7 @@ VarDecl ParseVarDecl(TokenStream tokens, int line){
             else
             {
                 error(line,"undefined type '" + node.type_ + "'.");
+                error_c = 1;
             }
         }
         else if(value){
@@ -247,10 +251,45 @@ IfStmt ParseIfStmt(TokenStream tokens, int line){
     return node;
 }
 
+ElifStmt ParseElifStmt(TokenStream tokens, int line){
+    ElifStmt node;
+    TokenStream condition_expr;
+    bool condition = 0;
+    bool end = 0;
+    //
+    for(Token token : tokens){
+        if(!condition && !end && token.token == "elif"){
+                condition = 1;
+        }
+        else if(condition && token.token != ":"){
+            condition_expr.push_back(token);
+        }
+        else if(condition && token.token == ":"){
+            end = 1;
+            condition = 0;
+            node.condition = ParseCondition(condition_expr,line);
+        }
+        else if(end){
+            error(line,"invalid token after the end of elif stmt '" + token.token + "'.");
+        }
+    }
+    //
+    return node;
+}
+
+ElseStmt ParseElseStmt(TokenStream tokens, int line){
+    ElseStmt node;
+    if(tokens[1].token != ":"){
+        error(line, "expected a : after else.");
+    }
+    return node;
+}
+
+
 //These functions will be checking which type of the statement is and returns it's nodetype.
 bool isVarDecl(TokenStream tokens){
     bool state = 0;
-    if(tokens[1].token == ":=" || tokens[1].token == ":"){
+    if(tokens[1].token == ":=" ||( tokens[1].token == ":" && tokens[0].token != "else")){
         state = 1;
     }
     return state;
@@ -298,6 +337,12 @@ NODE_TYPE StatementType(TokenStream tokens){
     }
     else if(isIfStmt(tokens)){
         type = IF_STATEMENT;
+    }
+    else if(isElifStmt(tokens)){
+        type = ELIF_STATEMENT;
+    }
+    else if(isElseStmt(tokens)){
+        type = ELSE_STATEMENT;
     }
     else{
         type = EXPR_TYPE;
@@ -411,14 +456,25 @@ string Parse(vector<TokenStream> code)
                 codeString += IfStmt_visitor(node) + "{\n";
                 break;
             }
-            case EXPR_TYPE:{
-                Expr node = ParseExpr(line,line_no);
-                codeString += Expr_visitor(node) + ";\n";
+            case ELIF_STATEMENT:{
+                scope_stack.push_back(Scope(indent_level+1, StatementType(line), 0));
+                ElifStmt node = ParseElifStmt(line,line_no);
+                codeString += ElifStmt_visitor(node) + "{\n";
                 break;
             }
-            last_statement = StatementType(line);
-            last_indent = indent_level;
+            case ELSE_STATEMENT:{
+                scope_stack.push_back(Scope(indent_level+1, StatementType(line), 0));
+                ElseStmt node = ParseElseStmt(line,line_no);
+                codeString += ElseStmt_visitor(node) + "{\n";
+                break;
+            }
+            case EXPR_TYPE:{
+                Expr node = ParseExpr(line,line_no);
+                codeString +=node.expr + ";\n";
+                break;
+            }
         }
+        line_no++;
     }
     return codeString;
 }
