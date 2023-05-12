@@ -53,7 +53,7 @@ struct SymbolTable{
     void addFunction(string name, Function fun){
         functions[name]=fun;
     }
-    void addVariable(string name, Class c){
+    void addClass(string name, Class c){
         classes[name] = c;
     }
 
@@ -94,6 +94,13 @@ void load_builtins(){
     print.name = "print";
     print.type = "void";
     table.addFunction(print.name, print);
+    Function range_;
+    range_.name = "range";
+    range_.type = "list<i32>";
+    table.addFunction(range_.name, range_);
+    Class i32;
+    i32.name = "i32";
+    table.addClass("i32",i32);
 }
 
 #endif // SYMBOL_TABLE_CSQ
