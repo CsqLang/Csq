@@ -113,6 +113,13 @@ VarDecl ParseVarDecl(TokenStream tokens, int line){
                 error(line,"invalid syntax : '" + node.name + " " + token.token + "'.");
             }
         }
+        else if(type){
+            if(token.type == IDENTIFIER)
+            {
+                //Check whether the type is present in the symbol table or not.
+                
+            }
+        }
     }
 
     return node;
