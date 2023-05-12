@@ -18,13 +18,6 @@ enum TARGET_COMPILER{
 };
 
 
-string combineFunctions(){
-    string code;
-    for(string function : Functions){
-        code += function + "\n";
-    }
-    return code;
-}
 
 string formIR(string code, string current_path){
     string IR = "#include \"" + current_path + "/Csq4/IR/instructions.h\"\n";
