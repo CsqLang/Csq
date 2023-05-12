@@ -111,16 +111,39 @@ VarDecl ParseVarDecl(TokenStream tokens, int line){
             }
             else{
                 error(line,"invalid syntax : '" + node.name + " " + token.token + "'.");
+                type = 0;
+                value = 1;
             }
         }
-        else if(type){
+        else if(type && token.token != "="){
             if(token.type == IDENTIFIER)
             {
-                //Check whether the type is present in the symbol table or not.
-                
+                node.type_ += token.token;
+            }
+            else if(token.token == ">" || token.token == "<"){
+                node.type_ += token.token;
+            }
+            else{
+                error(line,"invalid token '"+token.token + "' used as a type.");
             }
         }
+        else if(token.token == "=" && type){
+            type = 0;
+            if(table.isClassDefined(node.type_))
+            {
+                value = 1;
+            }
+            else
+            {
+                error(line,"undefined type '" + node.type_ + "'.");
+            }
+        }
+        else if(value){
+            val_expr.push_back(token);
+        }
     }
+
+    node.value = ParseRValue(val_expr,line);
 
     return node;
 }
@@ -208,7 +231,11 @@ string Parse(vector<TokenStream> code)
         //The encoding of scope will be helping to distinguish between different scopes 
         //Process : (<parent> * 1000) + <current_scope>
         switch(StatementType(line)){
-            
+            case VAR_DECLARATION:{
+                VarDecl node = ParseVarDecl(line,line_no);
+                codeString += VarDecl_visitor(node) + ";\n";
+                break;
+            }
         }
     }
     return codeString;
