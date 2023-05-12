@@ -21,6 +21,7 @@ string VarDecl_visitor(VarDecl node);
 string VarAssign_visitor(VarAssign node);
 string FuncDecl_visitor(FunctionDecl node);
 string IfStmt_visitor(IfStmt node);
+string Expr_visitor(Expr node);
 string ElifStmt_visitor(ElifStmt node);
 string ElseStmt_visitor(ElseStmt node);
 string ForLoop_visitor(ForLoop node);
@@ -33,10 +34,10 @@ string ReturnStmt_visitor(ReturnStmt node);
 //Visitor for variable declaration and assignment
 string VarDecl_visitor(VarDecl node){
     if(node.type_infr){
-        return "VAR " + node.name + " = " + node.value.expr + ";";
+        return "VAR " + node.name + " = " + node.value.expr;
     }
     else{
-        return node.type_ + " " + node.name + " = " + node.value.expr + ";";
+        return node.type_ + " " + node.name + " = " + node.value.expr;
     }
 }
 
@@ -56,6 +57,7 @@ string Block_visitor(Block node){
 
 //Visitor for If,Elif and Else statements
 string IfStmt_visitor(IfStmt node){
+
     return "IF(" + node.condition.expr + ")\n";
 }
 string ElifStmt_visitor(ElifStmt node){
