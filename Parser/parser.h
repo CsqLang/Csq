@@ -334,6 +334,35 @@ ForLoop ParseForLoop(TokenStream tokens, int line){
     return node;
 }
 
+WhileLoop ParseWhileLoop(TokenStream tokens, int line){
+    WhileLoop node;
+    TokenStream condition;
+    //States
+    bool condition_ = 0;
+    bool end = 0;
+
+    for(Token token : tokens){
+        if(token.token == "while")
+        {
+            if(condition_ || end){error(line,"unexpected while keyword inside the while statement");}
+            else{
+                condition_ = 1;
+            }
+        }
+        else if(condition_ && token.token != ":"){
+            condition.push_back(token);
+        }
+        else if(condition_ && token.token == ":"){
+            end = 1;
+            node.condition = ParseCondition(condition,line);
+        }
+        else if(end){
+            error(line, "invalid token '" + token.token + "' after end of");
+        }
+    }
+    return node;
+}
+
 //These functions will be checking which type of the statement is and returns it's nodetype.
 bool isVarDecl(TokenStream tokens){
     bool state = 0;
@@ -353,6 +382,24 @@ bool isVarAssign(TokenStream tokens){
 
 bool isForLoop(TokenStream tokens){
     if(tokens[0].token == "for"){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+
+bool isWhileLoop(TokenStream tokens){
+    if(tokens[0].token == "while"){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+
+bool isFunctionDef(TokenStream tokens){
+    if(tokens[0].token == "def"){
         return 1;
     }
     else{
@@ -403,6 +450,12 @@ NODE_TYPE StatementType(TokenStream tokens){
     }
     else if(isForLoop(tokens)){
         type = FOR_LOOP;
+    }
+    else if(isWhileLoop(tokens)){
+        type = WHILE_LOOP;
+    }
+    else if(isFunctionDef(tokens)){
+        type = FUNCTION_DECL;
     }
     else{
         type = EXPR_TYPE;
@@ -532,6 +585,12 @@ string Parse(vector<TokenStream> code)
                 scope_stack.push_back(Scope(indent_level+1, StatementType(line), 0));
                 ForLoop node = ParseForLoop(line,line_no);
                 codeString += ForLoop_visitor(node) + "{\n";
+                break;
+            }
+            case WHILE_LOOP:{
+                scope_stack.push_back(Scope(indent_level+1, StatementType(line), 0));
+                WhileLoop node = ParseWhileLoop(line, line_no);
+                codeString += WhileLoop_visitor(node) + "{\n";
                 break;
             }
             case EXPR_TYPE:{
