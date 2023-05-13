@@ -285,6 +285,54 @@ ElseStmt ParseElseStmt(TokenStream tokens, int line){
     return node;
 }
 
+ForLoop ParseForLoop(TokenStream tokens, int line){
+    ForLoop node;
+    TokenStream expr;
+    //States
+    bool iter = 0;
+    bool expr_ = 0;
+    bool end = 0;
+
+    //Parse
+    for(Token token : tokens){
+        if(token.token == "for"){
+            if(!iter && !expr_ && !end){
+                iter = 1;
+            }
+            else{
+                error(line,"invalid use of for keyword.");
+            }
+        }
+        else if(iter){
+            if(token.type == IDENTIFIER){
+                node.iter_name += token.token;
+                Variable var;
+                var.name = node.iter_name;
+                table.addVariable(var.name,var);
+                iter = 0;
+            }
+            else{
+                error(line,"expected an identifier.");
+            }
+        }
+        else if(token.token == "in"){
+            if(!expr_ && !end){
+                expr_ = 1;
+            }
+            else{
+                error(line,"invalid use of in keyword.");
+            }
+        }
+        else if(expr_ && token.token != ":"){
+            expr.push_back(token);
+        }
+        else if(token.token == ":" && expr_){
+            node.condition = ParseExpr(expr,line);
+            break;
+        }   
+    }
+    return node;
+}
 
 //These functions will be checking which type of the statement is and returns it's nodetype.
 bool isVarDecl(TokenStream tokens){
@@ -301,6 +349,15 @@ bool isVarAssign(TokenStream tokens){
         state = 1;
     }
     return state;
+}
+
+bool isForLoop(TokenStream tokens){
+    if(tokens[0].token == "for"){
+        return 1;
+    }
+    else{
+        return 0;
+    }
 }
 
 bool isIfStmt(TokenStream tokens){
@@ -343,6 +400,9 @@ NODE_TYPE StatementType(TokenStream tokens){
     }
     else if(isElseStmt(tokens)){
         type = ELSE_STATEMENT;
+    }
+    else if(isForLoop(tokens)){
+        type = FOR_LOOP;
     }
     else{
         type = EXPR_TYPE;
@@ -466,6 +526,12 @@ string Parse(vector<TokenStream> code)
                 scope_stack.push_back(Scope(indent_level+1, StatementType(line), 0));
                 ElseStmt node = ParseElseStmt(line,line_no);
                 codeString += ElseStmt_visitor(node) + "{\n";
+                break;
+            }
+            case FOR_LOOP:{
+                scope_stack.push_back(Scope(indent_level+1, StatementType(line), 0));
+                ForLoop node = ParseForLoop(line,line_no);
+                codeString += ForLoop_visitor(node) + "{\n";
                 break;
             }
             case EXPR_TYPE:{
