@@ -18,18 +18,11 @@ enum TARGET_COMPILER{
 };
 
 
-string combineFunctions(){
-    string code;
-    for(string function : Functions){
-        code += function + "\n";
-    }
-    return code;
-}
 
-string formIR(string code, string fncode, string current_path){
+string formIR(string code, string current_path){
     string IR = "#include \"" + current_path + "/Csq4/IR/instructions.h\"\n";
     IR += "\nint main(int argc, char *argv[]){\n";
-    IR += code + "\nreturn 0;}\n";
+    IR += code + "\n;return 0;}\n";
     return IR;
 }
 
@@ -104,11 +97,8 @@ void compile(string lang, string currdir, string name){
     if(lang == "cpp"){
         string raw_code = readCode(currdir + "/" + name + ".csq");
         vector<TokenStream> tokens = Tokenizer(raw_code);
-        ParseLines(tokens);
-        string mcode = ParseStatements();
-        string fncode = combineFunctions();
-        string IR = formIR(mcode, fncode, currdir);
-        replaceAll(IR," . ",".");
+        string mcode = Parse(tokens);
+        string IR = formIR(mcode, currdir);
         writeIR(IR, currdir,name);
         if(error_count > 0){
             printf("Couldn't compile due to %d existing error.\n", error_count);
