@@ -118,6 +118,8 @@ VarDecl ParseVarDecl(TokenStream tokens, int line){
         {
             if(token.token == ":"){
                 type = 1;
+                node.type_ = "";
+                node.type_infr = 0;
             }
             else if(token.token == ":="){
                 value = 1;
@@ -423,6 +425,50 @@ FunctionDecl ParseFunction(TokenStream tokens, int line){
     return node;
 }
 
+ClassDecl ParseClass(TokenStream tokens, int line){
+    ClassDecl node;
+    //States
+    bool name = 0;
+    bool inherit_class = 0;
+    bool end = 0;
+
+    for(Token token : tokens)
+    {
+        if(token.token == "class")
+        {
+            if(!name && !end){
+                name  = 1;
+            }
+            else{
+                error(line,"invalid class keyword.");
+            }
+        }
+        else if(name && token.token != ":"){
+            if(token.type == IDENTIFIER)
+            {
+                if(!table.isIdentifierDefined(token.token)){
+                    node.name = token.token;
+                    name = 0;
+                }
+                else{
+                    error(line, "'" + token.token + "' is already defined use another name.");
+                }
+            }
+            else{
+                error(line,"expected an identifier.");
+            }
+        }
+        else if(name && token.token == ":"){
+            end = 1;
+            break;
+        }
+    }
+    Class c;
+    c.name = node.name;
+    table.addClass(node.name, c);
+    return node;
+}
+
 //These functions will be checking which type of the statement is and returns it's nodetype.
 bool isVarDecl(TokenStream tokens){
     bool state = 0;
@@ -460,6 +506,15 @@ bool isWhileLoop(TokenStream tokens){
 
 bool isFunctionDef(TokenStream tokens){
     if(tokens[0].token == "def"){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+
+bool isClass(TokenStream tokens){
+    if(tokens[0].token == "class"){
         return 1;
     }
     else{
@@ -516,6 +571,9 @@ NODE_TYPE StatementType(TokenStream tokens){
     }
     else if(isFunctionDef(tokens)){
         type = FUNCTION_DECL;
+    }
+    else if(isClass(tokens)){
+        type = CLASS_DEFINITION;
     }
     else{
         type = EXPR_TYPE;
@@ -657,6 +715,12 @@ string Parse(vector<TokenStream> code)
                 scope_stack.push_back(Scope(indent_level+1, FUNCTION_DECL, 0));
                 FunctionDecl node = ParseFunction(line,line_no);
                 codeString += FuncDecl_visitor(node) + "{\n";
+                break;
+            }
+            case CLASS_DEFINITION:{
+                scope_stack.push_back(Scope(indent_level+1, CLASS_DEFINITION, 0));
+                ClassDecl node = ParseClass(line,line_no);
+                codeString += ClassDecl_visitor(node) + "{\n";
                 break;
             }
             case EXPR_TYPE:{
