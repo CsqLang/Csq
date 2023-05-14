@@ -45,7 +45,7 @@ struct SymbolTable{
     map<string,Variable> variables;
     map<string,Class> classes;
     map<string,Function> functions;
-
+    vector<string> fnStack;
     //Helper functions
     void addVariable(string name, Variable var){
         variables[name]=var;
@@ -64,8 +64,8 @@ struct SymbolTable{
                 state = 1;
             }
         }
-        for(pair<string,Function> fun : functions){
-            if(fun.first == name){
+        for(pair<string,Function> fn : functions){
+            if(fn.first == name){
                 state = 1;
             }
         }
@@ -101,6 +101,9 @@ void load_builtins(){
     Class i32;
     i32.name = "i32";
     table.addClass("i32",i32);
+    Class list;
+    list.name = "list";
+    table.addClass("list",list);
 }
 
 #endif // SYMBOL_TABLE_CSQ
