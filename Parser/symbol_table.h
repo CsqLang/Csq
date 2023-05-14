@@ -101,6 +101,12 @@ void load_builtins(){
     Class i32;
     i32.name = "i32";
     table.addClass("i32",i32);
+    Class void_;
+    void_.name = "None";
+    table.addClass("None",void_);
+    Class f64_;
+    f64_.name = "f64";
+    table.addClass("f64",f64_);
     Class list;
     list.name = "list";
     table.addClass("list",list);
