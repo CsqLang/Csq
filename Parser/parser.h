@@ -37,35 +37,29 @@ vector<TokenStream> Tokenizer(string code){
     return lines;
 }
 
+///////////////////////
+//Testing kit
+#define printsize(vect) printf("%ld\n",vect.size())
+#define printi(x) printf("%d\n",x)
+
 
 //Parsing functions
 
 Expr ParseExpr(TokenStream tokens, int line){
     Expr node;
-    Token last;
     for(Token token : tokens){
         if(token.type == IDENTIFIER){
-            //Check is it defined?
-            if(table.isIdentifierDefined(token.token))
-            {
-                node.expr += token.token + " ";
+            if(!table.isIdentifierDefined(token.token)){
+                error(line,"undefined identifier '" + token.token + "'.");
             }
             else{
-                error(line,"undefined identifier '" + token.token + "' used.");
+                node.expr += token.token + " ";
             }
-            last = token;
         }
         else{
-            if(last.token == token.token){
-                error(line, "invalid syntax '" + last.token + " " + token.token + ".");
-            }
-            else{
-                node.expr += token.token + " ";
-            }
-            last = token;
+            node.expr += token.token + " ";
         }
-
-    }
+    }        
     return node;
 }
 
@@ -100,6 +94,7 @@ Expr ParseRValue(TokenStream tokens, int line){
 VarDecl ParseVarDecl(TokenStream tokens, int line){
     VarDecl node;
     TokenStream val_expr;
+    node.type_ = "NONE";
     //States
     bool name = 1;
     bool type = 0;
@@ -169,6 +164,12 @@ VarDecl ParseVarDecl(TokenStream tokens, int line){
     var.name = node.name;
     var.type = node.type_;
     table.addVariable(node.name, var);
+    if(node.type_ == "NONE"){
+        node.type_infr = 1;
+    }
+    else{
+        node.type_infr = 0;
+    }
     return node;
 }
 
@@ -360,6 +361,65 @@ WhileLoop ParseWhileLoop(TokenStream tokens, int line){
             error(line, "invalid token '" + token.token + "' after end of");
         }
     }
+    return node;
+}
+
+FunctionDecl ParseFunction(TokenStream tokens, int line){
+    FunctionDecl node;
+    //States
+    bool name = 0;
+    bool param = 0;
+    bool end = 0;
+
+    TokenStream param_;
+    for(Token token : tokens)
+    {
+        if(token.token == "def"){
+            if(!name && !param && !end){
+                name = 1;
+            }
+            else{
+                error(line,"invalid def keyword in function.");
+            }
+        }
+        else if(name && token.token != "("){
+            if(token.type == IDENTIFIER){
+                node.name = token.token;
+                name = 0;
+            }
+            else{
+                error(line,"expected an identifier.");
+            }
+        }
+        else if(!name && token.token == "(" && !param){
+            param = 1;
+        }
+        else if(param){
+            if(token.token != "," && token.token != ")"){
+                param_.push_back(token);
+            }
+            else if(token.token == ","){
+                node.params.push_back(ParseVarDecl(param_,line));
+            }
+            else if(token.token == ")"){
+                if(param_.size()>0){
+                    node.params.push_back(ParseVarDecl(param_,line));
+                    param = 0;
+                }
+                else{param = 0;}
+            }
+        }
+        else if(!end && !param && token.token == ":"){
+            end=  1;
+            break;
+        }
+    }
+
+    Function fun;
+    fun.name = node.name;
+    table.fnStack.push_back(node.name);
+    table.addFunction(fun.name,fun);
+    node.return_type_infr = 1;
     return node;
 }
 
@@ -591,6 +651,12 @@ string Parse(vector<TokenStream> code)
                 scope_stack.push_back(Scope(indent_level+1, StatementType(line), 0));
                 WhileLoop node = ParseWhileLoop(line, line_no);
                 codeString += WhileLoop_visitor(node) + "{\n";
+                break;
+            }
+            case FUNCTION_DECL:{
+                scope_stack.push_back(Scope(indent_level+1, FUNCTION_DECL, 0));
+                FunctionDecl node = ParseFunction(line,line_no);
+                codeString += FuncDecl_visitor(node) + "{\n";
                 break;
             }
             case EXPR_TYPE:{
