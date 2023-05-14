@@ -354,7 +354,7 @@ WhileLoop ParseWhileLoop(TokenStream tokens, int line){
         }
         else if(condition_ && token.token != ":"){
             condition.push_back(token);
-        }
+        }   
         else if(condition_ && token.token == ":"){
             end = 1;
             node.condition = ParseCondition(condition,line);
@@ -371,8 +371,9 @@ FunctionDecl ParseFunction(TokenStream tokens, int line){
     //States
     bool name = 0;
     bool param = 0;
+    bool type;
     bool end = 0;
-
+    node.return_type_infr = 1;
     TokenStream param_;
     for(Token token : tokens)
     {
@@ -411,9 +412,22 @@ FunctionDecl ParseFunction(TokenStream tokens, int line){
                 else{param = 0;}
             }
         }
-        else if(!end && !param && token.token == ":"){
+        else if(!end && !param && !type && token.token == ":"){
             end=  1;
             break;
+        }
+        else if(!param && token.token == "->"){
+            type = 1;
+            node.return_type_infr = 0;
+        }
+        else if(type && token.token != ":")
+        {
+            if(token.type == IDENTIFIER || token.token == "<" || token.token == ">"){
+                node.return_type += token.token;
+            }
+            else{
+                error(line,"expected a valid token for type.");
+            }
         }
     }
 
@@ -421,7 +435,6 @@ FunctionDecl ParseFunction(TokenStream tokens, int line){
     fun.name = node.name;
     table.fnStack.push_back(node.name);
     table.addFunction(fun.name,fun);
-    node.return_type_infr = 1;
     return node;
 }
 
@@ -720,7 +733,7 @@ string Parse(vector<TokenStream> code)
             case CLASS_DEFINITION:{
                 scope_stack.push_back(Scope(indent_level+1, CLASS_DEFINITION, 0));
                 ClassDecl node = ParseClass(line,line_no);
-                codeString += ClassDecl_visitor(node) + "{\n";
+                codeString += ClassDecl_visitor(node) + "{\npublic:\n";
                 break;
             }
             case EXPR_TYPE:{
