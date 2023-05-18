@@ -50,15 +50,23 @@ int addCell(Cell cell)
     return memory.size() - 1;
 }
 
+// Read the value of at address
+Cell read(int address){
+    if(address >= memory.size()){
+        printf("%s", ("Could access memory at " + to_string(address) + " since it doesn't exist.\n").c_str());
+        abort();
+        return memory[0];
+    }
+    else{
+        return memory[address];
+    }
+}
+
+
 // Check if a cell is available at the given address.
 bool isCellAvailable(int address)
 {
     return address >= 0 && address < usedStatus.size() && !usedStatus[address];
 }
-
-
-/*
-A must needed boiler plate for speeding the
-*/
 
 #endif // MEMORY_CSQ4  
