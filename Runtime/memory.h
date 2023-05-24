@@ -31,42 +31,106 @@ int a = stoi(heap[0]);
 #include <vector>
 using namespace std;
 
+
+//Value types
+enum Type{
+    INT,
+    STR,
+    FLOAT,
+};
+
+
 // Struct for a memory cell.
 struct Cell
 {
-    string value;
+    union{
+        int ival;
+        double fval;
+        string sval;
+    };
+    Type type;
     bool used;
+    Cell(){}
+    ~Cell(){}
 };
+
 
 // This is the ultimate memory where everything will be stored.
 vector<Cell> memory;
-vector<bool> usedStatus;
 
 // This will add a memory cell to the main memory and return its address.
-int addCell(Cell cell)
+void addCell(int val)
 {
+    Cell cell;
+    cell.ival = val;
+    cell.used = 1;
+    cell.type = INT;
     memory.emplace_back(cell);
-    usedStatus.push_back(true);
-    return memory.size() - 1;
+}
+
+void addCell(double val)
+{
+    Cell cell;
+    cell.fval = val;
+    cell.used = 1;
+    cell.type = FLOAT;
+    memory.emplace_back(cell);
+}
+
+void addCell(string val)
+{
+    Cell cell;
+    cell.sval = val;
+    cell.used = 1;
+    cell.type = STR;
+    memory.emplace_back(cell);
 }
 
 // Read the value of at address
-Cell read(int address){
-    if(address >= memory.size()){
-        printf("%s", ("Could access memory at " + to_string(address) + " since it doesn't exist.\n").c_str());
-        abort();
-        return memory[0];
-    }
-    else{
-        return memory[address];
+string readCell(int address){
+    switch(memory[address].type){
+        case INT:{
+            return to_string(memory[address].ival);
+        }
+        case STR:{
+            return memory[address].sval;
+        }
+        default:{
+            return to_string(memory[address].fval);
+        }
     }
 }
 
+Cell* getCellPtr(int address){
+    return &memory[address];
+}
 
-// Check if a cell is available at the given address.
-bool isCellAvailable(int address)
-{
-    return address >= 0 && address < usedStatus.size() && !usedStatus[address];
+// Modify the memory cell
+void modifyCell(Cell* cell, string value){
+    if(cell->type != STR){
+        printf("Error: couldn't allocate a str value into a cell of different type.");
+    }
+    else{
+        cell->sval = value;
+    }
+}
+
+void modifyCell(Cell* cell, int value){
+    if(cell->type != INT){
+        printf("Error: couldn't allocate an int value into a cell of different type.");
+    }
+    else{
+        cell->ival = value;
+    }
+}
+
+void modifyCell(Cell* cell, float value){
+    if(cell->type != FLOAT){
+        printf("Error: couldn't allocate an float value into a cell of different type.");
+    }
+    else{
+        cell->fval = value;
+    }
 }
 
 #endif // MEMORY_CSQ4  
