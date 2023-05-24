@@ -43,20 +43,18 @@ enum Type{
 // Struct for a memory cell.
 struct Cell
 {
-    union{
-        int ival;
-        double fval;
-        string sval;
-    };
+    int ival;
+    double fval;
+    string sval;
     Type type;
     bool used;
-    Cell(){}
-    ~Cell(){}
 };
 
 
 // This is the ultimate memory where everything will be stored.
 vector<Cell> memory;
+//Function to get the number of cells in the memory.
+int memory_size(){return memory.size();}
 
 // This will add a memory cell to the main memory and return its address.
 void addCell(int val)
@@ -65,7 +63,7 @@ void addCell(int val)
     cell.ival = val;
     cell.used = 1;
     cell.type = INT;
-    memory.emplace_back(cell);
+    memory.push_back(cell);
 }
 
 void addCell(double val)
@@ -74,7 +72,7 @@ void addCell(double val)
     cell.fval = val;
     cell.used = 1;
     cell.type = FLOAT;
-    memory.emplace_back(cell);
+    memory.push_back(cell);
 }
 
 void addCell(string val)
@@ -83,7 +81,23 @@ void addCell(string val)
     cell.sval = val;
     cell.used = 1;
     cell.type = STR;
-    memory.emplace_back(cell);
+    memory.push_back(cell);
+}
+
+//This function will dump all data in the memory.
+void dump(){
+    for(int i=0; i<memory.size(); i++){
+        printf("[%d] => type : %d used : %d value : ",i,memory[i].type,memory[i].used);
+        if(memory[i].type == STR){
+            printf("%s\n",memory[i].sval.c_str());
+        }
+        else if(memory[i].type == FLOAT){
+            printf("%lf\n",memory[i].fval);
+        }
+        else{
+            printf("%d\n",memory[i].ival);
+        }
+    }
 }
 
 // Read the value of at address
