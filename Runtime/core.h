@@ -8,40 +8,46 @@ Csq's runtime is responsible for the memory management and other runtime feature
 #include "object.h"
 #include "memory.h"
 #include "error.h"
-
+#include "function.h"
 /*
 This will be used by parser to resemble current line.
 */
 int line = 1;
 
+
+/*
+Possible types of symbol for the symbol table.
+*/
+enum SYMBOL_TYPE{
+    FUNCTION,
+    VARIABLE,
+};
+/*
+This struct stores a object of both Variable and Function which are to be used
+as a symbol and make it easy to traverse the symbol table
+*/
+struct Symbol{
+    Variable var;
+    Function fun;
+    SYMBOL_TYPE type;
+};
+
 /*Symbol table
 Creating map for variable table storing the key value pair of name and variable struct.
 We could even utilize this to do type checking easily.
 */
-map<string, Variable> SY_Var;
-
-void addVar(Variable var){
-    SY_Var[var.name] = var;
-}
+map<string, Symbol> SymTable;
 
 
 /*
-a<i32> = 4390 -------->i32 a = i32(memory[0])
-b<i32> = a + a ------->i32 b = toi32(memory[0]) + toi32(memory[0])
+Function to allocate variables 
+basically it first allocates the value into memory and then it creates Variable
+object to add it to the symbol table.
 */
-void assignVar(string var, string val, string type){
-    if(isIdentifier(val)){
-        auto it = SY_Var.find(val);
-        if (it != SY_Var.end())
-        {
-            //Defied so:
-            SY_Var[var].value_address = SY_Var[val].value_address;
-        }
-        else 
-        {
-            
-        }
-    }
+void allocateVar(string name, string type, TokenStream tokens)
+{
+    Variable var;
+    
 }
 
 #endif // RUNTIME_CORE_CSQ
