@@ -23,7 +23,9 @@ Memory view
  --------------------
 
  C++ is 
-int a = stoi(heap[0]);
+int a = stoi(readCell(0));
+***********************
+
 */
 
 
@@ -35,7 +37,7 @@ using namespace std;
 //Value types
 enum Type{
     INT,
-    STR,
+    STRING,
     FLOAT,
 };
 
@@ -80,7 +82,7 @@ void addCell(string val)
     Cell cell;
     cell.sval = val;
     cell.used = 1;
-    cell.type = STR;
+    cell.type = Type::STRING;
     memory.push_back(cell);
 }
 
@@ -88,7 +90,7 @@ void addCell(string val)
 void dump(){
     for(int i=0; i<memory.size(); i++){
         printf("[%d] => type : %d used : %d value : ",i,memory[i].type,memory[i].used);
-        if(memory[i].type == STR){
+        if(memory[i].type == STRING){
             printf("%s\n",memory[i].sval.c_str());
         }
         else if(memory[i].type == FLOAT){
@@ -106,8 +108,8 @@ string readCell(int address){
         case INT:{
             return to_string(memory[address].ival);
         }
-        case STR:{
-            return memory[address].sval;
+        case STRING:{
+            return "\"" + memory[address].sval + "\"";
         }
         default:{
             return to_string(memory[address].fval);
@@ -121,30 +123,28 @@ Cell* getCellPtr(int address){
 
 // Modify the memory cell
 void modifyCell(Cell* cell, string value){
-    if(cell->type != STR){
-        printf("Error: couldn't allocate a str value into a cell of different type.");
-    }
-    else{
-        cell->sval = value;
-    }
+    cell->sval = value;
+    cell->type = Type::STRING;
 }
 
 void modifyCell(Cell* cell, int value){
-    if(cell->type != INT){
-        printf("Error: couldn't allocate an int value into a cell of different type.");
-    }
-    else{
         cell->ival = value;
-    }
+        cell->type = INT;
 }
 
 void modifyCell(Cell* cell, float value){
-    if(cell->type != FLOAT){
-        printf("Error: couldn't allocate an float value into a cell of different type.");
-    }
-    else{
-        cell->fval = value;
-    }
+    cell->fval = value;
+    cell->type = FLOAT;
+}
+
+//This function will clear all the memory allocated.
+void freeMemory(){
+    memory.clear();
+}
+
+//Top cell address of memory
+int TopCellAddress(){
+    return memory.size()-1;
 }
 
 #endif // MEMORY_CSQ4  
