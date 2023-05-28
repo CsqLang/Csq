@@ -56,12 +56,36 @@ struct JIT_BINOP : JIT_Node {
 
         if (opt == "+") {
             return leftVal + rightVal;
-        } else if (opt == "-") {
+        }
+        else if (opt == "-") {
             return leftVal - rightVal;
-        } else if (opt == "*") {
+        }
+        else if (opt == "*") {
             return leftVal * rightVal;
-        } else if (opt == "/") {
+        }
+        else if (opt == "/") {
             return leftVal / rightVal;
+        } 
+        else if (opt == "==") {
+            return leftVal == rightVal;
+        }
+        else if (opt == "!=") {
+            return leftVal != rightVal;
+        }
+        else if (opt == ">") {
+            return leftVal > rightVal;
+        }
+        else if (opt == "<") {
+            return leftVal < rightVal;
+        }
+        else if (opt == ">=") {
+            return leftVal >= rightVal;
+        }
+        else if (opt == "<=") {
+            return leftVal <= rightVal;
+        }
+        else if (opt == "&&") {
+            return leftVal && rightVal;
         }
 
         // Handle other cases here or return an error value
@@ -91,7 +115,7 @@ string evalString(TokenStream tokens){
                     last = "+";
                 }
                 else{
-                    RuntimeError("invalid binary operator for strings.");
+                    RuntimeError("invalid binary operator '" + token.token + "' for strings.");
                 }
             }
         }
@@ -99,6 +123,95 @@ string evalString(TokenStream tokens){
     }
     return result;
 }
+
+double evalValue(TokenStream tokens) {
+    if (tokens.empty()) {
+        RuntimeError("Invalid expression");
+    }
+
+    unique_ptr<JIT_Node> resultNode = nullptr;
+
+    for (size_t i = 0; i < tokens.size(); i++) {
+        const Token& token = tokens[i];
+
+        if (token.type == VALUE) {
+            double value = stod(token.token);
+            unique_ptr<JIT_Node> node = make_unique<JIT_Value>(value);
+
+            if (resultNode) {
+                RuntimeError("Invalid expression");
+            }
+
+            resultNode = move(node);
+        } 
+        else if (token.type == AROPERATOR || token.type == COPERATOR) {
+            if (!resultNode || i + 1 >= tokens.size()) {
+                RuntimeError("Invalid expression");
+            }
+
+            const Token& nextToken = tokens[i + 1];
+            if (nextToken.type != VALUE) {
+                RuntimeError("Invalid expression");
+            }
+
+            double leftVal = resultNode->eval();
+            double rightVal = stod(nextToken.token);
+
+            // Apply operator precedence
+            if (token.token == "*" || token.token == "/") {
+                if (!resultNode->type == JBINOP) {
+                    RuntimeError("Invalid expression");
+                }
+
+                JIT_BINOP* binopNode = static_cast<JIT_BINOP*>(resultNode.get());
+
+                // Check if the current operator has higher precedence than the previous operator
+                if (binopNode->opt == "+" || binopNode->opt == "-") {
+                    // Create a new binop node with the current operator and operands
+                    unique_ptr<JIT_Node> newBinopNode = make_unique<JIT_BINOP>(
+                        move(binopNode->rval),
+                        token.token,
+                        make_unique<JIT_Value>(rightVal)
+                    );
+
+                    binopNode->rval = move(newBinopNode);
+                } else {
+                    // Create a new binop node with the current operator and operands
+                    unique_ptr<JIT_Node> binopNode = make_unique<JIT_BINOP>(
+                        move(resultNode),
+                        token.token,
+                        make_unique<JIT_Value>(rightVal)
+                    );
+
+                    resultNode = move(binopNode);
+                }
+            } 
+            else {
+                // Create a new binop node with the current operator and operands
+                unique_ptr<JIT_Node> binopNode = make_unique<JIT_BINOP>(
+                    move(resultNode),
+                    token.token,
+                    make_unique<JIT_Value>(rightVal)
+                );
+
+                resultNode = move(binopNode);
+            }
+
+            i++; // Skip the next token since it has been processed
+        }
+        else{
+            RuntimeError("Invalid token "  + token.token);
+        }
+    }
+
+    if (!resultNode) {
+        RuntimeError("Invalid expression");
+    }
+
+    return resultNode->eval();
+}
+
+
 
 bool is(TokenStream tokens, TokenType type){
     for(Token token : tokens){
@@ -109,14 +222,22 @@ bool is(TokenStream tokens, TokenType type){
 }
 
 //For arithmetic and concatenation and add it to memory
-void eval(TokenStream tokens)
+int eval(TokenStream tokens)
 {
     //do string eval if string is found
     if(is(tokens, STR)){
         if(is(tokens,VALUE)){
             RuntimeError("couldn't do binary operations between string and a value.");
         }
+        else{
+            addCell(evalString(tokens));
+            return memory_size()-1;
+        }
     }
+    else if(is(tokens,VALUE)){
+        addCell(evalValue(tokens));
+        return memory_size()-1;
+    }return -1;
 }
 
 #define JVal(v,x) unique_ptr<JIT_Node> v = make_unique<JIT_Value>(x)
