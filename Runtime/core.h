@@ -55,52 +55,82 @@ Function to allocate variables
 basically it first allocates the value into memory and then it creates Variable
 object to add it to the symbol table.
 */
-void allocateVar(string name, string type, TokenStream tokens)
+void allocateVar(string name, string type, TokenStream value)
 {
     Variable var;
     var.name = name;
     var.type = type;
-    TokenStream value_;
-    for(Token token : tokens){
+
+    TokenStream nval;
+    //Filter identifiers by placing their values
+    for(int i = 0;i<value.size();i++){
+        Token token = value[i];
         if(token.type == IDENTIFIER){
-            if(inTable(token.token))
-            {
-                //Get the Symbol
-                Symbol symbol = SymTable[token.token];
-                switch(symbol.type){
-                    case VARIABLE:{
-                        //Get the value present 
-                        string val = readCell(SymTable[token.token].var.value_address);
-                        if(isInt(val) || isDecimal(val)){
-                            Token tok_;
-                            tok_.token = val;
-                            tok_.type = VALUE;
-                            value_.push_back(tok_);
-                        }
-                        else{
-                            Token tok_;
-                            tok_.token = val;
-                            tok_.type = STR;
-                            value_.push_back(tok_);
-                        }
+            if(inTable(token.token)){
+                if(SymTable[token.token].type == VARIABLE){
+                    Cell cell = memory[(SymTable[token.token].var.value_address)];
+                    if(cell.type == STRING){
+                        nval.push_back(create(STR,cell.sval));
                     }
+                    else if(cell.type == FLOAT){
+                        nval.push_back(create(VALUE,to_string(cell.fval)));
+                    }
+                    else{
+                        nval.push_back(create(VALUE,to_string(cell.ival)));
+                    }
+                }
+                else{
+                    // ... For functions
                 }
             }
             else{
-                RuntimeError("undefined identifier '" + token.token + "'");
+                RuntimeError("undefined identifier '" + token.token + "'.");
             }
         }
         else{
-            value_.push_back(token);
+            nval.push_back(token);
         }
     }
-    //Allocate the data to the memory
-    addCell(eval(value_));
-    var.value_address = TopCellAddress();
-    Symbol sym_;
-    sym_.var = var;
-    sym_.type = VARIABLE;
-    SymTable[var.name] = sym_;
+
+    var.value_address = eval(nval);
+    Symbol sym;
+    sym.type = VARIABLE;
+    sym.var = var;
+    SymTable[name] = sym;
+}
+
+void assignVar(string name, TokenStream value){
+    TokenStream nval;
+    //Filter identifiers by placing their values
+    for(int i = 0;i<value.size();i++){
+        Token token = value[i];
+        if(token.type == IDENTIFIER){
+            if(inTable(token.token)){
+                if(SymTable[token.token].type == VARIABLE){
+                    Cell cell = memory[(SymTable[token.token].var.value_address)];
+                    if(cell.type == STRING){
+                        nval.push_back(create(STR,cell.sval));
+                    }
+                    else if(cell.type == FLOAT){
+                        nval.push_back(create(VALUE,to_string(cell.fval)));
+                    }
+                    else{
+                        nval.push_back(create(VALUE,to_string(cell.ival)));
+                    }
+                }
+                else{
+                    // ... For functions
+                }
+            }
+            else{
+                RuntimeError("undefined identifier '" + token.token + "'.");
+            }
+        }
+        else{
+            nval.push_back(token);
+        }
+    }
+    
 }
 
 void traverseSymTable(){
