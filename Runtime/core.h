@@ -93,6 +93,7 @@ void allocateVar(string name, string type, TokenStream value)
     }
 
     var.value_address = eval(nval);
+    memory[var.value_address].u_count++;
     Symbol sym;
     sym.type = VARIABLE;
     sym.var = var;
@@ -130,7 +131,11 @@ void assignVar(string name, TokenStream value){
             nval.push_back(token);
         }
     }
-    
+    if(memory[SymTable[name].var.value_address].u_count == 1){
+        memory.erase(memory.begin() + SymTable[name].var.value_address);    
+    }
+    SymTable[name].var.value_address = eval(nval);
+    memory[SymTable[name].var.value_address].u_count++;
 }
 
 void traverseSymTable(){
