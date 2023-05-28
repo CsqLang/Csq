@@ -49,7 +49,7 @@ struct Cell
     double fval;
     string sval;
     Type type;
-    bool used;
+    int u_count;
 };
 
 
@@ -63,8 +63,8 @@ void addCell(int val)
 {
     Cell cell;
     cell.ival = val;
-    cell.used = 1;
     cell.type = INT;
+    cell.u_count = 0;
     memory.push_back(cell);
 }
 
@@ -72,8 +72,8 @@ void addCell(double val)
 {
     Cell cell;
     cell.fval = val;
-    cell.used = 1;
     cell.type = FLOAT;
+    cell.u_count = 0;
     memory.push_back(cell);
 }
 
@@ -81,15 +81,15 @@ void addCell(string val)
 {
     Cell cell;
     cell.sval = val;
-    cell.used = 1;
-    cell.type = Type::STRING;
+    cell.type = STRING;
+    cell.u_count = 0;
     memory.push_back(cell);
 }
 
 //This function will dump all data in the memory.
 void dump(){
     for(int i=0; i<memory.size(); i++){
-        printf("[%d] => type : %d used : %d value : ",i,memory[i].type,memory[i].used);
+        printf("[%d] => type : %d (used : %d )value : ",i,memory[i].type,memory[i].u_count);
         if(memory[i].type == STRING){
             printf("%s\n",memory[i].sval.c_str());
         }
@@ -145,6 +145,16 @@ void freeMemory(){
 //Top cell address of memory
 int TopCellAddress(){
     return memory.size()-1;
+}
+
+//GC----------------------------------------------->
+void Free(){
+    for(int i = 0;i<memory.size();i++){
+        if(memory[i].u_count == 0){
+            //Free its a garbage cell
+            memory.erase(memory.begin() + i);
+        }
+    }
 }
 
 #endif // MEMORY_CSQ4  
