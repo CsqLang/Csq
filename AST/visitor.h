@@ -2,7 +2,7 @@
 #if !defined(VISITOR_H_CSQ4)
 #define VISITOR_H_CSQ4
 
-#include "ast.h"
+#include "../Runtime/core.h"
 
 string visit_ExprNode(ExprNode node){
     string result;
