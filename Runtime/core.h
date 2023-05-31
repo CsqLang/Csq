@@ -152,7 +152,7 @@ void assignVar(string name, TokenStream value){
 void traverseSymTable(){
     for(pair<string,Symbol> p : SymTable){
         if(p.second.type == VARIABLE){
-            printf("%s : { %d {Name: %s Type: %s Value : {%d %p}} }\n",p.first.c_str(),p.second.type, p.second.var.name.c_str(), p.second.var.type.c_str(), p.second.var.value_address, (void*)(p.second.var.value));
+            printf("%s : { %d Name: %s Type: %s Value : %d }\n",p.first.c_str(),p.second.type, p.second.var.name.c_str(), p.second.var.type.c_str(), p.second.var.value_address);
         }
         else{
             // printf("%s : { %d {%s %s %d} }\n",p.first,p.second.type, p.second.var.name, p.second.var.type, p.second.var.value_address);
