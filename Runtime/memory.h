@@ -45,11 +45,11 @@ enum Type{
 // Struct for a memory cell.
 struct Cell
 {
+    Type type;
+    int u_count;
     int ival;
     double fval;
     string sval;
-    Type type;
-    int u_count;
 };
 
 
@@ -89,7 +89,7 @@ void addCell(string val)
 //This function will dump all data in the memory.
 void dump(){
     for(int i=0; i<memory.size(); i++){
-        printf("[%d] => type : %d (used : %d )value : ",i,memory[i].type,memory[i].u_count);
+        printf("[%d] => type : %d used : %d  value : ",i,memory[i].type,memory[i].u_count);
         if(memory[i].type == STRING){
             printf("%s\n",memory[i].sval.c_str());
         }
