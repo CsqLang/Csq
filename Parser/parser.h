@@ -71,6 +71,71 @@ bool VarAssign_Check(TokenStream tokens){
     return valid;
 }
 
+
+//Parsing without reporting any error because when this function is called before it
+//VarDecl_check will be called.
+VarDeclNode parse_VarDecl(TokenStream tokens){
+    VarDeclNode node;
+    //Default type:
+    node.var_type = "any";
+    //Parsing States
+    bool name = 1;
+    bool equal = 0;
+    bool type = 0;
+    bool value = 0;
+
+    //
+    for(Token token : tokens){
+        if(name)
+        {
+            node.identifier = token.token;
+            name = 0;
+        }
+        else if(!name && !type && !equal && !value){
+            if(token.token == ":"){
+                type = 1;
+            }
+            else if(token.token == "="){
+                value = 1;
+                equal = 1;
+            }
+        }
+        else if(type){
+            if(token.token != "="){
+                node.var_type += token.token;
+            }else{
+                type = 0;
+            }
+        }
+        else if(value){
+            node.value.tokens.push_back(token);
+        }
+    }
+    return node;
+}
+//for var reassignment
+VarAssignNode parse_VarAssign(TokenStream tokens){
+    VarAssignNode node;
+    //States
+    bool name = 1;
+    bool val = 0;
+    
+    for(Token token : tokens){
+        if(name){
+            node.identifier = token.token;
+            name = 0;
+            
+        }
+        else if(!val && token.token == "="){
+            val = 1;
+        }
+        else if(val){
+            node.value.tokens.push_back(token);
+        }
+    }
+    return node;
+}
+
 /*
 "Now for Csq, now for the coding and the CsqLang"
 Implement the parser
