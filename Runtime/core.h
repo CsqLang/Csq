@@ -132,7 +132,18 @@ void assignVar(string name, TokenStream value){
         }
     }
     if(memory[SymTable[name].var.value_address].u_count == 1){
-        memory.erase(memory.begin() + SymTable[name].var.value_address);    
+        int addr = SymTable[name].var.value_address;
+        memory.erase(memory.begin()+addr);
+        for(int mem_address = addr;mem_address < memory.size();mem_address++){
+            for(pair<string,Symbol> sym : SymTable){
+                if(SymTable[sym.first].var.value_address){
+                    SymTable[sym.first].var.value_address--;
+                }
+            }
+        }
+    }
+    else{
+        memory[SymTable[name].var.value_address].u_count--;
     }
     SymTable[name].var.value_address = eval(nval);
     memory[SymTable[name].var.value_address].u_count++;
@@ -141,7 +152,7 @@ void assignVar(string name, TokenStream value){
 void traverseSymTable(){
     for(pair<string,Symbol> p : SymTable){
         if(p.second.type == VARIABLE){
-            printf("%s : { %d {%s %s %d} }\n",p.first.c_str(),p.second.type, p.second.var.name.c_str(), p.second.var.type.c_str(), p.second.var.value_address);
+            printf("%s : { %d {Name: %s Type: %s Value : {%d %p}} }\n",p.first.c_str(),p.second.type, p.second.var.name.c_str(), p.second.var.type.c_str(), p.second.var.value_address, (void*)(p.second.var.value));
         }
         else{
             // printf("%s : { %d {%s %s %d} }\n",p.first,p.second.type, p.second.var.name, p.second.var.type, p.second.var.value_address);
