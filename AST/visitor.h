@@ -12,6 +12,15 @@ string visit_ExprNode(ExprNode node){
     return result;
 }
 
+Cell visit_Call(CallNode node){
+    // fun(3,56)
+
+    for(Token arg : node.params){
+        
+    }
+    return Cell();
+}
+
 string visit_VarDecl(VarDeclNode node){
     //This will also include the processing of the runtime variables
     allocateVar(
