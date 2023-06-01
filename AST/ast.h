@@ -21,6 +21,7 @@ enum NodeType{
     FOR_STMT,
     WHILE_STMT,
     BLOCK,
+    FUN_CALL,
 };
 
 struct ASTNode {
@@ -36,7 +37,7 @@ struct ExprNode : ASTNode {
 
 struct VarDeclNode : ASTNode {
     string identifier;
-    string type;
+    string var_type;
     ExprNode value;
     VarDeclNode(){
         type = VAR_DECL;
@@ -107,9 +108,12 @@ struct WhileStmtNode : ASTNode {
     }
 };
 
-
-
-//Importing visitor containing all utilities to visit AST.
-#include "visitor.h"
+struct CallNode : ASTNode {
+    string name;
+    vector<Token> params;
+    CallNode(){
+        type = FUN_CALL;
+    }
+};
 
 #endif // AST_Csq4_H
