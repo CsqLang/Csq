@@ -1,10 +1,9 @@
-/*
-Csq's runtime is responsible for the memory management and other runtime features.
-*/
-
 #if !defined(RUNTIME_CORE_CSQ)
 #define RUNTIME_CORE_CSQ
 
+/*
+Csq's runtime is responsible for the memory management and other runtime features.
+*/
 
 /*
 This will be used by parser to resemble current line.
@@ -55,12 +54,12 @@ Function to allocate variables
 basically it first allocates the value into memory and then it creates Variable
 object to add it to the symbol table.
 */
-void allocateVar(string name, string type, TokenStream value)
+void allocateVar(string name, string type, string val__)
 {
     Variable var;
     var.name = name;
     var.type = type;
-
+    TokenStream value = tokenize(val__);
     TokenStream nval;
     //Filter identifiers by placing their values
     for(int i = 0;i<value.size();i++){
@@ -100,8 +99,9 @@ void allocateVar(string name, string type, TokenStream value)
     SymTable[name] = sym;
 }
 
-void assignVar(string name, TokenStream value){
+void assignVar(string name, string val_){
     TokenStream nval;
+    TokenStream value = tokenize(val_);
     //Filter identifiers by placing their values
     for(int i = 0;i<value.size();i++){
         Token token = value[i];
@@ -148,6 +148,7 @@ void assignVar(string name, TokenStream value){
     SymTable[name].var.value_address = eval(nval);
     memory[SymTable[name].var.value_address].u_count++;
 }
+
 
 void traverseSymTable(){
     for(pair<string,Symbol> p : SymTable){
