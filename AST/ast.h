@@ -22,6 +22,7 @@ enum NodeType{
     WHILE_STMT,
     BLOCK,
     FUN_CALL,
+    PRINT,
 };
 
 struct ASTNode {
@@ -113,6 +114,13 @@ struct CallNode : ASTNode {
     vector<Token> params;
     CallNode(){
         type = FUN_CALL;
+    }
+};
+
+struct PrintNode : ASTNode {
+    ExprNode value;
+    PrintNode(){
+        type = PRINT;
     }
 };
 
