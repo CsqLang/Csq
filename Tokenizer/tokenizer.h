@@ -578,4 +578,18 @@ Token create(TokenType type, string token){
     return tok;
 }
 
+//Function to convert stream of tokens into string without changing.
+string tokenS_to_string(vector<Token> tokens){
+    string s;
+    for(Token token : tokens){
+        if(token.type == VALUE || token.token == "."){
+            s += token.token;
+        }
+        else{
+            s += token.token + " ";
+        }
+    }
+    return s;
+}
+
 #endif // tokenizer_Csq4
