@@ -17,81 +17,7 @@ Now you all may wonder why a new ast for jit is written it's already there in as
 but here we do it only for JIT data not the overall Csq code.
 */
 
-enum JIT_NODE_TYPE
-{
-    JVALUE,
-    JBINOP,
-};
 
-// JIT Node base class with a virtual eval() function
-struct JIT_Node {
-    JIT_NODE_TYPE type;
-    JIT_Node(JIT_NODE_TYPE type_) : type(type_) {}
-    virtual double eval() const = 0;
-    virtual ~JIT_Node() {}
-};
-
-// JIT Value class
-struct JIT_Value : JIT_Node {
-    double value;
-
-    JIT_Value(double value_) : JIT_Node(JVALUE), value(value_) {}
-
-    double eval() const override {
-        return value;
-    }
-};
-
-struct JIT_BINOP : JIT_Node {
-    std::string opt;
-    std::unique_ptr<JIT_Node> lval;
-    std::unique_ptr<JIT_Node> rval;
-
-    JIT_BINOP(std::unique_ptr<JIT_Node> lval_, const std::string& opt_, std::unique_ptr<JIT_Node> rval_)
-        : JIT_Node(JBINOP), opt(opt_), lval(std::move(lval_)), rval(std::move(rval_)) {}
-
-    double eval() const override {
-        double leftVal = lval->eval();
-        double rightVal = rval->eval();
-
-        if (opt == "+") {
-            return leftVal + rightVal;
-        }
-        else if (opt == "-") {
-            return leftVal - rightVal;
-        }
-        else if (opt == "*") {
-            return leftVal * rightVal;
-        }
-        else if (opt == "/") {
-            return leftVal / rightVal;
-        } 
-        else if (opt == "==") {
-            return leftVal == rightVal;
-        }
-        else if (opt == "!=") {
-            return leftVal != rightVal;
-        }
-        else if (opt == ">") {
-            return leftVal > rightVal;
-        }
-        else if (opt == "<") {
-            return leftVal < rightVal;
-        }
-        else if (opt == ">=") {
-            return leftVal >= rightVal;
-        }
-        else if (opt == "<=") {
-            return leftVal <= rightVal;
-        }
-        else if (opt == "&&") {
-            return leftVal && rightVal;
-        }
-
-        // Handle other cases here or return an error value
-        return 0.0;
-    }
-};
 
 string evalString(TokenStream tokens){
     string result = "";
@@ -124,92 +50,94 @@ string evalString(TokenStream tokens){
     return result;
 }
 
-double evalValue(TokenStream tokens) {
-    if (tokens.empty()) {
-        RuntimeError("Invalid expression");
+// #include <vector>
+// #include <stack>
+// #include <cmath>
+// #include <cstdlib>
+
+double evalValue(TokenStream ts) {
+    vector<string> tokens;
+    for (Token token : ts) {
+        tokens.push_back(token.token);
     }
+    std::stack<double> values;
+    std::stack<string> operators;
 
-    unique_ptr<JIT_Node> resultNode = nullptr;
+    auto applyOperator = [&](const string& op) {
+        double rightOperand = values.top();
+        values.pop();
+        double leftOperand = values.top();
+        values.pop();
 
-    for (size_t i = 0; i < tokens.size(); i++) {
-        const Token& token = tokens[i];
-
-        if (token.type == VALUE) {
-            double value = stod(token.token);
-            unique_ptr<JIT_Node> node = make_unique<JIT_Value>(value);
-
-            if (resultNode) {
-                RuntimeError("Invalid expression");
-            }
-
-            resultNode = move(node);
-        } 
-        else if (token.type == AROPERATOR || token.type == COPERATOR) {
-            if (!resultNode || i + 1 >= tokens.size()) {
-                RuntimeError("Invalid expression");
-            }
-
-            const Token& nextToken = tokens[i + 1];
-            if (nextToken.type != VALUE) {
-                RuntimeError("Invalid expression");
-            }
-
-            double leftVal = resultNode->eval();
-            double rightVal = stod(nextToken.token);
-
-            // Apply operator precedence
-            if (token.token == "*" || token.token == "/") {
-                if (!resultNode->type == JBINOP) {
-                    RuntimeError("Invalid expression");
-                }
-
-                JIT_BINOP* binopNode = static_cast<JIT_BINOP*>(resultNode.get());
-
-                // Check if the current operator has higher precedence than the previous operator
-                if (binopNode->opt == "+" || binopNode->opt == "-") {
-                    // Create a new binop node with the current operator and operands
-                    unique_ptr<JIT_Node> newBinopNode = make_unique<JIT_BINOP>(
-                        move(binopNode->rval),
-                        token.token,
-                        make_unique<JIT_Value>(rightVal)
-                    );
-
-                    binopNode->rval = move(newBinopNode);
-                } else {
-                    // Create a new binop node with the current operator and operands
-                    unique_ptr<JIT_Node> binopNode = make_unique<JIT_BINOP>(
-                        move(resultNode),
-                        token.token,
-                        make_unique<JIT_Value>(rightVal)
-                    );
-
-                    resultNode = move(binopNode);
-                }
-            } 
-            else {
-                // Create a new binop node with the current operator and operands
-                unique_ptr<JIT_Node> binopNode = make_unique<JIT_BINOP>(
-                    move(resultNode),
-                    token.token,
-                    make_unique<JIT_Value>(rightVal)
-                );
-
-                resultNode = move(binopNode);
-            }
-
-            i++; // Skip the next token since it has been processed
+        if (op == "+") {
+            values.push(leftOperand + rightOperand);
+        } else if (op == "-") {
+            values.push(leftOperand - rightOperand);
+        } else if (op == "*") {
+            values.push(leftOperand * rightOperand);
+        } else if (op == "/") {
+            values.push(leftOperand / rightOperand);
+        } else if (op == "==") {
+            values.push(leftOperand == rightOperand);
+        } else if (op == ">=") {
+            values.push(leftOperand >= rightOperand);
+        } else if (op == "<=") {
+            values.push(leftOperand <= rightOperand);
+        } else if (op == "<") {
+            values.push(leftOperand < rightOperand);
+        } else if (op == ">") {
+            values.push(leftOperand > rightOperand);
+        } else if (op == "!=") {
+            values.push(leftOperand != rightOperand);
         }
-        else{
-            RuntimeError("Invalid token "  + token.token);
+    };
+
+    auto isOperator = [&](const string& token) {
+        return (token == "+" || token == "-" || token == "*" || token == "/" || token == "==" || token == ">=" || token == "<=" || token == "<" || token == ">" || token == "!=");
+    };
+
+    auto getPrecedence = [&](const string& op) {
+        if (op == "+" || op == "-")
+            return 1;
+        else if (op == "*" || op == "/")
+            return 2;
+        else if (op == "==" || op == ">=" || op == "<=" || op == "<" || op == ">" || op == "!=")
+            return 3;
+        return 0;
+    };
+
+    for (const string& token : tokens) {
+        if (isOperator(token)) {
+            while (!operators.empty() && operators.top() != "(" && getPrecedence(operators.top()) >= getPrecedence(token)) {
+                applyOperator(operators.top());
+                operators.pop();
+            }
+            operators.push(token);
+        } else if (token == "(") {
+            operators.push(token);
+        } else if (token == ")") {
+            while (!operators.empty() && operators.top() != "(") {
+                applyOperator(operators.top());
+                operators.pop();
+            }
+            if (!operators.empty())
+                operators.pop();
+        } else {
+            values.push(std::stod(token));
         }
     }
 
-    if (!resultNode) {
-        RuntimeError("Invalid expression");
+    while (!operators.empty()) {
+        applyOperator(operators.top());
+        operators.pop();
     }
 
-    return resultNode->eval();
+    if (!values.empty())
+        return values.top();
+    else
+        return 0;
 }
+
 
 
 
