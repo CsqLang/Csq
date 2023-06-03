@@ -51,8 +51,37 @@ string visit_PrintNode(PrintNode node){
 
 string visit_IfNode(IfStmtNode node){
     string code = "if(" + visit_ExprNode(node.condition) + "){\n";
+    //Recursive visitor method for body visit
     for(ASTNode* stmt : node.body.statements){
         code += visit(stmt) + "\n";
+    }
+    code += "}";
+    return code;
+}
+
+string visit_ElifNode(ElifStmtNode node){
+    string code = "else if(" + visit_ExprNode(node.condition) + "){\n";
+    //Recursive visitor method for body visit
+    for(ASTNode* stmt : node.body.statements){
+        code += visit(stmt) + "\n";
+    }
+    code += "}";
+    return code;
+}
+
+string visit_ElseNode(ElseStmtNode node){
+    string code = "else{\n";
+    for(ASTNode* stmt : node.body.statements){
+        code += visit(stmt) + "\n";
+    }
+    code += "}";
+    return code;
+}
+
+string visit_WhileNode(WhileStmtNode node){
+    string code = "while(" + visit_ExprNode(node.condition) + "){\n";
+    for(ASTNode* s : node.body.statements){
+        code += visit(s) + "\n";
     }
     return code;
 }
@@ -70,6 +99,22 @@ string visit(ASTNode* node){
         case PRINT:{
             PrintNode prt = *((PrintNode*)node);
             return visit_PrintNode(prt);
+        }
+        case IF_STMT:{
+            IfStmtNode stmt = *((IfStmtNode*)node);
+            return visit_IfNode(stmt);
+        }
+        case ELIF_STMT:{
+            ElifStmtNode stmt = *((ElifStmtNode*)node);
+            return visit_ElifNode(stmt);
+        }
+        case ELSE_STMT:{
+            ElseStmtNode stmt = *((ElseStmtNode*)node);
+            return visit_ElseNode(stmt);
+        }
+        case WHILE_STMT:{
+            WhileStmtNode stmt = *((WhileStmtNode*)node);
+            return visit_WhileNode(stmt);
         }
     }return "";
 }
