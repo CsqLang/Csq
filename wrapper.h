@@ -12,4 +12,8 @@ so how will our runtime be runned by C/C++
 #include "Parser/parser.h"
 #include "AST/visitor.h"
 
+string addBuiltin(string pdir){
+    return "#include \"" + pdir + "/Csq4/Builtin/basic.h\"\n";
+}
+
 #endif // WRAPPER_CS
