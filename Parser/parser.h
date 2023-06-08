@@ -148,15 +148,84 @@ VarAssignNode parse_VarAssign(TokenStream tokens){
     return node;
 }
 
+PrintNode parse_PrintStatement(TokenStream tokens){
+    PrintNode node;
+    for(int i = 1;i<tokens.size();i++){
+        node.value.tokens.push_back(tokens[i]);
+    }
+    return node;
+}
+
+bool isVarDecl(TokenStream tokens){
+    if(tokens[0].type == IDENTIFIER && tokens[1].token == ":="){
+        return 1;
+    }return 0;
+}
+
+bool isVarAssign(TokenStream tokens){
+    if(tokens[0].type == IDENTIFIER && tokens[1].token == "="){
+        return 1;
+    }return 0;
+}
+
+bool isIfStmt(TokenStream tokens){
+    if(tokens[0].token == "if"){
+        return 1;
+    }
+    return 0;
+}
+
+bool isElifStmt(TokenStream tokens){
+    if(tokens[0].token == "elif"){
+        return 1;
+    }
+    return 0;
+}
+
+bool isElseStmt(TokenStream tokens){
+    if(tokens[0].token == "else"){
+        return 1;
+    }
+    return 0;
+}
+
+bool isWhileStmt(TokenStream tokens){
+    if(tokens[0].token == "while"){
+        return 1;
+    }
+    return 0;
+}
 
 /*
 "Now for Csq, now for the coding and the CsqLang"
 Implement the parser
 */
 
-string Parser(){
-    string code;
-    return code;
+string Parser(vector<TokenStream> code){
+    string res;
+    int error_c = 0;
+    //Iterate and parse
+    for(TokenStream line : code)
+    {
+        if(isVarDecl(line)){
+            //First error check to check validity.
+            bool valid = VarDecl_check(line);
+            if(valid){
+                VarDeclNode node = parse_VarDecl(line);
+                //Visit on the spot
+                res += visit(&node) + "\n";
+            }
+        }
+        else if(isVarAssign(line)){
+            bool valid = VarAssign_Check(line);
+            if(valid){
+                VarAssignNode node = parse_VarAssign(line);
+                //Visit on the spot
+                res += visit(&node) + "\n";
+            }
+        }
+    }
+    return res;
 };
 
 
