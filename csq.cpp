@@ -27,11 +27,10 @@ int main(int argc, char const *argv[])
             vector<TokenStream> code = toTokens(raw_code);
             //Now parse:
             string _code = Parser(code);
-            _code = addBuiltin(currdir + "/") + "\n" + "int main(){\n" + _code + "\n}\n";
-            ofstream fobj(currdir + "/" + name + ".cpp");
-            fobj << _code << "\n";
-            //Execute the C++ code
-            system(("cd " + currdir + "/" + " && g++ " + name + ".cpp -o " + name + " && ./" + name).c_str());
+            string final_code = addBuiltin(currdir + "/") + "\n" + "int main(){\n" + _code + "\n}\n";
+            // printf("%s\n",final_code.c_str());
+            writeCode(final_code, currdir + "/" + name + ".cpp");
+            compile(currdir,name);
         }
     return 0;
 }
