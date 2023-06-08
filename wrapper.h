@@ -15,5 +15,15 @@ so how will our runtime be runned by C/C++
 string addBuiltin(string pdir){
     return "#include \"" + pdir + "/Csq4/Builtin/basic.h\"\n";
 }
-
+void RunExecutable(string path){
+    string command = path;
+    system((command).c_str());
+}
+void CompileToGPP(string path, string name,string curr){
+    string command = "cd " + curr + " && g++ " + path + " -o " + name;
+    system(command.c_str());
+}
+void compile(string currdir, string name){
+    CompileToGPP(currdir + "/" + name + ".cpp",name, currdir);
+}
 #endif // WRAPPER_CS
