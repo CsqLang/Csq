@@ -592,4 +592,15 @@ string tokenS_to_string(vector<Token> tokens){
     return s;
 }
 
+//This function will tell us the number of indent present in the tokenstream
+int getIndentLevel(TokenStream tokens){
+    int indent_ = 0;
+    for(Token token : tokens){
+        if(token.type == INDENT)
+            indent_++;
+        else
+            break;
+    }return indent_;
+}
+
 #endif // tokenizer_Csq4
