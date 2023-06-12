@@ -152,12 +152,33 @@ PrintNode parse_PrintStatement(TokenStream tokens){
     PrintNode node;
     for(int i = 1;i<tokens.size();i++){
         node.value.tokens.push_back(tokens[i]);
+        
+    }
+    return node;
+}
+
+IfStmtNode parse_IfStmt(TokenStream tokens){
+    IfStmtNode node;
+    //states
+    bool condition = 0;
+    // bool end = 0;
+    for(Token token : tokens){
+        if(token.token == "if")
+            condition = 1;
+        else
+            node.condition.tokens.push_back(token);
     }
     return node;
 }
 
 bool isVarDecl(TokenStream tokens){
     if(tokens[0].type == IDENTIFIER && tokens[1].token == ":="){
+        return 1;
+    }return 0;
+}
+
+bool isPrintStmt(TokenStream tokens){
+    if(tokens[0].token == "print"){
         return 1;
     }return 0;
 }
@@ -196,24 +217,31 @@ bool isWhileStmt(TokenStream tokens){
     return 0;
 }
 
+struct CodeBlock{
+    vector<ASTNode> nodes;
+};
+
 /*
-"Now for Csq, now for the coding and the CsqLang"
 Implement the parser
 */
 
-string Parser(vector<TokenStream> code){
-    string res;
+
+
+CodeBlock Parser(vector<TokenStream> code){
+    CodeBlock block;
     int error_c = 0;
+    int child_indent = 0;
     //Iterate and parse
-    for(TokenStream line : code)
+    for(int i=0;i<code.size();i++)
     {
+        TokenStream line = code[i];
         if(isVarDecl(line)){
             //First error check to check validity.
             bool valid = VarDecl_check(line);
             if(valid){
                 VarDeclNode node = parse_VarDecl(line);
                 //Visit on the spot
-                res += visit(&node) + "\n";
+                block.nodes.push_back(*((ASTNode*)(&node)));
             }
         }
         else if(isVarAssign(line)){
@@ -221,12 +249,65 @@ string Parser(vector<TokenStream> code){
             if(valid){
                 VarAssignNode node = parse_VarAssign(line);
                 //Visit on the spot
-                res += visit(&node) + "\n";
+                block.nodes.push_back(*((ASTNode*)(&node)));
+            }
+        }
+        else if(isPrintStmt(line)){
+            PrintNode node = parse_PrintStatement(line);
+            block.nodes.push_back(*((ASTNode*)(&node)));
+        }
+        else if(isIfStmt(line)){
+            int current_indent = getIndentLevel(line);
+            child_indent++;
+            //Now parse and check whether to eval it or not here eval means visiting it's body
+            IfStmtNode node = parse_IfStmt(line);
+            //After all necessary data we are going to parse the body by looking at the indent level
+            block.nodes.push_back(*((ASTNode*)(&node)));
+        }
+        else{}
+    }
+    return block;
+};
+
+//This is the final stage to produce C++ code in which we read the inputs from the Parser function in the form of Nodes
+string Compile(CodeBlock nodes)
+{
+    string res;
+    for(int i=0;i<nodes.nodes.size();i++){
+        ASTNode node = nodes.nodes[i];
+        switch(node.type){
+            case VAR_DECL:{
+                break;
+            }
+            case VAR_ASSIGN:{
+                break;
+            }
+            case PRINT:{
+                break;
+            }
+            case IF_STMT:{
+                IfStmtNode _node = *((IfStmtNode*)(&node));
+                if(eval(_node.condition.tokens) == 1){
+                    res += visit(&_node.body) + "\n";
+                    //No need to eval other statements like elif and else
+                    if(nodes.nodes[i+1].type == ELIF_STMT){
+                        i++;
+                        if(nodes.nodes[i+1].type == ELSE_STMT){
+                            i++;
+                        }
+                    }
+                }
+                else{
+                    //move on to next node since current one is false
+                    
+                }
+                break;
+            }
+            case ELIF_STMT:{
+
             }
         }
     }
     return res;
-};
-
-
+}
 #endif // PARSER_H_CSQ4
