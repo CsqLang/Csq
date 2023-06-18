@@ -227,87 +227,52 @@ Implement the parser
 
 
 
-CodeBlock Parser(vector<TokenStream> code){
-    CodeBlock block;
+auto Parser(vector<TokenStream> code) {
+    vector<pair<ASTNode*, NodeType>> block;
     int error_c = 0;
     int child_indent = 0;
-    //Iterate and parse
-    for(int i=0;i<code.size();i++)
-    {
+
+    for (int i = 0; i < code.size(); i++) {
         TokenStream line = code[i];
-        if(isVarDecl(line)){
-            //First error check to check validity.
+        if (isVarDecl(line)) {
             bool valid = VarDecl_check(line);
-            if(valid){
-                VarDeclNode node = parse_VarDecl(line);
-                //Visit on the spot
-                block.nodes.push_back(*((ASTNode*)(&node)));
+            if (valid) {
+                VarDeclNode* node = new VarDeclNode(parse_VarDecl(line));
+                pair<ASTNode*, NodeType> _res;
+                _res.first = node;
+                _res.second = VAR_DECL;
+                block.push_back(_res);
             }
         }
-        else if(isVarAssign(line)){
-            bool valid = VarAssign_Check(line);
-            if(valid){
-                VarAssignNode node = parse_VarAssign(line);
-                //Visit on the spot
-                block.nodes.push_back(*((ASTNode*)(&node)));
-            }
-        }
-        else if(isPrintStmt(line)){
-            PrintNode node = parse_PrintStatement(line);
-            block.nodes.push_back(*((ASTNode*)(&node)));
-        }
-        else if(isIfStmt(line)){
-            int current_indent = getIndentLevel(line);
-            child_indent++;
-            //Now parse and check whether to eval it or not here eval means visiting it's body
-            IfStmtNode node = parse_IfStmt(line);
-            //After all necessary data we are going to parse the body by looking at the indent level
-            block.nodes.push_back(*((ASTNode*)(&node)));
-        }
-        else{}
+        // ... handle other node types
+
     }
     return block;
-};
+}
 
-//This is the final stage to produce C++ code in which we read the inputs from the Parser function in the form of Nodes
-string Compile(CodeBlock nodes)
-{
+string Compile(vector<pair<ASTNode*, NodeType>> nodes) {
     string res;
-    for(int i=0;i<nodes.nodes.size();i++){
-        ASTNode node = nodes.nodes[i];
-        switch(node.type){
-            case VAR_DECL:{
+    
+    printf("%ld\n", nodes.size());
+    
+    for (int i = 0; i < nodes.size(); i++) {
+        int type = nodes[i].second;
+        ASTNode* _node = nodes[i].first;
+        switch (type) {
+            case VAR_DECL: {
+                VarDeclNode* node = static_cast<VarDeclNode*>(_node);
+                allocateVar(node->identifier, node->var_type, tokenS_to_string(node->value.tokens));
                 break;
             }
-            case VAR_ASSIGN:{
-                break;
-            }
-            case PRINT:{
-                break;
-            }
-            case IF_STMT:{
-                IfStmtNode _node = *((IfStmtNode*)(&node));
-                if(eval(_node.condition.tokens) == 1){
-                    res += visit(&_node.body) + "\n";
-                    //No need to eval other statements like elif and else
-                    if(nodes.nodes[i+1].type == ELIF_STMT){
-                        i++;
-                        if(nodes.nodes[i+1].type == ELSE_STMT){
-                            i++;
-                        }
-                    }
-                }
-                else{
-                    //move on to next node since current one is false
-                    
-                }
-                break;
-            }
-            case ELIF_STMT:{
-
-            }
+            // ... handle other node types
         }
     }
+    
+    // Free allocated memory
+    for (int i = 0; i < nodes.size(); i++) {
+        delete nodes[i].first;
+    }
+
     return res;
 }
 #endif // PARSER_H_CSQ4
