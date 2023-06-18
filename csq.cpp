@@ -26,9 +26,10 @@ int main(int argc, char const *argv[])
             //Convert to tokens
             vector<TokenStream> code = toTokens(raw_code);
             //Now parse:
-            string _code = Parser(code);
+            auto parsed = Parser(code);
+            
+            string _code = Compile(parsed);
             string final_code = addBuiltin(currdir + "/") + "\n" + "int main(){\n" + _code + "\n}\n";
-            // printf("%s\n",final_code.c_str());
             writeCode(final_code, currdir + "/" + name + ".cpp");
             compile(currdir,name);
         }
