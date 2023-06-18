@@ -23,6 +23,7 @@ enum NodeType{
     BLOCK,
     FUN_CALL,
     PRINT,
+    UNKNOWN_NODE,
 };
 
 struct ASTNode {
@@ -123,5 +124,9 @@ struct PrintNode : ASTNode {
         type = PRINT;
     }
 };
-
+struct UnknownNode : ASTNode {
+    UnknownNode(){
+        type = UNKNOWN_NODE;
+    }
+};
 #endif // AST_Csq4_H
