@@ -25,14 +25,24 @@ string evalString(TokenStream tokens){
     for(Token token : tokens){
         if(result == ""){
             if(token.type == STR){
-                result = token.token;
+                token.token.pop_back();
+                string s;
+                for(int i=1;i<token.token.size();i++){
+                    s += token.token[i];
+                }
+                result = s;
             }
             else{
                 RuntimeError("invalid syntax \"\"+.");
             }
         }
         else if(last == "+"){
-            result  = result + token.token;
+            token.token.pop_back();
+            string s;
+            for(int i=1;i<token.token.size();i++){
+                s += token.token[i];
+            }
+            result = result + s;
             last = "";
         }
         else if(token.type != STR){
@@ -47,7 +57,7 @@ string evalString(TokenStream tokens){
         }
         
     }
-    return result;
+    return "" + result + "";
 }
 
 // #include <vector>
