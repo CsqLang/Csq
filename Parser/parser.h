@@ -183,6 +183,13 @@ bool isPrintStmt(TokenStream tokens){
     }return 0;
 }
 
+bool isTypeStmt(TokenStream tokens){
+    if(tokens[0].token == "type"){
+        return 1;
+    }return 0;
+}
+
+
 bool isVarAssign(TokenStream tokens){
     if(tokens[0].type == IDENTIFIER && tokens[1].token == "="){
         return 1;
@@ -231,9 +238,18 @@ auto Parser(vector<TokenStream> code) {
     vector<pair<ASTNode*, NodeType>> block;
     int error_c = 0;
     int child_indent = 0;
+    //To know the type of block statement and it's maxindent
+    NodeType block_type;
+    int block_indent;
+    //All Block statements
+    IfStmtNode if_block;
+    ElseStmtNode else_block;
+    ElifStmtNode elif_block;
 
     for (int i = 0; i < code.size(); i++) {
         TokenStream line = code[i];
+        //To know about current indentation
+        int indent = getIndentLevel(line);
         if (isVarDecl(line)) {
             bool valid = VarDecl_check(line);
             if (valid) {
@@ -261,7 +277,38 @@ auto Parser(vector<TokenStream> code) {
                 pair<ASTNode*, NodeType> _res;
                 _res.first = node;
                 _res.second = PRINT;
-                block.push_back(_res);
+                if(child_indent != 0){
+                    if(block_type == IF_STMT){
+                        if(indent < block_indent){
+                            if_block.body.statements.push_back(node);
+                        }
+                        else if(indent == block_indent){
+                            IfStmtNode* node_if = new IfStmtNode();
+                            node_if->body = if_block.body;
+                            pair<ASTNode*, NodeType> _res2;
+                            _res2.first = node_if;
+                            _res2.second = IF_STMT;
+                            block.push_back(_res2);
+                            block.push_back(_res);
+                            child_indent = 0;
+                            block_type = UNKNOWN_NODE;
+                        }
+                    }
+                }
+            }
+        }
+        else if(isIfStmt(line)){
+            bool valid = 1;
+            if(valid){
+                IfStmtNode* node = new IfStmtNode(parse_IfStmt(line));
+                
+                child_indent = indent + 1;
+                //Block info for next statements
+                if_block.body = node->body;
+                if_block.condition = node->condition;
+                if_block.type = IF_STMT;
+                block_indent = indent;
+                block_type = IF_STMT;
             }
         }
     }
@@ -295,7 +342,28 @@ string Compile(vector<pair<ASTNode*, NodeType>> nodes) {
                 code += visit_PrintNode(*node) + "\n";
                 break;
             }
-            // ... handle other node types
+            case IF_STMT:{
+                IfStmtNode* node = static_cast<IfStmtNode*>(_node);
+                if(eval(node->condition.tokens) == 1){
+                    //We shall eval this function else we shouldn't.
+                    visit(&node->body);
+                }
+                else{}
+            }
+
+            case ELIF_STMT:{
+                ElifStmtNode* node = static_cast<ElifStmtNode*>(_node);
+                if(eval(node->condition.tokens) == 1){
+                    //We shall eval this function else we shouldn't.
+                    visit(&node->body);
+                }
+                else{}
+            }
+
+            case ELSE_STMT:{
+                ElseStmtNode* node = static_cast<ElseStmtNode*>(_node);
+                visit(&node->body);
+            }
         }
     }
 
