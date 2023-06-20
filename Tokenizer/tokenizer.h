@@ -388,7 +388,8 @@ vector<Token> tokenize(string source_code) {
             }
             else if((c == '"' || c == '\'') && string_presence == true){
                 Token tok;
-                tok.token = "\""+str_input+"\"";
+                tok.token = "'"+str_input+"'";
+                // tok.token = ""+str_input+"";
                 tok.type = STR;
                 tokens.push_back(tok);
                 str_input = "";
@@ -593,7 +594,7 @@ string tokenS_to_string(vector<Token> tokens){
 }
 
 //This function will tell us the number of indent present in the tokenstream
-int getIndentLevel(TokenStream tokens){
+int getIndentLevel(vector<Token> tokens){
     int indent_ = 0;
     for(Token token : tokens){
         if(token.type == INDENT)
