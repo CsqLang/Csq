@@ -244,35 +244,67 @@ auto Parser(vector<TokenStream> code) {
                 block.push_back(_res);
             }
         }
-        // ... handle other node types
-
+        else if (isVarAssign(line)) {
+            bool valid = VarAssign_Check(line);
+            if (valid) {
+                VarAssignNode* node = new VarAssignNode(parse_VarAssign(line));
+                pair<ASTNode*, NodeType> _res;
+                _res.first = node;
+                _res.second = VAR_ASSIGN;
+                block.push_back(_res);
+            }
+        }
+        else if(isPrintStmt(line)){
+            bool valid = 1;
+            if (valid) {
+                PrintNode* node = new PrintNode(parse_PrintStatement(line));
+                pair<ASTNode*, NodeType> _res;
+                _res.first = node;
+                _res.second = PRINT;
+                block.push_back(_res);
+            }
+        }
     }
     return block;
 }
 
+/*
+We are saying this is the function which compiles the nodes but in the hood it behaves much like the
+JIT.
+*/
 string Compile(vector<pair<ASTNode*, NodeType>> nodes) {
-    string res;
-    
-    printf("%ld\n", nodes.size());
-    
+    string code;
+
     for (int i = 0; i < nodes.size(); i++) {
         int type = nodes[i].second;
         ASTNode* _node = nodes[i].first;
+
         switch (type) {
             case VAR_DECL: {
                 VarDeclNode* node = static_cast<VarDeclNode*>(_node);
-                allocateVar(node->identifier, node->var_type, tokenS_to_string(node->value.tokens));
+                code += "allocateVar(\"" + node->identifier + "\", \"" + node->var_type + "\", \"" + tokenS_to_string(node->value.tokens) + "\");\n";
+                break;
+            }
+            case VAR_ASSIGN: {
+                VarAssignNode* node = static_cast<VarAssignNode*>(_node);
+                code += "assignVar(\"" + node->identifier + "\", \"" + tokenS_to_string(node->value.tokens) + "\");\n";
+                break;
+            }
+            case PRINT: {
+                PrintNode* node = static_cast<PrintNode*>(_node);
+                code += visit_PrintNode(*node) + "\n";
                 break;
             }
             // ... handle other node types
         }
     }
-    
+
     // Free allocated memory
     for (int i = 0; i < nodes.size(); i++) {
         delete nodes[i].first;
     }
 
-    return res;
+    return code;
 }
+
 #endif // PARSER_H_CSQ4
