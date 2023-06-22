@@ -157,4 +157,36 @@ void Free(){
     }
 }
 
+//Boolean funtions to tell that are the cells having equal value?
+bool mem_areEqual(Cell c1, Cell c2){
+    string lval,rval;
+    switch(c1.type){
+        case FLOAT:{
+            lval = to_string(c1.fval);
+        }
+        case STR:{
+            lval = c1.sval;
+        }
+    }
+    switch(c2.type){
+        case FLOAT:{
+            lval = to_string(c2.fval);
+        }
+        case STR:{
+            lval = c2.sval;
+        }
+    }
+    return lval == rval;
+}
+
+bool mem_notEqual(Cell c1, Cell c2){
+    return !mem_areEqual(c1,c2);
+}
+
+//Function to throw memory based errors
+void mem_error(string msg){
+    printf("Error: Memory error, %s\n",msg.c_str());
+    exit(0);
+}
+
 #endif // MEMORY_CSQ4  
