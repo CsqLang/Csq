@@ -11,16 +11,18 @@ string visit_ExprNode(ExprNode node){
     string result;
     for(Token token : node.tokens){
         if(token.type == IDENTIFIER){
-            //Read from the SYM_table
-            result += readCell(SymTable[token.token].var.value_address);
+            result += "id(\"" + token.token + "\")";
         }
-        else if (token.type == STR) {
+        else if(token.type == VALUE){
+            result += "f_val(" + token.token + ")";
+        }
+        else if(token.type == STR){
             token.token.pop_back();
-            string s;
-            for(int i=1;i<token.token.size();i++){
-                s += token.token[i];
+            string tok;
+            for(int i = 1; i<token.token.size();i++){
+                tok.push_back(token.token[i]);
             }
-            result += "'" + s + "'";
+            result += "s_val(\"" + tok + "\")";
         }
         else{
             result += token.token;
@@ -40,7 +42,7 @@ Cell visit_Call(CallNode node){
 
 string visit_VarDecl(VarDeclNode node){
     //This will also include the processing of the runtime variables
-    allocateVar(node.identifier,node.var_type,tokenS_to_string(node.value.tokens));
+    // allocateVar(node.identifier,node.var_type,tokenS_to_string(node.value.tokens));
     //Embedding the function to string to convert it into C/C++ format so that they could execute it.
     // string code = "allocateVar(\"" + node.identifier + "\",\"" + node.var_type  + "\",\""+ tokenS_to_string(node.value.tokens) +"\");";
     //Basically we have returned "" because there is no need to generate any C/C++ var instead that is added to the virtual memory
@@ -50,33 +52,16 @@ string visit_VarDecl(VarDeclNode node){
 
 string visit_VarAssign(VarAssignNode node){
     //It's processing is also not lengthy since we already implemented functions in the runtime core
-    assignVar(
-        node.identifier,
-        tokenS_to_string(node.value.tokens)
-    );
+    // assignVar(
+    //     node.identifier,
+    //     tokenS_to_string(node.value.tokens)
+    // );
     return "";
 }
 
 string visit_PrintNode(PrintNode node){
     string code = "print(";
-
-    for(Token token : node.value.tokens){
-        if(token.type == IDENTIFIER){
-            code += string("readCell(") + "SymTable[\"" + token.token + "\"].var.value_address)";
-        }
-        else if(token.type == STR){
-            token.token.pop_back();
-            string s;
-            for(int i=1;i<token.token.size();i++){
-                s += token.token[i];
-            }
-            code +=  "\"" + s + "\"";
-        }
-        else{
-            code += "\"" + token.token + "\"";
-        }
-    }
-
+    code += visit_ExprNode(node.value);
     code += ");";
     return code;
 }
