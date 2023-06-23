@@ -166,7 +166,10 @@ IfStmtNode parse_IfStmt(TokenStream tokens){
         if(token.token == "if")
             condition = 1;
         else
-            node.condition.tokens.push_back(token);
+            if(token.token != ":")
+                node.condition.tokens.push_back(token);
+            else
+                break;
     }
     return node;
 }
@@ -228,29 +231,60 @@ struct CodeBlock{
     vector<ASTNode> nodes;
 };
 
-/*
-Implement the parser
-*/
+//Parse by single statement. it will not parse block based expressions.
+pair<ASTNode*, NodeType> parse(TokenStream line){
+    if(isVarDecl(line)){
+        bool valid = VarDecl_check(line);
+        if (valid) {
+            VarDeclNode* node = new VarDeclNode(parse_VarDecl(line));
+            pair<ASTNode*, NodeType> _res;
+            _res.first = node;
+            _res.second = VAR_DECL;
+            return _res;
+        }
+    }
+    else if(isVarAssign(line)){
+        bool valid = VarAssign_Check(line);
+        if (valid) {
+            VarAssignNode* node = new VarAssignNode(parse_VarAssign(line));
+            pair<ASTNode*, NodeType> _res;
+            _res.first = node;
+            _res.second = VAR_ASSIGN;
+            return _res;
+        }
+    }
+    else{
+        PrintNode* node = new PrintNode(parse_PrintStatement(line));
+        pair<ASTNode*, NodeType> _res;
+        _res.first = node;
+        _res.second = PRINT;
+        return _res;
+    }return pair<ASTNode*, NodeType>(new UnknownNode(), UNKNOWN_NODE);
+}
 
+// Forward declaration of the Parser function
+vector<pair<ASTNode*, NodeType>> Parser(const vector<TokenStream>& code, int startIndex, int targetIndent);
 
-
-auto Parser(vector<TokenStream> code) {
+auto Parser(const vector<TokenStream>& code) {
     vector<pair<ASTNode*, NodeType>> block;
     int error_c = 0;
-    int child_indent = 0;
-    //To know the type of block statement and it's maxindent
     NodeType block_type;
     int block_indent;
-    //All Block statements
     IfStmtNode if_block;
     ElseStmtNode else_block;
     ElifStmtNode elif_block;
 
     for (int i = 0; i < code.size(); i++) {
         TokenStream line = code[i];
-        //To know about current indentation
         int indent = getIndentLevel(line);
+
+        // Skip lines that are only INDENT tokens
+        if (line.size() == 1 && line[0].type == INDENT) {
+            continue;
+        }
+
         if (isVarDecl(line)) {
+            // Handle variable declaration
             bool valid = VarDecl_check(line);
             if (valid) {
                 VarDeclNode* node = new VarDeclNode(parse_VarDecl(line));
@@ -261,6 +295,7 @@ auto Parser(vector<TokenStream> code) {
             }
         }
         else if (isVarAssign(line)) {
+            // Handle variable assignment
             bool valid = VarAssign_Check(line);
             if (valid) {
                 VarAssignNode* node = new VarAssignNode(parse_VarAssign(line));
@@ -270,55 +305,61 @@ auto Parser(vector<TokenStream> code) {
                 block.push_back(_res);
             }
         }
-        else if(isPrintStmt(line)){
+        else if (isPrintStmt(line)) {
+            // Handle print statement
             bool valid = 1;
             if (valid) {
                 PrintNode* node = new PrintNode(parse_PrintStatement(line));
                 pair<ASTNode*, NodeType> _res;
                 _res.first = node;
                 _res.second = PRINT;
-                if(child_indent != 0){
-                    if(block_type == IF_STMT){
-                        if(indent < block_indent){
-                            if_block.body.statements.push_back(node);
-                        }
-                        else if(indent == block_indent){
-                            IfStmtNode* node_if = new IfStmtNode();
-                            node_if->body = if_block.body;
-                            pair<ASTNode*, NodeType> _res2;
-                            _res2.first = node_if;
-                            _res2.second = IF_STMT;
-                            block.push_back(_res2);
-                            block.push_back(_res);
-                            child_indent = 0;
-                            block_type = UNKNOWN_NODE;
-                        }
-                    }
+                block.push_back(_res);
+            }
+        }
+        else if (isIfStmt(line)) {
+            // Handle if statement
+            IfStmtNode* node = new IfStmtNode(parse_IfStmt(line));
+            bool ended = 0;
+            int child_indent = indent+1;
+            
+            //Now we will be continuing the parsing with the current index and stop when the scope will end.
+            while(ended != 1)
+            {
+                
+                if(parse(line).second == UNKNOWN_NODE){
+
+                }
+                else{
+
                 }
             }
-        }
-        else if(isIfStmt(line)){
-            bool valid = 1;
-            if(valid){
-                IfStmtNode* node = new IfStmtNode(parse_IfStmt(line));
-                
-                child_indent = indent + 1;
-                //Block info for next statements
-                if_block.body = node->body;
-                if_block.condition = node->condition;
-                if_block.type = IF_STMT;
-                block_indent = indent;
-                block_type = IF_STMT;
-            }
+            //then push back to block 
         }
     }
+
     return block;
 }
 
-/*
-We are saying this is the function which compiles the nodes but in the hood it behaves much like the
-JIT.
-*/
+vector<pair<ASTNode*, NodeType>> Parser(const vector<TokenStream>& code, int startIndex, int targetIndent) {
+    vector<TokenStream> block;
+    for (int i = startIndex + 1; i < code.size(); i++) {
+        TokenStream line = code[i];
+        int indent = getIndentLevel(line);
+        if (indent == targetIndent) {
+            block.push_back(line);
+        }
+        else if (indent < targetIndent) {
+            break;
+        }
+    }
+    return Parser(block);
+}
+
+
+// /*
+// We are saying this is the function which compiles the nodes but in the hood it behaves much like the
+// JIT.
+// */
 string Compile(vector<pair<ASTNode*, NodeType>> nodes) {
     string code;
 
@@ -329,35 +370,29 @@ string Compile(vector<pair<ASTNode*, NodeType>> nodes) {
         switch (type) {
             case VAR_DECL: {
                 VarDeclNode* node = static_cast<VarDeclNode*>(_node);
-                code += "allocateVar(\"" + node->identifier + "\", \"" + node->var_type + "\", \"" + tokenS_to_string(node->value.tokens) + "\");\n";
+                code += "allocateVar(\"" + node->identifier + "\", \"" + node->var_type + "\", " + visit_ExprNode(node->value) + ");\n";
                 break;
             }
             case VAR_ASSIGN: {
                 VarAssignNode* node = static_cast<VarAssignNode*>(_node);
-                code += "assignVar(\"" + node->identifier + "\", \"" + tokenS_to_string(node->value.tokens) + "\");\n";
+                code += "assignVar(\"" + node->identifier + "\", " + visit_ExprNode(node->value) + ");\n";
                 break;
             }
             case PRINT: {
                 PrintNode* node = static_cast<PrintNode*>(_node);
-                code += visit_PrintNode(*node) + "\n";
+                code += "print(" + visit_ExprNode(node->value) + ");\n";
                 break;
             }
             case IF_STMT:{
                 IfStmtNode* node = static_cast<IfStmtNode*>(_node);
-                if(eval(node->condition.tokens) == 1){
-                    //We shall eval this function else we shouldn't.
-                    visit(&node->body);
-                }
-                else{}
+                code += "if(" + visit_ExprNode(node->condition) + ") {\n";
+                code += visit(node);
+                code += "}\n";
             }
 
             case ELIF_STMT:{
                 ElifStmtNode* node = static_cast<ElifStmtNode*>(_node);
-                if(eval(node->condition.tokens) == 1){
-                    //We shall eval this function else we shouldn't.
-                    visit(&node->body);
-                }
-                else{}
+                
             }
 
             case ELSE_STMT:{
