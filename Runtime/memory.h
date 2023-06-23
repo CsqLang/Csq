@@ -22,8 +22,6 @@ Memory view
 |                   |
  --------------------
 
- C++ is 
-int a = stoi(readCell(0));
 ***********************
 
 */
@@ -50,6 +48,61 @@ struct Cell
     int ival;
     double fval;
     string sval;
+
+    Cell operator+(Cell c){
+        if(c.type == STRING){
+            Cell c1;
+            c1.type = STRING;
+            c1.sval = sval + c.sval;
+            return c1;
+        }
+        else{
+            Cell c1;
+            c1.type = FLOAT;
+            c1.fval = fval + c.fval;
+            return c1;
+        }
+    }
+
+    Cell operator*(Cell c){
+        if(c.type == STRING){
+            Cell c1;
+            printf("Error: invalid use of operator * between two strings.");
+            return c1;
+        }
+        else{
+            Cell c1;
+            c1.type = FLOAT;
+            c1.fval = fval * c.fval;
+            return c1;
+        }
+    }
+    Cell operator-(Cell c){
+        if(c.type == STRING){
+            Cell c1;
+            printf("Error: invalid use of operator - between two strings.");
+            return c1;
+        }
+        else{
+            Cell c1;
+            c1.type = FLOAT;
+            c1.fval = fval - c.fval;
+            return c1;
+        }
+    }
+    Cell operator/(Cell c){
+        if(c.type == STRING){
+            Cell c1;
+            printf("Error: invalid use of operator / between two strings.");
+            return c1;
+        }
+        else{
+            Cell c1;
+            c1.type = FLOAT;
+            c1.fval = fval / c.fval;
+            return c1;
+        }
+    }
 };
 
 
@@ -147,6 +200,7 @@ int TopCellAddress(){
     return memory.size()-1;
 }
 
+
 //GC----------------------------------------------->
 void Free(){
     for(int i = 0;i<memory.size();i++){
@@ -157,36 +211,6 @@ void Free(){
     }
 }
 
-//Boolean funtions to tell that are the cells having equal value?
-bool mem_areEqual(Cell c1, Cell c2){
-    string lval,rval;
-    switch(c1.type){
-        case FLOAT:{
-            lval = to_string(c1.fval);
-        }
-        case STR:{
-            lval = c1.sval;
-        }
-    }
-    switch(c2.type){
-        case FLOAT:{
-            lval = to_string(c2.fval);
-        }
-        case STR:{
-            lval = c2.sval;
-        }
-    }
-    return lval == rval;
-}
 
-bool mem_notEqual(Cell c1, Cell c2){
-    return !mem_areEqual(c1,c2);
-}
-
-//Function to throw memory based errors
-void mem_error(string msg){
-    printf("Error: Memory error, %s\n",msg.c_str());
-    exit(0);
-}
 
 #endif // MEMORY_CSQ4  
