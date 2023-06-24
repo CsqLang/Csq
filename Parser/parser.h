@@ -262,6 +262,16 @@ pair<ASTNode*, NodeType> parse(TokenStream line){
     }return pair<ASTNode*, NodeType>(new UnknownNode(), UNKNOWN_NODE);
 }
 
+TokenStream removeIndent(TokenStream tokens){
+    TokenStream tok;
+    for(Token token: tokens){
+        if(token.type == INDENT){}
+        else{
+            tok.push_back(token);
+        }
+    }return tok;
+}
+
 // Forward declaration of the Parser function
 vector<pair<ASTNode*, NodeType>> Parser(const vector<TokenStream>& code, int startIndex, int targetIndent);
 
@@ -277,7 +287,7 @@ auto Parser(const vector<TokenStream>& code) {
     for (int i = 0; i < code.size(); i++) {
         TokenStream line = code[i];
         int indent = getIndentLevel(line);
-
+        
         // Skip lines that are only INDENT tokens
         if (line.size() == 1 && line[0].type == INDENT) {
             continue;
@@ -321,19 +331,30 @@ auto Parser(const vector<TokenStream>& code) {
             IfStmtNode* node = new IfStmtNode(parse_IfStmt(line));
             bool ended = 0;
             int child_indent = indent+1;
-            
+            TokenStream line_;
             //Now we will be continuing the parsing with the current index and stop when the scope will end.
             while(ended != 1)
-            {
-                
-                if(parse(line).second == UNKNOWN_NODE){
+            {   
+                int l_indent = getIndentLevel(line_);
+                line_ = removeIndent(line_);
+                if(l_indent <= child_indent){
+                    if(parse(line).second == UNKNOWN_NODE){
 
+                    }
+                    else{
+                        node->body.statements.push_back(parse(line).first);
+                    } 
+                    line_ = code[i];
+                    i++;
                 }
                 else{
-
+                    ended = 1;
                 }
+                
             }
+            
             //then push back to block 
+            block.push_back(pair<ASTNode*, NodeType>(node,IF_STMT));
         }
     }
 
