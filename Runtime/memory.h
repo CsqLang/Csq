@@ -103,6 +103,34 @@ struct Cell
             return c1;
         }
     }
+    Cell operator==(Cell c){
+        if(c.type == STRING){
+            Cell c1;
+            c1.type = FLOAT;
+            c1.fval = c.sval == sval;
+            return c1;
+        }
+        else{
+            Cell c1;
+            c1.type = FLOAT;
+            c1.fval = fval == c.fval;
+            return c1;
+        }
+    }
+    Cell operator!=(Cell c){
+        if(c.type == STRING){
+            Cell c1;
+            c1.type = FLOAT;
+            c1.fval = c.sval != sval;
+            return c1;
+        }
+        else{
+            Cell c1;
+            c1.type = FLOAT;
+            c1.fval = fval != c.fval;
+            return c1;
+        }
+    }
 };
 
 
