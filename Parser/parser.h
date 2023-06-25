@@ -327,35 +327,62 @@ auto Parser(const vector<TokenStream>& code) {
             }
         }
         else if (isIfStmt(line)) {
-            // Handle if statement
-            IfStmtNode* node = new IfStmtNode(parse_IfStmt(line));
-            bool ended = 0;
-            int child_indent = indent+1;
-            TokenStream line_;
-            //Now we will be continuing the parsing with the current index and stop when the scope will end.
-            while(ended != 1)
-            {   
-                int l_indent = getIndentLevel(line_);
-                line_ = removeIndent(line_);
-                if(l_indent <= child_indent){
-                    if(parse(line).second == UNKNOWN_NODE){
-
-                    }
-                    else{
-                        node->body.statements.push_back(parse(line).first);
-                    } 
-                    line_ = code[i];
-                    i++;
-                }
-                else{
-                    ended = 1;
-                }
-                
+    // Handle if statement
+    IfStmtNode* node = new IfStmtNode(parse_IfStmt(line));
+        bool ended = false;
+        int child_indent = indent + 1;
+        TokenStream line_;
+        while (!ended) {
+            i = i + 1;
+            if (i >= code.size()) {
+                ended = true;  // Exit the loop if end of code is reached
+                break;
             }
-            
-            //then push back to block 
-            block.push_back(pair<ASTNode*, NodeType>(node,IF_STMT));
+            line_ = code[i];
+            int line_indent = getIndentLevel(line_);
+            line_ = removeIndent(line_);
+            if (line_indent == child_indent) {
+                ASTNode* parsedNode = parse(line_).first;
+                node->body.statements.push_back(parsedNode);
+            }
+            else if (line_indent > child_indent) {
+                // Handle statements at the same indentation level
+                std::vector<ASTNode*> innerStatements;
+                while (line_indent == child_indent) {
+                    ASTNode* innerNode = parse(line_).first;
+                    innerStatements.push_back(innerNode);
+
+                    i = i + 1;
+                    if (i >= code.size()) {
+                        ended = true;  // Exit the loop if end of code is reached
+                        break;
+                    }
+                    line_ = code[i];
+                    line_indent = getIndentLevel(line_);
+                    line_ = removeIndent(line_);
+                }
+
+                // Create a block node and assign the inner statements
+                BlockNode* blockNode = new BlockNode();
+                blockNode->statements = innerStatements;
+
+                // Set the block node as the body of the if statement
+                node->body.statements.push_back(blockNode);
+
+                // Adjust the index to reprocess the current line
+                i = i - 1;
+            }
+            else {
+                ended = true;  // Exit the loop if indentation level is lower
+                i = i - 1;  // Adjust the index to reprocess the current line
+            }
         }
+
+        // Then push back to block
+        block.push_back(std::make_pair(node, IF_STMT));
+    }
+
+
     }
 
     return block;
@@ -406,9 +433,7 @@ string Compile(vector<pair<ASTNode*, NodeType>> nodes) {
             }
             case IF_STMT:{
                 IfStmtNode* node = static_cast<IfStmtNode*>(_node);
-                code += "if(" + visit_ExprNode(node->condition) + ") {\n";
                 code += visit(node);
-                code += "}\n";
             }
 
             case ELIF_STMT:{
