@@ -41,22 +41,11 @@ Cell visit_Call(CallNode node){
 }
 
 string visit_VarDecl(VarDeclNode node){
-    //This will also include the processing of the runtime variables
-    // allocateVar(node.identifier,node.var_type,tokenS_to_string(node.value.tokens));
-    //Embedding the function to string to convert it into C/C++ format so that they could execute it.
-    // string code = "allocateVar(\"" + node.identifier + "\",\"" + node.var_type  + "\",\""+ tokenS_to_string(node.value.tokens) +"\");";
-    //Basically we have returned "" because there is no need to generate any C/C++ var instead that is added to the virtual memory
-    // thanks to allocateVar function.
-    return "";
+    return "allocateVar(\"" + node.identifier + "\", \"" + node.var_type + "\", " + visit_ExprNode(node.value) + ");\n";
 }
 
 string visit_VarAssign(VarAssignNode node){
-    //It's processing is also not lengthy since we already implemented functions in the runtime core
-    // assignVar(
-    //     node.identifier,
-    //     tokenS_to_string(node.value.tokens)
-    // );
-    return "";
+    return "assignVar(\"" + node.identifier + "\", " + visit_ExprNode(node.value) + ");\n";;
 }
 
 string visit_PrintNode(PrintNode node){
@@ -67,7 +56,7 @@ string visit_PrintNode(PrintNode node){
 }
 
 string visit_IfNode(IfStmtNode node){
-    string code = "if(" + visit_ExprNode(node.condition) + "){\n";
+    string code = "if(_cond_(" + visit_ExprNode(node.condition) + ")){\n";
     //Recursive visitor method for body visit
     for(ASTNode* stmt : node.body.statements){
         code += visit(stmt) + "\n";
