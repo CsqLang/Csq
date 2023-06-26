@@ -12,7 +12,11 @@ string readCode(string path){
     string code,line;
     fout.open(path);
     while(getline (fout, line)){
-        code += line + "\n";
+        if(line == "")
+            continue;
+        // else if(line[0] == '#') continue;
+        else
+            code += line + "\n";
     }
     return code;
 }
@@ -36,6 +40,13 @@ vector<TokenStream> toTokens(string code){
     }
     return tokens;
 }
+
+void writeCode(string code, string path){
+    ofstream fobj(path);
+    fobj << code << "\n";
+}
+
+
 
 
 
