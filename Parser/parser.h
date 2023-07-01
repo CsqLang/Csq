@@ -357,12 +357,12 @@ vector<pair<ASTNode*, NodeType>> Parser(const vector<TokenStream>& code) {
                 int body_indent = getIndentLevel(code[j]);
                 TokenStream block_line = code[j];
                 block_line = removeIndent(block_line);
-                if(body_indent <= min_child_indent){
+                if(body_indent != indent){
                     body.push_back(block_line);
                 }
                 else{
                     //Ended
-                    i = j;
+                    i = j-1;
                     break;
                 }
             }
@@ -385,30 +385,57 @@ vector<pair<ASTNode*, NodeType>> Parser(const vector<TokenStream>& code) {
             }
             block.push_back(pair<ASTNode*, NodeType>(node,IF_STMT));
         }
+        else if (isElifStmt(line)) {
+            // Handle if statement
+            ElifStmtNode* node = new ElifStmtNode(parse_ElifStmt(line));
+            int min_child_indent = indent + 1;
+            /*
+            To parse a block statement its easy to use the function recursively
+            in this case we will first gather all the code after ifstmt with the indent less
+            than or equal to min_child_indent.
+            */
+            vector<TokenStream> body;
+            
+            for(int j = i+1;j<code.size();j++) {
+                int body_indent = getIndentLevel(code[j]);
+                TokenStream block_line = code[j];
+                block_line = removeIndent(block_line);
+                if(body_indent <= min_child_indent){
+                    body.push_back(block_line);
+                }
+                else{
+                    //Ended
+                    i = j;
+                    break;
+                }
+            }
+            // printf("p1\n");
+
+            //Now have to do some syntax check on body.
+            if(body.size() == 0){
+                printf("Error: expected an indent for elif statement written at line %d\n", i+1);
+                exit(0);
+            }
+            else{
+                // traverseTokenStream(body);
+                //Call the parse function;
+                // printf("p2\n");
+                auto body_AST = Parser(body);
+                for(pair<ASTNode*, NodeType> body_stmt : body_AST){
+                    node->body.statements.push_back(body_stmt.first);
+                }
+                // printf("p3\n");
+            }
+            block.push_back(pair<ASTNode*, NodeType>(node,ELIF_STMT));
+        }
     }
 
     return block;
 }
 
-// vector<pair<ASTNode*, NodeType>> Parser(const vector<TokenStream>& code, int startIndex, int targetIndent) {
-//     vector<TokenStream> block;
-//     for (int i = startIndex + 1; i < code.size(); i++) {
-//         TokenStream line = code[i];
-//         int indent = getIndentLevel(line);
-//         if (indent == targetIndent) {
-//             block.push_back(line);
-//         }
-//         else if (indent < targetIndent) {
-//             break;
-//         }
-//     }
-//     return Parser(block);
-// }
-
-
 // /*
 // We are saying this is the function which compiles the nodes but in the hood it behaves much like the
-// JIT.
+// JIT by converting nodes processed into intermediate language which in our case is C++.
 // */
 string Compile(vector<pair<ASTNode*, NodeType>> nodes) {
     string code;
