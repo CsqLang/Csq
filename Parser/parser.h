@@ -353,10 +353,12 @@ vector<pair<ASTNode*, NodeType>> Parser(const vector<TokenStream>& code) {
             */
             vector<TokenStream> body;
             
-            for(int j = i;j<=code.size();j++) {
+            for(int j = i+1;j<code.size();j++) {
                 int body_indent = getIndentLevel(code[j]);
+                TokenStream block_line = code[j];
+                block_line = removeIndent(block_line);
                 if(body_indent <= min_child_indent){
-                    body.push_back(code[j]);
+                    body.push_back(block_line);
                 }
                 else{
                     //Ended
@@ -364,17 +366,22 @@ vector<pair<ASTNode*, NodeType>> Parser(const vector<TokenStream>& code) {
                     break;
                 }
             }
+            // printf("p1\n");
+
             //Now have to do some syntax check on body.
             if(body.size() == 0){
                 printf("Error: expected an indent for if statement written at line %d\n", i+1);
                 exit(0);
             }
             else{
+                // traverseTokenStream(body);
                 //Call the parse function;
+                // printf("p2\n");
                 auto body_AST = Parser(body);
-                for(pair<ASTNode*, NodeType> stmt : body_AST){
-                    node->body.statements.push_back(stmt.first);
+                for(pair<ASTNode*, NodeType> body_stmt : body_AST){
+                    node->body.statements.push_back(body_stmt.first);
                 }
+                // printf("p3\n");
             }
             block.push_back(pair<ASTNode*, NodeType>(node,IF_STMT));
         }
