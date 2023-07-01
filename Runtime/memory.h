@@ -103,6 +103,58 @@ struct Cell
             return c1;
         }
     }
+    Cell operator>(Cell c){
+        if(c.type == STRING){
+            Cell c1;
+            printf("Error: invalid use of operator > between two strings.");
+            return c1;
+        }
+        else{
+            Cell c1;
+            c1.type = FLOAT;
+            c1.fval = fval > c.fval;
+            return c1;
+        }
+    }
+    Cell operator<(Cell c){
+        if(c.type == STRING){
+            Cell c1;
+            printf("Error: invalid use of operator < between two strings.");
+            return c1;
+        }
+        else{
+            Cell c1;
+            c1.type = FLOAT;
+            c1.fval = fval < c.fval;
+            return c1;
+        }
+    }
+    Cell operator>=(Cell c){
+        if(c.type == STRING){
+            Cell c1;
+            printf("Error: invalid use of operator >= between two strings.");
+            return c1;
+        }
+        else{
+            Cell c1;
+            c1.type = FLOAT;
+            c1.fval = fval >= c.fval;
+            return c1;
+        }
+    }
+    Cell operator<=(Cell c){
+        if(c.type == STRING){
+            Cell c1;
+            printf("Error: invalid use of operator <= between two strings.");
+            return c1;
+        }
+        else{
+            Cell c1;
+            c1.type = FLOAT;
+            c1.fval = fval <= c.fval;
+            return c1;
+        }
+    }
     Cell operator==(Cell c){
         if(c.type == STRING){
             Cell c1;
