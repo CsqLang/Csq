@@ -604,4 +604,14 @@ int getIndentLevel(vector<Token> tokens){
     }return indent_;
 }
 
+void traverseTokenStream(vector<vector<Token>> tokens){
+    for(vector<Token> line : tokens){
+        printf("%ld : ", line.size());
+        for(Token token : line){
+            printf("'%s',",token.token.c_str());
+        }
+        printf("\n");
+    }
+}
+
 #endif // tokenizer_Csq4
