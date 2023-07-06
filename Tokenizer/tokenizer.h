@@ -321,9 +321,7 @@ vector<Token> tokenize(string source_code) {
     vector<Token> tokens;
     string current_string, str_input, code_;
 
-    if(source_code == " ;ignore;"){
-        source_code = "ignore";
-    }
+    
     int current_line = 1;
     //Indentation count;
     int IndentCount = 0;
@@ -526,14 +524,23 @@ vector<Token> tokenize(string source_code) {
                 }
             }
             case COLAN:{
-                switch(symbolType(tokens[i+1])){
-                    case EQUAL:{
-                        Token token;
-                        token.token = ":=";
-                        token.type = ASOPERATOR;
-                        filtered_Tokens.push_back(token);
-                        i = i + 2;
+                if(i != tokens.size()-1){
+                    switch(symbolType(tokens[i+1])){
+                        case EQUAL:{
+                            Token token;
+                            token.token = ":=";
+                            token.type = ASOPERATOR;
+                            filtered_Tokens.push_back(token);
+                            i = i + 2;
+                        }
+                    
                     }
+                }
+                else{
+                    Token token;
+                    token.token = ":";
+                    token.type = SYMBOL;
+                    filtered_Tokens.push_back(token);
                 }
             }
             default:{
@@ -604,7 +611,7 @@ int getIndentLevel(vector<Token> tokens){
     }return indent_;
 }
 
-void traverseTokenStream(vector<vector<Token>> tokens){
+void traverseTokenStreams(vector<vector<Token>> tokens){
     for(vector<Token> line : tokens){
         printf("%ld : ", line.size());
         for(Token token : line){
@@ -612,6 +619,13 @@ void traverseTokenStream(vector<vector<Token>> tokens){
         }
         printf("\n");
     }
+}
+
+void traverseTokenStream(vector<Token> line){
+    for(Token token : line){
+        printf("'%s',",token.token.c_str());
+    }
+    printf("\n");
 }
 
 #endif // tokenizer_Csq4
