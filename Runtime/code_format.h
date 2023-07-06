@@ -33,13 +33,22 @@ vector<string> split(const string& str)
     return tokens;
 }
 
-vector<TokenStream> toTokens(string code){
+vector<TokenStream> toTokens(string code) {
     vector<TokenStream> tokens;
-    for(string stmt : split(code)){
-        tokens.push_back(tokenize (stmt));
+    vector<string> statements = split(code);
+    
+    for (string stmt : statements) {
+        try {
+            TokenStream tokenStream = tokenize(stmt);
+            tokens.push_back(tokenStream);
+        } catch (const std::exception& e) {
+            printf("Error: %s\n", e.what());
+        }
     }
+    
     return tokens;
 }
+
 
 void writeCode(string code, string path){
     ofstream fobj(path);
