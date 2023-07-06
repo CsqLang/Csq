@@ -24,7 +24,8 @@ int main(int argc, char const *argv[])
             //Read the file
             string raw_code = readCode(path_code);
             //Convert to tokens
-            vector<TokenStream> code = toTokens(raw_code);
+            vector<TokenStream> code = toTokens(raw_code); //Error starts
+            // traverseTokenStreams(code);
             //Now parse:
             auto parsed = Parser(code);
             
