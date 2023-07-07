@@ -189,10 +189,31 @@ ElifStmtNode parse_ElifStmt(TokenStream tokens){
     }
     return node;
 }
-// ElseStmtNode parse_ElseStmt(TokenStream tokens){
-//     ElseStmtNode node;
-//     return node;
-// }
+ElseStmtNode parse_ElseStmt(TokenStream tokens){
+    ElseStmtNode node;
+    return node;
+}
+
+ForStmtNode parse_ForStmt(TokenStream tokens){
+    ForStmtNode node;
+
+    // node.
+
+    return node;
+}
+
+WhileStmtNode parse_WhileStmt(TokenStream tokens){
+    WhileStmtNode node;
+
+    for(int i = 1;i<tokens.size();i++)
+        if(!(tokens[i].token == ":"))
+            node.condition.tokens.push_back(tokens[i]);
+        else
+            break;
+
+    return node;
+}
+
 bool isVarDecl(TokenStream tokens){
     if(tokens[0].type == IDENTIFIER && tokens[1].token == ":="){
         return 1;
@@ -470,6 +491,49 @@ vector<pair<ASTNode*, NodeType>> Parser(const vector<TokenStream>& code) {
             }
             block.push_back(pair<ASTNode*, NodeType>(node,ELSE_STMT));
         }
+        else if (isWhileStmt(line)) {
+            // Handle while statement
+            WhileStmtNode* node = new WhileStmtNode(parse_WhileStmt(line));
+            int min_child_indent = indent + 1;
+            /*
+            To parse a block statement its easy to use the function recursively
+            in this case we will first gather all the code after ifstmt with the indent less
+            than or equal to min_child_indent.
+            */
+            vector<TokenStream> body;
+            
+            for(int j = i+1;j<code.size();j++) {
+                int body_indent = getIndentLevel(code[j]);
+                TokenStream block_line = code[j];
+                block_line = removeIndent(block_line);
+                if(body_indent != indent){
+                    body.push_back(block_line);
+                }
+                else{
+                    //Ended
+                    i = j-1;
+                    break;
+                }
+            }
+            // printf("p1\n");
+
+            //Now have to do some syntax check on body.
+            if(body.size() == 0){
+                printf("Error: expected an indent for else statement written at line %d\n", i+1);
+                exit(0);
+            }
+            else{
+                // traverseTokenStreams(body);
+                //Call the parse function;
+                // printf("p2\n");
+                auto body_AST = Parser(body);
+                for(pair<ASTNode*, NodeType> body_stmt : body_AST){
+                    node->body.statements.push_back(body_stmt.first);
+                }
+                // printf("p3\n");
+            }
+            block.push_back(pair<ASTNode*, NodeType>(node,WHILE_STMT));
+        }
     }
 
     return block;
@@ -516,6 +580,12 @@ string Compile(vector<pair<ASTNode*, NodeType>> nodes) {
 
             case ELSE_STMT:{
                 ElseStmtNode* node = static_cast<ElseStmtNode*>(_node);
+                code += visit(node);
+                break;
+            }
+
+            case WHILE_STMT:{
+                WhileStmtNode* node = static_cast<WhileStmtNode*>(_node);
                 code += visit(node);
                 break;
             }
