@@ -66,7 +66,7 @@ string visit_IfNode(IfStmtNode node){
 }
 
 string visit_ElifNode(ElifStmtNode node){
-    string code = "else if(" + visit_ExprNode(node.condition) + "){\n";
+    string code = "else if(_cond_(" + visit_ExprNode(node.condition) + ")){\n";
     //Recursive visitor method for body visit
     for(ASTNode* stmt : node.body.statements){
         code += visit(stmt) + "\n";
@@ -85,11 +85,11 @@ string visit_ElseNode(ElseStmtNode node){
 }
 
 string visit_WhileNode(WhileStmtNode node){
-    string code = "while(" + visit_ExprNode(node.condition) + "){\n";
+    string code = "while(_cond_(" + visit_ExprNode(node.condition) + ")){\n";
     for(ASTNode* s : node.body.statements){
         code += visit(s) + "\n";
     }
-    return code;
+    return code + "}";
 }
 
 //Will do later since it requires some extra efforts.
