@@ -4,6 +4,8 @@
 #include "../AST/ast.h"
 #include "../AST/visitor.h"
 
+
+
 /*
 Upper layer syntax checking in which we don't have to do much instead it will roughly match the 
 syntax and returns the possible type which could be futher verified.
@@ -267,40 +269,33 @@ bool isWhileStmt(TokenStream tokens){
     return 0;
 }
 
+NodeType StatementType(TokenStream tokens){
+    NodeType type;
+    
+    if(isVarDecl(tokens)){
+        type = VAR_DECL;
+    }
+    else if(isVarAssign(tokens)){
+        type = VAR_ASSIGN;
+    }
+    else if(isIfStmt(tokens)){
+        type = IF_STMT;
+    }
+    else if(isElifStmt(tokens)){
+        type = ELIF_STMT;
+    }
+    else if(isElseStmt(tokens)){
+        type = ELSE_STMT;
+    }
+    else{
+        type = EXPR;
+    }
+    return type;
+}
+
 struct CodeBlock{
     vector<ASTNode> nodes;
 };
-
-//Parse by single statement. it will not parse block based expressions.
-pair<ASTNode*, NodeType> parse(TokenStream line){
-    if(isVarDecl(line)){
-        bool valid = VarDecl_check(line);
-        if (valid) {
-            VarDeclNode* node = new VarDeclNode(parse_VarDecl(line));
-            pair<ASTNode*, NodeType> _res;
-            _res.first = node;
-            _res.second = VAR_DECL;
-            return _res;
-        }
-    }
-    else if(isVarAssign(line)){
-        bool valid = VarAssign_Check(line);
-        if (valid) {
-            VarAssignNode* node = new VarAssignNode(parse_VarAssign(line));
-            pair<ASTNode*, NodeType> _res;
-            _res.first = node;
-            _res.second = VAR_ASSIGN;
-            return _res;
-        }
-    }
-    else{
-        PrintNode* node = new PrintNode(parse_PrintStatement(line));
-        pair<ASTNode*, NodeType> _res;
-        _res.first = node;
-        _res.second = PRINT;
-        return _res;
-    }return pair<ASTNode*, NodeType>(new UnknownNode(), UNKNOWN_NODE);
-}
 
 TokenStream removeIndent(TokenStream tokens){
     TokenStream tok;
@@ -312,9 +307,52 @@ TokenStream removeIndent(TokenStream tokens){
     }return tok;
 }
 
+//Scope for the statements
+struct Scope{
+    int indent_level;
+    bool ended;
+    NodeType of;
+    Scope(){}
+    Scope(int level, NodeType of_, bool ended_){
+        indent_level = level;
+        of = of_;
+        ended = ended_;
+    };
+};
+
 // Forward declaration of the Parser function
 vector<pair<ASTNode*, NodeType>> Parser(const vector<TokenStream>& code);
 
+//individual parsing  unit for if stmts,
+IfStmtNode parseCode_IfStmt(vector<TokenStream> lines)
+{
+    IfStmtNode node;
+    Scope scope(1,BLOCK,0);
+    vector<Scope> scope_stack = {scope};
+    BlockNode block;
+    NodeType stmt_type = UNKNOWN_NODE;
+    for(TokenStream line : lines){
+        int indent_level = getIndentLevel(line);
+        switch(StatementType(line))
+        {
+            case IF_STMT:{
+                stmt_type = IF_STMT;
+                block.statements.push_back(new IfStmtNode());
+                
+                if(indent_level > scope_stack[scope_stack.size()-1].indent_level){
+                    
+                }
+
+                break;
+            }
+            case PRINT:{
+                break;
+            }
+        };
+    }
+}
+
+//Defination for Parser function
 vector<pair<ASTNode*, NodeType>> Parser(const vector<TokenStream>& code) {
     vector<pair<ASTNode*, NodeType>> block;
     int error_c = 0;
@@ -363,8 +401,6 @@ vector<pair<ASTNode*, NodeType>> Parser(const vector<TokenStream>& code) {
             }
         }
         else if (isIfStmt(line)) {
-            // Handle if statement
-            IfStmtNode* node = new IfStmtNode(parse_IfStmt(line));
             int min_child_indent = indent + 1;
             /*
             To parse a block statement its easy to use the function recursively
@@ -376,7 +412,6 @@ vector<pair<ASTNode*, NodeType>> Parser(const vector<TokenStream>& code) {
             for(int j = i+1;j<code.size();j++) {
                 int body_indent = getIndentLevel(code[j]);
                 TokenStream block_line = code[j];
-                block_line = removeIndent(block_line);
                 if(body_indent != indent){
                     body.push_back(block_line);
                 }
@@ -386,23 +421,10 @@ vector<pair<ASTNode*, NodeType>> Parser(const vector<TokenStream>& code) {
                     break;
                 }
             }
-            // printf("p1\n");
-
-            //Now have to do some syntax check on body.
-            if(body.size() == 0){
-                printf("Error: expected an indent for if statement written at line %d\n", i+1);
-                exit(0);
-            }
-            else{
-                // traverseTokenStream(body);
-                //Call the parse function;
-                // printf("p2\n");
-                auto body_AST = Parser(body);
-                for(pair<ASTNode*, NodeType> body_stmt : body_AST){
-                    node->body.statements.push_back(body_stmt.first);
-                }
-                // printf("p3\n");
-            }
+            IfStmtNode* node = new IfStmtNode(parse_IfStmt(line));
+            traverseTokenStreams(body);       
+            node->body = parseCode_IfStmt(body).body;
+            printf("%ld\n",node->body.statements.size());     
             block.push_back(pair<ASTNode*, NodeType>(node,IF_STMT));
         }
         else if (isElifStmt(line)) {
