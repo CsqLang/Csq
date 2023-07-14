@@ -340,7 +340,7 @@ IfStmtNode parseCode_IfStmt(vector<TokenStream> lines)
                 block.statements.push_back(new IfStmtNode());
                 
                 if(indent_level > scope_stack[scope_stack.size()-1].indent_level){
-                    
+                    scope_stack.push_back(Scope(indent_level,IF_STMT,0));
                 }
 
                 break;
