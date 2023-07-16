@@ -57,39 +57,25 @@ string visit_PrintNode(PrintNode node){
 
 string visit_IfNode(IfStmtNode node){
     string code = "if(_cond_(" + visit_ExprNode(node.condition) + ")){\n";
-    //Recursive visitor method for body visit
-    for(ASTNode* stmt : node.body.statements){
-        code += visit(stmt) + "\n";
-    }
-    code += "}";
     return code;
 }
 
 string visit_ElifNode(ElifStmtNode node){
     string code = "else if(_cond_(" + visit_ExprNode(node.condition) + ")){\n";
-    //Recursive visitor method for body visit
-    for(ASTNode* stmt : node.body.statements){
-        code += visit(stmt) + "\n";
-    }
-    code += "}";
+    
     return code;
 }
 
 string visit_ElseNode(ElseStmtNode node){
     string code = "else{\n";
-    for(ASTNode* stmt : node.body.statements){
-        code += visit(stmt) + "\n";
-    }
-    code += "}";
+  
     return code;
 }
 
 string visit_WhileNode(WhileStmtNode node){
     string code = "while(_cond_(" + visit_ExprNode(node.condition) + ")){\n";
-    for(ASTNode* s : node.body.statements){
-        code += visit(s) + "\n";
-    }
-    return code + "}";
+ 
+    return code;
 }
 
 //Will do later since it requires some extra efforts.
