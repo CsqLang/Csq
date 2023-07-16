@@ -281,11 +281,17 @@ NodeType StatementType(TokenStream tokens){
     else if(isIfStmt(tokens)){
         type = IF_STMT;
     }
+    else if(isPrintStmt(tokens)){
+        type = PRINT;
+    }
     else if(isElifStmt(tokens)){
         type = ELIF_STMT;
     }
     else if(isElseStmt(tokens)){
         type = ELSE_STMT;
+    }
+    else if(isWhileStmt(tokens)){
+        type = WHILE_STMT;
     }
     else{
         type = EXPR;
@@ -320,306 +326,98 @@ struct Scope{
     };
 };
 
-// Forward declaration of the Parser function
-vector<pair<ASTNode*, NodeType>> Parser(const vector<TokenStream>& code);
 
-//individual parsing  unit for if stmts,
-IfStmtNode parseCode_IfStmt(vector<TokenStream> lines)
+ //Returns the last scope present in the given scope vector.
+Scope last_scope(vector<Scope> scope){
+    return scope[scope.size()-1];
+}
+
+
+string Compile(vector<TokenStream> code)
 {
-    IfStmtNode node;
-    Scope scope(1,BLOCK,0);
-    vector<Scope> scope_stack = {scope};
-    BlockNode block;
-    NodeType stmt_type = UNKNOWN_NODE;
-    for(TokenStream line : lines){
-        int indent_level = getIndentLevel(line);
-        switch(StatementType(line))
-        {
-            case IF_STMT:{
-                stmt_type = IF_STMT;
-                block.statements.push_back(new IfStmtNode());
-                
-                if(indent_level > scope_stack[scope_stack.size()-1].indent_level){
-                    scope_stack.push_back(Scope(indent_level,IF_STMT,0));
-                }
+    //Resulting code
+    string codeString = "";
 
+    //Scope properties
+    int line_no = 1;
+    Scope scope(0,UNKNOWN_NODE,0);
+    vector<Scope> scope_stack = {scope};
+
+
+    //States
+    bool class_ = 0;
+    int last_indent = 0;    
+    //Last statement type
+    NodeType last_statement = UNKNOWN_NODE;
+    for(TokenStream line : code)
+    {
+        //Get the current scope by finding indents
+        int indent_level = getIndentLevel(line);
+     
+        //Work with the indentation levels
+        while(indent_level != last_scope(scope_stack).indent_level){
+            if(last_scope(scope_stack).of == FUN_DECL){
+                codeString += "};\n";
+                scope_stack.pop_back(); 
+   
+            }
+            else{
+                codeString += "}\n";
+                //Pop the previous scope since it's now closed.
+                scope_stack.pop_back(); 
+            }
+        }
+
+        //Removing all indentation from the stream
+        line = removeIndent(line);
+
+        switch(StatementType(line)){
+            case VAR_DECL:{
+                VarDeclNode node = parse_VarDecl(line);
+                codeString += visit_VarDecl(node);
+                break;
+            }
+            case VAR_ASSIGN:{
+                VarAssignNode node = parse_VarAssign(line);
+                codeString += visit_VarAssign(node);
+                break;
+            }
+            case IF_STMT:{
+                
+                scope_stack.push_back(Scope(indent_level+1, StatementType(line), 0));
+                IfStmtNode node = parse_IfStmt(line);
+                codeString += visit_IfNode(node) + "\n";
+                break;
+            }
+            case ELIF_STMT:{
+                scope_stack.push_back(Scope(indent_level+1, StatementType(line), 0));
+                ElifStmtNode node = parse_ElifStmt(line);
+                codeString += visit_ElifNode(node) + "\n";
+                break;
+            }
+            case ELSE_STMT:{
+                scope_stack.push_back(Scope(indent_level+1, StatementType(line), 0));
+                ElseStmtNode node = parse_ElseStmt(line);
+                codeString += visit_ElseNode(node) + "\n";
                 break;
             }
             case PRINT:{
-                break;
-            }
-        };
-    }
-}
-
-//Defination for Parser function
-vector<pair<ASTNode*, NodeType>> Parser(const vector<TokenStream>& code) {
-    vector<pair<ASTNode*, NodeType>> block;
-    int error_c = 0;
-    NodeType block_type;
-    int block_indent;
-    // traverseTokenStreams(code);
-    for (int i = 0; i < code.size(); i++) {
-        TokenStream line = code[i];
-        int indent = getIndentLevel(line);
-        // Skip lines that are only INDENT tokens
-        if (line.size() == 1 && line[0].type == INDENT) {
-            continue;
-        }
-
-        if (isVarDecl(line)) {
-            // Handle variable declaration
-            bool valid = VarDecl_check(line);
-            if (valid) {
-                VarDeclNode* node = new VarDeclNode(parse_VarDecl(line));
-                pair<ASTNode*, NodeType> _res;
-                _res.first = node;
-                _res.second = VAR_DECL;
-                block.push_back(_res);
-            }
-        }
-        else if (isVarAssign(line)) {
-            // Handle variable assignment
-            bool valid = VarAssign_Check(line);
-            if (valid) {
-                VarAssignNode* node = new VarAssignNode(parse_VarAssign(line));
-                pair<ASTNode*, NodeType> _res;
-                _res.first = node;
-                _res.second = VAR_ASSIGN;
-                block.push_back(_res);
-            }
-        }
-        else if (isPrintStmt(line)) {
-            // Handle print statement
-            bool valid = 1;
-            if (valid) {
-                PrintNode* node = new PrintNode(parse_PrintStatement(line));
-                pair<ASTNode*, NodeType> _res;
-                _res.first = node;
-                _res.second = PRINT;
-                block.push_back(_res);
-            }
-        }
-        else if (isIfStmt(line)) {
-            int min_child_indent = indent + 1;
-            /*
-            To parse a block statement its easy to use the function recursively
-            in this case we will first gather all the code after ifstmt with the indent less
-            than or equal to min_child_indent.
-            */
-            vector<TokenStream> body;
-            
-            for(int j = i+1;j<code.size();j++) {
-                int body_indent = getIndentLevel(code[j]);
-                TokenStream block_line = code[j];
-                if(body_indent != indent){
-                    body.push_back(block_line);
-                }
-                else{
-                    //Ended
-                    i = j-1;
-                    break;
-                }
-            }
-            IfStmtNode* node = new IfStmtNode(parse_IfStmt(line));
-            traverseTokenStreams(body);       
-            node->body = parseCode_IfStmt(body).body;
-            printf("%ld\n",node->body.statements.size());     
-            block.push_back(pair<ASTNode*, NodeType>(node,IF_STMT));
-        }
-        else if (isElifStmt(line)) {
-            // Handle elif statement
-            ElifStmtNode* node = new ElifStmtNode(parse_ElifStmt(line));
-            int min_child_indent = indent + 1;
-            /*
-            To parse a block statement its easy to use the function recursively
-            in this case we will first gather all the code after ifstmt with the indent less
-            than or equal to min_child_indent.
-            */
-            vector<TokenStream> body;
-            
-            for(int j = i+1;j<code.size();j++) {
-                int body_indent = getIndentLevel(code[j]);
-                TokenStream block_line = code[j];
-                block_line = removeIndent(block_line);
-                if(body_indent != indent){
-                    body.push_back(block_line);
-                }
-                else{
-                    //Ended
-                    i = j-1;
-                    break;
-                }
-            }
-            // printf("p1\n");
-
-            //Now have to do some syntax check on body.
-            if(body.size() == 0){
-                printf("Error: expected an indent for elif statement written at line %d\n", i+1);
-                exit(0);
-            }
-            else{
-                // traverseTokenStream(body);
-                //Call the parse function;
-                // printf("p2\n");
-                auto body_AST = Parser(body);
-                for(pair<ASTNode*, NodeType> body_stmt : body_AST){
-                    node->body.statements.push_back(body_stmt.first);
-                }
-                // printf("p3\n");
-            }
-            block.push_back(pair<ASTNode*, NodeType>(node,ELIF_STMT));
-        }
-        else if (isElseStmt(line)) {
-            // Handle else statement
-            ElseStmtNode* node = new ElseStmtNode();
-            int min_child_indent = indent + 1;
-            /*
-            To parse a block statement its easy to use the function recursively
-            in this case we will first gather all the code after ifstmt with the indent less
-            than or equal to min_child_indent.
-            */
-            vector<TokenStream> body;
-            
-            for(int j = i+1;j<code.size();j++) {
-                int body_indent = getIndentLevel(code[j]);
-                TokenStream block_line = code[j];
-                block_line = removeIndent(block_line);
-                if(body_indent != indent){
-                    body.push_back(block_line);
-                }
-                else{
-                    //Ended
-                    i = j-1;
-                    break;
-                }
-            }
-            // printf("p1\n");
-
-            //Now have to do some syntax check on body.
-            if(body.size() == 0){
-                printf("Error: expected an indent for else statement written at line %d\n", i+1);
-                exit(0);
-            }
-            else{
-                // traverseTokenStreams(body);
-                //Call the parse function;
-                // printf("p2\n");
-                auto body_AST = Parser(body);
-                for(pair<ASTNode*, NodeType> body_stmt : body_AST){
-                    node->body.statements.push_back(body_stmt.first);
-                }
-                // printf("p3\n");
-            }
-            block.push_back(pair<ASTNode*, NodeType>(node,ELSE_STMT));
-        }
-        else if (isWhileStmt(line)) {
-            // Handle while statement
-            WhileStmtNode* node = new WhileStmtNode(parse_WhileStmt(line));
-            int min_child_indent = indent + 1;
-            /*
-            To parse a block statement its easy to use the function recursively
-            in this case we will first gather all the code after ifstmt with the indent less
-            than or equal to min_child_indent.
-            */
-            vector<TokenStream> body;
-            
-            for(int j = i+1;j<code.size();j++) {
-                int body_indent = getIndentLevel(code[j]);
-                TokenStream block_line = code[j];
-                block_line = removeIndent(block_line);
-                if(body_indent != indent){
-                    body.push_back(block_line);
-                }
-                else{
-                    //Ended
-                    i = j-1;
-                    break;
-                }
-            }
-            // printf("p1\n");
-
-            //Now have to do some syntax check on body.
-            if(body.size() == 0){
-                printf("Error: expected an indent for else statement written at line %d\n", i+1);
-                exit(0);
-            }
-            else{
-                // traverseTokenStreams(body);
-                //Call the parse function;
-                // printf("p2\n");
-                auto body_AST = Parser(body);
-                for(pair<ASTNode*, NodeType> body_stmt : body_AST){
-                    node->body.statements.push_back(body_stmt.first);
-                }
-                // printf("p3\n");
-            }
-            block.push_back(pair<ASTNode*, NodeType>(node,WHILE_STMT));
-        }
-    }
-
-    return block;
-}
-
-// /*
-// We are saying this is the function which compiles the nodes but in the hood it behaves much like the
-// JIT by converting nodes processed into intermediate language which in our case is C++.
-// */
-string Compile(vector<pair<ASTNode*, NodeType>> nodes) {
-    string code;
-
-    for (int i = 0; i < nodes.size(); i++) {
-        int type = nodes[i].second;
-        ASTNode* _node = nodes[i].first;
-
-        switch (type) {
-            case VAR_DECL: {
-                VarDeclNode* node = static_cast<VarDeclNode*>(_node);
-                code += "allocateVar(\"" + node->identifier + "\", \"" + node->var_type + "\", " + visit_ExprNode(node->value) + ");\n";
-                break;
-            }
-            case VAR_ASSIGN: {
-                VarAssignNode* node = static_cast<VarAssignNode*>(_node);
-                code += "assignVar(\"" + node->identifier + "\", " + visit_ExprNode(node->value) + ");\n";
-                break;
-            }
-            case PRINT: {
-                PrintNode* node = static_cast<PrintNode*>(_node);
-                code += "print(" + visit_ExprNode(node->value) + ");\n";
-                break;
-            }
-            case IF_STMT:{
-                IfStmtNode* node = static_cast<IfStmtNode*>(_node);
-                code += visit(node);
-                break;
-            }
-
-            case ELIF_STMT:{
-                ElifStmtNode* node = static_cast<ElifStmtNode*>(_node);
-                code += visit(node);
-                break;
-            }
-
-            case ELSE_STMT:{
-                ElseStmtNode* node = static_cast<ElseStmtNode*>(_node);
-                code += visit(node);
+                PrintNode node = parse_PrintStatement(line);
+                codeString += visit_PrintNode(node) + "\n";
                 break;
             }
 
             case WHILE_STMT:{
-                WhileStmtNode* node = static_cast<WhileStmtNode*>(_node);
-                code += visit(node);
+                scope_stack.push_back(Scope(indent_level+1, StatementType(line), 0));
+                WhileStmtNode node = parse_WhileStmt(line);
+                codeString += visit_WhileNode(node) + "\n";
                 break;
             }
+   
         }
+        line_no++;
     }
-
-    // Free allocated memory
-    for (int i = 0; i < nodes.size(); i++) {
-        delete nodes[i].first;
-    }
-
-    return code;
+    return codeString;
 }
 
 #endif // PARSER_H_CSQ4
