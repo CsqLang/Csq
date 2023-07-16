@@ -27,9 +27,9 @@ int main(int argc, char const *argv[])
             vector<TokenStream> code = toTokens(raw_code); //Error starts
             // traverseTokenStreams(code);
             //Now parse:
-            auto parsed = Parser(code);
+            // auto parsed = Parser(code);
             
-            string _code = Compile(parsed);
+            string _code = Compile(code);
             string final_code = addBuiltin(currdir + "/") + "\n" + "int main(){\n" + _code + "\n}\n";
             writeCode(final_code, currdir + "/" + name + ".cpp");
             compile(currdir,name);
