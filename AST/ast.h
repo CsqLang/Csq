@@ -23,11 +23,13 @@ enum NodeType{
     BLOCK,
     FUN_CALL,
     PRINT,
+    TYPE, // to print the type of an object
     UNKNOWN_NODE,
 };
 
 struct ASTNode {
     NodeType type;
+    int indent_level;
 };
 
 struct ExprNode : ASTNode {
@@ -67,7 +69,7 @@ struct FunDeclNode : ASTNode {
     FunDeclNode(){
         type = FUN_DECL;
     }
-    BlockNode body;
+    // BlockNode body;
 };
 
 struct IfStmtNode : ASTNode {
@@ -75,14 +77,19 @@ struct IfStmtNode : ASTNode {
     IfStmtNode(){
         type = IF_STMT;
     }
-    BlockNode body;
+    IfStmtNode(IfStmtNode cond, int ind){
+        type = IF_STMT;
+        condition = cond.condition;
+        indent_level = ind;
+    }
+    // BlockNode body;
 };
 
 struct ElseStmtNode : ASTNode {
     ElseStmtNode(){
         type = ELSE_STMT;
     }
-    BlockNode body;
+    // BlockNode body;
 };
 
 struct ElifStmtNode : ASTNode {
@@ -90,7 +97,7 @@ struct ElifStmtNode : ASTNode {
     ElifStmtNode(){
         type = ELIF_STMT;
     }
-    BlockNode body;
+    // BlockNode body;
 };
 
 struct ForStmtNode : ASTNode {
@@ -103,7 +110,7 @@ struct ForStmtNode : ASTNode {
 };
 
 struct WhileStmtNode : ASTNode {
-    BlockNode body;
+    // BlockNode body;
     ExprNode condition;
     WhileStmtNode(){
         type = WHILE_STMT;
@@ -122,6 +129,16 @@ struct PrintNode : ASTNode {
     ExprNode value;
     PrintNode(){
         type = PRINT;
+    }
+    PrintNode(PrintNode node, int ind){
+        type = PRINT;
+        indent_level = ind;
+        value = node.value;
+    }
+};
+struct TypeNode : ASTNode {
+    TypeNode(){
+        type = TYPE;
     }
 };
 struct UnknownNode : ASTNode {
