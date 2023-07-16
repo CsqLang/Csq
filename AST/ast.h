@@ -4,241 +4,146 @@
 //Imports
 #include "../Grammar/grammar.h"
 #include "../Tokenizer/tokenizer.h"
-#include "../Memory/stack.h"
-#include <memory>
 using namespace std;
 
-//Node types
-typedef enum {
-    VAR_DECLARATION,
-    VAR_ASSIGNMENT,
-    CLASS_DEFINITION,
-    FOR_LOOP,
-    WHILE_LOOP,
-    EXPR_TYPE,
-    FUNCTION_DECL,
+typedef vector<Token> TokenStream;
+typedef vector<string> StringStream;
+typedef vector<vector<Token>> Lines;
+
+enum NodeType{
+    EXPR,
+    VAR_DECL,
+    VAR_ASSIGN,
+    FUN_DECL,
+    IF_STMT,
+    ELSE_STMT,
+    ELIF_STMT,
+    FOR_STMT,
+    WHILE_STMT,
     BLOCK,
-    IF_STATEMENT,
-    ELIF_STATEMENT,
-    ELSE_STATEMENT,
-    FUN_ARGUMENT,
-    BREAK,
-    GROUP,
-    ONE_LINER,
-    RETURN_STMT,
-    IMPORT,
-    PROGRAM, //The basic node type is Program which doesn't needs to be traversed.
-} NODE_TYPE;
-
-//Node struct
-struct Node;
-//body struct for node type
-struct Node{
-    NODE_TYPE type;
-    Node(NODE_TYPE nodetype){
-        type = nodetype;
-    }
-    Node(){}
+    FUN_CALL,
+    PRINT,
+    TYPE, // to print the type of an object
+    UNKNOWN_NODE,
 };
 
-//Declaration for Node types.
-struct Expr;
-struct VarDecl;
-struct VarAssign;
-struct Block;
-struct FunctionDecl;
-struct ClassDecl;
-struct ForLoop;
-struct WhileLoop;
-struct IfStmt;
-struct ElifStmt;
-struct ElseStmt;
-struct FunArg;
-struct Break;
-struct Group;
-struct Import;
-struct OneLiner;
-struct ReturnStmt;
-// Definitions for above Node types
-//Expr node type is the combination of different types of statements like
-//*Function call
-//*Value
-//*Binary and Unary expressions
-struct Expr : Node{
-    string expr;
-    Expr(){type = EXPR_TYPE; expr = "";}
-    Expr(string express){type = EXPR_TYPE; expr = express;}
+struct ASTNode {
+    NodeType type;
+    int indent_level;
 };
 
-struct VarDecl : Node{
-    string name;
-    Expr value;
-    bool type_infr;
-    string type_;
-    VarDecl(string name_, string value_, string type_ = ""){
-        name = name_;
-        value = value_;
-        type = VAR_DECLARATION;
-        if(type_ == ""){
-            type_infr = true;
-        }
-        else{
-            type_infr = false;
-        }
-    }
-    VarDecl(){
-        name = "";
-        value = Expr();
-        type = VAR_DECLARATION;
-
+struct ExprNode : ASTNode {
+    TokenStream tokens;
+    ExprNode(){
+        type = EXPR;
     }
 };
 
-struct ReturnStmt : Node{
-    Expr expr;
-    ReturnStmt(){
-        type = RETURN_STMT;
-    }
-    ReturnStmt(Expr exp){
-        type = RETURN_STMT;
-        expr = exp;
+struct VarDeclNode : ASTNode {
+    string identifier;
+    string var_type;
+    ExprNode value;
+    VarDeclNode(){
+        type = VAR_DECL;
     }
 };
 
-struct Import : Node{
-    string path;
-    string alias;
-    string code;
-    Import(){
-        type = IMPORT;
-    }
-    Import(string path_, string code_, string alias_ = ""){
-        code = code_;
-        path = path_;
-        alias = alias_;
-        type = IMPORT;
-    }   
-};
-
-struct Break : Node{
-    Break(){
-        type = BREAK;
+struct VarAssignNode : ASTNode {
+    string identifier;
+    ExprNode value;
+    VarAssignNode(){
+        type = VAR_ASSIGN;
     }
 };
 
-struct VarAssign : Node{
-    string name;
-    Expr value;
-    VarAssign(string name_, string value_){
-        name = name_;
-        value = value_;
-        type = VAR_ASSIGNMENT;
-    }
-    VarAssign(){
-        name = "";
-        value = Expr();
-        type = VAR_ASSIGNMENT;
+struct BlockNode : ASTNode {
+    vector<ASTNode*> statements;
+    BlockNode(){
+        type = BLOCK; 
     }
 };
 
-struct Block : Node{
-    vector<string> statements;
-    Block(){type = BLOCK;}
-    Block(vector<string> statement){statements = statement;type = BLOCK;}
+struct FunDeclNode : ASTNode {
+    string identifier;
+    vector<string> parameters;
+    FunDeclNode(){
+        type = FUN_DECL;
+    }
+    // BlockNode body;
 };
 
-struct FunctionDecl : Node{
-    string name;
-    string return_type;
-    bool return_type_infr;
-    vector<VarDecl> params = {};
-    Block body;
-    FunctionDecl(){
-        type = FUNCTION_DECL;
-        name = "";
+struct IfStmtNode : ASTNode {
+    ExprNode condition;
+    IfStmtNode(){
+        type = IF_STMT;
     }
-    FunctionDecl(string name_, vector<VarDecl> params_, string return_type_=""){
-        type = FUNCTION_DECL;
-        name = name_;
-        params = params_;
-        if(return_type_ == ""){
-            return_type = "";
-            return_type_infr = 1;
-        }
-        else{
-            return_type = return_type_;
-            return_type_infr = 0;
-        }
+    IfStmtNode(IfStmtNode cond, int ind){
+        type = IF_STMT;
+        condition = cond.condition;
+        indent_level = ind;
     }
+    // BlockNode body;
 };
 
-struct ForLoop : Node{
-    Expr condition;
+struct ElseStmtNode : ASTNode {
+    ElseStmtNode(){
+        type = ELSE_STMT;
+    }
+    // BlockNode body;
+};
+
+struct ElifStmtNode : ASTNode {
+    ExprNode condition;
+    ElifStmtNode(){
+        type = ELIF_STMT;
+    }
+    // BlockNode body;
+};
+
+struct ForStmtNode : ASTNode {
+    BlockNode body;
     string iter_name;
-    Block body;
-    ForLoop(){type = FOR_LOOP;}
-    ForLoop(string itername, Expr cond){type = FOR_LOOP;iter_name = itername;condition = cond;}
+    ExprNode condition;
+    ForStmtNode(){
+        type = FOR_STMT;
+    }
 };
 
-struct WhileLoop : Node{
-    Expr condition;
-    Block body;
-    WhileLoop(){type = WHILE_LOOP;}
-    WhileLoop(Expr cond){type = WHILE_LOOP;condition = cond;}
+struct WhileStmtNode : ASTNode {
+    // BlockNode body;
+    ExprNode condition;
+    WhileStmtNode(){
+        type = WHILE_STMT;
+    }
 };
 
-struct IfStmt : Node{
-    Expr condition;
-    Block body;
-    IfStmt(){type = IF_STATEMENT;}
-    IfStmt(Expr cond){type = IF_STATEMENT;condition = cond;}
-};
-
-struct ElifStmt : Node{
-    Expr condition;
-    Block body;
-    ElifStmt(){type = ELIF_STATEMENT;}
-    ElifStmt(Expr cond){type = ELIF_STATEMENT;condition = cond;}
-};
-
-struct ElseStmt : Node{
-    Block body;
-    ElseStmt(){type = ELSE_STATEMENT;}
-};
-
-struct ClassDecl : Node{
+struct CallNode : ASTNode {
     string name;
-    string inherit_class;
-    ClassDecl(){
-        type = CLASS_DEFINITION;
-    }
-    ClassDecl(string name_, string inherit_class_){
-        name = name_;
-        inherit_class = inherit_class_;
-        type = CLASS_DEFINITION;
+    vector<Token> params;
+    CallNode(){
+        type = FUN_CALL;
     }
 };
 
-struct Group : Node{
-    string name;
-    Group(){type = GROUP;}
-    Group(string name_){
-        name = name_;
-        type = GROUP;
+struct PrintNode : ASTNode {
+    ExprNode value;
+    PrintNode(){
+        type = PRINT;
+    }
+    PrintNode(PrintNode node, int ind){
+        type = PRINT;
+        indent_level = ind;
+        value = node.value;
     }
 };
-
-struct OneLiner : Node{
-    string code;
-    vector<vector<Token>> lines;
-    OneLiner(){type = ONE_LINER;}      
-    OneLiner(string code_){
-        type = ONE_LINER;
-        code = code_;
-    }      
+struct TypeNode : ASTNode {
+    TypeNode(){
+        type = TYPE;
+    }
 };
-
-//Importing visitor containing all utilities to visit AST.
-#include "visitor.h"
-
+struct UnknownNode : ASTNode {
+    UnknownNode(){
+        type = UNKNOWN_NODE;
+    }
+};
 #endif // AST_Csq4_H
