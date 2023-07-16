@@ -45,9 +45,12 @@ vector<TokenStream> toTokens(string code) {
             printf("Error: %s\n", e.what());
         }
     }
-    
+
+    // traverseTokenStreams(tokens);
+    tokens.push_back(TokenStream({tokenize("ignore")}));
     return tokens;
 }
+
 
 
 void writeCode(string code, string path){
