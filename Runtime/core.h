@@ -87,9 +87,21 @@ void allocateVar(string id_, string type, Cell c){
     SymTable[id_] = sym;
 }
 
+vector<Cell> removeItemAt(vector<Cell>& vec, int itemNum) {
+    // Check if the itemNum is valid (within the range of vector's size)
+    if (itemNum >= 0 && itemNum < vec.size()) {
+        // Erase the element at the specified position
+        vec.erase(vec.begin() + itemNum);
+    }
+    // Return the modified vector
+    return vec;
+}
+
 void assignVar(string id_, Cell c){
+    memory = removeItemAt(memory,SymTable[id_].var.value_address);
     memory.push_back(c);
     SymTable[id_].var.value_address = TopCellAddress();
+
 }
 
 
