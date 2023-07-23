@@ -30,7 +30,7 @@ int main(int argc, char const *argv[])
             // auto parsed = Parser(code);
             
             string _code = Compile(code);
-            string final_code = addBuiltin(currdir + "/") + "\n" + "int main(){\n" + _code + "\n}\n";
+            string final_code = addBuiltin(currdir + "/") + "\n" + "int main(){\n" + _code + "\nfreeMemory();\n}\n";
             writeCode(final_code, currdir + "/" + name + ".cpp");
             compile(currdir,name);
         }
