@@ -88,6 +88,18 @@ ExprNode parse_ExprNode(TokenStream tokens){
                 RuntimeError("undefined name '" + token.token + "'.");
             }
         }
+        else if(token.type == VALUE){
+            if(tokens[i+1].token == "."){
+                Token val;
+                val.type = VALUE;
+                val.token = token.token + "." + tokens[i+2].token;
+                node.tokens.push_back(val);
+                i = i+2;
+            }
+            else{
+                node.tokens.push_back(token);    
+            }
+        }
         else{
             //Just for now couldn't be used during actual production.
             node.tokens.push_back(token);
@@ -121,9 +133,11 @@ VarDeclNode parse_VarDecl(TokenStream tokens){
             equal = 1;
         }
         else if(equal){
-            node.value.tokens.push_back(token);
+            valstream.push_back(token);
         }
     }
+
+    node.value = parse_ExprNode(valstream);
     
     return node;
 }
