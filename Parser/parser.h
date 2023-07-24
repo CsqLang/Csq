@@ -89,15 +89,20 @@ ExprNode parse_ExprNode(TokenStream tokens){
             }
         }
         else if(token.type == VALUE){
-            if(tokens[i+1].token == "."){
-                Token val;
-                val.type = VALUE;
-                val.token = token.token + "." + tokens[i+2].token;
-                node.tokens.push_back(val);
-                i = i+2;
+            if(tokens.size() != i+1){
+                if(tokens[i+1].token == "."){
+                    Token val;
+                    val.type = VALUE;
+                    val.token = token.token + "." + tokens[i+2].token;
+                    node.tokens.push_back(val);
+                    i = i+2;
+                }
+                else{
+                    node.tokens.push_back(token);    
+                }
             }
             else{
-                node.tokens.push_back(token);    
+                node.tokens.push_back(token);   
             }
         }
         else{
@@ -144,6 +149,7 @@ VarDeclNode parse_VarDecl(TokenStream tokens){
 //for var reassignment
 VarAssignNode parse_VarAssign(TokenStream tokens){
     VarAssignNode node;
+    TokenStream valstream;
     //States
     bool name = 1;
     bool val = 0;
@@ -158,9 +164,10 @@ VarAssignNode parse_VarAssign(TokenStream tokens){
             val = 1;
         }
         else if(val){
-            node.value.tokens.push_back(token);
+            valstream.push_back(token);
         }
     }
+    node.value = parse_ExprNode(valstream);
     return node;
 }
 
