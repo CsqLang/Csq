@@ -48,6 +48,7 @@ struct Cell
     int ival;
     double fval;
     string sval;
+    vector<Cell> array;
 
     Cell operator+(Cell c){
         if(c.type == STRING){
@@ -218,7 +219,11 @@ void addCell(string val)
     cell.u_count = 0;
     memory.push_back(cell);
 }
-
+void addCell(vector<Cell> array){
+    for(Cell c : array){
+        memory.push_back(c);
+    }
+}
 //This function will dump all data in the memory.
 void dump(){
     for(int i=0; i<memory.size(); i++){
