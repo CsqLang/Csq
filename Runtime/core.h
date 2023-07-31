@@ -100,6 +100,17 @@ void allocateVar(string id_, string type, Cell c){
     
 }
 
+void allocateVar(string id_, string type, vector<Cell> c){
+    addCell(c);
+    Symbol sym;
+    sym.var.name = id_;
+    sym.var.type = type;
+    sym.type = VARIABLE;
+    sym.var.value_address = TopCellAddress();
+    SymTable[id_] = sym;
+    
+}
+
 vector<Cell> removeItemAt(vector<Cell>& vec, int itemNum) {
     // Check if the itemNum is valid (within the range of vector's size)
     if (itemNum >= 0 && itemNum < vec.size()) {
