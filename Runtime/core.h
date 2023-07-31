@@ -8,7 +8,7 @@ Csq's runtime is responsible for the memory management and other runtime feature
 /*
 This will be used by parser to resemble current line.
 */
-int line = 1;
+int line_ = 1;
 
 #include "error.h" 
 #include "object.h"
@@ -37,11 +37,23 @@ Creating map for variable table storing the key value pair of name and variable 
 We could even utilize this to do type checking easily.
 */
 map<string, Symbol> SymTable;
+vector<string> var_names;
 
 int inTable(string name){
     int s = 0;
     for(pair<string, Symbol> p : SymTable){
         if(p.first == name){
+            s = 1;
+            break;
+        }
+    }
+    return s;
+}
+
+int isVar(string name){
+    int s = 0;
+    for(string p : var_names){
+        if(p == name){
             s = 1;
             break;
         }
@@ -85,6 +97,7 @@ void allocateVar(string id_, string type, Cell c){
     sym.type = VARIABLE;
     sym.var.value_address = TopCellAddress();
     SymTable[id_] = sym;
+    
 }
 
 vector<Cell> removeItemAt(vector<Cell>& vec, int itemNum) {

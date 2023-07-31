@@ -50,6 +50,16 @@ bool VarAssign_Check(TokenStream tokens){
         if(tokens[1].token == "="){
             if(tokens.size()>2){
                 valid = 1;
+                for(int i = 2;i<tokens.size();i++){
+                    if(tokens[i].type == KEYWORD){
+                        RuntimeError("syntax error by using keyword '" + tokens[i].token + "' inside a value.");
+                        valid = 0;
+                    }
+                    else if(tokens[i].token == ":="){
+                        RuntimeError("syntax error by using '" + tokens[i].token + "' inside a value.");
+                        valid = 0;
+                    }
+                }
             }
             else{
                 RuntimeError("expected a value after '='.");
@@ -394,13 +404,23 @@ string Compile(vector<TokenStream> code)
 
         switch(StatementType(line)){
             case VAR_DECL:{
-                VarDeclNode node = parse_VarDecl(line);
-                codeString += visit_VarDecl(node);
+                if(VarDecl_check(line)){
+                    VarDeclNode node = parse_VarDecl(line);
+                    codeString += visit_VarDecl(node);
+                }
+                else{
+
+                }
                 break;
             }
             case VAR_ASSIGN:{
-                VarAssignNode node = parse_VarAssign(line);
-                codeString += visit_VarAssign(node);
+                if(VarAssign_Check(line)){
+                    VarAssignNode node = parse_VarAssign(line);
+                    codeString += visit_VarAssign(node);
+                }
+                else{
+
+                }
                 break;
             }
             case IF_STMT:{
@@ -437,6 +457,7 @@ string Compile(vector<TokenStream> code)
    
         }
         line_no++;
+        line_++;
     }
     return codeString;
 }
