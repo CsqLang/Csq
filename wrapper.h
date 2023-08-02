@@ -13,7 +13,7 @@ so how will our runtime be runned by C/C++
 #include "AST/visitor.h"
 
 string addBuiltin(string pdir){
-    return "#include \"" + pdir + "/Csq4/Builtin/basic.h\"\n";
+    return "#include \"" + pdir + "/Builtin/basic.h\"\n";
 }
 void RunExecutable(string path){
     string command = path;
