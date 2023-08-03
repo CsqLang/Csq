@@ -129,6 +129,15 @@ void assignVar(string id_, Cell c){
 
 }
 
+Cell id(string identifier, int index){
+    if(index == 0){
+        return memory[SymTable[identifier].var.value_address];
+    }
+    else{
+        return memory[SymTable[identifier].var.value_address + index];
+    }
+}
+
 
 
 #endif // RUNTIME_CORE_CSQ
