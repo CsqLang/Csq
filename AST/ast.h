@@ -149,6 +149,7 @@ struct UnknownNode : ASTNode {
 };
 
 struct AccessNode : ASTNode {
+    int index = 0;
     AccessNode(){
         type = ACCESS;
     }
