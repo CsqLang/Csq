@@ -101,12 +101,13 @@ void allocateVar(string id_, string type, Cell c){
 }
 
 void allocateVar(string id_, string type, vector<Cell> c){
+    int cell_addr = TopCellAddress();
     addCell(c);
     Symbol sym;
     sym.var.name = id_;
     sym.var.type = type;
     sym.type = VARIABLE;
-    sym.var.value_address = TopCellAddress();
+    sym.var.value_address = cell_addr+1;
     SymTable[id_] = sym;
     
 }
