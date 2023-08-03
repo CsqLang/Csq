@@ -24,6 +24,7 @@ enum NodeType{
     FUN_CALL,
     PRINT,
     TYPE, // to print the type of an object
+    ACCESS,
     UNKNOWN_NODE,
 };
 
@@ -144,6 +145,12 @@ struct TypeNode : ASTNode {
 struct UnknownNode : ASTNode {
     UnknownNode(){
         type = UNKNOWN_NODE;
+    }
+};
+
+struct AccessNode : ASTNode {
+    AccessNode(){
+        type = ACCESS;
     }
 };
 #endif // AST_Csq4_H
