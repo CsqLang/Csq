@@ -330,6 +330,26 @@ ExprNode parse_ExprNode(TokenStream tokens){
     return node;
 }
 
+CollectionUpdateNode parse_CollectionUpdate(TokenStream tokens){
+    CollectionUpdateNode node;
+    node.source = tokens[0].token;
+    node.index = stoi(tokens[2].token);
+    //Have to do some slicing
+    TokenStream sliced;
+    for(int i=5;i<tokens.size();i++)
+        sliced.push_back(tokens[i]);
+    node.value = parse_ExprNode(sliced);
+    return node;
+}
+
+bool isAccessUpdate(TokenStream tokens){
+    if(tokens[0].type == IDENTIFIER && tokens[1].token == "[" && tokens[4].token == "="){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
 
 NodeType StatementType(TokenStream tokens){
     NodeType type;
@@ -354,6 +374,9 @@ NodeType StatementType(TokenStream tokens){
     }
     else if(isWhileStmt(tokens)){
         type = WHILE_STMT;
+    }
+    else if(isAccessUpdate(tokens)){
+        type = COLLECTION_UPDATE;
     }
     else{
         type = EXPR;
@@ -483,6 +506,11 @@ string Compile(vector<TokenStream> code)
                 scope_stack.push_back(Scope(indent_level+1, StatementType(line), 0));
                 WhileStmtNode node = parse_WhileStmt(line);
                 codeString += visit_WhileNode(node) + "\n";
+                break;
+            }
+            case COLLECTION_UPDATE:{
+                CollectionUpdateNode node = parse_CollectionUpdate(line);
+                codeString += visit_CollectionUpdateNode(node) + "\n";
                 break;
             }
    
