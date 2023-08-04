@@ -6,6 +6,10 @@
 
 
 
+#define TokenIter Token token : tokens
+#define TokenTop token[0]
+
+
 /*
 Upper layer syntax checking in which we don't have to do much instead it will roughly match the 
 syntax and returns the possible type which could be futher verified.
@@ -70,58 +74,7 @@ bool VarAssign_Check(TokenStream tokens){
     return valid;
 }
 
-//Function to parse expressions and report the errors.
-ExprNode parse_ExprNode(TokenStream tokens){
-    ExprNode node;
-
-    for(int i = 0;i<tokens.size();i++)
-    {   
-        Token token = tokens[i];
-        if(token.type == IDENTIFIER)
-        {
-            //Check is the identifier defined in table?
-            if(inTable(token.token))
-            {
-                Token val;
-                if(memory[SymTable[token.token].var.value_address].type == FLOAT){
-                    val.token = to_string(memory[SymTable[token.token].var.value_address].fval);
-                    val.type = VALUE;
-                }
-                else{
-                    val.token = memory[SymTable[token.token].var.value_address].sval;
-                    val.type = STR;
-                }
-                node.tokens.push_back(val);
-            }
-            else
-            {
-                RuntimeError("undefined name '" + token.token + "'.");
-            }
-        }
-        else if(token.type == VALUE){
-            if(tokens.size() != i+1){
-                if(tokens[i+1].token == "."){
-                    Token val;
-                    val.type = VALUE;
-                    val.token = token.token + "." + tokens[i+2].token;
-                    node.tokens.push_back(val);
-                    i = i+2;
-                }
-                else{
-                    node.tokens.push_back(token);    
-                }
-            }
-            else{
-                node.tokens.push_back(token);   
-            }
-        }
-        else{
-            //Just for now couldn't be used during actual production.
-            node.tokens.push_back(token);
-        }
-    }
-    return node;
-}
+ExprNode parse_ExprNode(TokenStream tokens);
 
 //Parsing without reporting any error because when this function is called before it
 //VarDecl_check will be called.
@@ -187,6 +140,7 @@ PrintNode parse_PrintStatement(TokenStream tokens){
         node.value.tokens.push_back(tokens[i]);
         
     }
+    node.value = parse_ExprNode(node.value.tokens);
     return node;
 }
 
@@ -247,6 +201,23 @@ WhileStmtNode parse_WhileStmt(TokenStream tokens){
     return node;
 }
 
+// AccessNode parse_AccessNode(TokenStream tokens){
+//     AccessNode node;
+//     bool index = 0;
+//     for(TokenIter){
+//         if(index == 0){
+//             if(token.token == "["){
+//                 index = 1;
+//             }   
+//         }
+//         else{
+//             node.index = stoi(token.token);
+//             index = 0;
+//         }
+//     return node;
+// }
+
+//     }
 bool isVarDecl(TokenStream tokens){
     if(tokens[0].type == IDENTIFIER && tokens[1].token == ":="){
         return 1;
@@ -299,6 +270,66 @@ bool isWhileStmt(TokenStream tokens){
     }
     return 0;
 }
+
+bool isAccessStmt(TokenStream tokens){
+    bool isAccess = false;
+    if(tokens[0].type == IDENTIFIER){
+        for(Token token : tokens){
+            if(token.token == "[" || token.token == "]"){
+                isAccess = true;
+                break;
+            }
+        }
+    }
+    return isAccess;
+}
+
+//Function to parse expressions and report the errors.
+ExprNode parse_ExprNode(TokenStream tokens){
+    ExprNode node;
+
+    for(int i = 0;i<tokens.size();i++)
+    {   
+        Token token = tokens[i];
+        if(token.type == IDENTIFIER){
+            if(tokens.size() == i+1){
+                node.tokens.push_back(token);
+            }
+            else{
+                if(tokens[i+1].token == "["){
+                    Token tok;
+                    tok.token = "id(\"" + token.token + "\"," + tokens[i+2].token + ")";
+                    tok.type = ACCESS_OPERATOR;
+                    node.tokens.push_back(tok);
+                    i+=3;
+                }
+            }
+        }
+        else if(token.type == VALUE){
+            if(tokens.size() != i+1){
+                if(tokens[i+1].token == "."){
+                    Token val;
+                    val.type = VALUE;
+                    val.token = token.token + "." + tokens[i+2].token;
+                    node.tokens.push_back(val);
+                    i = i+2;
+                }
+                else{
+                    node.tokens.push_back(token);    
+                }
+            }
+            else{
+                node.tokens.push_back(token);   
+            }
+        }
+        else{
+            //Just for now couldn't be used during actual production.
+            node.tokens.push_back(token);
+        }
+    }
+    return node;
+}
+
 
 NodeType StatementType(TokenStream tokens){
     NodeType type;

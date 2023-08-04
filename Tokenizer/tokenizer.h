@@ -576,6 +576,31 @@ vector<Token> tokenize(string source_code) {
         error_count++;
     }
     TokenizerLine++;
+    // vector<Token> tokens__;
+    // for(int i =0;i<filtered_Tokens.size();i++){
+    //     if(filtered_Tokens[i].type == VALUE){
+    //         if(filtered_Tokens[i+1].token == "."){
+    //             if(filtered_Tokens[i+2].type == VALUE){
+    //                 // Token __ctoken;
+    //                 // __ctoken.type = VALUE;
+    //                 // __ctoken.token = filtered_Tokens[i].token + "." + filtered_Tokens[i+2].token;
+    //                 // tokens__.push_back(__ctoken);
+    //             }
+    //             else{
+    //                 printf("Error: unexpected a value after .");
+    //                 // exit(0);
+    //             }
+                
+    //         }
+    //         else{
+    //             tokens__.push_back(filtered_Tokens[i]);
+    //         }
+    //     }
+    //     else{
+    //         tokens__.push_back(filtered_Tokens[i]);
+    //     }
+    // }
+
     return filtered_Tokens;
 }
 
