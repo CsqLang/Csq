@@ -13,6 +13,7 @@ string visit_ExprNode(ExprNode node){
         if(token.type == IDENTIFIER){
             result += "id(\"" + token.token + "\")";
         }
+
         else if(token.type == VALUE){
             result += "f_val(" + token.token + ")";
         }
@@ -48,6 +49,8 @@ string visit_VarAssign(VarAssignNode node){
     return "assignVar(\"" + node.identifier + "\", " + visit_ExprNode(node.value) + ");\n";;
 }
 
+
+
 string visit_PrintNode(PrintNode node){
     string code = "print(";
     code += visit_ExprNode(node.value);
@@ -76,6 +79,10 @@ string visit_WhileNode(WhileStmtNode node){
     string code = "while(_cond_(" + visit_ExprNode(node.condition) + ")){\n";
  
     return code;
+}
+
+string visit_CollectionUpdateNode(CollectionUpdateNode node){
+    return "assignVar(\"" + node.source + "\", " + to_string(node.index) + ", " + visit_ExprNode(node.value) + ");\n";
 }
 
 //Will do later since it requires some extra efforts.

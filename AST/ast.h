@@ -25,6 +25,7 @@ enum NodeType{
     PRINT,
     TYPE, // to print the type of an object
     ACCESS,
+    COLLECTION_UPDATE,
     UNKNOWN_NODE,
 };
 
@@ -150,8 +151,18 @@ struct UnknownNode : ASTNode {
 
 struct AccessNode : ASTNode {
     int index = 0;
+    string source;
     AccessNode(){
         type = ACCESS;
+    }
+};
+
+struct CollectionUpdateNode : ASTNode {
+    int index = 0;
+    string source;
+    ExprNode value;
+    CollectionUpdateNode(){
+        type = COLLECTION_UPDATE;
     }
 };
 #endif // AST_Csq4_H
