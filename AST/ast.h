@@ -158,7 +158,7 @@ struct AccessNode : ASTNode {
 };
 
 struct CollectionUpdateNode : ASTNode {
-    int index = 0;
+    ExprNode index;
     string source;
     ExprNode value;
     CollectionUpdateNode(){
