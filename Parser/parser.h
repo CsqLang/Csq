@@ -298,10 +298,19 @@ ExprNode parse_ExprNode(TokenStream tokens){
             else{
                 if(tokens[i+1].token == "["){
                     Token tok;
-                    tok.token = "id(\"" + token.token + "\"," + tokens[i+2].token + ")";
+                    tok.token = "id(\"" + token.token + "\"," ;
+                    if(tokens[i+2].type == IDENTIFIER){
+                        tok.token += "id(\"" + tokens[i+2].token + "\").fval";
+                    }else{
+                        tok.token += tokens[i+2].token + ").fval";
+                    }
+                    tok.token +=  ")";
                     tok.type = ACCESS_OPERATOR;
                     node.tokens.push_back(tok);
                     i+=3;
+                }
+                else{
+                    node.tokens.push_back(token);
                 }
             }
         }
@@ -333,7 +342,7 @@ ExprNode parse_ExprNode(TokenStream tokens){
 CollectionUpdateNode parse_CollectionUpdate(TokenStream tokens){
     CollectionUpdateNode node;
     node.source = tokens[0].token;
-    node.index = stoi(tokens[2].token);
+    node.index.tokens.push_back(tokens[2]);
     //Have to do some slicing
     TokenStream sliced;
     for(int i=5;i<tokens.size();i++)
