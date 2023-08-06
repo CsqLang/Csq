@@ -71,13 +71,6 @@ void traverseSymTable(){
 }
 
 
-/*
-Logics****************
-Input : a == 2
-Output expected : 
-id('a')....
-*/
-
 Cell id(string identifier){
     if(inTable(identifier)){
         return memory[SymTable[identifier].var.value_address];
@@ -107,7 +100,9 @@ void allocateVar(string id_, string type, vector<Cell> c){
     sym.var.name = id_;
     sym.var.type = type;
     sym.type = VARIABLE;
+    sym.var.isCollection = true;
     sym.var.value_address = cell_addr+1;
+
     SymTable[id_] = sym;
     
 }
@@ -127,6 +122,10 @@ void assignVar(string id_, Cell c){
     memory.push_back(c);
     SymTable[id_].var.value_address = TopCellAddress();
 
+}
+
+void assignVar(string id, int index, Cell c){
+    memory[SymTable[id].var.value_address + index] = c;
 }
 
 Cell id(string identifier, int index){

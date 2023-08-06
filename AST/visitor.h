@@ -42,10 +42,13 @@ Cell visit_Call(CallNode node){
 }
 
 string visit_VarDecl(VarDeclNode node){
+    // traverseTokenStream(node.value.tokens);
     return "allocateVar(\"" + node.identifier + "\", \"" + node.var_type + "\", " + visit_ExprNode(node.value) + ");\n";
+    return "";
 }
 
 string visit_VarAssign(VarAssignNode node){
+    // traverseTokenStream(node.value.tokens);
     return "assignVar(\"" + node.identifier + "\", " + visit_ExprNode(node.value) + ");\n";;
 }
 
@@ -82,7 +85,7 @@ string visit_WhileNode(WhileStmtNode node){
 }
 
 string visit_CollectionUpdateNode(CollectionUpdateNode node){
-    return "assignVar(\"" + node.source + "\", " + to_string(node.index) + ", " + visit_ExprNode(node.value) + ");\n";
+    return "assignVar(\"" + node.source + "\", " + visit_ExprNode(node.index) + ".fval, " + visit_ExprNode(node.value) + ");\n";
 }
 
 //Will do later since it requires some extra efforts.
