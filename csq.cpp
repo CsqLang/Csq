@@ -6,21 +6,19 @@
 #include "Runtime/core.h"
 #include "wrapper.h"
 #include "Runtime/code_format.h"
-
-
+#include <cstdlib>
+#include<iostream>
 
 int main(int argc, char const *argv[])
 {
-        if(argc < 4){
-            printf("Expected 3 args : <lang> <name> <current dir>\n");
+        if(argc < 2){
+            printf("Expected 1 args : <name>\n");
         }
         else{
-            string lang = argv[1];
-            string name = argv[2];
-            string currdir = argv[3];
+            string name = argv[1];
 
             //Path to the file:
-            string path_code = currdir + "/" + name + ".csq";
+            string path_code = name + ".csq";
             //Read the file
             string raw_code = readCode(path_code);
             //Convert to tokens
@@ -30,9 +28,19 @@ int main(int argc, char const *argv[])
             // auto parsed = Parser(code);
             
             string _code = Compile(code);
-            string final_code = addBuiltin(currdir + "/") + "\n" + "int main(){\n" + _code + "\nfreeMemory();\n}\n";
-            writeCode(final_code, currdir + "/" + name + ".cpp");
-            compile(currdir,name);
+
+            
+            const char* pathValue = getenv("CSQ_PATH");
+
+            if (pathValue != nullptr) {
+                // std::cout << "CSQ_PATH environment variable value: " << pathValue << std::endl;
+            } else {
+                std::cout << "CSQ_PATH environment variable not found." << std::endl;
+            }
+            
+            string final_code = addBuiltin(pathValue) + "\n" + "int main(){\n" + _code + "\nfreeMemory();\n}\n";
+            writeCode(final_code, name + ".cpp");
+            compile(name);
         }
     return 0;
 }

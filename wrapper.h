@@ -23,7 +23,14 @@ void CompileToGPP(string path, string name,string curr){
     string command = "cd " + curr + " && g++ " + path + " -o " + name;
     system(command.c_str());
 }
+void CompileToGPP(string path, string name){
+    string command = "g++ " + path + " -o " + name;
+    system(command.c_str());
+}
 void compile(string currdir, string name){
     CompileToGPP(currdir + "/" + name + ".cpp",name, currdir);
+}
+void compile(string name){
+    CompileToGPP(name + ".cpp",name);
 }
 #endif // WRAPPER_CS

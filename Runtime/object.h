@@ -10,6 +10,7 @@ struct Variable
 {
     string name;
     string type;
+    bool isCollection;
     // string value; instead of directly storing the value it should store address of the value.
     int value_address;
     Variable(){}
