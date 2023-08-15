@@ -300,11 +300,12 @@ ExprNode parse_ExprNode(TokenStream tokens){
                     Token tok;
                     tok.token = "id(\"" + token.token + "\"," ;
                     if(tokens[i+2].type == IDENTIFIER){
-                        tok.token += "id(\"" + tokens[i+2].token + "\").fval";
+                        tok.token += "id(\"" + tokens[i+2].token + "\")";
+                        tok.token +=  ")";
                     }else{
-                        tok.token += tokens[i+2].token + ").fval";
+                        tok.token += tokens[i+2].token + ")";
                     }
-                    tok.token +=  ")";
+                    
                     tok.type = ACCESS_OPERATOR;
                     node.tokens.push_back(tok);
                     i+=3;
