@@ -10,6 +10,15 @@
 #define TokenTop token[0]
 
 
+//
+Token Lparen("(", SYMBOL);
+Token Rparen(")", SYMBOL);
+Token Lbrac("[", SYMBOL);
+Token Lbrac("]", SYMBOL);
+Token Lcbrac("{", SYMBOL);
+Token Lcbrac("}", SYMBOL);
+Token Comma(",", SYMBOL);
+
 /*
 Upper layer syntax checking in which we don't have to do much instead it will roughly match the 
 syntax and returns the possible type which could be futher verified.
@@ -201,23 +210,46 @@ WhileStmtNode parse_WhileStmt(TokenStream tokens){
     return node;
 }
 
-// AccessNode parse_AccessNode(TokenStream tokens){
-//     AccessNode node;
-//     bool index = 0;
-//     for(TokenIter){
-//         if(index == 0){
-//             if(token.token == "["){
-//                 index = 1;
-//             }   
-//         }
-//         else{
-//             node.index = stoi(token.token);
-//             index = 0;
-//         }
-//     return node;
-// }
+FunDeclNode parse_FunDecl(TokenStream tokens){
+    FunDeclNode node;
+    bool param = 0;
+    tokens.pop_back();
+    tokens.pop_back();
+    tokens.push_back(Comma);
+    tokens.push_back(Rparen);
 
-//     }
+    Token arg;
+    //Process of parsing starts from here
+    for(Token token : tokens){
+        if(param){
+            if(token.token == ","){
+                node.parameters.push_back(arg.token);
+                arg.token = "";
+            }
+            else if(token.token == ")"){
+                node.parameters.push_back(arg.token);
+                arg.token = "";
+                break;
+            }
+            else{
+                arg.token += token.token;
+            }
+        }
+        else{
+            if(token.token == ")"){
+                break;
+            }
+            else if(token.token == "("){
+                param = 1;
+            }
+            else if(!param && token.type == IDENTIFIER){
+                node.identifier = token.token;
+            }
+        }
+    }
+    return node;
+}
+
 bool isVarDecl(TokenStream tokens){
     if(tokens[0].type == IDENTIFIER && tokens[1].token == ":="){
         return 1;
