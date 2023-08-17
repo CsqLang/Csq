@@ -14,9 +14,9 @@
 Token Lparen("(", SYMBOL);
 Token Rparen(")", SYMBOL);
 Token Lbrac("[", SYMBOL);
-Token Lbrac("]", SYMBOL);
+Token Rbrac("]", SYMBOL);
 Token Lcbrac("{", SYMBOL);
-Token Lcbrac("}", SYMBOL);
+Token Rcbrac("}", SYMBOL);
 Token Comma(",", SYMBOL);
 
 /*
@@ -242,7 +242,7 @@ FunDeclNode parse_FunDecl(TokenStream tokens){
             else if(token.token == "("){
                 param = 1;
             }
-            else if(!param && token.type == IDENTIFIER){
+            else if(!param && token.type == IDENTIFIER && token.token != "def"){
                 node.identifier = token.token;
             }
         }
@@ -392,6 +392,14 @@ bool isAccessUpdate(TokenStream tokens){
         return 0;
     }
 }
+bool isFunction(TokenStream tokens){
+    if(tokens[0].token == "def" ){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
 
 NodeType StatementType(TokenStream tokens){
     NodeType type;
@@ -419,6 +427,9 @@ NodeType StatementType(TokenStream tokens){
     }
     else if(isAccessUpdate(tokens)){
         type = COLLECTION_UPDATE;
+    }
+    else if(isFunction(tokens)){
+        type = FUNCTION;
     }
     else{
         type = EXPR;
