@@ -429,7 +429,7 @@ NodeType StatementType(TokenStream tokens){
         type = COLLECTION_UPDATE;
     }
     else if(isFunction(tokens)){
-        type = FUNCTION;
+        type = FUN_DECL;
     }
     else{
         type = EXPR;
