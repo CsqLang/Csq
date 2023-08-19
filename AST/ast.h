@@ -26,6 +26,7 @@ enum NodeType{
     TYPE, // to print the type of an object
     ACCESS,
     COLLECTION_UPDATE,
+    RETURN,
     UNKNOWN_NODE,
 };
 
@@ -165,4 +166,13 @@ struct CollectionUpdateNode : ASTNode {
         type = COLLECTION_UPDATE;
     }
 };
+
+struct ReturnNode : ASTNode {
+    ExprNode value;
+    ReturnNode(){
+        type = RETURN;
+    }
+};
+
+
 #endif // AST_Csq4_H
