@@ -1,20 +1,41 @@
 #!/bin/bash
 
-# Get the current directory
-current_dir=$(pwd)
-
-# Check if CSQ_PATH is already set in .bashrc
-if ! grep -q "CSQ_PATH" ~/.bashrc; then
-    # Append the current directory to PATH in .bashrc
-    echo 'export PATH="'$current_dir':$PATH"' >> ~/.bashrc
-    echo 'export CSQ_PATH="'$current_dir'"' >> ~/.bashrc
-    # Apply the changes in the current shell
-    source ~/.bashrc
-fi
+# The terminal should be refreshed for effects to take place
+# Can be witten better, but this is just a concept
 
 # Compile csq.cpp only if g++ is available
 if command -v g++ >/dev/null 2>&1; then
-    g++ csq.cpp -o csq
+  g++ csq.cpp -o csq
 else
-    echo "g++ compiler not found."
+  echo "g++ compiler not found."
+fi
+
+# Copy it to ~/.local/bin for it to be global
+
+local_bin="$HOME/.local/bin/"
+
+cp_cmd=$(cp csq "$local_bin")
+
+if [[ "$cp_cmd" -ne 0 ]]; then
+  echo "Couldn't copy the executable to $local_bin"
+fi
+
+# Copy the include directories to ~/.local/include for global
+
+c_dirs=$(ls */ -d)
+local_include="$HOME/.local/include"
+
+for _dir in "$c_dirs"; do
+  cp -r "$_dir" "$local_include/csq"
+done
+
+# Check if CSQ_PATH is already set in .bashrc
+if ! grep -q "CSQ_INCLUDE" ~/.bashrc; then
+  # Append the current directory to PATH in .bashrc
+  CSQ_BIN="$local_bin/csq"
+  CSQ_PATH="$local_include/csq"
+  echo 'export PATH="'"$CSQ_BIN"':$PATH"' >>~/.bashrc
+  echo 'export CSQ_INCLUDE="'"$CSQ_PATH"'"' >>~/.bashrc
+  # Apply the changes in the current shell
+  source ~/.bashrc
 fi
