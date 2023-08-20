@@ -214,10 +214,9 @@ FunDeclNode parse_FunDecl(TokenStream tokens){
     FunDeclNode node;
     bool param = 0;
     tokens.pop_back();
-    tokens.pop_back();
-    tokens.push_back(Comma);
+    // tokens.push_back(Comma);
     tokens.push_back(Rparen);
-
+    // traverseTokenStream(tokens);
     Token arg;
     //Process of parsing starts from here
     for(Token token : tokens){
@@ -296,6 +295,13 @@ bool isElseStmt(TokenStream tokens){
     return 0;
 }
 
+bool isReturnStmt(TokenStream tokens){
+    if(tokens[0].token == "return"){
+        return 1;
+    }
+    return 0;
+}
+
 bool isWhileStmt(TokenStream tokens){
     if(tokens[0].token == "while"){
         return 1;
@@ -342,6 +348,30 @@ ExprNode parse_ExprNode(TokenStream tokens){
                     node.tokens.push_back(tok);
                     i+=3;
                 }
+                else if(tokens[i+1].token == "("){
+                    int param_ = 0;
+                    Token tok;
+                    tok.token += tokens[i].token + "(";
+                    int j;
+                    for(j = i+2;j<tokens.size();j++){
+                        if(tokens[j].type == IDENTIFIER || tokens[j].type == VALUE || tokens[j].type == STR){
+                            tok.token += visit_ExprNode(parse_ExprNode({tokens[j]})) + ",";
+                            param_++;
+                        }
+                        else if(tokens[j].token == ")"){
+                            if(param_ > 0){
+                                tok.token.pop_back();
+                                break;
+                            }
+                        }
+                        else if(tokens[j].token == "'"){
+                            // tok.token += "'";
+                        }
+                    }
+                    tok.token.push_back(')');
+                    node.tokens.push_back(tok);
+                    i = j+1;
+                }
                 else{
                     node.tokens.push_back(token);
                 }
@@ -381,6 +411,14 @@ CollectionUpdateNode parse_CollectionUpdate(TokenStream tokens){
     for(int i=5;i<tokens.size();i++)
         sliced.push_back(tokens[i]);
     node.value = parse_ExprNode(sliced);
+    return node;
+}
+
+ReturnNode parse_ReturnNode(TokenStream tokens){
+    ReturnNode node;
+    for(int i = 1;i<tokens.size();i++) {
+        node.value.tokens.push_back(tokens[i]);
+    }
     return node;
 }
 
@@ -430,6 +468,9 @@ NodeType StatementType(TokenStream tokens){
     }
     else if(isFunction(tokens)){
         type = FUN_DECL;
+    }
+    else if(isReturnStmt(tokens)){
+        type = RETURN;
     }
     else{
         type = EXPR;
@@ -564,6 +605,17 @@ string Compile(vector<TokenStream> code)
             case COLLECTION_UPDATE:{
                 CollectionUpdateNode node = parse_CollectionUpdate(line);
                 codeString += visit_CollectionUpdateNode(node) + "\n";
+                break;
+            }
+            case FUN_DECL:{
+                FunDeclNode node = parse_FunDecl(line);
+                codeString += visit_FunDeclNode(node) + "\n";
+                scope_stack.push_back(Scope(indent_level+1, StatementType(line), 0));
+                break;
+            }
+            case RETURN:{
+                ReturnNode node = parse_ReturnNode(line);
+                codeString += visit_ReturnNode(node) + "\n";
                 break;
             }
    
