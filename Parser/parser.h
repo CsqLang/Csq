@@ -10,6 +10,15 @@
 #define TokenTop token[0]
 
 
+//
+Token Lparen("(", SYMBOL);
+Token Rparen(")", SYMBOL);
+Token Lbrac("[", SYMBOL);
+Token Rbrac("]", SYMBOL);
+Token Lcbrac("{", SYMBOL);
+Token Rcbrac("}", SYMBOL);
+Token Comma(",", SYMBOL);
+
 /*
 Upper layer syntax checking in which we don't have to do much instead it will roughly match the 
 syntax and returns the possible type which could be futher verified.
@@ -201,23 +210,45 @@ WhileStmtNode parse_WhileStmt(TokenStream tokens){
     return node;
 }
 
-// AccessNode parse_AccessNode(TokenStream tokens){
-//     AccessNode node;
-//     bool index = 0;
-//     for(TokenIter){
-//         if(index == 0){
-//             if(token.token == "["){
-//                 index = 1;
-//             }   
-//         }
-//         else{
-//             node.index = stoi(token.token);
-//             index = 0;
-//         }
-//     return node;
-// }
+FunDeclNode parse_FunDecl(TokenStream tokens){
+    FunDeclNode node;
+    bool param = 0;
+    tokens.pop_back();
+    // tokens.push_back(Comma);
+    tokens.push_back(Rparen);
+    // traverseTokenStream(tokens);
+    Token arg;
+    //Process of parsing starts from here
+    for(Token token : tokens){
+        if(param){
+            if(token.token == ","){
+                node.parameters.push_back(arg.token);
+                arg.token = "";
+            }
+            else if(token.token == ")"){
+                node.parameters.push_back(arg.token);
+                arg.token = "";
+                break;
+            }
+            else{
+                arg.token += token.token;
+            }
+        }
+        else{
+            if(token.token == ")"){
+                break;
+            }
+            else if(token.token == "("){
+                param = 1;
+            }
+            else if(!param && token.type == IDENTIFIER && token.token != "def"){
+                node.identifier = token.token;
+            }
+        }
+    }
+    return node;
+}
 
-//     }
 bool isVarDecl(TokenStream tokens){
     if(tokens[0].type == IDENTIFIER && tokens[1].token == ":="){
         return 1;
@@ -259,6 +290,13 @@ bool isElifStmt(TokenStream tokens){
 
 bool isElseStmt(TokenStream tokens){
     if(tokens[0].token == "else"){
+        return 1;
+    }
+    return 0;
+}
+
+bool isReturnStmt(TokenStream tokens){
+    if(tokens[0].token == "return"){
         return 1;
     }
     return 0;
@@ -310,6 +348,30 @@ ExprNode parse_ExprNode(TokenStream tokens){
                     node.tokens.push_back(tok);
                     i+=3;
                 }
+                else if(tokens[i+1].token == "("){
+                    int param_ = 0;
+                    Token tok;
+                    tok.token += tokens[i].token + "(";
+                    int j;
+                    for(j = i+2;j<tokens.size();j++){
+                        if(tokens[j].type == IDENTIFIER || tokens[j].type == VALUE || tokens[j].type == STR){
+                            tok.token += visit_ExprNode(parse_ExprNode({tokens[j]})) + ",";
+                            param_++;
+                        }
+                        else if(tokens[j].token == ")"){
+                            if(param_ > 0){
+                                tok.token.pop_back();
+                                break;
+                            }
+                        }
+                        else if(tokens[j].token == "'"){
+                            // tok.token += "'";
+                        }
+                    }
+                    tok.token.push_back(')');
+                    node.tokens.push_back(tok);
+                    i = j+1;
+                }
                 else{
                     node.tokens.push_back(token);
                 }
@@ -352,8 +414,24 @@ CollectionUpdateNode parse_CollectionUpdate(TokenStream tokens){
     return node;
 }
 
+ReturnNode parse_ReturnNode(TokenStream tokens){
+    ReturnNode node;
+    for(int i = 1;i<tokens.size();i++) {
+        node.value.tokens.push_back(tokens[i]);
+    }
+    return node;
+}
+
 bool isAccessUpdate(TokenStream tokens){
     if(tokens[0].type == IDENTIFIER && tokens[1].token == "[" && tokens[4].token == "="){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+bool isFunction(TokenStream tokens){
+    if(tokens[0].token == "def" ){
         return 1;
     }
     else{
@@ -387,6 +465,12 @@ NodeType StatementType(TokenStream tokens){
     }
     else if(isAccessUpdate(tokens)){
         type = COLLECTION_UPDATE;
+    }
+    else if(isFunction(tokens)){
+        type = FUN_DECL;
+    }
+    else if(isReturnStmt(tokens)){
+        type = RETURN;
     }
     else{
         type = EXPR;
@@ -521,6 +605,17 @@ string Compile(vector<TokenStream> code)
             case COLLECTION_UPDATE:{
                 CollectionUpdateNode node = parse_CollectionUpdate(line);
                 codeString += visit_CollectionUpdateNode(node) + "\n";
+                break;
+            }
+            case FUN_DECL:{
+                FunDeclNode node = parse_FunDecl(line);
+                codeString += visit_FunDeclNode(node) + "\n";
+                scope_stack.push_back(Scope(indent_level+1, StatementType(line), 0));
+                break;
+            }
+            case RETURN:{
+                ReturnNode node = parse_ReturnNode(line);
+                codeString += visit_ReturnNode(node) + "\n";
                 break;
             }
    

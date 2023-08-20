@@ -88,14 +88,20 @@ string visit_CollectionUpdateNode(CollectionUpdateNode node){
     return "assignVar(\"" + node.source + "\", " + visit_ExprNode(node.index) + ".fval, " + visit_ExprNode(node.value) + ");\n";
 }
 
-//Will do later since it requires some extra efforts.
-// string visit_ForNode(ForStmtNode node){
-//     string code = "for(" + visit_ExprNode(node.condition) + "){\n";
-//     for(ASTNode* s : node.body.statements){
-//         code += visit(s) + "\n";
-//     }
-//     return code;
-// }
+string visit_FunDeclNode(FunDeclNode node){
+    string inst = "auto " + node.identifier + "=[&](";
+    for(string param : node.parameters)
+        inst += "Cell " + param + ",";
+    inst.pop_back();
+    inst += "){\n";
+    for(string param : node.parameters)
+        inst += "allocateVar(\"" + param + "\", \"" + "any" + "\", " + param  + ");\n";
+    return inst;
+}
+
+string visit_ReturnNode(ReturnNode node){
+    return "return " + visit_ExprNode(node.value) + ";\n";
+}
 
 string visit(ASTNode* node){
     switch(node->type){

@@ -66,6 +66,11 @@ typedef enum{
 struct Token{
     string token;
     TokenType type;
+    Token(){}
+    Token(string tok, TokenType type_){
+        token = tok;
+        type = type_;
+    }
 };  
 
 //This function will be returning an object to Token struct.
