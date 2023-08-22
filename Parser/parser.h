@@ -214,6 +214,7 @@ FunDeclNode parse_FunDecl(TokenStream tokens){
     FunDeclNode node;
     bool param = 0;
     tokens.pop_back();
+    tokens.pop_back();
     // tokens.push_back(Comma);
     tokens.push_back(Rparen);
     // traverseTokenStream(tokens);
@@ -557,7 +558,7 @@ string Compile(vector<TokenStream> code)
                     codeString += visit_VarDecl(node);
                 }
                 else{
-
+                    RuntimeError("invalid syntax for variable decl.");
                 }
                 break;
             }
@@ -567,7 +568,7 @@ string Compile(vector<TokenStream> code)
                     codeString += visit_VarAssign(node);
                 }
                 else{
-
+                    RuntimeError("invalid syntax for variable assign .");
                 }
                 break;
             }
@@ -618,7 +619,11 @@ string Compile(vector<TokenStream> code)
                 codeString += visit_ReturnNode(node) + "\n";
                 break;
             }
-   
+            default:{
+                ExprNode node = parse_ExprNode(line);
+                codeString += visit_ExprNode(node) + ";\n";
+                break;
+            }
         }
         line_no++;
         line_++;
