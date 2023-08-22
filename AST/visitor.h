@@ -91,11 +91,17 @@ string visit_CollectionUpdateNode(CollectionUpdateNode node){
 string visit_FunDeclNode(FunDeclNode node){
     string inst = "auto " + node.identifier + "=[&](";
     for(string param : node.parameters)
-        inst += "Cell " + param + ",";
-    inst.pop_back();
+        if(param != ""){
+            inst += "Cell " + param + ",";
+        }
+    if(inst[inst.size()-1] != '('){
+        inst.pop_back();
+    }
     inst += "){\n";
     for(string param : node.parameters)
-        inst += "allocateVar(\"" + param + "\", \"" + "any" + "\", " + param  + ");\n";
+        if(param != ""){
+            inst += "allocateVar(\"" + param + "\", \"" + "any" + "\", " + param  + ");\n";
+        }
     return inst;
 }
 
