@@ -15,6 +15,7 @@ int line_ = 1;
 #include "memory.h"
 #include "function.h"
 #include "eval.h"
+#include <unordered_map>
 /*
 Possible types of symbol for the symbol table.
 */
@@ -36,7 +37,8 @@ struct Symbol{
 Creating map for variable table storing the key value pair of name and variable struct.
 We could even utilize this to do type checking easily.
 */
-map<string, Symbol> SymTable;
+unordered_map<string, Symbol> SymTable;
+
 vector<string> var_names;
 
 int inTable(string name){
@@ -72,36 +74,25 @@ void traverseSymTable(){
 
 
 Cell id(string identifier){
-    if(inTable(identifier)){
-        return memory[SymTable[identifier].var.value_address];
-    }
-    else{
-        printf("Error: undefined identifier '%s'.\n", identifier.c_str());
-        exit(0);
-        return Cell();
-    }
+    return memory[SymTable[identifier].var.value_address];
 }
 
 void allocateVar(string id_, string type, Cell c){
     memory.push_back(c);
     Symbol sym;
     sym.var.name = id_;
-    sym.var.type = type;
     sym.type = VARIABLE;
     sym.var.value_address = TopCellAddress();
     SymTable[id_] = sym;
-    
 }
 
 void allocateVar(string id_){
     memory.push_back(Cell(f_val(0)));
     Symbol sym;
     sym.var.name = id_;
-    sym.var.type = "any";
     sym.type = VARIABLE;
     sym.var.value_address = TopCellAddress();
     SymTable[id_] = sym;
-    
 }
 
 
@@ -110,7 +101,6 @@ void allocateVar(string id_, string type, vector<Cell> c){
     addCell(c);
     Symbol sym;
     sym.var.name = id_;
-    sym.var.type = type;
     sym.type = VARIABLE;
     sym.var.isCollection = true;
     sym.var.value_address = cell_addr+1;
@@ -129,11 +119,9 @@ vector<Cell> removeItemAt(vector<Cell>& vec, int itemNum) {
     return vec;
 }
 
-void assignVar(string id_, Cell c){
-    memory = removeItemAt(memory,SymTable[id_].var.value_address);
-    memory.push_back(c);
-    SymTable[id_].var.value_address = TopCellAddress();
-
+void assignVar(string id_, Cell c) {
+    int oldAddress = SymTable[id_].var.value_address;
+    memory[oldAddress] = c;
 }
 
 void assignVar(string id, int index, Cell c){
