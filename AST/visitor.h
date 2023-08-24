@@ -109,6 +109,10 @@ string visit_ReturnNode(ReturnNode node){
     return "return " + visit_ExprNode(node.value) + ";\n";
 }
 
+string curr_path;
+
+
+
 string visit(ASTNode* node){
     switch(node->type){
         case VAR_DECL:{
