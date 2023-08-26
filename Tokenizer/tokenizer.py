@@ -139,3 +139,34 @@ def isKeyword(val:str) -> bool:
     else:
         return False
     
+def check(val:str,line:int) -> Token:
+    """check token which type of this"""
+    token = Token()
+    token.token = val
+    if isKeyword(val):
+        token.type = TokenType.KEYWORD
+    
+    elif isOperator(val):
+        if isArithmeticOperator(val):
+            token.type = TokenType.AROPERATOR
+        elif isLogicalOperator(val):
+            token.type = TokenType.LOPERATOR
+        elif isAssignmentOperator(val):
+            token.type = TokenType.ASOPERATOR
+        elif isComparisonOperator(val):
+            token.type = TokenType.COPERATOR
+    
+    elif isValue(val):
+        token.type = TokenType.VALUE
+    
+    elif isIdentifier(val):
+        token.type = TokenType.IDENTIFIER
+    
+    elif isSymbol(val):
+        token.type = TokenType.SYMBOL
+    
+    else:
+        token.type = TokenType.UNKNOWN
+
+
+    return token
