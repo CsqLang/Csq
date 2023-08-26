@@ -186,42 +186,34 @@ bool isKeyword(string val){
 //This is the checking section which will take a token and then check it's type.
 Token check(string val,int line){
     Token token;
+    token.token = val;
     if(isKeyword(val)){
-        token.token = val;
         token.type = KEYWORD;
     }
     else if(isOperator(val)){
         if(isArithmeticOperator(val)){
-            token.token = val;
             token.type = AROPERATOR;
         }
         else if(isLogicalOperator(val)){
-            token.token = val;
             token.type = LOPERATOR;
         }
         else if(isAssignmentOperator(val)){
-            token.token = val;
             token.type = ASOPERATOR;
         }
         else if(isComparisonOperator(val)){
-            token.token = val;
             token.type = COPERATOR;
         }
     }
     else if(isValue(val)){
-        token.token = val;
         token.type = VALUE;
     }
     else if(isIdentifier(val)){
-        token.token = val;
         token.type = IDENTIFIER;
     }
     else if(isSymbol(val)){
-        token.token = val;
         token.type = SYMBOL;
     }
     else{
-        token.token = val;
         token.type = UNKNOWN;
     }
     return token;
