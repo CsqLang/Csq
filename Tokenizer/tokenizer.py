@@ -170,3 +170,71 @@ def check(val:str,line:int) -> Token:
 
 
     return token
+
+def symbolType(token:Token) -> STOKEN:
+    """Brief token check and about the symbole"""
+    match token.type:
+        case TokenType.ASOPERATOR:
+            if token.token == "=":
+                return STOKEN.EQUAL
+        
+        case TokenType.ASOPERATOR:
+            if token.token == "+":
+                return STOKEN.PLUS
+            elif token.token == "-":
+                return STOKEN.MINUS
+            elif token.token == "*":
+                return STOKEN.STAR
+            elif token.token == "/":
+                return STOKEN.FSLASH
+            elif token.token =="%":
+                return STOKEN.MOD
+            elif token.token == "^":
+                return STOKEN.HAT
+            
+        case TokenType.SYMBOL:
+            if token.token == "!":
+                return STOKEN.NOT
+            elif token.token == "|":
+                return STOKEN.VBAR
+            elif token.token == "&":
+                return STOKEN.AMPER 
+            elif token.token == "{":
+                return STOKEN.LBRACE
+            elif token.token == "}":
+                return STOKEN.RBRACE
+            elif token.token == "(":
+                return STOKEN.LPAREN
+            elif token.token == ")":
+                return STOKEN.RPAREN
+            elif token.token == "[":
+                return STOKEN.LBRACK
+            elif token.token == "]":
+                return STOKEN.RBRACK
+            elif token.token == ".":
+                return STOKEN.DOT
+            elif token.token == ",":
+                return STOKEN.COMMA
+            elif token.token == ":":
+                return STOKEN.COLAN
+            elif token.token == ";":
+                return STOKEN.SEMI
+            elif token.token == "~":
+                return STOKEN.TILDE
+        
+        case TokenType.LOPERATOR:
+            if token.token == "or":
+                return STOKEN.OR
+            elif token.token == "and":
+                return STOKEN.AND
+            elif token.token == "not":
+                return STOKEN.NOT
+
+        case TokenType.COPERATOR:
+            if token.token == ">":
+                return STOKEN.GREATER
+            elif token.token == "<":
+                return STOKEN.LESSER
+            
+        case _:
+            return STOKEN.NOTSYMBOL
