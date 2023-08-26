@@ -38,9 +38,17 @@ int main(int argc, char const *argv[])
         else if (argc == 2)
         {
             string name = argv[1];
+            string extension = ".csq";
 
+            // Calculate the position of the extension in the name
+            size_t pos = name.rfind(extension);
+            
+            // If the extension is found at the end of the name, remove it
+            if (pos != string::npos && pos == name.length() - extension.length()) {
+                name.erase(pos, extension.length());
+            }
             //Path to the file:
-            string path_code = name + ".csq";
+            string path_code = name + extension;
             //Read the file
             string raw_code = readCode(path_code);
             //Convert to tokens
