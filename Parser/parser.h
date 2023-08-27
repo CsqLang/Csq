@@ -214,6 +214,7 @@ FunDeclNode parse_FunDecl(TokenStream tokens){
     FunDeclNode node;
     bool param = 0;
     tokens.pop_back();
+    tokens.pop_back();
     // tokens.push_back(Comma);
     tokens.push_back(Rparen);
     // traverseTokenStream(tokens);
@@ -422,6 +423,12 @@ ReturnNode parse_ReturnNode(TokenStream tokens){
     return node;
 }
 
+ImportNode parse_ImportNode(TokenStream tokens){
+    ImportNode node;
+    node.name = tokens[1].token;
+    return node;
+}
+
 bool isAccessUpdate(TokenStream tokens){
     if(tokens[0].type == IDENTIFIER && tokens[1].token == "[" && tokens[4].token == "="){
         return 1;
@@ -432,6 +439,15 @@ bool isAccessUpdate(TokenStream tokens){
 }
 bool isFunction(TokenStream tokens){
     if(tokens[0].token == "def" ){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+
+bool isImportStmt(TokenStream tokens){
+    if(tokens[0].token == "import" ){
         return 1;
     }
     else{
@@ -472,6 +488,9 @@ NodeType StatementType(TokenStream tokens){
     else if(isReturnStmt(tokens)){
         type = RETURN;
     }
+    else if(isImportStmt(tokens)){
+        type = IMPORT;
+    }
     else{
         type = EXPR;
     }
@@ -511,6 +530,9 @@ Scope last_scope(vector<Scope> scope){
     return scope[scope.size()-1];
 }
 
+
+//A forward decl for visitor of import node //only for import node.
+string visit_ImportNode(ImportNode node);
 
 string Compile(vector<TokenStream> code)
 {
@@ -557,7 +579,7 @@ string Compile(vector<TokenStream> code)
                     codeString += visit_VarDecl(node);
                 }
                 else{
-
+                    RuntimeError("invalid syntax for variable decl.");
                 }
                 break;
             }
@@ -567,7 +589,7 @@ string Compile(vector<TokenStream> code)
                     codeString += visit_VarAssign(node);
                 }
                 else{
-
+                    RuntimeError("invalid syntax for variable assign .");
                 }
                 break;
             }
@@ -618,12 +640,30 @@ string Compile(vector<TokenStream> code)
                 codeString += visit_ReturnNode(node) + "\n";
                 break;
             }
-   
+            case IMPORT:{
+                ImportNode node = parse_ImportNode(line);
+                codeString += visit_ImportNode(node) + "\n";
+                break;
+            }
+            default:{
+                ExprNode node = parse_ExprNode(line);
+                codeString += visit_ExprNode(node) + ";\n";
+                break;
+            }
         }
         line_no++;
         line_++;
     }
     return codeString;
+}
+
+#include "../Runtime/code_format.h"
+
+string visit_ImportNode(ImportNode node){
+    string raw_code = readCode(curr_path+node.name+".csq");
+    vector<TokenStream> code = toTokens(raw_code);
+    string _code = Compile(code);
+    return _code;
 }
 
 #endif // PARSER_H_CSQ4
