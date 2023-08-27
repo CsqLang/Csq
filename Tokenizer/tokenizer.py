@@ -238,3 +238,36 @@ def symbolType(token:Token) -> STOKEN:
             
         case _:
             return STOKEN.NOTSYMBOL
+def make_token(token:str,token_type:int) -> Token:
+    t = Token()
+    t.token = token
+    t.type = token_type
+    return t
+
+def tokenize(source_code:str) -> list:
+    """Split in code into tokens"""
+    tokens = list()
+    current_string = str_input = code_= str()
+
+    current_line = 1
+    IndentCount = 0
+
+    indent_ended = True
+    indentation_present = False
+    char_start = False
+    string_presence = False
+    comment = False
+
+    if source_code[0] == "#":
+        t = make_token("ignore",TokenType.KEYWORD)
+        tokens.append(t)
+    else:
+        if source_code[0] == " ":
+            indentation_present = True
+            temp_source = str()
+            for i in range(len(source_code)):
+                if source_code[i] == " " and char_start == False:
+                    t = make_token(" ",TokenType.INDENT)
+                    tokens.append(t)
+
+
