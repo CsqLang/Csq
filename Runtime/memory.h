@@ -51,10 +51,16 @@ struct Cell
     vector<Cell> array;
 
     Cell operator+(Cell c){
-        if(c.type == STRING){
+        if(c.type == STRING && type == STRING){
             Cell c1;
             c1.type = STRING;
             c1.sval = sval + c.sval;
+            return c1;
+        }
+        else if(type == STRING && c.type == FLOAT){
+            Cell c1;
+            c1.type = STRING;
+            c1.sval = sval + to_string(c.fval);
             return c1;
         }
         else{
@@ -192,37 +198,28 @@ vector<Cell> memory;
 //Function to get the number of cells in the memory.
 int memory_size(){return memory.size();}
 
-// This will add a memory cell to the main memory and return its address.
-void addCell(int val)
-{
+void addCell(int val) {
     Cell cell;
     cell.ival = val;
     cell.type = INT;
     cell.u_count = 0;
-    memory.push_back(cell);
+    memory.emplace_back(cell);
 }
 
-void addCell(double val)
-{
+void addCell(double val) {
     Cell cell;
     cell.fval = val;
     cell.type = FLOAT;
     cell.u_count = 0;
-    memory.push_back(cell);
+    memory.emplace_back(cell);
 }
 
-void addCell(string val)
-{
-    Cell cell;
-    cell.sval = val;
-    cell.type = STRING;
-    cell.u_count = 0;
-    memory.push_back(cell);
+void addCell(const string& val) {
+    memory.emplace_back(Cell{STRING, 0, 0, 0.0, val});
 }
-void addCell(vector<Cell> array){
-    for(Cell c : array){
-        memory.push_back(c);
-    }
+
+void addCell(const vector<Cell>& array) {
+    memory.insert(memory.end(), array.begin(), array.end());
 }
 //This function will dump all data in the memory.
 void dump(){
@@ -259,18 +256,17 @@ Cell* getCellPtr(int address){
     return &memory[address];
 }
 
-// Modify the memory cell
-void modifyCell(Cell* cell, string value){
+void modifyCell(Cell* cell, const string& value) {
     cell->sval = value;
     cell->type = Type::STRING;
 }
 
-void modifyCell(Cell* cell, int value){
-        cell->ival = value;
-        cell->type = INT;
+void modifyCell(Cell* cell, int value) {
+    cell->ival = value;
+    cell->type = INT;
 }
 
-void modifyCell(Cell* cell, float value){
+void modifyCell(Cell* cell, float value) {
     cell->fval = value;
     cell->type = FLOAT;
 }
