@@ -6,77 +6,72 @@
 #include "Runtime/memory.h"
 #include "Tokenizer/tokenizer.h"
 #include "wrapper.h"
-#include "Runtime/code_format.h"
 
 #include <cstdlib>
-#include<iostream>
+#include <iostream>
 
+/* Instead of resolving and in turn making complicated program, let cpp handle
+ * it*/
+#include "include/files.hpp"
 
-int main(int argc, char const *argv[])
-{
-        if(argc == 4){
-            string lang = argv[1];
-            string name = argv[2];
-            string currdir = argv[3];
+int main(int argc, char const *argv[]) {
+  /* Check if the program is invoked without any argument*/
+  if (argc < 2) {
+    fprintf(stderr, "%s: fatal error: no input files\n",
+            program_invocation_name);
+    exit(EXIT_FAILURE);
+  }
 
-            //Path to the file:
-            string path_code = currdir + "/" + name + ".csq";
-            curr_path = currdir + "/";
-            //Read the file
-            string raw_code = readCode(path_code);
-            //Convert to tokens
-            vector<TokenStream> code = toTokens(raw_code); //Error starts
-            // traverseTokenStreams(code);
-            //Now parse:
-            // auto parsed = Parser(code);
+  int i = 1;
 
-            string _code = Compile(code);
-            string final_code = addBuiltin(currdir + "/") + "\n" + "int main(){\n" + _code + "\nfreeMemory();\n}\n";
-            writeCode(final_code, currdir + "/" + name + ".cpp");
-            compile(currdir,name);
+  /* If the program is invoked with arguments do something*/
+  /* Since the program doesn't accept arguments yet, we can use the args we get
+   * as filename(s)*/
+  /* If the language is needed, then it can be added*/
+  /* This one just compiles all of the files that it finds, they should contain
+   * .csq extension. It can work though*/
+  while (i < argc) {
+    std::string file_name = argv[i];
+    /* Check if file exists before doing anything to the file */
 
-        }
-        else if (argc == 2)
-        {
-            string name = argv[1];
-            string extension = ".csq";
+    if (!file_exists(file_name)) {
+      std::cerr << program_invocation_name << ": error: " << file_name
+                << " No such file or directory\n";
+      continue;
+    }
 
-            // Calculate the position of the extension in the name
-            size_t pos = name.rfind(extension);
+    std::string abs_filepath = abs_path(file_name);
+    std::string name = remove_ext(file_name);
 
-            // If the extension is found at the end of the name, remove it
-            if (pos != string::npos && pos == name.length() - extension.length()) {
-                name.erase(pos, extension.length());
-            }
-            //Path to the file:
-            string path_code = name + extension;
-            //Read the file
-            string raw_code = readCode(path_code);
-            //Convert to tokens
-            vector<TokenStream> code = toTokens(raw_code); //Error starts
-            // auto parsed = Parser(code);
+    /* Read the code */
 
-            string _code = Compile(code);
+    std::string raw_code = readCode(abs_filepath);
 
+    /* Convert to tokens */
+    vector<TokenStream> code = toTokens(raw_code); // Error starts
+    // auto parsed = Parser(code);
 
-            const char* pathValue = getenv("CSQ_PATH");
+    std::string _code = Compile(code);
 
-            if (pathValue != nullptr) {
-                // std::cout << "CSQ_PATH environment variable value: " << pathValue << std::endl;
-            } else {
-                std::cout << "CSQ_PATH environment variable not found." << std::endl;
-            }
+    /* Use the env variable CSQ_INCLUDE for the include files */
+    char *pathValue = getenv("CSQ_INCLUDE");
 
-            string final_code = addBuiltin(pathValue) + "\n" + "int main(){\n" + _code + "\nfreeMemory();\n}\n";
-            writeCode(final_code, name + ".cpp");
-            compile(name);
-        }
+    /* Check if the variable was set, if it was not set, use the pwd */
+    if (pathValue == nullptr)
+      pathValue = getenv("PWD");
 
-        else{
-            printf("[Compile Code Instructions] \n\n");
-            printf(" Expected 3 args : <lang> <name> <current dir>\n [Example : ./csq cpp hello 'current-directory'] \n\n OR \n\n");
-            printf(" Expected 1 args : <name>\n [Example : csq hello ]\n");
+    /* If both didn't work, stop and exit the program */
+    if (pathValue == nullptr) {
+      std::cerr << program_invocation_name << " something went wrong\n";
+      exit(EXIT_FAILURE);
+    }
 
-        }
-    return 0;
+    string final_code = addBuiltin(pathValue) + "\n" + "int main(){\n" + _code +
+                        "\nfreeMemory();\n}\n";
+    writeCode(final_code, name + ".cpp");
+    compile(name);
+    i++;
+  }
+
+  return 0;
 }

@@ -8,5 +8,4 @@ indent_size = 4
 indent_style = space
 
 [*.{md, markdown}]
-trim_trailing_whitespace = false
 indent_style = tab
