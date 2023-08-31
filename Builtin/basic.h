@@ -34,4 +34,19 @@ Cell len(Cell arg){
     return c;
 }
 
+Cell type(Cell arg){
+    Cell c;
+    c.type = STRING;
+    if(arg.type == STRING){
+        c.sval = "string";
+    }
+    else if(arg.type == COMPOUND){
+        c.sval = "compound";
+    }
+    else if(arg.type == FLOAT){
+        c.sval = "float";
+    }
+    return c;
+}
+
 #endif // basic_H
