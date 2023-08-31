@@ -5,10 +5,17 @@
 
 void print(Cell arg){
     if(arg.type == STRING){
-        printf("%s\n",arg.sval.c_str());
+        printf("%s",arg.sval.c_str());
+    }
+    else if(arg.type == COMPOUND){
+        for(Cell c : arg.array){
+            print(c);
+            printf(" ");
+        }
+        printf("\n");
     }
     else{
-        printf("%lf\n",arg.fval);
+        printf("%lf",arg.fval);
     }
 }
 
