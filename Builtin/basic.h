@@ -2,6 +2,7 @@
 #define basic_H
 #include "../Runtime/memory.h"
 #include "../Runtime/core.h"
+#include <iostream>
 
 void print(Cell arg){
     if(arg.type == STRING){
@@ -53,6 +54,14 @@ Cell type(Cell arg){
     else if(arg.type == FLOAT){
         c.sval = "float";
     }
+    return c;
+}
+
+Cell input(Cell prompt){
+    Cell c;
+    c.type = STRING;
+    print(prompt);
+    cin >> c.sval;
     return c;
 }
 
