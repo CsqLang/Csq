@@ -37,6 +37,7 @@ enum Type{
     INT,
     STRING,
     FLOAT,
+    COMPOUND,
 };
 
 
@@ -190,6 +191,9 @@ struct Cell
             return c1;
         }
     }
+    Cell operator[](Cell index){
+        return array[int(index.fval)];
+    }
 };
 
 
@@ -219,7 +223,13 @@ void addCell(const string& val) {
 }
 
 void addCell(const vector<Cell>& array) {
-    memory.insert(memory.end(), array.begin(), array.end());
+    // memory.insert(memory.end(), array.begin(), array.end());
+    Cell c;
+    c.type = COMPOUND;
+    for(Cell e : array){
+        c.array.push_back(e);
+    }
+    memory.push_back(c);
 }
 //This function will dump all data in the memory.
 void dump(){
