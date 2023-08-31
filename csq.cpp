@@ -62,7 +62,7 @@ int main(int argc, char const *argv[]) {
 
     /* If both didn't work, stop and exit the program */
     if (pathValue == nullptr) {
-      std::cerr << program_invocation_name << " something went wrong\n";
+      std::cerr << program_invocation_name << " :error :something went wrong\n";
       exit(EXIT_FAILURE);
     }
 
