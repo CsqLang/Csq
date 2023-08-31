@@ -22,5 +22,16 @@ bool _cond_(Cell arg){
     }
 }
 
+Cell len(Cell arg){
+    Cell c;
+    c.type = FLOAT;
+    if(arg.type == STRING){
+        c.fval = arg.sval.size();    
+    }
+    else if(arg.type == COMPOUND){
+        c.fval = arg.array.size();    
+    }
+    return c;
+}
 
 #endif // basic_H
