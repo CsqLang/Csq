@@ -129,12 +129,7 @@ void assignVar(string id, int index, Cell c){
 }
 
 Cell id(string identifier, int index){
-    if(index == 0){
-        return memory[SymTable[identifier].var.value_address];
-    }
-    else{
-        return memory[SymTable[identifier].var.value_address + index];
-    }
+    return memory[SymTable[identifier].var.value_address].array[index];
 }
 
 

@@ -186,42 +186,34 @@ bool isKeyword(string val){
 //This is the checking section which will take a token and then check it's type.
 Token check(string val,int line){
     Token token;
+    token.token = val;
     if(isKeyword(val)){
-        token.token = val;
         token.type = KEYWORD;
     }
     else if(isOperator(val)){
         if(isArithmeticOperator(val)){
-            token.token = val;
             token.type = AROPERATOR;
         }
         else if(isLogicalOperator(val)){
-            token.token = val;
             token.type = LOPERATOR;
         }
         else if(isAssignmentOperator(val)){
-            token.token = val;
             token.type = ASOPERATOR;
         }
         else if(isComparisonOperator(val)){
-            token.token = val;
             token.type = COPERATOR;
         }
     }
     else if(isValue(val)){
-        token.token = val;
         token.type = VALUE;
     }
     else if(isIdentifier(val)){
-        token.token = val;
         token.type = IDENTIFIER;
     }
     else if(isSymbol(val)){
-        token.token = val;
         token.type = SYMBOL;
     }
     else{
-        token.token = val;
         token.type = UNKNOWN;
     }
     return token;
@@ -320,7 +312,12 @@ int TokenCount(vector<Token> tokens, Token token)
     return count;
 }
 
-
+Token make_token(string token, TokenType token_type){
+    Token t;
+    t.token = token;
+    t.type = token_type;
+    return t;
+}
 
 vector<Token> tokenize(string source_code) {
     vector<Token> tokens;
@@ -337,9 +334,7 @@ vector<Token> tokenize(string source_code) {
     bool string_presence = false;
     bool comment = false;
     if(source_code[0] == '#'){
-        Token t;
-        t.token = "ignore";
-        t.type = KEYWORD;
+        Token t = make_token("ignore",KEYWORD);
         tokens = {t};
     }
     else{
@@ -350,11 +345,9 @@ vector<Token> tokenize(string source_code) {
             string temp_source;
             for(int i = 0;i<source_code.length();i++){
                 if(source_code[i] == ' ' && char_start == false){
-                    Token indent;
-                    indent.token = ' ';
+                    Token t = make_token(" ",INDENT);
+                    tokens.push_back(t);
                     IndentCount++;
-                    indent.type = INDENT;
-                    tokens.push_back(indent);
                     indent_ended = false; 
                 }
                 else if(source_code[i] != ' ' && char_start == false && indent_ended == false){
@@ -372,10 +365,8 @@ vector<Token> tokenize(string source_code) {
             if ((c == ' ' || c == '\n' || c == '\t' || isSymbolLaterals(string(1, c))) && string_presence == false) { // if whitespace or symbol character, handle separately
                 if (c == '\n') {
                     current_line++;
-                    Token newline;
-                    newline.token = "\n";
-                    newline.type = NEWLINE;
-                    tokens.push_back(newline);
+                    Token t = make_token("\n",NEWLINE);
+                    tokens.push_back(t);
                 }
                 if (current_string.length() > 0) { // if non-empty string, check if it matches any operator, keyword, or value
                     Token token = check(current_string, current_line);
@@ -390,11 +381,8 @@ vector<Token> tokenize(string source_code) {
                 string_presence = true;
             }
             else if((c == '"' || c == '\'') && string_presence == true){
-                Token tok;
-                tok.token = "'"+str_input+"'";
-                // tok.token = ""+str_input+"";
-                tok.type = STR;
-                tokens.push_back(tok);
+                Token t = make_token("'"+str_input+"'",STR);
+                tokens.push_back(t);
                 str_input = "";
                 string_presence = false;
             }
@@ -423,10 +411,8 @@ vector<Token> tokenize(string source_code) {
             case NOT:{
                 switch(symbolType(tokens[i+1])){
                     case EQUAL:{
-                        Token token;
-                        token.token = "!=";
-                        token.type = COPERATOR;
-                        filtered_Tokens.push_back(token);
+                        Token t = make_token("!=",COPERATOR);
+                        filtered_Tokens.push_back(t);
                         i = i + 2;
                     }
                 }
@@ -435,10 +421,8 @@ vector<Token> tokenize(string source_code) {
             case EQUAL:{
                 switch(symbolType(tokens[i+1])){
                     case EQUAL:{
-                        Token token;
-                        token.token = "==";
-                        token.type = COPERATOR;
-                        filtered_Tokens.push_back(token);
+                        Token t = make_token("==",COPERATOR);
+                        filtered_Tokens.push_back(t);
                         i = i + 2;
                     }
                 }
@@ -446,10 +430,8 @@ vector<Token> tokenize(string source_code) {
             case PLUS:{
                 switch(symbolType(tokens[i+1])){
                     case EQUAL:{
-                        Token token;
-                        token.token = "+=";
-                        token.type = ASOPERATOR;
-                        filtered_Tokens.push_back(token);
+                        Token t = make_token("+=",ASOPERATOR);
+                        filtered_Tokens.push_back(t);
                         i = i + 2;
                     }
                 }
@@ -457,17 +439,13 @@ vector<Token> tokenize(string source_code) {
             case MINUS:{
                 switch(symbolType(tokens[i+1])){
                     case EQUAL:{
-                        Token token;
-                        token.token = "-=";
-                        token.type = ASOPERATOR;
-                        filtered_Tokens.push_back(token);
+                        Token t = make_token("-=",ASOPERATOR);
+                        filtered_Tokens.push_back(t);
                         i = i + 2;
                     }
                     case GREATER:{
-                        Token token;
-                        token.token = "->";
-                        token.type = ASOPERATOR;
-                        filtered_Tokens.push_back(token);
+                        Token t = make_token("->",ASOPERATOR);
+                        filtered_Tokens.push_back(t);
                         i = i + 2;
                     }
                 }
@@ -475,10 +453,8 @@ vector<Token> tokenize(string source_code) {
             case STAR:{
                 switch(symbolType(tokens[i+1])){
                     case EQUAL:{
-                        Token token;
-                        token.token = "*=";
-                        token.type = ASOPERATOR;
-                        filtered_Tokens.push_back(token);
+                        Token t = make_token("*=",ASOPERATOR);
+                        filtered_Tokens.push_back(t);
                         i = i + 2;
                     }
                 }
@@ -486,10 +462,8 @@ vector<Token> tokenize(string source_code) {
             case FSLASH:{
                 switch(symbolType(tokens[i+1])){
                     case EQUAL:{
-                        Token token;
-                        token.token = "/=";
-                        token.type = ASOPERATOR;
-                        filtered_Tokens.push_back(token);
+                        Token t = make_token("/=",ASOPERATOR);
+                        filtered_Tokens.push_back(t);
                         i = i + 2;
                     }
                 }
@@ -498,10 +472,8 @@ vector<Token> tokenize(string source_code) {
             case LESSER:{
                 switch(symbolType(tokens[i+1])){
                     case EQUAL:{
-                        Token token;
-                        token.token = "<=";
-                        token.type = COPERATOR;
-                        filtered_Tokens.push_back(token);
+                        Token t = make_token("<=",COPERATOR);
+                        filtered_Tokens.push_back(t);
                         i = i + 2;
                     }
                 }
@@ -509,10 +481,8 @@ vector<Token> tokenize(string source_code) {
             case AMPER:{
                 switch(symbolType(tokens[i+1])){
                     case AMPER:{
-                        Token token;
-                        token.token = "&&";
-                        token.type = COPERATOR;
-                        filtered_Tokens.push_back(token);
+                        Token t = make_token("&&",COPERATOR);
+                        filtered_Tokens.push_back(t);
                         i = i + 2;
                     }
                 }
@@ -520,10 +490,8 @@ vector<Token> tokenize(string source_code) {
             case VBAR:{
                 switch(symbolType(tokens[i+1])){
                     case VBAR:{
-                        Token token;
-                        token.token = "||";
-                        token.type = COPERATOR;
-                        filtered_Tokens.push_back(token);
+                        Token t = make_token("||",COPERATOR);
+                        filtered_Tokens.push_back(t);
                         i = i + 2;
                     }
                 }
@@ -532,20 +500,16 @@ vector<Token> tokenize(string source_code) {
                 if(i != tokens.size()-1){
                     switch(symbolType(tokens[i+1])){
                         case EQUAL:{
-                            Token token;
-                            token.token = ":=";
-                            token.type = ASOPERATOR;
-                            filtered_Tokens.push_back(token);
+                            Token t = make_token(":=",ASOPERATOR);
+                            filtered_Tokens.push_back(t);
                             i = i + 2;
                         }
                     
                     }
                 }
                 else{
-                    Token token;
-                    token.token = ":";
-                    token.type = SYMBOL;
-                    filtered_Tokens.push_back(token);
+                    Token t = make_token(":",SYMBOL);
+                    filtered_Tokens.push_back(t);
                 }
             }
             default:{
