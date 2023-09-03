@@ -4,6 +4,8 @@
 #include "../Runtime/core.h"
 #include <iostream>
 
+#define _for_(iter, range_) for(auto J__ : range_.array){assignVar(iter, J__);
+
 void print(Cell arg){
     if(arg.type == STRING){
         printf("%s",arg.sval.c_str());
@@ -64,5 +66,6 @@ Cell input(Cell prompt){
     cin >> c.sval;
     return c;
 }
+
 
 #endif // basic_H

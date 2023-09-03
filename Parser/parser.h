@@ -192,8 +192,13 @@ ElseStmtNode parse_ElseStmt(TokenStream tokens){
 
 ForStmtNode parse_ForStmt(TokenStream tokens){
     ForStmtNode node;
+    tokens.pop_back();
 
-    // node.
+    node.iter_name = tokens[1].token;
+    for(int i = 3;i<tokens.size();i++){
+        node.condition.tokens.push_back(tokens[i]);
+    }
+    node.condition.tokens.pop_back();
 
     return node;
 }
@@ -472,6 +477,15 @@ bool isCImportStmt(TokenStream tokens){
         return 0;
     }
 }
+
+bool isForStmt(TokenStream tokens){
+    if(tokens[0].token == "for" ){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
 NodeType StatementType(TokenStream tokens){
     NodeType type;
     
@@ -486,6 +500,9 @@ NodeType StatementType(TokenStream tokens){
     }
     else if(isPrintStmt(tokens)){
         type = PRINT;
+    }
+    else if(isForStmt(tokens)){
+        type = FOR_STMT;
     }
     else if(isElifStmt(tokens)){
         type = ELIF_STMT;
@@ -669,6 +686,12 @@ string Compile(vector<TokenStream> code)
             case CIMPORT:{
                 CImportNode node = parse_CImportNode(line);
                 cimports += visit_CImportNode(node) + "\n";
+                break;
+            }
+            case FOR_STMT:{
+                ForStmtNode node = parse_ForStmt(line);
+                scope_stack.push_back(Scope(indent_level+1, StatementType(line), 0));
+                codeString += visit_ForNode(node);
                 break;
             }
             default:{
