@@ -109,6 +109,12 @@ string visit_ReturnNode(ReturnNode node){
     return "return " + visit_ExprNode(node.value) + ";\n";
 }
 
+string visit_ForNode(ForStmtNode node){
+    string res = "allocateVar(\"" + node.iter_name + "\");\n";
+    res += "_for_(\"" + node.iter_name+ "\"," + visit_ExprNode(node.condition) + ")\n";
+    return res;
+}
+
 string curr_path;
 
 
