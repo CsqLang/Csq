@@ -28,6 +28,7 @@ enum NodeType{
     COLLECTION_UPDATE,
     RETURN,
     IMPORT,
+    CIMPORT,
     UNKNOWN_NODE,
 };
 
@@ -181,5 +182,12 @@ struct ImportNode : ASTNode {
         type = IMPORT;
     }
 };
+struct CImportNode : ASTNode {
+    string name;
+    CImportNode(){
+        type = CIMPORT;
+    }
+};
+
 
 #endif // AST_Csq4_H

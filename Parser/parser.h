@@ -192,8 +192,13 @@ ElseStmtNode parse_ElseStmt(TokenStream tokens){
 
 ForStmtNode parse_ForStmt(TokenStream tokens){
     ForStmtNode node;
+    tokens.pop_back();
 
-    // node.
+    node.iter_name = tokens[1].token;
+    for(int i = 3;i<tokens.size();i++){
+        node.condition.tokens.push_back(tokens[i]);
+    }
+    node.condition.tokens.pop_back();
 
     return node;
 }
@@ -425,7 +430,16 @@ ReturnNode parse_ReturnNode(TokenStream tokens){
 
 ImportNode parse_ImportNode(TokenStream tokens){
     ImportNode node;
-    node.name = tokens[1].token;
+    for(int i = 1;i<tokens.size();i++) {
+        node.name += tokens[i].token;
+    }
+    return node;
+}
+CImportNode parse_CImportNode(TokenStream tokens){
+    CImportNode node;
+    for(int i = 1;i<tokens.size();i++) {
+        node.name += tokens[i].token;
+    }
     return node;
 }
 
@@ -455,6 +469,23 @@ bool isImportStmt(TokenStream tokens){
     }
 }
 
+bool isCImportStmt(TokenStream tokens){
+    if(tokens[0].token == "cimport" ){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+
+bool isForStmt(TokenStream tokens){
+    if(tokens[0].token == "for" ){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
 NodeType StatementType(TokenStream tokens){
     NodeType type;
     
@@ -469,6 +500,9 @@ NodeType StatementType(TokenStream tokens){
     }
     else if(isPrintStmt(tokens)){
         type = PRINT;
+    }
+    else if(isForStmt(tokens)){
+        type = FOR_STMT;
     }
     else if(isElifStmt(tokens)){
         type = ELIF_STMT;
@@ -490,6 +524,9 @@ NodeType StatementType(TokenStream tokens){
     }
     else if(isImportStmt(tokens)){
         type = IMPORT;
+    }
+    else if(isCImportStmt(tokens)){
+        type = CIMPORT;
     }
     else{
         type = EXPR;
@@ -533,12 +570,13 @@ Scope last_scope(vector<Scope> scope){
 
 //A forward decl for visitor of import node //only for import node.
 string visit_ImportNode(ImportNode node);
+string visit_CImportNode(CImportNode node);
 
 string Compile(vector<TokenStream> code)
 {
     //Resulting code
     string codeString = "";
-
+    string cimports = "";
     //Scope properties
     int line_no = 1;
     Scope scope(0,UNKNOWN_NODE,0);
@@ -645,6 +683,17 @@ string Compile(vector<TokenStream> code)
                 codeString += visit_ImportNode(node) + "\n";
                 break;
             }
+            case CIMPORT:{
+                CImportNode node = parse_CImportNode(line);
+                cimports += visit_CImportNode(node) + "\n";
+                break;
+            }
+            case FOR_STMT:{
+                ForStmtNode node = parse_ForStmt(line);
+                scope_stack.push_back(Scope(indent_level+1, StatementType(line), 0));
+                codeString += visit_ForNode(node);
+                break;
+            }
             default:{
                 ExprNode node = parse_ExprNode(line);
                 codeString += visit_ExprNode(node) + ";\n";
@@ -654,7 +703,8 @@ string Compile(vector<TokenStream> code)
         line_no++;
         line_++;
     }
-    return codeString;
+    string res_code = cimports + "\n" +  codeString;
+    return res_code;
 }
 
 #include "../Runtime/code_format.h"
@@ -662,8 +712,23 @@ string Compile(vector<TokenStream> code)
 string visit_ImportNode(ImportNode node){
     string raw_code = readCode(curr_path+node.name+".csq");
     vector<TokenStream> code = toTokens(raw_code);
+    string act_path = curr_path;
+    curr_path = curr_path+node.name;
+    
+    for(int i = curr_path.size()-1;i>=0;i--){
+        if(curr_path[i] != '/'){
+            curr_path.pop_back();
+        }else{
+            break;
+        }
+    }
+
+
     string _code = Compile(code);
     return _code;
+}
+string visit_CImportNode(CImportNode node){
+    return "#include \"" + curr_path+node.name+".h\"";
 }
 
 #endif // PARSER_H_CSQ4
