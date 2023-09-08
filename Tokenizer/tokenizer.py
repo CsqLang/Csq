@@ -248,8 +248,10 @@ def make_token(token:str,token_type:int) -> Token:
 
 def tokenize(line:str) -> list:
     tokens = list()
-    current_string, str_input, code_ = '','',''
+    current_string, identifier,number, code_ = '','','',''
 
+    identifier_ = 0
+    value_end = 0
     current_line = 1
     indentCount = 0
     indent_ended = True
@@ -275,7 +277,8 @@ def tokenize(line:str) -> list:
         line = line[indentCount::]
 
         #Proceed Futher
-        for char in line:
+        for i in range(len(line)):
+            char = line[i]
             if char == "'" and string_presence == False:
                 string_presence = True; 
             elif char == "'" and string_presence:
@@ -284,5 +287,156 @@ def tokenize(line:str) -> list:
                 current_string = ""
             elif char != "'" and string_presence:
                 current_string += char
+            elif isIdentifier(char) and string_presence == False:
+                identifier += char
+                identifier_ = 1
+            elif isValue(char) and string_presence == False:
+                if identifier_:
+                    identifier += char
+                else:
+                    number += char
+            elif isSymbolLaterals(char) and string_presence == False:
+                if len(identifier) != 0:
+                    if identifier in KEYWORDS_TABLE:
+                        tokens.append(Token(identifier, TokenType.KEYWORD))
+                    else:
+                        tokens.append(Token(identifier, TokenType.IDENTIFIER))
+                    identifier = ''
+                    identifier_ = 0
+                    #Now lets decide the fate of the operator came
+                    
+                    match char:
+                        case ':':
+                            match line[i+1]:
+                                case '=':
+                                    tokens.append(Token(':=',TokenType.ASOPERATOR))
+                                    i+=1
+                                case _:
+                                    tokens.append(Token(':=',TokenType.SYMBOL))
+                        case '>':
+                            match line[i+1]:
+                                case '=':
+                                    tokens.append(Token('>=',TokenType.COPERATOR))
+                                    i+=1
+                                case _:
+                                    tokens.append(Token('>=',TokenType.COPERATOR))
+                        case '<':
+                            match line[i+1]:
+                                case '=':
+                                    tokens.append(Token('<=',TokenType.COPERATOR))
+                                    i+=1
+                                case _:
+                                    tokens.append(Token('<=',TokenType.COPERATOR))
+                        case '=':
+                            match line[i+1]:
+                                case '=':
+                                    tokens.append(Token('==',TokenType.COPERATOR))
+                                    i+=1
+                                case _:
+                                    tokens.append(Token('=',TokenType.ASOPERATOR))
+                        case '+':
+                            match line[i+1]:
+                                case '=':
+                                    tokens.append(Token('+=',TokenType.AROPERATOR))
+                                    i+=1
+                                case _:
+                                    tokens.append(Token('+',TokenType.AROPERATOR))
+                        case '-':
+                            match line[i+1]:
+                                case '=':
+                                    tokens.append(Token('-=',TokenType.AROPERATOR))
+                                    i+=1
+                                case _:
+                                    tokens.append(Token('-',TokenType.AROPERATOR))
+                        case '*':
+                            match line[i+1]:
+                                case '=':
+                                    tokens.append(Token('*=',TokenType.AROPERATOR))
+                                    i+=1
+                                case _:
+                                    tokens.append(Token('*',TokenType.AROPERATOR))
+                        case '/':
+                            match line[i+1]:
+                                case '=':
+                                    tokens.append(Token('/=',TokenType.AROPERATOR))
+                                    i+=1
+                                case _:
+                                    tokens.append(Token('/',TokenType.AROPERATOR))
+                else:
+                    tokens.append(Token(number, TokenType.VALUE))
+                    identifier = ''
+                    identifier_ = ''
+                    number = ''
+
+                    #Now lets decide the fate of the operator came
+                    
+                    match char:
+                        case ':':
+                            match line[i+1]:
+                                case '=':
+                                    tokens.append(Token(':=',TokenType.ASOPERATOR))
+                                    i+=1
+                                case _:
+                                    tokens.append(Token(':=',TokenType.SYMBOL))
+                        case '>':
+                            match line[i+1]:
+                                case '=':
+                                    tokens.append(Token('>=',TokenType.COPERATOR))
+                                    i+=1
+                                case _:
+                                    tokens.append(Token('>=',TokenType.COPERATOR))
+                        case '<':
+                            match line[i+1]:
+                                case '=':
+                                    tokens.append(Token('<=',TokenType.COPERATOR))
+                                    i+=1
+                                case _:
+                                    tokens.append(Token('<=',TokenType.COPERATOR))
+                        case '=':
+                            match line[i+1]:
+                                case '=':
+                                    tokens.append(Token('==',TokenType.COPERATOR))
+                                    i+=1
+                                case _:
+                                    tokens.append(Token('=',TokenType.ASOPERATOR))
+                        case '+':
+                            match line[i+1]:
+                                case '=':
+                                    tokens.append(Token('+=',TokenType.AROPERATOR))
+                                    i+=1
+                                case _:
+                                    tokens.append(Token('+',TokenType.AROPERATOR))
+                        case '-':
+                            match line[i+1]:
+                                case '=':
+                                    tokens.append(Token('-=',TokenType.AROPERATOR))
+                                    i+=1
+                                case _:
+                                    tokens.append(Token('-',TokenType.AROPERATOR))
+                        case '*':
+                            match line[i+1]:
+                                case '=':
+                                    tokens.append(Token('*=',TokenType.AROPERATOR))
+                                    i+=1
+                                case _:
+                                    tokens.append(Token('*',TokenType.AROPERATOR))
+                        case '/':
+                            match line[i+1]:
+                                case '=':
+                                    tokens.append(Token('/=',TokenType.AROPERATOR))
+                                    i+=1
+                                case _:
+                                    tokens.append(Token('/',TokenType.AROPERATOR))
+        if identifier_:
+            if identifier in KEYWORDS_TABLE:
+                tokens.append(Token(identifier, TokenType.KEYWORD))
+            else:
+                tokens.append(Token(identifier, TokenType.IDENTIFIER))
+            identifier = ''
+            identifier_ = 0
+        elif len(number) > 0:
+            tokens.append(Token(number,TokenType.VALUE))
+
+                    
     return tokens
             
