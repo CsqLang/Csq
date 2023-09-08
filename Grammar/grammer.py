@@ -20,9 +20,6 @@ SYMBOLS = ["{", "}", "(", ")", "[", "]", ",", "~", "@", "$", "&", "!", ":", ";",
 
 # Keyword lookup
 KEYWORDS_TABLE = [
-    "if", "elif", "else", "def", "for", "while", "return",
-    "ends", "endc", "macro", "import", "in", "init", "public",
-    "private", "inherits", "protected", "class", "use", "all",
-    "as", "module", "try", "catch", "break", "continue",
-    "ignore", "group"
+    "if", "elif", "else", "def", "for", "while", "return",'in',
+    'import', 'cimport'
 ]
