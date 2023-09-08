@@ -57,6 +57,8 @@ class Token:
     def __init__(self,token:str, token_type:int) -> None:
         self.token = token
         self.type = token_type
+    def __str__(self):
+        return "('" + self.token + "', " + str(self.type) + ")" 
 
 def addToken(value:str,token_type:int) -> Token:
     token = Token()
@@ -244,5 +246,43 @@ def make_token(token:str,token_type:int) -> Token:
     t.type = token_type
     return t
 
-def tokenize(source_code:str) -> list:
-    pass
+def tokenize(line:str) -> list:
+    tokens = list()
+    current_string, str_input, code_ = '','',''
+
+    current_line = 1
+    indentCount = 0
+    indent_ended = True
+    indentation_present = False
+    char_start = False
+    string_presence = False
+    comment = False
+
+    #Try to skip parsing a comment since it will be ignored.
+    if isComment(line[0]):
+        tokens = []
+    #Main logic
+    else:
+        # indent is there
+        if line[0] == ' ':
+            indentation_present = True
+            for char in line:
+                if char != ' ' and indentation_present:
+                    tokens.append(Token(' ', TokenType.INDENT))
+                else:
+                    indentCount = indentCount + 1
+                    indentation_present = False
+        line = line[indentCount::]
+
+        #Proceed Futher
+        for char in line:
+            if char == "'" and string_presence == False:
+                string_presence = True; 
+            elif char == "'" and string_presence:
+                string_presence = False
+                tokens.append(Token('\"'+current_string + '"', TokenType.STR))
+                current_string = ""
+            elif char != "'" and string_presence:
+                current_string += char
+    return tokens
+            
