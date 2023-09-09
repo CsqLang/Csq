@@ -1,3 +1,5 @@
 csq
 __pycache__
 *.pyc
+include
+*.o
