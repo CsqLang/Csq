@@ -192,13 +192,16 @@ def Compile(code:list) -> str:
         line = remove_indent(line)
 
         match statement_type(line):
+
             case NodeTypes.VAR_DECL:
                 node = parse_VarDecl(line)
-                code_string += node.visit() + "\n"
+                code_string += node.visit() + ";\n"
+                
             case NodeTypes.VAR_ASSIGN:
                 node = parse_VarAssign(line)
-                code_string += node.visit() + "\n"
+                code_string += node.visit() + ";\n"
+            
+            case NodeTypes.IF_STMT:
+                pass
             
     return code_string
-
-    
