@@ -55,10 +55,10 @@ class VarAssignNode(ASTNode):
     def __init__(self):
         super().__init__()
         self.identifier = ""
-        self.value = None
+        self.value = ExprNode()
         self.type = NodeTypes.VAR_ASSIGN
     def visit(self):
-        return 'assignVar("' + self.identifier + '","any",'+self.value + ')'
+        return 'assignVar("' + self.identifier + '","any",'+self.value.visit() + ')'
 
 class BlockNode(ASTNode):
     def __init__(self):
