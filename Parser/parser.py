@@ -123,31 +123,6 @@ def statement_type(tokens):
     else:
         return NodeTypes.EXPR
 
-def statement_type(tokens):
-    if is_var_decl(tokens):
-        return NodeTypes.VAR_DECL
-    elif is_var_assign(tokens):
-        return NodeTypes.VAR_ASSIGN
-    elif is_if_stmt(tokens):
-        return NodeTypes.IF_STMT
-    elif is_print_stmt(tokens):
-        return NodeTypes.PRINT
-    elif is_elif_stmt(tokens):
-        return NodeTypes.ELIF_STMT
-    elif is_else_stmt(tokens):
-        return NodeTypes.ELSE_STMT
-    elif is_while_stmt(tokens):
-        return NodeTypes.WHILE_STMT
-    elif is_access_update(tokens):
-        return NodeTypes.COLLECTION_UPDATE
-    elif is_function(tokens):
-        return NodeTypes.FUN_DECL
-    elif is_return_stmt(tokens):
-        return NodeTypes.RETURN
-    elif is_import_stmt(tokens):
-        return NodeTypes.IMPORT
-    else:
-        return NodeTypes.EXPR
 
 
 def Compile(code:list) -> str:
@@ -183,4 +158,5 @@ def Compile(code:list) -> str:
 
         # Removing all indentation from the stream
         line = remove_indent(line)
+
     
