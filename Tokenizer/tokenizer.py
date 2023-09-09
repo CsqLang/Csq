@@ -269,13 +269,13 @@ def tokenize(line:str) -> list:
         if line[0] == ' ':
             indentation_present = True
             for char in line:
-                if char != ' ' and indentation_present:
+                if char == ' ' and indentation_present:
                     tokens.append(Token(' ', TokenType.INDENT))
-                else:
                     indentCount = indentCount + 1
+                else:
                     indentation_present = False
+        print(indentCount)
         line = line[indentCount::]
-
         #Proceed Futher
         i = 0
         while i < len(line):
@@ -296,6 +296,17 @@ def tokenize(line:str) -> list:
                     identifier += char
                 else:
                     number += char
+            elif char == ' ' and string_presence == False:
+                if len(identifier) != 0:
+                    if identifier in KEYWORDS_TABLE:
+                        tokens.append(Token(identifier, TokenType.KEYWORD))
+                    else:
+                        tokens.append(Token(identifier, TokenType.IDENTIFIER))
+                    identifier = ''
+                    identifier_ = 0
+                elif len(number) != 0:
+                    tokens.append(Token(number, TokenType.VALUE))
+                    number = ''
             elif isSymbolLaterals(char) and string_presence == False:
                 if len(identifier) != 0:
                     if identifier in KEYWORDS_TABLE:
@@ -308,12 +319,15 @@ def tokenize(line:str) -> list:
                     
                     match char:
                         case ':':
-                            match line[i+1]:
-                                case '=':
-                                    tokens.append(Token(':=',TokenType.ASOPERATOR))
-                                    i = i+1
-                                case _:
-                                    tokens.append(Token('=',TokenType.SYMBOL))
+                            if i != len(line)-1:
+                                match line[i+1]:
+                                    case '=':
+                                        tokens.append(Token(':=',TokenType.ASOPERATOR))
+                                        i = i+1
+                                    case _:
+                                        tokens.append(Token(':',TokenType.SYMBOL))
+                            else:
+                                tokens.append(Token(':',TokenType.SYMBOL))
                         case '>':
                             match line[i+1]:
                                 case '=':
@@ -373,12 +387,15 @@ def tokenize(line:str) -> list:
                     
                     match char:
                         case ':':
-                            match line[i+1]:
-                                case '=':
-                                    tokens.append(Token(':=',TokenType.ASOPERATOR))
-                                    i+=1
-                                case _:
-                                    tokens.append(Token(':=',TokenType.SYMBOL))
+                            if i != len(line)-1:
+                                match line[i+1]:
+                                    case '=':
+                                        tokens.append(Token(':=',TokenType.ASOPERATOR))
+                                        i = i+1
+                                    case _:
+                                        tokens.append(Token(':',TokenType.SYMBOL))
+                            else:
+                                tokens.append(Token(':',TokenType.SYMBOL))
                         case '>':
                             match line[i+1]:
                                 case '=':
