@@ -36,14 +36,21 @@ class ExprNode(ASTNode):
         super().__init__()
         self.tokens = []
         self.type = NodeTypes.EXPR
+    def visit(self)->str:
+        val = ''
+        for tok in self.tokens:
+            val += tok.token
+        return val
 
 class VarDeclNode(ASTNode):
     def __init__(self):
         super().__init__()
         self.identifier = ""
         self.var_type = ""
-        self.value = None
+        self.value = ExprNode()
         self.type = NodeTypes.VAR_DECL
+    def visit(self):
+        return 'allocateVar("' + self.identifier + '","any",'+self.value.visit() + ')'
 
 class VarAssignNode(ASTNode):
     def __init__(self):
@@ -51,6 +58,8 @@ class VarAssignNode(ASTNode):
         self.identifier = ""
         self.value = None
         self.type = NodeTypes.VAR_ASSIGN
+    def visit(self):
+        return 'assignVar("' + self.identifier + '","any",'+self.value + ')'
 
 class BlockNode(ASTNode):
     def __init__(self):
@@ -68,33 +77,40 @@ class FunDeclNode(ASTNode):
 class IfStmtNode(ASTNode):
     def __init__(self):
         super().__init__()
-        self.condition = None
+        self.condition = ExprNode()
         self.type = NodeTypes.IF_STMT
-
+    def visit(self)->str:
+        return "if(" + self.condition.visit() + ')'
 class ElseStmtNode(ASTNode):
     def __init__(self):
         super().__init__()
         self.type = NodeTypes.ELSE_STMT
+    def visit(self)->str:
+        return "else"
 
 class ElifStmtNode(ASTNode):
     def __init__(self):
         super().__init__()
-        self.condition = None
+        self.condition = ExprNode()
         self.type = NodeTypes.ELIF_STMT
+    def visit(self)->str:
+        return "else if(" + self.condition.visit() + ')'
 
 class ForStmtNode(ASTNode):
     def __init__(self):
         super().__init__()
         self.body = None
         self.iter_name = ""
-        self.condition = None
+        self.condition = ExprNode()
         self.type = NodeTypes.FOR_STMT
 
 class WhileStmtNode(ASTNode):
     def __init__(self):
         super().__init__()
-        self.condition = None
+        self.condition = ExprNode()
         self.type = NodeTypes.WHILE_STMT
+    def visit(self):
+        return 'while(' + self.condition.visit() + ')'
 
 class CallNode(ASTNode):
     def __init__(self):
@@ -106,7 +122,7 @@ class CallNode(ASTNode):
 class PrintNode(ASTNode):
     def __init__(self):
         super().__init__()
-        self.value = None
+        self.value = ExprNode()
         self.type = NodeTypes.PRINT
 
 class TypeNode(ASTNode):
@@ -137,7 +153,7 @@ class CollectionUpdateNode(ASTNode):
 class ReturnNode(ASTNode):
     def __init__(self):
         super().__init__()
-        self.value = None
+        self.value = ExprNode()
         self.type = NodeTypes.RETURN
 
 class ImportNode(ASTNode):
