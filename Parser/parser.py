@@ -1,5 +1,5 @@
-from ..AST.ast import NodeTypes
-from ..Tokenizer.tokenizer import TokenType
+from AST.ast import NodeTypes
+from Tokenizer.tokenizer import TokenType
 class Scope():
     
     def __init__(self,level:int,of_:NodeTypes,ended:bool) -> None:
@@ -183,7 +183,3 @@ def Compile(code:list) -> str:
 
         # Removing all indentation from the stream
         line = remove_indent(line)
-
-        match statement_type(line):
-            case NodeTypes.VAR_DECL:
-                
