@@ -16,7 +16,7 @@ def get_indent_level(tokens) -> int:
             break
     return indent_
 
-def remove_indent(tokens):
+def remove_indent(tokens) -> list:
     tok = []
     for token in tokens:
         if token.type == TokenType.INDENT:
@@ -24,27 +24,27 @@ def remove_indent(tokens):
         else:
             tok.append(token)
     return tok
-def is_var_decl(tokens):
+def is_var_decl(tokens) -> bool:
     if len(tokens) >= 2 and tokens[0].type == TokenType.IDENTIFIER and tokens[1].token == ":=":
         return True
     return False
 
-def is_print_stmt(tokens):
+def is_print_stmt(tokens) -> bool:
     if len(tokens) >= 1 and tokens[0].token == TokenType.print:
         return True
     return False
 
-def is_type_stmt(tokens):
+def is_type_stmt(tokens) -> bool:
     if len(tokens) >= 1 and tokens[0].token == TokenType.type:
         return True
     return False
 
-def is_var_assign(tokens):
+def is_var_assign(tokens) -> bool:
     if len(tokens) >= 2 and tokens[0].type == TokenType.IDENTIFIER and tokens[1].token == "=":
         return True
     return False
 
-def is_if_stmt(tokens):
+def is_if_stmt(tokens) -> bool:
     if len(tokens) >= 1 and tokens[0].token == "if":
         return True
     return False
@@ -54,22 +54,22 @@ def is_elif_stmt(tokens):
         return True
     return False
 
-def is_else_stmt(tokens):
+def is_else_stmt(tokens) -> bool:
     if len(tokens) >= 1 and tokens[0].token == "else":
         return True
     return False
 
-def is_return_stmt(tokens):
+def is_return_stmt(tokens) -> bool:
     if len(tokens) >= 1 and tokens[0].token == "return":
         return True
     return False
 
-def is_while_stmt(tokens):
+def is_while_stmt(tokens) -> bool:
     if len(tokens) >= 1 and tokens[0].token == "while":
         return True
     return False
 
-def is_access_stmt(tokens):
+def is_access_stmt(tokens) -> bool:
     is_access = False
     if len(tokens) >= 1 and tokens[0].type == TokenType.IDENTIFIER:
         for token in tokens:
@@ -78,26 +78,26 @@ def is_access_stmt(tokens):
                 break
     return is_access
 
-def is_access_update(tokens):
+def is_access_update(tokens) -> bool:
     if len(tokens) >= 5 and tokens[0].type == TokenType.IDENTIFIER and tokens[1].token == "[" and tokens[4].token == "=":
         return True
     else:
         return False
 
-def is_function(tokens):
+def is_function(tokens) -> bool:
     if len(tokens) >= 1 and tokens[0].token == "def":
         return True
     else:
         return False
 
-def is_import_stmt(tokens):
+def is_import_stmt(tokens) -> bool:
     if len(tokens) >= 1 and tokens[0].token == "import":
         return True
     else:
         return False
 
 
-def statement_type(tokens):
+def statement_type(tokens) -> NodeTypes:
     if is_var_decl(tokens):
         return NodeTypes.VAR_DECL
     elif is_var_assign(tokens):
