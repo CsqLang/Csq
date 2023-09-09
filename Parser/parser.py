@@ -1,5 +1,14 @@
-from AST.ast import NodeTypes
+'''
+        
+    Parser for Csq4.2
+
+'''
+
+from AST.ast import *
 from Tokenizer.tokenizer import TokenType
+from Compiletime.error import TypeError, IndentationError, NameError, SyntaxError, Error
+
+
 class Scope():
     
     def __init__(self,level:int,of_:NodeTypes,ended:bool) -> None:
@@ -24,6 +33,8 @@ def remove_indent(tokens) -> list:
         else:
             tok.append(token)
     return tok
+
+
 def is_var_decl(tokens) -> bool:
     if len(tokens) >= 2 and tokens[0].type == TokenType.IDENTIFIER and tokens[1].token == ":=":
         return True
@@ -40,7 +51,7 @@ def is_type_stmt(tokens) -> bool:
     return False
 
 def is_var_assign(tokens) -> bool:
-    if len(tokens) >= 2 and tokens[0].type == TokenType.IDENTIFIER and tokens[1].token == "=":
+    if tokens[0].type == TokenType.IDENTIFIER and tokens[1].token == "=":
         return True
     return False
 
@@ -123,7 +134,28 @@ def statement_type(tokens) -> NodeTypes:
     else:
         return NodeTypes.EXPR
 
+'''
+Parsing units
+'''
+def parse_VarDecl(tokens) -> VarDeclNode:
+    node = VarDeclNode()
+    node.identifier = tokens[0].token
+    node.value.tokens = tokens[2:]
+    return node
 
+def parse_VarAssign(tokens) -> VarAssignNode:
+    node = VarAssignNode()
+    node.identifier = tokens[0].token
+    node.value.tokens = tokens[2:]
+    return node
+
+def parse_PrintStmt(tokens) -> PrintNode:
+    node = PrintNode()
+    node.value.tokens = tokens[1:]
+    return node
+
+def parse_IfStmt(tokens) -> IfStmtNode:
+    pass
 
 def Compile(code:list) -> str:
 
@@ -159,4 +191,17 @@ def Compile(code:list) -> str:
         # Removing all indentation from the stream
         line = remove_indent(line)
 
-    
+        match statement_type(line):
+
+            case NodeTypes.VAR_DECL:
+                node = parse_VarDecl(line)
+                code_string += node.visit() + ";\n"
+                
+            case NodeTypes.VAR_ASSIGN:
+                node = parse_VarAssign(line)
+                code_string += node.visit() + ";\n"
+            
+            case NodeTypes.IF_STMT:
+                pass
+            
+    return code_string

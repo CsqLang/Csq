@@ -16,13 +16,12 @@ class NodeTypes:
     BLOCK = 9
     FUN_CALL = 10 
     PRINT = 11
-    TYPE = 12
-    ACCESS = 13
-    COLLECTION_UPDATE = 14
-    RETURN = 15
-    IMPORT = 16
-    UNKNOWN_NODE = 17
-    CIMPORT = 18
+    ACCESS = 12
+    COLLECTION_UPDATE = 13
+    RETURN = 14
+    IMPORT = 15
+    UNKNOWN_NODE = 16
+    CIMPORT = 17
     
 #Parent AST node type
 
@@ -56,10 +55,10 @@ class VarAssignNode(ASTNode):
     def __init__(self):
         super().__init__()
         self.identifier = ""
-        self.value = None
+        self.value = ExprNode()
         self.type = NodeTypes.VAR_ASSIGN
     def visit(self):
-        return 'assignVar("' + self.identifier + '","any",'+self.value + ')'
+        return 'assignVar("' + self.identifier + '","any",'+self.value.visit() + ')'
 
 class BlockNode(ASTNode):
     def __init__(self):
@@ -124,11 +123,8 @@ class PrintNode(ASTNode):
         super().__init__()
         self.value = ExprNode()
         self.type = NodeTypes.PRINT
-
-class TypeNode(ASTNode):
-    def __init__(self):
-        super().__init__()
-        self.type = NodeTypes.TYPE
+    def visit(self):
+        return 'print(' + self.value.visit()+');'
 
 class UnknownNode(ASTNode):
     def __init__(self):
