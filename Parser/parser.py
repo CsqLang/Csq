@@ -51,7 +51,7 @@ def is_type_stmt(tokens) -> bool:
     return False
 
 def is_var_assign(tokens) -> bool:
-    if len(tokens) >= 2 and tokens[0].type == TokenType.IDENTIFIER and tokens[1].token == "=":
+    if tokens[0].type == TokenType.IDENTIFIER and tokens[1].token == "=":
         return True
     return False
 
@@ -193,6 +193,12 @@ def Compile(code:list) -> str:
 
         match statement_type(line):
             case NodeTypes.VAR_DECL:
-                pass
+                node = parse_VarDecl(line)
+                code_string += node.visit() + "\n"
+            case NodeTypes.VAR_ASSIGN:
+                node = parse_VarAssign(line)
+                code_string += node.visit() + "\n"
+            
+    return code_string
 
     
