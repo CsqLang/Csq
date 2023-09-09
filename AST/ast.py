@@ -109,6 +109,8 @@ class WhileStmtNode(ASTNode):
         super().__init__()
         self.condition = ExprNode()
         self.type = NodeTypes.WHILE_STMT
+    def visit(self):
+        return 'while(' + self.condition.visit() + ')'
 
 class CallNode(ASTNode):
     def __init__(self):
