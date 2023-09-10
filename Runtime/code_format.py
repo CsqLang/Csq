@@ -1,5 +1,6 @@
 """Read Write Tokens  Python implementation of Csq"""
-from ..Tokenizer.tokenizer import *
+from Tokenizer.tokenizer import *
+
 def readCode(path:str) ->str:
     """Read Csq Code File """
     code = str()
@@ -30,7 +31,7 @@ def toTokens(code:str) -> list:
             tokenStream = tokenize(line)
             tokens.append(tokenStream)
         except Exception as e:
-            print(f"Error: {e}")
+            pass
 
     tokens.append(tokenize("ignore"))
     return tokens
