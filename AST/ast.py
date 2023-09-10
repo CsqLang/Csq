@@ -1,165 +1,234 @@
 '''
-Python implementation of Csq AST
+        
+    Parser for Csq4.2
+
 '''
 
-#Node Types 
-class NodeTypes:
-    EXPR = 0
-    VAR_DECL = 1
-    VAR_ASSIGN = 2
-    FUN_DECL = 3
-    IF_STMT = 4
-    ELSE_STMT = 5
-    ELIF_STMT = 6
-    FOR_STMT = 7
-    WHILE_STMT = 8
-    BLOCK = 9
-    FUN_CALL = 10 
-    PRINT = 11
-    ACCESS = 12
-    COLLECTION_UPDATE = 13
-    RETURN = 14
-    IMPORT = 15
-    UNKNOWN_NODE = 16
-    CIMPORT = 17
+from AST.ast import *
+from Tokenizer.tokenizer import TokenType
+from Compiletime.error import TypeError, IndentationError, NameError, SyntaxError, Error
+
+
+class Scope():
     
-#Parent AST node type
+    def __init__(self,level:int,of_:NodeTypes,ended:bool) -> None:
+        self.indent_level = level
+        self.of = of_
+        self.ended = ended 
+        
+def get_indent_level(tokens) -> int:
+    indent_ = 0
+    for token in tokens:
+        if token.type == TokenType.INDENT:
+            indent_ +=1
+        else:
+            break
+    return indent_
 
-class ASTNode:
-    def __init__(self):
-        self.type = None
-        self.indent_level = int()
+def remove_indent(tokens) -> list:
+    tok = []
+    for token in tokens:
+        if token.type == TokenType.INDENT:
+            pass
+        else:
+            tok.append(token)
+    return tok
 
-class ExprNode(ASTNode):
-    def __init__(self):
-        super().__init__()
-        self.tokens = []
-        self.type = NodeTypes.EXPR
-    def visit(self)->str:
-        val = ''
-        for tok in self.tokens:
-            val += tok.token
-        return val
 
-class VarDeclNode(ASTNode):
-    def __init__(self):
-        super().__init__()
-        self.identifier = ""
-        self.var_type = ""
-        self.value = ExprNode()
-        self.type = NodeTypes.VAR_DECL
-    def visit(self):
-        return 'allocateVar("' + self.identifier + '","any",'+self.value.visit() + ')'
+def is_var_decl(tokens) -> bool:
+    if len(tokens) >= 2 and tokens[0].type == TokenType.IDENTIFIER and tokens[1].token == ":=":
+        return True
+    return False
 
-class VarAssignNode(ASTNode):
-    def __init__(self):
-        super().__init__()
-        self.identifier = ""
-        self.value = ExprNode()
-        self.type = NodeTypes.VAR_ASSIGN
-    def visit(self):
-        return 'assignVar("' + self.identifier + '","any",'+self.value.visit() + ')'
+def is_print_stmt(tokens) -> bool:
+    if len(tokens) >= 1 and tokens[0].type == TokenType.KEYWORD:
+        return True
+    return False
 
-class BlockNode(ASTNode):
-    def __init__(self):
-        super().__init__()
-        self.statements = []
-        self.type = NodeTypes.BLOCK
+def is_type_stmt(tokens) -> bool:
+    if len(tokens) >= 1 and tokens[0].token == TokenType.type:
+        return True
+    return False
 
-class FunDeclNode(ASTNode):
-    def __init__(self):
-        super().__init__()
-        self.identifier = ""
-        self.parameters = []
-        self.type = NodeTypes.FUN_DECL
+def is_var_assign(tokens) -> bool:
+    if len(tokens) >= 2 and tokens[0].type == TokenType.IDENTIFIER and tokens[1].token == "=":
+        return True
+    return False
 
-class IfStmtNode(ASTNode):
-    def __init__(self):
-        super().__init__()
-        self.condition = ExprNode()
-        self.type = NodeTypes.IF_STMT
-    def visit(self)->str:
-        return "if(" + self.condition.visit() + ')'
-class ElseStmtNode(ASTNode):
-    def __init__(self):
-        super().__init__()
-        self.type = NodeTypes.ELSE_STMT
-    def visit(self)->str:
-        return "else"
+def is_if_stmt(tokens) -> bool:
+    if len(tokens) >= 1 and tokens[0].token == "if":
+        return True
+    return False
 
-class ElifStmtNode(ASTNode):
-    def __init__(self):
-        super().__init__()
-        self.condition = ExprNode()
-        self.type = NodeTypes.ELIF_STMT
-    def visit(self)->str:
-        return "else if(" + self.condition.visit() + ')'
+def is_elif_stmt(tokens):
+    if len(tokens) >= 1 and tokens[0].token == "elif":
+        return True
+    return False
 
-class ForStmtNode(ASTNode):
-    def __init__(self):
-        super().__init__()
-        self.body = None
-        self.iter_name = ""
-        self.condition = ExprNode()
-        self.type = NodeTypes.FOR_STMT
+def is_else_stmt(tokens) -> bool:
+    if len(tokens) >= 1 and tokens[0].token == "else":
+        return True
+    return False
 
-class WhileStmtNode(ASTNode):
-    def __init__(self):
-        super().__init__()
-        self.condition = ExprNode()
-        self.type = NodeTypes.WHILE_STMT
-    def visit(self):
-        return 'while(' + self.condition.visit() + ')'
+def is_return_stmt(tokens) -> bool:
+    if len(tokens) >= 1 and tokens[0].token == "return":
+        return True
+    return False
 
-class CallNode(ASTNode):
-    def __init__(self):
-        super().__init__()
-        self.name = ""
-        self.params = []
-        self.type = NodeTypes.FUN_CALL
+def is_while_stmt(tokens) -> bool:
+    if len(tokens) >= 1 and tokens[0].token == "while":
+        return True
+    return False
 
-class PrintNode(ASTNode):
-    def __init__(self):
-        super().__init__()
-        self.value = ExprNode()
-        self.type = NodeTypes.PRINT
-    def visit(self):
-        return 'print(' + self.value.visit()+');'
+def is_access_stmt(tokens) -> bool:
+    is_access = False
+    if len(tokens) >= 1 and tokens[0].type == TokenType.IDENTIFIER:
+        for token in tokens:
+            if token.token == "[" or token.token == "]":
+                is_access = True
+                break
+    return is_access
 
-class UnknownNode(ASTNode):
-    def __init__(self):
-        super().__init__()
-        self.type = NodeTypes.UNKNOWN_NODE
+def is_access_update(tokens) -> bool:
+    if len(tokens) >= 5 and tokens[0].type == TokenType.IDENTIFIER and tokens[1].token == "[" and tokens[4].token == "=":
+        return True
+    else:
+        return False
 
-class AccessNode(ASTNode):
-    def __init__(self):
-        super().__init__()
-        self.index = 0
-        self.source = ""
-        self.type = NodeTypes.ACCESS
+def is_function(tokens) -> bool:
+    if len(tokens) >= 1 and tokens[0].token == "def":
+        return True
+    else:
+        return False
 
-class CollectionUpdateNode(ASTNode):
-    def __init__(self):
-        super().__init__()
-        self.index = None
-        self.source = ""
-        self.value = None
-        self.type = NodeTypes.COLLECTION_UPDATE
+def is_import_stmt(tokens) -> bool:
+    if len(tokens) >= 1 and tokens[0].token == "import":
+        return True
+    else:
+        return False
 
-class ReturnNode(ASTNode):
-    def __init__(self):
-        super().__init__()
-        self.value = ExprNode()
-        self.type = NodeTypes.RETURN
 
-class ImportNode(ASTNode):
-    def __init__(self):
-        super().__init__()
-        self.name = ""
-        self.type = NodeTypes.IMPORT
+def statement_type(tokens) -> NodeTypes:
+    if is_var_decl(tokens):
+        return NodeTypes.VAR_DECL
+    elif is_var_assign(tokens):
+        return NodeTypes.VAR_ASSIGN
+    elif is_if_stmt(tokens):
+        return NodeTypes.IF_STMT
+    elif is_print_stmt(tokens):
+        return NodeTypes.PRINT
+    elif is_elif_stmt(tokens):
+        return NodeTypes.ELIF_STMT
+    elif is_else_stmt(tokens):
+        return NodeTypes.ELSE_STMT
+    elif is_while_stmt(tokens):
+        return NodeTypes.WHILE_STMT
+    elif is_access_update(tokens):
+        return NodeTypes.COLLECTION_UPDATE
+    elif is_function(tokens):
+        return NodeTypes.FUN_DECL
+    elif is_return_stmt(tokens):
+        return NodeTypes.RETURN
+    elif is_import_stmt(tokens):
+        return NodeTypes.IMPORT
+    else:
+        return NodeTypes.EXPR
 
-class CImportNode(ASTNode):
-    def __init__(self):
-        super().__init__()
-        self.name = ""
-        self.type = NodeTypes.CIMPORT
+'''
+Parsing units
+'''
+def parse_VarDecl(tokens) -> VarDeclNode:
+    node = VarDeclNode()
+    node.identifier = tokens[0].token
+    node.value.tokens = tokens[2:]
+    return node
+
+def parse_VarAssign(tokens) -> VarAssignNode:
+    node = VarAssignNode()
+    node.identifier = tokens[0].token
+    node.value.tokens = tokens[2:]
+    return node
+
+def parse_PrintStmt(tokens) -> PrintNode:
+    node = PrintNode()
+    node.value.tokens = tokens[1:]
+    return node
+
+def parse_IfStmt(tokens) -> IfStmtNode:
+    tokens.pop(len(tokens)-1)
+
+    node = IfStmtNode()
+    node.condition.tokens = tokens[1:]
+    return node
+
+def parse_ElifStmt(tokens) -> ElifStmtNode:
+    tokens.pop(len(tokens)-1)
+
+    node = ElifStmtNode()
+    node.condition.tokens = tokens[1:]
+    return node
+
+def parse_ElseStmt():
+    node = ElseStmtNode()
+    return node
+
+def Compile(code:list) -> str:
+
+    # Resulting code
+    code_string = ""
+
+    # Scope properties
+    line_no = 1
+    scope = Scope(0, NodeTypes.UNKNOWN_NODE, 0)
+    scope_stack = [scope]
+
+    # States
+    class_ = False
+    last_indent = 0
+    # Last statement type
+    last_statement = NodeTypes.UNKNOWN_NODE
+
+    for line in code:
+        # Get the current scope by finding indents
+        indent_level = get_indent_level(line)
+
+        # Work with the indentation levels
+        while indent_level != scope_stack[-1].indent_level:
+            if scope_stack[-1].of == NodeTypes.FUN_DECL:
+                code_string += "};\n"
+                scope_stack.pop()
+
+            else:
+                code_string += "}\n"
+                # Pop the previous scope since it's now closed.
+                scope_stack.pop()
+
+        # Removing all indentation from the stream
+        line = remove_indent(line)
+
+        match statement_type(line):
+
+            case NodeTypes.VAR_DECL:
+                node = parse_VarDecl(line)
+                code_string += node.visit() + "\n"
+                
+            case NodeTypes.VAR_ASSIGN:
+                node = parse_VarAssign(line)
+                code_string += node.visit() + "\n"
+            
+            case NodeTypes.IF_STMT:
+                node = parse_IfStmt(line)
+                code_string += node.visit() + "\n"
+                scope_stack.append(Scope(indent_level+1,NodeTypes.IF_STMT,0))
+
+            case NodeTypes.ELIF_STMT:
+                node = parse_ElifStmt(line)
+                code_string += node.visit() + "\n"
+                scope_stack.append(Scope(indent_level+1,NodeTypes.ELIF_STMT,0))
+            
+            case NodeTypes.ELSE_STMT:
+                node = parse_ElseStmt(line)
+                code_string += node.visit() + "\n"
+                scope_stack.append(Scope(indent_level+1,NodeTypes.ELSE_STMT,0))
+            
+    return code_string
