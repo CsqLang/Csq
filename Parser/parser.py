@@ -210,25 +210,25 @@ def Compile(code:list) -> str:
 
             case NodeTypes.VAR_DECL:
                 node = parse_VarDecl(line)
-                code_string += node.visit() + ";\n"
+                code_string += node.visit() + "\n"
                 
             case NodeTypes.VAR_ASSIGN:
                 node = parse_VarAssign(line)
-                code_string += node.visit() + ";\n"
+                code_string += node.visit() + "\n"
             
             case NodeTypes.IF_STMT:
                 node = parse_IfStmt(line)
-                code_string += node.visit() + "{\n"
+                code_string += node.visit() + "\n"
                 scope_stack.append(Scope(indent_level+1,NodeTypes.IF_STMT,0))
 
             case NodeTypes.ELIF_STMT:
                 node = parse_ElifStmt(line)
-                code_string += node.visit() + "{\n"
+                code_string += node.visit() + "\n"
                 scope_stack.append(Scope(indent_level+1,NodeTypes.ELIF_STMT,0))
             
             case NodeTypes.ELSE_STMT:
                 node = parse_ElseStmt(line)
-                code_string += node.visit() + "{\n"
+                code_string += node.visit() + "\n"
                 scope_stack.append(Scope(indent_level+1,NodeTypes.ELSE_STMT,0))
             
     return code_string
