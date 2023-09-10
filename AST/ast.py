@@ -49,7 +49,7 @@ class VarDeclNode(ASTNode):
         self.value = ExprNode()
         self.type = NodeTypes.VAR_DECL
     def visit(self):
-        return 'allocateVar("' + self.identifier + '","any",'+self.value.visit() + ')'
+        return 'allocateVar("' + self.identifier + '","any",'+self.value.visit() + ');'
 
 class VarAssignNode(ASTNode):
     def __init__(self):
@@ -58,7 +58,7 @@ class VarAssignNode(ASTNode):
         self.value = ExprNode()
         self.type = NodeTypes.VAR_ASSIGN
     def visit(self):
-        return 'assignVar("' + self.identifier + '","any",'+self.value.visit() + ')'
+        return 'assignVar("' + self.identifier + '","any",'+self.value.visit() + ');'
 
 class BlockNode(ASTNode):
     def __init__(self):
@@ -79,13 +79,13 @@ class IfStmtNode(ASTNode):
         self.condition = ExprNode()
         self.type = NodeTypes.IF_STMT
     def visit(self)->str:
-        return "if(" + self.condition.visit() + ')'
+        return "if(" + self.condition.visit() + '){'
 class ElseStmtNode(ASTNode):
     def __init__(self):
         super().__init__()
         self.type = NodeTypes.ELSE_STMT
     def visit(self)->str:
-        return "else"
+        return "else{"
 
 class ElifStmtNode(ASTNode):
     def __init__(self):
@@ -93,7 +93,7 @@ class ElifStmtNode(ASTNode):
         self.condition = ExprNode()
         self.type = NodeTypes.ELIF_STMT
     def visit(self)->str:
-        return "else if(" + self.condition.visit() + ')'
+        return "else if(" + self.condition.visit() + '){'
 
 class ForStmtNode(ASTNode):
     def __init__(self):
@@ -109,7 +109,7 @@ class WhileStmtNode(ASTNode):
         self.condition = ExprNode()
         self.type = NodeTypes.WHILE_STMT
     def visit(self):
-        return 'while(' + self.condition.visit() + ')'
+        return 'while(' + self.condition.visit() + '){'
 
 class CallNode(ASTNode):
     def __init__(self):

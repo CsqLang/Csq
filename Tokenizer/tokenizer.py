@@ -304,7 +304,7 @@ def tokenize(line:str) -> list:
     while i < len(tokens):
         match tokens[i].token:
             case ':':
-                if i+1 != len(tokens)-1:
+                if i+1 != len(tokens):
                     match tokens[i+1].token:
                         case '=':
                             resTokens.append(Token(':=', TokenType.ASOPERATOR))
@@ -314,7 +314,7 @@ def tokenize(line:str) -> list:
                 else:
                     resTokens.append(tokens[i])
             case '=':
-                if i+1 != len(tokens)-1:
+                if i+1 != len(tokens):
                     match tokens[i+1].token:
                         case '=':
                             resTokens.append(Token('==', TokenType.COPERATOR))
@@ -324,7 +324,7 @@ def tokenize(line:str) -> list:
                 else:
                     resTokens.append(tokens[i])
             case '+':
-                if i+1 != len(tokens)-1:
+                if i+1 != len(tokens):
                     match tokens[i+1].token:
                         case '=':
                             resTokens.append(Token('+=', TokenType.ASOPERATOR))
@@ -334,7 +334,7 @@ def tokenize(line:str) -> list:
                 else:
                     resTokens.append(tokens[i])
             case '-':
-                if i+1 != len(tokens)-1:
+                if i+1 != len(tokens):
                     match tokens[i+1].token:
                         case '=':
                             resTokens.append(Token('-=', TokenType.ASOPERATOR))
@@ -344,7 +344,7 @@ def tokenize(line:str) -> list:
                 else:
                     resTokens.append(tokens[i])
             case '*':
-                if i+1 != len(tokens)-1:
+                if i+1 != len(tokens):
                     match tokens[i+1].token:
                         case '=':
                             resTokens.append(Token('*=', TokenType.ASOPERATOR))
@@ -354,7 +354,7 @@ def tokenize(line:str) -> list:
                 else:
                     resTokens.append(tokens[i])
             case '/':
-                if i+1 != len(tokens)-1:
+                if i+1 != len(tokens):
                     match tokens[i+1].token:
                         case '=':
                             resTokens.append(Token('/=', TokenType.ASOPERATOR))
@@ -364,7 +364,7 @@ def tokenize(line:str) -> list:
                 else:
                     resTokens.append(tokens[i])
             case '>':
-                if i+1 != len(tokens)-1:
+                if i+1 != len(tokens):
                     match tokens[i+1].token:
                         case '=':
                             resTokens.append(Token('>=', TokenType.COPERATOR))
@@ -374,7 +374,7 @@ def tokenize(line:str) -> list:
                 else:
                     resTokens.append(tokens[i])
             case '<':
-                if i+1 != len(tokens)-1:
+                if i+1 != len(tokens):
                     match tokens[i+1].token:
                         case '=':
                             resTokens.append(Token('<=', TokenType.COPERATOR))
@@ -384,7 +384,7 @@ def tokenize(line:str) -> list:
                 else:
                     resTokens.append(tokens[i])
             case '!':
-                if i+1 != len(tokens)-1:
+                if i+1 != len(tokens):
                     match tokens[i+1].token:
                         case '=':
                             resTokens.append(Token('!=', TokenType.COPERATOR))
