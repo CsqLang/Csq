@@ -41,7 +41,7 @@ def is_var_decl(tokens) -> bool:
     return False
 
 def is_print_stmt(tokens) -> bool:
-    if len(tokens) >= 1 and tokens[0].token == TokenType.print:
+    if len(tokens) >= 1 and tokens[0].type == TokenType.KEYWORD:
         return True
     return False
 
@@ -51,7 +51,7 @@ def is_type_stmt(tokens) -> bool:
     return False
 
 def is_var_assign(tokens) -> bool:
-    if tokens[0].type == TokenType.IDENTIFIER and tokens[1].token == "=":
+    if len(tokens) >= 2 and tokens[0].type == TokenType.IDENTIFIER and tokens[1].token == "=":
         return True
     return False
 
@@ -155,7 +155,22 @@ def parse_PrintStmt(tokens) -> PrintNode:
     return node
 
 def parse_IfStmt(tokens) -> IfStmtNode:
-    pass
+    tokens.pop(len(tokens)-1)
+
+    node = IfStmtNode()
+    node.condition.tokens = tokens[1:]
+    return node
+
+def parse_ElifStmt(tokens) -> ElifStmtNode:
+    tokens.pop(len(tokens)-1)
+
+    node = ElifStmtNode()
+    node.condition.tokens = tokens[1:]
+    return node
+
+def parse_ElseStmt():
+    node = ElseStmtNode()
+    return node
 
 def Compile(code:list) -> str:
 
@@ -202,6 +217,18 @@ def Compile(code:list) -> str:
                 code_string += node.visit() + ";\n"
             
             case NodeTypes.IF_STMT:
-                pass
+                node = parse_IfStmt(line)
+                code_string += node.visit() + "{\n"
+                scope_stack.append(Scope(indent_level+1,NodeTypes.IF_STMT,0))
+
+            case NodeTypes.ELIF_STMT:
+                node = parse_ElifStmt(line)
+                code_string += node.visit() + "{\n"
+                scope_stack.append(Scope(indent_level+1,NodeTypes.ELIF_STMT,0))
+            
+            case NodeTypes.ELSE_STMT:
+                node = parse_ElseStmt(line)
+                code_string += node.visit() + "{\n"
+                scope_stack.append(Scope(indent_level+1,NodeTypes.ELSE_STMT,0))
             
     return code_string
