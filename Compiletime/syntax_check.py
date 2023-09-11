@@ -9,17 +9,17 @@ def check_VarDecl(tokens):
     Format:
     <identifier> := <Expr>
     '''
-    valid = 0
+    valid = False
     if tokens[0].type == TokenType.IDENTIFIER:
-        valid = 1
+        valid = True
 
         if tokens[1].token == ':=':
-            for i in tokens[1::]:
+            for i in tokens[1:]:
                 if i.type == TokenType.KEYWORD:
-                    valid = 0
+                    valid = False
                     break
         else:
-            valid = 0
+            valid = False
     return valid
 
 def check_VarAssign(tokens):
@@ -27,15 +27,15 @@ def check_VarAssign(tokens):
     Format:
     <identifier> = <Expr>
     '''
-    valid = 0
+    valid = False
     if tokens[0].type == TokenType.IDENTIFIER:
-        valid = 1
+        valid = True
 
         if tokens[1].token == '=':
-            for i in tokens[1::]:
+            for i in tokens[1:]:
                 if i.type == TokenType.KEYWORD:
-                    valid = 0
+                    valid = False
                     break
         else:
-            valid = 0
+            valid = False
     return valid
