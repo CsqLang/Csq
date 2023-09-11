@@ -268,25 +268,29 @@ def make_token(token: str, token_type: int) -> Token:
 
 
 def tokenize(line: str) -> list:
-    tokens = list()
-    current_string, identifier, number, code_ = "", "", "", ""
-    current_token = ""
-    identifier_ = 0
-    value_end = 0
+    """
+    Tokenizes a line of code.
+
+    Args:
+        line (str): The input line to tokenize.
+
+    Returns:
+        list: A list of Token objects representing the tokens in the line.
+    """
+    tokens = []
+    current_string = identifier = number = code_ = current_token = ""
+    identifier_ = value_end = indentCount = 0
     current_line = 1
-    indentCount = 0
     indent_ended = True
-    indentation_present = False
-    char_start = False
-    string_presence = False
-    comment = False
+    indentation_present = char_start = string_presence = comment = False
 
     # Try to skip parsing a comment since it will be ignored.
     if isComment(line[0]):
         tokens = []
+
     # Main logic
     else:
-        # indent is there
+        # Check for initial indentation
         if line[0] == " ":
             indentation_present = True
             for char in line:
@@ -295,12 +299,9 @@ def tokenize(line: str) -> list:
                     indentCount = indentCount + 1
                 else:
                     indentation_present = False
-        # print(indentCount)
-        line = line[indentCount::]
-        # Proceed Futher
-        i = 0
-        while i < len(line):
-            char = line[i]
+
+        line = line[indentCount::]  # Remove initial indentation
+        for char in line:
             if (
                 char == " "
                 or char == "\n"
@@ -310,12 +311,12 @@ def tokenize(line: str) -> list:
             ):
                 if char == "\n":
                     tokens.append(Token("\n", TokenType.NEWLINE))
-                if (
-                    len(current_token) > 0
-                ):  # if non-empty string, check if it matches any operator, keyword, or value
+                if len(current_token) > 0:
+                    # If non-empty string, check if it matches any operator, keyword, or value
                     tokens.append(check(current_token, current_line))
                     current_token = ""
-                if isSymbolLaterals(char):  # handle symbol
+                if isSymbolLaterals(char):
+                    # Handle symbols
                     tokens.append(check(char, current_line))
             elif char == "'" and string_presence == 0:
                 string_presence = 1
@@ -326,8 +327,9 @@ def tokenize(line: str) -> list:
                 current_string += char
             else:
                 current_token += char
-            i += 1
-        if len(current_token) > 0 and string_presence == 0:  # process the last string
+
+        if len(current_token) > 0 and string_presence == 0:
+            # Process the last string
             tokens.append(check(current_token, current_line))
         if string_presence:
             error.SyntaxError(current_line, "unclosed string")
@@ -431,10 +433,9 @@ def tokenize(line: str) -> list:
             case _:
                 resTokens.append(tokens[i])
         i += 1
+
     return resTokens
 
-def to_str(tokens = []):
-    s = ""
-    for i in tokens:
-        s += i.token
-    return s
+
+def to_str(tokens=[]):
+    return "".join(map(str, tokens))
