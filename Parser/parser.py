@@ -1,29 +1,31 @@
-'''
+"""
         
     Parser for Csq4.2
 
-'''
+"""
 
 from AST.ast import *
+from Compiletime.error import (Error, IndentationError, NameError, SyntaxError,
+                               TypeError)
 from Tokenizer.tokenizer import TokenType
-from Compiletime.error import TypeError, IndentationError, NameError, SyntaxError, Error
 
 
-class Scope():
-    
-    def __init__(self,level:int,of_:NodeTypes,ended:bool) -> None:
+class Scope:
+    def __init__(self, level: int, of_: NodeTypes, ended: bool) -> None:
         self.indent_level = level
         self.of = of_
-        self.ended = ended 
-        
+        self.ended = ended
+
+
 def get_indent_level(tokens) -> int:
     indent_ = 0
     for token in tokens:
         if token.type == TokenType.INDENT:
-            indent_ +=1
+            indent_ += 1
         else:
             break
     return indent_
+
 
 def remove_indent(tokens) -> list:
     tok = []
@@ -36,49 +38,66 @@ def remove_indent(tokens) -> list:
 
 
 def is_var_decl(tokens) -> bool:
-    if len(tokens) >= 2 and tokens[0].type == TokenType.IDENTIFIER and tokens[1].token == ":=":
+    if (
+        len(tokens) >= 2
+        and tokens[0].type == TokenType.IDENTIFIER
+        and tokens[1].token == ":="
+    ):
         return True
     return False
+
 
 def is_print_stmt(tokens) -> bool:
     if len(tokens) >= 1 and tokens[0].type == TokenType.KEYWORD:
         return True
     return False
 
+
 def is_type_stmt(tokens) -> bool:
     if len(tokens) >= 1 and tokens[0].token == TokenType.type:
         return True
     return False
 
+
 def is_var_assign(tokens) -> bool:
-    if len(tokens) >= 2 and tokens[0].type == TokenType.IDENTIFIER and tokens[1].token == "=":
+    if (
+        len(tokens) >= 2
+        and tokens[0].type == TokenType.IDENTIFIER
+        and tokens[1].token == "="
+    ):
         return True
     return False
+
 
 def is_if_stmt(tokens) -> bool:
     if len(tokens) >= 1 and tokens[0].token == "if":
         return True
     return False
 
+
 def is_elif_stmt(tokens):
     if len(tokens) >= 1 and tokens[0].token == "elif":
         return True
     return False
+
 
 def is_else_stmt(tokens) -> bool:
     if len(tokens) >= 1 and tokens[0].token == "else":
         return True
     return False
 
+
 def is_return_stmt(tokens) -> bool:
     if len(tokens) >= 1 and tokens[0].token == "return":
         return True
     return False
 
+
 def is_while_stmt(tokens) -> bool:
     if len(tokens) >= 1 and tokens[0].token == "while":
         return True
     return False
+
 
 def is_access_stmt(tokens) -> bool:
     is_access = False
@@ -89,17 +108,25 @@ def is_access_stmt(tokens) -> bool:
                 break
     return is_access
 
+
 def is_access_update(tokens) -> bool:
-    if len(tokens) >= 5 and tokens[0].type == TokenType.IDENTIFIER and tokens[1].token == "[" and tokens[4].token == "=":
+    if (
+        len(tokens) >= 5
+        and tokens[0].type == TokenType.IDENTIFIER
+        and tokens[1].token == "["
+        and tokens[4].token == "="
+    ):
         return True
     else:
         return False
+
 
 def is_function(tokens) -> bool:
     if len(tokens) >= 1 and tokens[0].token == "def":
         return True
     else:
         return False
+
 
 def is_import_stmt(tokens) -> bool:
     if len(tokens) >= 1 and tokens[0].token == "import":
@@ -134,14 +161,18 @@ def statement_type(tokens) -> NodeTypes:
     else:
         return NodeTypes.EXPR
 
-'''
+
+"""
 Parsing units
-'''
+"""
+
+
 def parse_VarDecl(tokens) -> VarDeclNode:
     node = VarDeclNode()
     node.identifier = tokens[0].token
     node.value.tokens = tokens[2:]
     return node
+
 
 def parse_VarAssign(tokens) -> VarAssignNode:
     node = VarAssignNode()
@@ -149,31 +180,35 @@ def parse_VarAssign(tokens) -> VarAssignNode:
     node.value.tokens = tokens[2:]
     return node
 
+
 def parse_PrintStmt(tokens) -> PrintNode:
     node = PrintNode()
     node.value.tokens = tokens[1:]
     return node
 
+
 def parse_IfStmt(tokens) -> IfStmtNode:
-    tokens.pop(len(tokens)-1)
+    tokens.pop(len(tokens) - 1)
 
     node = IfStmtNode()
     node.condition.tokens = tokens[1:]
     return node
 
+
 def parse_ElifStmt(tokens) -> ElifStmtNode:
-    tokens.pop(len(tokens)-1)
+    tokens.pop(len(tokens) - 1)
 
     node = ElifStmtNode()
     node.condition.tokens = tokens[1:]
     return node
 
+
 def parse_ElseStmt():
     node = ElseStmtNode()
     return node
 
-def Compile(code:list) -> str:
 
+def Compile(code: list) -> str:
     # Resulting code
     code_string = ""
 
@@ -207,28 +242,27 @@ def Compile(code:list) -> str:
         line = remove_indent(line)
 
         match statement_type(line):
-
             case NodeTypes.VAR_DECL:
                 node = parse_VarDecl(line)
                 code_string += node.visit() + "\n"
-                
+
             case NodeTypes.VAR_ASSIGN:
                 node = parse_VarAssign(line)
                 code_string += node.visit() + "\n"
-            
+
             case NodeTypes.IF_STMT:
                 node = parse_IfStmt(line)
                 code_string += node.visit() + "\n"
-                scope_stack.append(Scope(indent_level+1,NodeTypes.IF_STMT,0))
+                scope_stack.append(Scope(indent_level + 1, NodeTypes.IF_STMT, 0))
 
             case NodeTypes.ELIF_STMT:
                 node = parse_ElifStmt(line)
                 code_string += node.visit() + "\n"
-                scope_stack.append(Scope(indent_level+1,NodeTypes.ELIF_STMT,0))
-            
+                scope_stack.append(Scope(indent_level + 1, NodeTypes.ELIF_STMT, 0))
+
             case NodeTypes.ELSE_STMT:
                 node = parse_ElseStmt(line)
                 code_string += node.visit() + "\n"
-                scope_stack.append(Scope(indent_level+1,NodeTypes.ELSE_STMT,0))
-            
+                scope_stack.append(Scope(indent_level + 1, NodeTypes.ELSE_STMT, 0))
+
     return code_string

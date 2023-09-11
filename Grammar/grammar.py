@@ -1,4 +1,3 @@
-
 # Identifiers lookup
 IDENTIFIERS = r"^[a-zA-Z_][a-zA-Z0-9_]*$"
 
@@ -20,6 +19,14 @@ SYMBOLS = ["{", "}", "(", ")", "[", "]", ",", "~", "@", "$", "&", "!", ":", ";",
 
 # Keyword lookup
 KEYWORDS_TABLE = [
-    "if", "elif", "else", "def", "for", "while", "return",'in',
-    'import', 'cimport'
+    "if",
+    "elif",
+    "else",
+    "def",
+    "for",
+    "while",
+    "return",
+    "in",
+    "import",
+    "cimport",
 ]

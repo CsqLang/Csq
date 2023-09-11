@@ -1,10 +1,13 @@
-'''
+"""
 Python implementation of Csq Tokenizer
-'''
-from Grammar.grammar import *
-from Compiletime import error
+"""
 import re
-# Type of Tokens  
+
+from Compiletime import error
+from Grammar.grammar import *
+
+
+# Type of Tokens
 class TokenType:
     KEYWORD = 1
     IDENTIFIER = 2
@@ -15,12 +18,13 @@ class TokenType:
     ASOPERATOR = 7
     COPERATOR = 8
     LOPERATOR = 9
-    COMMENT =10
+    COMMENT = 10
     INDENT = 11
     NEWLINE = 12
     ACCESS_OPERATOR = 13
     UNKNOWN = 14
     BLANK = 15
+
 
 class STOKEN:
     LBRACE = 1
@@ -54,94 +58,114 @@ class STOKEN:
     FSLASH = 29
     WALRUS = 30
 
+
 class Token:
-    def __init__(self,token:str, token_type:int = 0) -> None:
+    def __init__(self, token: str, token_type: int = 0) -> None:
         self.token = token
         self.type = token_type
-    def __str__(self):
-        return "('" + self.token + "', " + str(self.type) + ")" 
 
-def addToken(value:str,token_type:int) -> Token:
-    token = Token('')
+    def __str__(self):
+        return "('" + self.token + "', " + str(self.type) + ")"
+
+
+def addToken(value: str, token_type: int) -> Token:
+    token = Token("")
     token.token = value
     token.type = token_type
     return token
 
 
-def isIdentifier(val:str) -> bool:
-    return re.match(pattern=IDENTIFIERS,string=val)
+def isIdentifier(val: str) -> bool:
+    return re.match(pattern=IDENTIFIERS, string=val)
 
-def isInt(val:str) -> bool:
-    return re.match(pattern=INTEGER,string=val)
 
-def isDecimal(val:str) -> bool:
-    return re.match(pattern=DECIMAL,string=val)
+def isInt(val: str) -> bool:
+    return re.match(pattern=INTEGER, string=val)
 
-def isValue(val:str) -> bool:
+
+def isDecimal(val: str) -> bool:
+    return re.match(pattern=DECIMAL, string=val)
+
+
+def isValue(val: str) -> bool:
     if isDecimal(val) or isInt(val):
         return True
     else:
         return False
 
-def isComment(val:str) -> bool:
+
+def isComment(val: str) -> bool:
     return val == "#"
 
-def isLogicalOperator(val:str) -> bool:
+
+def isLogicalOperator(val: str) -> bool:
     if val in LOGICAL_OPERATORS:
         return True
     else:
         return False
 
-def isAssignmentOperator(val:str) -> bool:
+
+def isAssignmentOperator(val: str) -> bool:
     if val in ASSIGNMENT_OPERATORS:
         return True
     else:
         return False
 
-def isComparisonOperator(val:str) -> bool:
+
+def isComparisonOperator(val: str) -> bool:
     if val in COMPARISON_OPERATORS:
         return True
     else:
         return False
 
-def isArithmeticOperator(val:str) -> bool:
+
+def isArithmeticOperator(val: str) -> bool:
     if val in ARITHMETIC_OPERATORS:
         return True
     else:
         return False
 
-def isOperator(val:str) -> bool:
-    if (isArithmeticOperator(val) or isLogicalOperator(val) or 
-        isAssignmentOperator(val) or isComparisonOperator(val)):
+
+def isOperator(val: str) -> bool:
+    if (
+        isArithmeticOperator(val)
+        or isLogicalOperator(val)
+        or isAssignmentOperator(val)
+        or isComparisonOperator(val)
+    ):
         return True
     else:
         return False
 
-def isSymbol(val:str) -> bool:
+
+def isSymbol(val: str) -> bool:
     if val in SYMBOLS:
         return True
     else:
         return False
 
-def isSymbolLaterals(val:str) -> bool:
+
+def isSymbolLaterals(val: str) -> bool:
     if isSymbol(val) or isOperator(val):
         return True
     else:
         return False
-    
-def isKeyword(val:str) -> bool:
+
+
+def isKeyword(val: str) -> bool:
     if val in KEYWORDS_TABLE:
         return True
     else:
         return False
-    
-def check(val:str,line:int) -> Token:
+
+
+def check(val: str, line: int) -> Token:
     """check token which type of this"""
-    token = Token('')
+    token = Token("")
     token.token = val
     if isKeyword(val):
         token.type = TokenType.KEYWORD
-    
+
     elif isOperator(val):
         if isArithmeticOperator(val):
             token.type = TokenType.AROPERATOR
@@ -151,29 +175,29 @@ def check(val:str,line:int) -> Token:
             token.type = TokenType.ASOPERATOR
         elif isComparisonOperator(val):
             token.type = TokenType.COPERATOR
-    
+
     elif isValue(val):
         token.type = TokenType.VALUE
-    
+
     elif isIdentifier(val):
         token.type = TokenType.IDENTIFIER
-    
+
     elif isSymbol(val):
         token.type = TokenType.SYMBOL
-    
+
     else:
         token.type = TokenType.UNKNOWN
 
-
     return token
 
-def symbolType(token:Token) -> STOKEN:
+
+def symbolType(token: Token) -> STOKEN:
     """Brief token check and about the symbole"""
     match token.type:
         case TokenType.ASOPERATOR:
             if token.token == "=":
                 return STOKEN.EQUAL
-        
+
         case TokenType.ASOPERATOR:
             if token.token == "+":
                 return STOKEN.PLUS
@@ -183,18 +207,18 @@ def symbolType(token:Token) -> STOKEN:
                 return STOKEN.STAR
             elif token.token == "/":
                 return STOKEN.FSLASH
-            elif token.token =="%":
+            elif token.token == "%":
                 return STOKEN.MOD
             elif token.token == "^":
                 return STOKEN.HAT
-            
+
         case TokenType.SYMBOL:
             if token.token == "!":
                 return STOKEN.NOT
             elif token.token == "|":
                 return STOKEN.VBAR
             elif token.token == "&":
-                return STOKEN.AMPER 
+                return STOKEN.AMPER
             elif token.token == "{":
                 return STOKEN.LBRACE
             elif token.token == "}":
@@ -217,7 +241,7 @@ def symbolType(token:Token) -> STOKEN:
                 return STOKEN.SEMI
             elif token.token == "~":
                 return STOKEN.TILDE
-        
+
         case TokenType.LOPERATOR:
             if token.token == "or":
                 return STOKEN.OR
@@ -231,19 +255,22 @@ def symbolType(token:Token) -> STOKEN:
                 return STOKEN.GREATER
             elif token.token == "<":
                 return STOKEN.LESSER
-            
+
         case _:
             return STOKEN.NOTSYMBOL
-def make_token(token:str,token_type:int) -> Token:
+
+
+def make_token(token: str, token_type: int) -> Token:
     t = Token()
     t.token = token
     t.type = token_type
     return t
 
-def tokenize(line:str) -> list:
+
+def tokenize(line: str) -> list:
     tokens = list()
-    current_string, identifier,number, code_ = '','','',''
-    current_token = ''
+    current_string, identifier, number, code_ = "", "", "", ""
+    current_token = ""
     identifier_ = 0
     value_end = 0
     current_line = 1
@@ -254,34 +281,42 @@ def tokenize(line:str) -> list:
     string_presence = False
     comment = False
 
-    #Try to skip parsing a comment since it will be ignored.
+    # Try to skip parsing a comment since it will be ignored.
     if isComment(line[0]):
         tokens = []
-    #Main logic
+    # Main logic
     else:
         # indent is there
-        if line[0] == ' ':
+        if line[0] == " ":
             indentation_present = True
             for char in line:
-                if char == ' ' and indentation_present:
-                    tokens.append(Token(' ', TokenType.INDENT))
+                if char == " " and indentation_present:
+                    tokens.append(Token(" ", TokenType.INDENT))
                     indentCount = indentCount + 1
                 else:
                     indentation_present = False
         # print(indentCount)
         line = line[indentCount::]
-        #Proceed Futher
+        # Proceed Futher
         i = 0
         while i < len(line):
             char = line[i]
-            if char == ' ' or char == '\n' or char == '\t' or isSymbolLaterals(char) and string_presence == False:
-                if char == '\n':
-                    tokens.append(Token("\n",TokenType.NEWLINE))
-                if len(current_token) > 0: # if non-empty string, check if it matches any operator, keyword, or value
+            if (
+                char == " "
+                or char == "\n"
+                or char == "\t"
+                or isSymbolLaterals(char)
+                and string_presence == False
+            ):
+                if char == "\n":
+                    tokens.append(Token("\n", TokenType.NEWLINE))
+                if (
+                    len(current_token) > 0
+                ):  # if non-empty string, check if it matches any operator, keyword, or value
                     tokens.append(check(current_token, current_line))
                     current_token = ""
-                if isSymbolLaterals(char) : # handle symbol
-                    tokens.append(check(char,current_line))
+                if isSymbolLaterals(char):  # handle symbol
+                    tokens.append(check(char, current_line))
             elif char == "'" and string_presence == 0:
                 string_presence = 1
             elif char == "'" and string_presence:
@@ -291,109 +326,109 @@ def tokenize(line:str) -> list:
                 current_string += char
             else:
                 current_token += char
-            i+=1   
-        if len(current_token) > 0 and string_presence==0: # process the last string
+            i += 1
+        if len(current_token) > 0 and string_presence == 0:  # process the last string
             tokens.append(check(current_token, current_line))
         if string_presence:
             error.SyntaxError(current_line, "unclosed string")
-        
-    #Final tokens
+
+    # Final tokens
     resTokens = []
-    
+
     i = 0
     while i < len(tokens):
         match tokens[i].token:
-            case ':':
-                if i+1 != len(tokens):
-                    match tokens[i+1].token:
-                        case '=':
-                            resTokens.append(Token(':=', TokenType.ASOPERATOR))
-                            i+=1
+            case ":":
+                if i + 1 != len(tokens):
+                    match tokens[i + 1].token:
+                        case "=":
+                            resTokens.append(Token(":=", TokenType.ASOPERATOR))
+                            i += 1
                         case _:
                             resTokens.append(tokens[i])
                 else:
                     resTokens.append(tokens[i])
-            case '=':
-                if i+1 != len(tokens):
-                    match tokens[i+1].token:
-                        case '=':
-                            resTokens.append(Token('==', TokenType.COPERATOR))
-                            i+=1
+            case "=":
+                if i + 1 != len(tokens):
+                    match tokens[i + 1].token:
+                        case "=":
+                            resTokens.append(Token("==", TokenType.COPERATOR))
+                            i += 1
                         case _:
                             resTokens.append(tokens[i])
                 else:
                     resTokens.append(tokens[i])
-            case '+':
-                if i+1 != len(tokens):
-                    match tokens[i+1].token:
-                        case '=':
-                            resTokens.append(Token('+=', TokenType.ASOPERATOR))
-                            i+=1
+            case "+":
+                if i + 1 != len(tokens):
+                    match tokens[i + 1].token:
+                        case "=":
+                            resTokens.append(Token("+=", TokenType.ASOPERATOR))
+                            i += 1
                         case _:
                             resTokens.append(tokens[i])
                 else:
                     resTokens.append(tokens[i])
-            case '-':
-                if i+1 != len(tokens):
-                    match tokens[i+1].token:
-                        case '=':
-                            resTokens.append(Token('-=', TokenType.ASOPERATOR))
-                            i+=1
+            case "-":
+                if i + 1 != len(tokens):
+                    match tokens[i + 1].token:
+                        case "=":
+                            resTokens.append(Token("-=", TokenType.ASOPERATOR))
+                            i += 1
                         case _:
                             resTokens.append(tokens[i])
                 else:
                     resTokens.append(tokens[i])
-            case '*':
-                if i+1 != len(tokens):
-                    match tokens[i+1].token:
-                        case '=':
-                            resTokens.append(Token('*=', TokenType.ASOPERATOR))
-                            i+=1
+            case "*":
+                if i + 1 != len(tokens):
+                    match tokens[i + 1].token:
+                        case "=":
+                            resTokens.append(Token("*=", TokenType.ASOPERATOR))
+                            i += 1
                         case _:
                             resTokens.append(tokens[i])
                 else:
                     resTokens.append(tokens[i])
-            case '/':
-                if i+1 != len(tokens):
-                    match tokens[i+1].token:
-                        case '=':
-                            resTokens.append(Token('/=', TokenType.ASOPERATOR))
-                            i+=1
+            case "/":
+                if i + 1 != len(tokens):
+                    match tokens[i + 1].token:
+                        case "=":
+                            resTokens.append(Token("/=", TokenType.ASOPERATOR))
+                            i += 1
                         case _:
                             resTokens.append(tokens[i])
                 else:
                     resTokens.append(tokens[i])
-            case '>':
-                if i+1 != len(tokens):
-                    match tokens[i+1].token:
-                        case '=':
-                            resTokens.append(Token('>=', TokenType.COPERATOR))
-                            i+=1
+            case ">":
+                if i + 1 != len(tokens):
+                    match tokens[i + 1].token:
+                        case "=":
+                            resTokens.append(Token(">=", TokenType.COPERATOR))
+                            i += 1
                         case _:
                             resTokens.append(tokens[i])
                 else:
                     resTokens.append(tokens[i])
-            case '<':
-                if i+1 != len(tokens):
-                    match tokens[i+1].token:
-                        case '=':
-                            resTokens.append(Token('<=', TokenType.COPERATOR))
-                            i+=1
+            case "<":
+                if i + 1 != len(tokens):
+                    match tokens[i + 1].token:
+                        case "=":
+                            resTokens.append(Token("<=", TokenType.COPERATOR))
+                            i += 1
                         case _:
                             resTokens.append(tokens[i])
                 else:
                     resTokens.append(tokens[i])
-            case '!':
-                if i+1 != len(tokens):
-                    match tokens[i+1].token:
-                        case '=':
-                            resTokens.append(Token('!=', TokenType.COPERATOR))
-                            i+=1
+            case "!":
+                if i + 1 != len(tokens):
+                    match tokens[i + 1].token:
+                        case "=":
+                            resTokens.append(Token("!=", TokenType.COPERATOR))
+                            i += 1
                         case _:
                             resTokens.append(tokens[i])
                 else:
                     resTokens.append(tokens[i])
             case _:
                 resTokens.append(tokens[i])
-        i+=1
+        i += 1
     return resTokens

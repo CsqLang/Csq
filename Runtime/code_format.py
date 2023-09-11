@@ -1,8 +1,9 @@
 """Read Write Tokens  Python implementation of Csq"""
 from Tokenizer.tokenizer import *
 
-def readCode(path:str) ->str:
-    """Read Csq Code File """
+
+def readCode(path: str) -> str:
+    """Read Csq Code File"""
     code = str()
     with open(path) as codefile:
         for line in codefile.readlines():
@@ -10,10 +11,11 @@ def readCode(path:str) ->str:
                 continue
             else:
                 code += line
-    
+
     return code
 
-#Not need of split() in python
+
+# Not need of split() in python
 # def split(string:str) -> list:
 #     tokens = list()
 
@@ -22,7 +24,8 @@ def readCode(path:str) ->str:
 
 #     return tokens
 
-def toTokens(code:str) -> list:
+
+def toTokens(code: str) -> list:
     tokens = list()
     statements = code.split("\n")
 
@@ -36,8 +39,7 @@ def toTokens(code:str) -> list:
     tokens.append(tokenize("ignore"))
     return tokens
 
-def writeCode(code:str,path:str) -> None:
+
+def writeCode(code: str, path: str) -> None:
     with open(path) as codefile:
         codefile.write(code)
-
-
