@@ -33,11 +33,12 @@ int main(int argc, char const *argv[]) {
   while (i < argc) {
     std::string file_name = argv[i];
     /* Check if file exists before doing anything to the file */
+    /* If a file doesn't exist, stop compilation */
 
     if (!file_exists(file_name)) {
       std::cerr << program_invocation_name << ": error: " << file_name
-                << " No such file or directory\n";
-      continue;
+                << " No such file or directory\nCompilation stopped\n";
+      break;
     }
 
     std::string abs_filepath = abs_path(file_name);
