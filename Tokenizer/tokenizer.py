@@ -432,3 +432,9 @@ def tokenize(line: str) -> list:
                 resTokens.append(tokens[i])
         i += 1
     return resTokens
+
+def to_str(tokens = []):
+    s = ""
+    for i in tokens:
+        s += i.token
+    return s
