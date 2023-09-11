@@ -251,8 +251,11 @@ def Compile(code: list) -> str:
                     print(SyntaxError(line_no, "invalid variable decl " + to_str(line)))
 
             case NodeTypes.VAR_ASSIGN:
-                node = parse_VarAssign(line)
-                code_string += node.visit() + "\n"
+                if check_VarAssign(line):
+                    node = parse_VarAssign(line)
+                    code_string += node.visit() + "\n"
+                else:
+                    print(SyntaxError(line_no, "invalid variable assignment " + to_str(line)))
 
             case NodeTypes.IF_STMT:
                 node = parse_IfStmt(line)
