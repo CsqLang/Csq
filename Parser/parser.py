@@ -1,13 +1,14 @@
-'''
+"""
         
     Parser for Csq4.2
 
-'''
+"""
 
 from AST.ast import *
-from Tokenizer.tokenizer import TokenType, to_str
-from Compiletime.error import TypeError, IndentationError, NameError, SyntaxError, Error
+from Compiletime.error import (Error, IndentationError, NameError, SyntaxError,
+                               TypeError)
 from Compiletime.syntax_check import *
+from Tokenizer.tokenizer import TokenType, to_str
 
 
 class Scope:
@@ -85,7 +86,6 @@ def is_else_stmt(tokens) -> bool:
     if len(tokens) >= 1 and tokens[0].token == "else":
         return True
     return False
-
 
 
 def is_return_stmt(tokens) -> bool:
@@ -255,7 +255,11 @@ def Compile(code: list) -> str:
                     node = parse_VarAssign(line)
                     code_string += node.visit() + "\n"
                 else:
-                    print(SyntaxError(line_no, "invalid variable assignment " + to_str(line)))
+                    print(
+                        SyntaxError(
+                            line_no, "invalid variable assignment " + to_str(line)
+                        )
+                    )
 
             case NodeTypes.IF_STMT:
                 node = parse_IfStmt(line)
