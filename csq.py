@@ -38,11 +38,11 @@ curr_dir = os.getcwd()
 
 file = open(path, 'r')
 #Read the file and process it
-raw_code = file.read()
+raw_code = file.readlines()
 
 # Convert it into stream of tokens
 lines = []
-for line in raw_code.split('\n'):
+for line in raw_code:
     lines.append(tokenize(line))
 
 # Moving forth to compilation
