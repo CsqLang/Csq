@@ -6,7 +6,7 @@ CXX := g++
 # -Wall -Wextra -pedantic
 # The flags are found in this Stackoverflow answer "https://stackoverflow.com/questions/5088460/f"
 
-# Define directories
+# Define directories and files
 SRC_DIR := . AST Builtin Parser Runtime Tokenizer include
 INC_DIR := AST Builtin Grammar Parser Runtime Tokenizer include
 OBJ_DIR := ./
@@ -15,9 +15,11 @@ HOME := ${HOME}
 BIN_DIR := $(HOME)/.local/bin
 INCLUDE_DIR := $(HOME)/.local/include/csq
 USER_SHELL := ${SHELL}
+DOC := _doc.py
 
 # List of source files
 SRC := $(foreach dir, $(SRC_DIR), $(wildcard $(dir)/*.cpp))
+PY_SRC := $(foreach dir, $(SRC_DIR), $(wildcard $(dir)/*.py))
 OBJ := $(SRC:%.cpp=$(OBJ_DIR)/%.o)
 
 # Check if the target is 'dev'
@@ -45,6 +47,14 @@ $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)
 
 dev: $(BIN)
+
+# Format the python code
+.PHONY: format
+format: $(PY_SRC)
+	@python -m black $^
+	@python -m isort $^
+	@python $(DOC)
+
 
 # Install to the ~/.local/ directory
 # Use the build.sh script to do the PATh and Include stuff

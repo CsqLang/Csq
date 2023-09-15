@@ -1,14 +1,11 @@
 import ast
 import glob
 import os
+import subprocess
 from itertools import zip_longest as t_iter
 from pathlib import Path
 
 import pycodestyle
-
-curr_dir = os.getcwd()
-DOC_LEN = 20
-
 """
 This file (or module) runs the files in the current
     directory and its subdirectories.
@@ -18,7 +15,15 @@ Every file that ends with '.py' is checked, this is to ensure that
 
 This file is run with no arguments, this can be changed later
     if need be.
+
+The following modules (external) are needed to run the code:
+    pycodestyle
+    pydocstyle
+
 """
+
+curr_dir = os.getcwd()
+DOC_LEN = 20
 
 
 class StyleChecker:
@@ -27,18 +32,34 @@ class StyleChecker:
     Functions and classes are the ones considered.
     They needed arguments are supplied when each individual
         method is called
+
+
     """
 
     @staticmethod
     def file_code_style(file_path):
-        """Check for files whole files conformity to the style(s)"""
+        """Check for files whole files conformity to the style(s)
+
+        :param file_path: The name (or absolute path) of the file path
+
+        """
         StyleChecker.__file = file_path
         style_checker = pycodestyle.StyleGuide(config_file="setup.cfg")
-        result = style_checker.check_files([file_path])
+        style_checker.check_files([file_path])
+        """
+        I couldn't figure out how to run the rest of the commands,
+            in a script like manner, so I'll just run them using
+            subprocess
+        """
+        subprocess.run(["pydocstyle", file_path])
 
     @staticmethod
     def function_code_style(func_):
-        """Check for functions conformity to the style(s)"""
+        """Check for functions conformity to the style(s)
+
+        :param func_: The function(s) found in the file(s)
+
+        """
         func_doc = func_.__doc__
         f_ = Path(StyleChecker.__file).relative_to(curr_dir)
         if (len(func_doc)) < DOC_LEN:
@@ -46,7 +67,11 @@ class StyleChecker:
 
     @staticmethod
     def class_code_style(class_):
-        """Check for classes conformity to the style(s)"""
+        """Check for classes conformity to the style(s)
+
+        :param class_: Class(es) found in the file
+
+        """
         class_doc = class_.__doc__
         f_ = Path(StyleChecker.__file).relative_to(curr_dir)
         if (len(class_doc)) < DOC_LEN:
@@ -54,9 +79,14 @@ class StyleChecker:
 
 
 def collect_names(file_path, node_type):
-    """Collect the names of the nodes in a file
+    """Collect the names of the nodes in a file.
 
     The nodes include classes and functions which are later used
+        in the script
+
+    :param file_path: The location of the file absolute by default
+    :param node_type: The type of the object e.g class or function
+
     """
     with open(file_path, "r") as file:
         source_code = file.read()
@@ -77,11 +107,14 @@ class NameCollector(ast.NodeVisitor):
         self.node_type = node_type
 
     def visit(self, node):
-        """The function that visits each node
+        """Visit each node in a file.
 
-        It appends the name of the node to its name
+        The function appends the name of the node to its name
             e.g if the node is a function, it is appended to
             function array
+
+        :param node: The type of the object
+
         """
         if isinstance(node, self.node_type):
             self.names.append(node.name)
@@ -89,7 +122,6 @@ class NameCollector(ast.NodeVisitor):
 
 
 py_files = glob.glob(os.path.join(curr_dir, "**/*.py"), recursive=True)
-
 
 if __name__ == "__main__":
     for file in py_files:
