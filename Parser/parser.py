@@ -5,10 +5,9 @@
 """
 
 from AST.ast import *
-from Compiletime.error import (Error, IndentationError, NameError, SyntaxError,
-                               TypeError)
+from Tokenizer.tokenizer import TokenType, to_str, Token
+from Compiletime.error import TypeError, IndentationError, NameError, SyntaxError, Error
 from Compiletime.syntax_check import *
-from Tokenizer.tokenizer import Token, TokenType, to_str
 
 
 class Scope:
@@ -86,6 +85,7 @@ def is_else_stmt(tokens) -> bool:
     if len(tokens) >= 1 and tokens[0].token == "else":
         return True
     return False
+
 
 
 def is_return_stmt(tokens) -> bool:
@@ -167,41 +167,33 @@ def statement_type(tokens) -> NodeTypes:
 Parsing units
 """
 
-
 def parse_ExprNode(tokens) -> ExprNode:
     node = ExprNode()
     i = 0
     while i < len(tokens):
         if tokens[i].type == TokenType.IDENTIFIER:
-            if i + 1 < len(tokens):
-                if tokens[i + 1].token == "(":
-                    """
+            if i+1 < len(tokens):
+                if tokens[i+1].token == "(":
+                    '''
                     It's a function then
-                    """
-
+                    '''
+                    
                     node.tokens.append(Token(tokens[i].token + "(", TokenType.BLANK))
                     i += 1
                 else:
-                    node.tokens.append(
-                        Token('id("' + tokens[i].token + '")', TokenType.BLANK)
-                    )
+                    node.tokens.append(Token("id(\"" + tokens[i].token + "\")", TokenType.BLANK))
             else:
-                node.tokens.append(
-                    Token('id("' + tokens[i].token + '")', TokenType.BLANK)
-                )
+                node.tokens.append(Token("id(\"" + tokens[i].token + "\")", TokenType.BLANK))
 
         elif tokens[i].type == TokenType.STR or tokens[i].type == TokenType.VALUE:
             if tokens[i].type == TokenType.STR:
-                node.tokens.append(
-                    Token("s_val(" + tokens[i].token + ")", TokenType.BLANK)
-                )
+                node.tokens.append(Token("s_val(" + tokens[i].token + ")", TokenType.BLANK))
             else:
-                node.tokens.append(
-                    Token("f_val(" + tokens[i].token + ")", TokenType.BLANK)
-                )
+                node.tokens.append(Token("f_val(" + tokens[i].token + ")", TokenType.BLANK))
         else:
             node.tokens.append(tokens[i])
-        i += 1
+        i+=1
+
 
     return node
 
@@ -233,7 +225,7 @@ def parse_IfStmt(tokens) -> IfStmtNode:
     tokens.pop(len(tokens) - 1)
 
     node = IfStmtNode()
-    node.condition.tokens = tokens[1:]
+    node.condition.tokens = tokens[1:len(tokens)]
     node.condition = parse_ExprNode(node.condition.tokens)
     return node
 
@@ -270,7 +262,7 @@ def Compile(code: list) -> str:
     for line in code:
         # Get the current scope by finding indents
         indent_level = get_indent_level(line)
-
+        
         # Work with the indentation levels
         while indent_level != scope_stack[-1].indent_level:
             if scope_stack[-1].of == NodeTypes.FUN_DECL:
@@ -298,11 +290,7 @@ def Compile(code: list) -> str:
                     node = parse_VarAssign(line)
                     code_string += node.visit() + "\n"
                 else:
-                    print(
-                        SyntaxError(
-                            line_no, "invalid variable assignment " + to_str(line)
-                        )
-                    )
+                    print(SyntaxError(line_no, "invalid variable assignment " + to_str(line)))
 
             case NodeTypes.IF_STMT:
                 node = parse_IfStmt(line)
@@ -318,17 +306,12 @@ def Compile(code: list) -> str:
                 node = parse_ElseStmt(line)
                 code_string += node.visit() + "\n"
                 scope_stack.append(Scope(indent_level + 1, NodeTypes.ELSE_STMT, 0))
-
+            
             case NodeTypes.PRINT:
                 if check_PrintStmt(line):
                     node = parse_PrintStmt(line)
                     code_string += node.visit() + "\n"
                 else:
-                    print(
-                        SyntaxError(
-                            line_no,
-                            "invalid synatx for print statement\n(keywords and assignment operators arent allowed)",
-                        )
-                    )
-        line_no += 1
+                    print(SyntaxError(line_no, 'invalid syntax for print statement\n(keywords and assignment operators arent allowed)'))
+        line_no +=1
     return code_string
