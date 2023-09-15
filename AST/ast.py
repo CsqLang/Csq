@@ -1,7 +1,7 @@
 """
 Python implementation of Csq AST
 """
-
+from Tokenizer.tokenizer import to_str
 
 # Node Types
 class NodeTypes:
@@ -69,7 +69,7 @@ class VarAssignNode(ASTNode):
         self.type = NodeTypes.VAR_ASSIGN
 
     def visit(self):
-        return 'assignVar("' + self.identifier + '","any",' + self.value.visit() + ");"
+        return 'assignVar("' + self.identifier + '",' + self.value.visit() + ");"
 
 
 class BlockNode(ASTNode):
@@ -94,7 +94,7 @@ class IfStmtNode(ASTNode):
         self.type = NodeTypes.IF_STMT
 
     def visit(self) -> str:
-        return "if(" + self.condition.visit() + "){"
+        return "if(_cond_(" + self.condition.visit() + ")){"
 
 
 class ElseStmtNode(ASTNode):
