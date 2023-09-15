@@ -9,3 +9,6 @@ indent_style = space
 
 [*.{md, markdown}]
 indent_style = tab
+
+[Makefile]
+indent_style = tab
