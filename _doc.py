@@ -6,6 +6,7 @@ from itertools import zip_longest as t_iter
 from pathlib import Path
 
 import pycodestyle
+
 """
 This file (or module) runs the files in the current
     directory and its subdirectories.

@@ -41,5 +41,5 @@ def toTokens(code: str) -> list:
 
 
 def writeCode(code: str, path: str) -> None:
-    with open(path) as codefile:
+    with open(path, "w") as codefile:
         codefile.write(code)
