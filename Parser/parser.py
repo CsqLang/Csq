@@ -147,8 +147,6 @@ def statement_type(tokens) -> NodeTypes:
         return NodeTypes.ELIF_STMT
     elif is_else_stmt(tokens):
         return NodeTypes.ELSE_STMT
-    elif is_print_stmt(tokens):
-        return NodeTypes.PRINT
     elif is_while_stmt(tokens):
         return NodeTypes.WHILE_STMT
     elif is_access_update(tokens):
@@ -159,6 +157,8 @@ def statement_type(tokens) -> NodeTypes:
         return NodeTypes.RETURN
     elif is_import_stmt(tokens):
         return NodeTypes.IMPORT
+    elif is_print_stmt(tokens):
+        return NodeTypes.PRINT
     else:
         return NodeTypes.EXPR
 
@@ -243,6 +243,13 @@ def parse_ElseStmt():
     node = ElseStmtNode()
     return node
 
+def parse_WhileStmt(tokens) -> WhileStmtNode:
+    tokens.pop(len(tokens) - 1)
+
+    node = WhileStmtNode()
+    node.condition = parse_ExprNode(tokens[1:])
+    return node
+
 
 def Compile(code: list) -> str:
     #adding an additional line to make sure indents work properly.
@@ -315,11 +322,21 @@ def Compile(code: list) -> str:
                 code_string += node.visit() + "\n"
                 scope_stack.append(Scope(indent_level + 1, NodeTypes.ELSE_STMT, 0))
             
+            case NodeTypes.WHILE_STMT:
+                node = parse_WhileStmt(line)
+                code_string += node.visit() + "\n"
+                scope_stack.append(Scope(indent_level + 1, NodeTypes.WHILE_STMT, 0))
+
             case NodeTypes.PRINT:
                 if check_PrintStmt(line):
                     node = parse_PrintStmt(line)
                     code_string += node.visit() + "\n"
                 else:
                     print(SyntaxError(line_no, 'invalid syntax for print statement\n(keywords and assignment operators arent allowed)'))
+        
+            case _:
+                node = parse_ExprNode(line)
+                code_string += node.visit() + "\n"
+
         line_no +=1
     return code_string
