@@ -113,7 +113,7 @@ class ElifStmtNode(ASTNode):
         self.type = NodeTypes.ELIF_STMT
 
     def visit(self) -> str:
-        return "else if(" + self.condition.visit() + "){"
+        return "else if(_cond_(" + self.condition.visit() + ")){"
 
 
 class ForStmtNode(ASTNode):
