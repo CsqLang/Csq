@@ -250,6 +250,31 @@ def parse_WhileStmt(tokens) -> WhileStmtNode:
     node.condition = parse_ExprNode(tokens[1:])
     return node
 
+def parse_FunDecl(tokens) -> FunDeclNode:
+    tokens.pop(len(tokens) - 1)
+    tokens.pop(len(tokens) - 1)
+
+    node = FunDeclNode()
+    node.identifier = tokens[1].token
+    #By removing name and (
+    tokens = tokens[2:]
+    if len(tokens) == 0:
+        pass
+    else:
+        
+        tokens.append(Token(',',TokenType.SYMBOL))
+        param_ = False
+        param = ''
+        
+        for token in tokens[1:]:
+            if param_ == False and token.token != ',':
+                param_ = True
+                param += token.token
+            elif param_ and token.token == ',':
+                param_ = False
+                node.parameters.append(param)
+                param = ''
+    return node
 
 def Compile(code: list) -> str:
     #adding an additional line to make sure indents work properly.
@@ -326,6 +351,11 @@ def Compile(code: list) -> str:
                 node = parse_WhileStmt(line)
                 code_string += node.visit() + "\n"
                 scope_stack.append(Scope(indent_level + 1, NodeTypes.WHILE_STMT, 0))
+
+            case NodeTypes.FUN_DECL:
+                node = parse_FunDecl(line)
+                code_string += node.visit() + "\n"
+                scope_stack.append(Scope(indent_level + 1, NodeTypes.FUN_DECL, 0))
 
             case NodeTypes.PRINT:
                 if check_PrintStmt(line):
