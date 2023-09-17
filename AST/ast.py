@@ -132,7 +132,7 @@ class WhileStmtNode(ASTNode):
         self.type = NodeTypes.WHILE_STMT
 
     def visit(self):
-        return "while(" + self.condition.visit() + "){"
+        return "while(_cond_(" + self.condition.visit() + ")){"
 
 
 class CallNode(ASTNode):
