@@ -4,7 +4,6 @@
 #include "../Runtime/core.h"
 #include <iostream>
 
-#define _for_(iter, range_) for(auto J__ : range_.array){assignVar(iter, J__);
 
 void print(Cell arg){
     if(arg.type == STRING){
@@ -20,6 +19,13 @@ void print(Cell arg){
     else{
         printf("%lf",arg.fval);
     }
+}
+
+vector<Cell> range(Cell lim){
+    vector<Cell> vals;
+    for(int i = 0;i<lim.fval;i++)
+        vals.push_back(f_val(i));
+    return vals;
 }
 
 bool _cond_(Cell arg){
