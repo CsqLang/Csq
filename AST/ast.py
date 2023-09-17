@@ -86,6 +86,23 @@ class FunDeclNode(ASTNode):
         self.parameters = []
         self.type = NodeTypes.FUN_DECL
 
+    def visit(self):
+        code = 'auto ' + self.identifier + "=[&]("
+        #Args conversion
+        
+        for arg in self.parameters:
+            if arg != ' ':
+                code += 'Cell ' + arg + ','
+            
+        if code[len(code)-1] == ',':
+            code = code[:len(code)-1]
+        else:
+            pass
+
+        code += "){"
+        return code
+        
+
 
 class IfStmtNode(ASTNode):
     def __init__(self):
