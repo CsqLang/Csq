@@ -1,8 +1,8 @@
-"""
+'''
         
     Parser for Csq4.2
 
-"""
+'''
 
 from AST.ast import *
 from Tokenizer.tokenizer import TokenType, to_str, Token
@@ -143,12 +143,12 @@ def statement_type(tokens) -> NodeTypes:
         return NodeTypes.VAR_ASSIGN
     elif is_if_stmt(tokens):
         return NodeTypes.IF_STMT
-    elif is_print_stmt(tokens):
-        return NodeTypes.PRINT
     elif is_elif_stmt(tokens):
         return NodeTypes.ELIF_STMT
     elif is_else_stmt(tokens):
         return NodeTypes.ELSE_STMT
+    elif is_print_stmt(tokens):
+        return NodeTypes.PRINT
     elif is_while_stmt(tokens):
         return NodeTypes.WHILE_STMT
     elif is_access_update(tokens):
@@ -245,13 +245,14 @@ def parse_ElseStmt():
 
 
 def Compile(code: list) -> str:
+    #adding an additional line to make sure indents work properly.
+    code.append([Token('0',TokenType.VALUE)])
     # Resulting code
     code_string = ""
 
     # Scope properties
     line_no = 1
-    scope = Scope(0, NodeTypes.UNKNOWN_NODE, 0)
-    scope_stack = [scope]
+    scope_stack = [Scope(0, NodeTypes.UNKNOWN_NODE, 0)]
 
     # States
     class_ = False
@@ -263,7 +264,14 @@ def Compile(code: list) -> str:
         # Get the current scope by finding indents
         indent_level = get_indent_level(line)
         
-        # Work with the indentation levels
+        # # Work with the indentation levels
+        # # print(scope_stack[-1].indent_level, ' "', to_str(line), '"')
+        # if len(scope_stack) != 1:
+        #     # print(len(scope_stack))
+        #     while indent_level != scope_stack[-1].indent_level:
+        #         code_string += "}\n"
+        #         scope_stack.pop()
+            # scope_stack.append(Scope(indent_level+1,NodeTypes.UNKNOWN_NODE,2))
         while indent_level != scope_stack[-1].indent_level:
             if scope_stack[-1].of == NodeTypes.FUN_DECL:
                 code_string += "};\n"
@@ -296,14 +304,14 @@ def Compile(code: list) -> str:
                 node = parse_IfStmt(line)
                 code_string += node.visit() + "\n"
                 scope_stack.append(Scope(indent_level + 1, NodeTypes.IF_STMT, 0))
-
+                
             case NodeTypes.ELIF_STMT:
                 node = parse_ElifStmt(line)
                 code_string += node.visit() + "\n"
                 scope_stack.append(Scope(indent_level + 1, NodeTypes.ELIF_STMT, 0))
 
             case NodeTypes.ELSE_STMT:
-                node = parse_ElseStmt(line)
+                node = parse_ElseStmt()
                 code_string += node.visit() + "\n"
                 scope_stack.append(Scope(indent_level + 1, NodeTypes.ELSE_STMT, 0))
             
