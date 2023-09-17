@@ -29,5 +29,5 @@ KEYWORDS_TABLE = [
     "in",
     "import",
     "cimport",
-    "print"
+    "print",
 ]

@@ -1,8 +1,8 @@
-'''
+"""
 
 This file does compile code and produces machine code.
 
-'''
+"""
 
 import os
 import sys
@@ -12,16 +12,16 @@ from Compiletime.wrapper import bind
 from Parser.parser import Compile
 from Runtime.code_format import readCode, toTokens, writeCode
 
-'''
+"""
 
 Format for how this file should recieve args
 python3.10 csq.py <path of file>
 
-'''
-#Path of file
+"""
+# Path of file
 path = sys.argv[1]
 
-#Current path
+# Current path
 curr_dir = os.getcwd()
 
 file = open(path, "r")
