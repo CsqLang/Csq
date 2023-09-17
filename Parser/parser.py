@@ -86,6 +86,10 @@ def is_else_stmt(tokens) -> bool:
     if len(tokens) >= 1 and tokens[0].token == "else":
         return True
     return False
+def is_for_stmt(tokens) -> bool:
+    if len(tokens) >= 1 and tokens[0].token == "for":
+        return True
+    return False
 
 
 def is_return_stmt(tokens) -> bool:
@@ -147,6 +151,8 @@ def statement_type(tokens) -> NodeTypes:
         return NodeTypes.ELIF_STMT
     elif is_else_stmt(tokens):
         return NodeTypes.ELSE_STMT
+    elif is_for_stmt(tokens):
+        return NodeTypes.FOR_STMT
     elif is_while_stmt(tokens):
         return NodeTypes.WHILE_STMT
     elif is_access_update(tokens):
@@ -285,6 +291,14 @@ def parse_FunDecl(tokens) -> FunDeclNode:
                 param = ""
     return node
 
+def parse_ForStmt(tokens):
+    tokens.pop(len(tokens) - 1)
+
+    node = ForStmtNode()
+    node.iter_name = tokens[1].token
+    node.condition = parse_ExprNode(tokens[3:])
+
+    return node
 
 def Compile(code: list) -> str:
     # adding an additional line to make sure indents work properly.
@@ -365,6 +379,11 @@ def Compile(code: list) -> str:
                 node = parse_WhileStmt(line)
                 code_string += node.visit() + "\n"
                 scope_stack.append(Scope(indent_level + 1, NodeTypes.WHILE_STMT, 0))
+
+            case NodeTypes.FOR_STMT:
+                node = parse_ForStmt(line)
+                code_string += node.visit() + "\n"
+                scope_stack.append(Scope(indent_level + 1, NodeTypes.FOR_STMT, 0))
 
             case NodeTypes.FUN_DECL:
                 node = parse_FunDecl(line)
