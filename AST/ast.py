@@ -141,6 +141,8 @@ class ForStmtNode(ASTNode):
         self.condition = ExprNode()
         self.type = NodeTypes.FOR_STMT
 
+    def visit(self):
+        return "for(" + "Cell " + self.iter_name + "9019 : " + self.condition.visit() + "){" + f'allocateVar("{self.iter_name}","any",{self.iter_name + "9019"});'
 
 class WhileStmtNode(ASTNode):
     def __init__(self):
