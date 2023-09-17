@@ -24,7 +24,6 @@ path = sys.argv[1]
 # Current path
 curr_dir = os.getcwd()
 
-file = open(path, "r")
 # Read the file and process it
 raw_code = readCode(path=path)
 
