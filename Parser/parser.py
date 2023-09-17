@@ -336,7 +336,7 @@ def Compile(code: list) -> str:
         
             case _:
                 node = parse_ExprNode(line)
-                code_string += node.visit() + "\n"
+                code_string += node.visit() + ";\n"
 
         line_no +=1
     return code_string
