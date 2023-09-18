@@ -21,10 +21,11 @@ void print(Cell arg){
     }
 }
 
-vector<Cell> range(Cell lim){
-    vector<Cell> vals;
+Cell range(Cell lim){
+    Cell vals;
+    vals.type = COMPOUND;
     for(int i = 0;i<lim.fval;i++)
-        vals.push_back(f_val(i));
+        vals.array.push_back(f_val(i));
     return vals;
 }
 
