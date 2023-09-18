@@ -3,7 +3,6 @@ Python implementation of Csq AST
 """
 from Tokenizer.tokenizer import to_str
 
-
 # Node Types
 class NodeTypes:
     EXPR = 0
@@ -88,20 +87,21 @@ class FunDeclNode(ASTNode):
         self.type = NodeTypes.FUN_DECL
 
     def visit(self):
-        code = "auto " + self.identifier + "=[&]("
-        # Args conversion
-
+        code = 'auto ' + self.identifier + "=[&]("
+        #Args conversion
+        
         for arg in self.parameters:
-            if arg != " ":
-                code += "Cell " + arg + ","
-
-        if code[len(code) - 1] == ",":
-            code = code[: len(code) - 1]
+            if arg != ' ':
+                code += 'Cell ' + arg + ','
+            
+        if code[len(code)-1] == ',':
+            code = code[:len(code)-1]
         else:
             pass
 
         code += "){"
         return code
+        
 
 
 class IfStmtNode(ASTNode):
@@ -142,7 +142,7 @@ class ForStmtNode(ASTNode):
         self.type = NodeTypes.FOR_STMT
 
     def visit(self):
-        return "for(" + "Cell " + self.iter_name + "9019 : " + self.condition.visit() + "){" + f'allocateVar("{self.iter_name}","any",{self.iter_name + "9019"});'
+        return "for(" + "Cell " + self.iter_name + "9019 : " + self.condition.visit() + ".array){" + f'allocateVar("{self.iter_name}","any",{self.iter_name + "9019"});'
 
 class WhileStmtNode(ASTNode):
     def __init__(self):
