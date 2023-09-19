@@ -302,15 +302,26 @@ def tokenize(line: str) -> list:
 
         line = line[indentCount::]  # Remove initial indentation
         for char in line:
-            if (
+            if char == "\n":
+                if string_presence:
+                    current_string += char
+                else:
+                    tokens.append(Token("\n", TokenType.NEWLINE))
+            elif char == "'" and string_presence == 0:
+                string_presence = 1
+                current_string += char
+            elif char == "'" and string_presence:
+                string_presence = 0
+                current_string += char
+                tokens.append(Token('"' + current_string + '"', TokenType.STR))
+                current_string = ""
+            elif string_presence:
+                current_string += char
+            elif (
                 char == " "
-                or char == "\n"
                 or char == "\t"
                 or isSymbolLaterals(char)
-                and string_presence == False
             ):
-                if char == "\n":
-                    tokens.append(Token("\n", TokenType.NEWLINE))
                 if len(current_token) > 0:
                     # If non-empty string, check if it matches any operator, keyword, or value
                     tokens.append(check(current_token, current_line))
@@ -318,13 +329,6 @@ def tokenize(line: str) -> list:
                 if isSymbolLaterals(char):
                     # Handle symbols
                     tokens.append(check(char, current_line))
-            elif char == "'" and string_presence == 0:
-                string_presence = 1
-            elif char == "'" and string_presence:
-                tokens.append(Token('"' + current_string + '"', TokenType.STR))
-                string_presence = 0
-            elif string_presence:
-                current_string += char
             else:
                 current_token += char
 
