@@ -195,7 +195,15 @@ def parse_ExprNode(tokens) -> ExprNode:
             if tokens[i].type == TokenType.STR:
                 node.tokens.append(Token("s_val(" + tokens[i].token + ")", TokenType.BLANK))
             else:
-                node.tokens.append(Token("f_val(" + tokens[i].token + ")", TokenType.BLANK))
+                if len(tokens) > i+2:
+                    if tokens[i+1].token == ".":
+                        node.tokens.append(Token("f_val(" + tokens[i].token + "." + tokens[i+2].token + ")", TokenType.BLANK))
+                        i += 2
+                    else:
+                        node.tokens.append(Token("f_val(" + tokens[i].token + ")", TokenType.BLANK))
+                else:
+                    node.tokens.append(Token("f_val(" + tokens[i].token + ")", TokenType.BLANK))
+
         else:
             node.tokens.append(tokens[i])
         i+=1
@@ -311,14 +319,6 @@ def Compile(code: list) -> str:
         # Get the current scope by finding indents
         indent_level = get_indent_level(line)
         
-        # # Work with the indentation levels
-        # # print(scope_stack[-1].indent_level, ' "', to_str(line), '"')
-        # if len(scope_stack) != 1:
-        #     # print(len(scope_stack))
-        #     while indent_level != scope_stack[-1].indent_level:
-        #         code_string += "}\n"
-        #         scope_stack.pop()
-            # scope_stack.append(Scope(indent_level+1,NodeTypes.UNKNOWN_NODE,2))
         while indent_level != scope_stack[-1].indent_level:
             if scope_stack[-1].of == NodeTypes.FUN_DECL:
                 code_string += "};\n"
@@ -391,6 +391,9 @@ def Compile(code: list) -> str:
                     for tok in line:
                         val += tok.token + " "
                     code_string += val + ";\n"
+                else:
+                    node = parse_ExprNode(line)
+                    code_string += node.visit() + ";\n"
 
         line_no +=1
     return code_string
