@@ -335,7 +335,7 @@ def parse_ForStmt(tokens):
     return node
 
 def Compile(code: list) -> str:
-     """
+    """
     Compile Csq code into C/C++ code.
 
     Args:
