@@ -1,11 +1,12 @@
-# Identifiers lookup
+
+# Regular expression for identifying valid identifiers
 IDENTIFIERS = r"^[a-zA-Z_][a-zA-Z0-9_]*$"
 
-# Value lookup
+# Regular expressions for matching integer and decimal number literals
 INTEGER = r"[+-]?\d+"
 DECIMAL = r"[+-]?\d+(\.\d+)?"
 
-# Operators lookup
+# Lists of operators
 # Arithmetic operators
 ARITHMETIC_OPERATORS = ["+", "-", "*", "/", "%", "^"]
 # Logical operators
@@ -14,10 +15,11 @@ LOGICAL_OPERATORS = ["or", "and", "not"]
 COMPARISON_OPERATORS = ["==", "!=", "<", ">", "<=", ">="]
 # Assignment operators
 ASSIGNMENT_OPERATORS = ["="]
-# Symbols lookup
+
+# List of symbols
 SYMBOLS = ["{", "}", "(", ")", "[", "]", ",", "~", "@", "$", "&", "!", ":", ";", "."]
 
-# Keyword lookup
+# List of keywords
 KEYWORDS_TABLE = [
     "if",
     "elif",
