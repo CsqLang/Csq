@@ -1,15 +1,24 @@
 """
-THis will be checking for syntax errors where grammar is voilated.
+Module: Syntax Checking Functions
+
+These functions are responsible for checking the syntax of various statements and expressions
+in the Csq language. They check for violations of grammar rules and return whether the syntax is
+valid or not.
 """
+
 from Compiletime.error import (Error, IndentationError, NameError, SyntaxError,
                                TypeError)
 from Tokenizer.tokenizer import TokenType
 
-
 def check_VarDecl(tokens):
     """
-    Format:
-    <identifier> := <Expr>
+    Check the syntax of a variable declaration statement.
+
+    Args:
+        tokens (list): A list of tokens representing the statement.
+
+    Returns:
+        bool: True if the syntax is valid, False otherwise.
     """
     valid = False
     if tokens[0].type == TokenType.IDENTIFIER:
@@ -24,11 +33,15 @@ def check_VarDecl(tokens):
             valid = False
     return valid
 
-
 def check_VarAssign(tokens):
     """
-    Format:
-    <identifier> = <Expr>
+    Check the syntax of a variable assignment statement.
+
+    Args:
+        tokens (list): A list of tokens representing the statement.
+
+    Returns:
+        bool: True if the syntax is valid, False otherwise.
     """
     valid = False
     if tokens[0].type == TokenType.IDENTIFIER:
@@ -43,11 +56,15 @@ def check_VarAssign(tokens):
             valid = False
     return valid
 
-
 def check_PrintStmt(tokens):
     """
-    Format:
-    print <Expr>
+    Check the syntax of a print statement.
+
+    Args:
+        tokens (list): A list of tokens representing the statement.
+
+    Returns:
+        bool: True if the syntax is valid, False otherwise.
     """
     valid = True
 
