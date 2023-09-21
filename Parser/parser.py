@@ -1,8 +1,8 @@
-'''
-        
-    Parser for Csq4.2
+"""
+Parser for Csq
 
-'''
+This module contains the parser for the Csq programming language. It defines functions for parsing various language constructs and generating the corresponding abstract syntax tree (AST).
+"""
 
 from AST.ast import *
 from Tokenizer.tokenizer import TokenType, to_str, Token
@@ -12,12 +12,32 @@ from Compiletime.syntax_check import *
 
 class Scope:
     def __init__(self, level: int, of_: NodeTypes, ended: bool) -> None:
+        """
+        Initialize a scope for tracking the indentation level and type of a block.
+
+        Args:
+            level (int): The indentation level of the block.
+            of_ (NodeTypes): The type of node this scope belongs to.
+            ended (bool): Flag indicating if the block has ended.
+
+        Returns:
+            None
+        """
         self.indent_level = level
         self.of = of_
         self.ended = ended
 
 
 def get_indent_level(tokens) -> int:
+    """
+    Get the indentation level of a line based on the number of indent tokens.
+
+    Args:
+        tokens (list): A list of tokens representing a line.
+
+    Returns:
+        int: The indentation level.
+    """
     indent_ = 0
     for token in tokens:
         if token.type == TokenType.INDENT:
@@ -28,6 +48,15 @@ def get_indent_level(tokens) -> int:
 
 
 def remove_indent(tokens) -> list:
+    """
+    Remove leading indentation tokens from a list of tokens.
+
+    Args:
+        tokens (list): A list of tokens.
+
+    Returns:
+        list: A new list of tokens with leading indentation tokens removed.
+    """
     tok = []
     for token in tokens:
         if token.type == TokenType.INDENT:
@@ -174,16 +203,22 @@ Parsing units
 """
 
 def parse_ExprNode(tokens) -> ExprNode:
+    """
+    Parse an expression node from a list of tokens.
+
+    Args:
+        tokens (list): A list of tokens representing an expression.
+
+    Returns:
+        ExprNode: The parsed expression node.
+    """
     node = ExprNode()
     i = 0
     while i < len(tokens):
         if tokens[i].type == TokenType.IDENTIFIER:
             if i+1 < len(tokens):
                 if tokens[i+1].token == "(":
-                    '''
-                    It's a function then
-                    '''
-                    
+                    # It's a function call
                     node.tokens.append(Token(tokens[i].token + "(", TokenType.BLANK))
                     i += 1
                 else:
@@ -300,6 +335,15 @@ def parse_ForStmt(tokens):
     return node
 
 def Compile(code: list) -> str:
+     """
+    Compile Csq code into C/C++ code.
+
+    Args:
+        code (list): A list of code lines as lists of tokens.
+
+    Returns:
+        str: The compiled C/C++ code as a string.
+    """
     #adding an additional line to make sure indents work properly.
     code.append([Token('0',TokenType.VALUE)])
     # Resulting code
