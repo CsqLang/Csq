@@ -61,6 +61,13 @@ class STOKEN:
 
 class Token:
     def __init__(self, token: str, token_type: int = 0) -> None:
+        """
+        Initialize a Token instance.
+
+        Args:
+            token (str): The token value.
+            token_type (int): The token type represented by TokenType enum.
+        """
         self.token = token
         self.type = token_type
 
@@ -69,6 +76,7 @@ class Token:
 
 
 def addToken(value: str, token_type: int) -> Token:
+    """Create a Token instance with the given value and token type."""
     token = Token("")
     token.token = value
     token.type = token_type
