@@ -295,10 +295,9 @@ def tokenize(line: str) -> list:
         list: A list of Token objects representing the tokens in the line.
     """
     tokens = []
-    current_string = identifier = number = code_ = current_token = ""
-    identifier_ = value_end = indentCount = 0
+    current_string = current_token = ""
+    indentCount = 0
     current_line = 1
-    indent_ended = True
     indentation_present = char_start = string_presence = comment = False
 
     # Try to skip parsing a comment since it will be ignored.
