@@ -297,30 +297,26 @@ def parse_WhileStmt(tokens) -> WhileStmtNode:
     return node
 
 def parse_FunDecl(tokens) -> FunDeclNode:
-    tokens.pop(len(tokens) - 1)
-    tokens.pop(len(tokens) - 1)
+    # Remove unnecessary tokens
+    tokens.pop()  # Remove the last token (")")
+    tokens.pop()  # Remove the second-to-last token ("name")
 
     node = FunDeclNode()
     node.identifier = tokens[1].token
-    #By removing name and (
-    tokens = tokens[2:]
-    if len(tokens) == 0:
-        pass
-    else:
-        
-        tokens.append(Token(',',TokenType.SYMBOL))
-        param_ = False
-        param = ''
-        
-        for token in tokens[1:]:
-            if param_ == False and token.token != ',':
-                param_ = True
-                param += token.token
-            elif param_ and token.token == ',':
-                param_ = False
-                node.parameters.append(param)
-                param = ''
+
+    # Extract parameters
+    tokens = tokens[2:]  # Skip the function name and "("
+    param = ''
+    
+    for token in tokens[1:]:
+        if token.token == ',':
+            node.parameters.append(param)
+            param = ''
+        else:
+            param += token.token
+
     return node
+
 
 def parse_ForStmt(tokens):
     tokens.pop(len(tokens) - 1)
