@@ -298,7 +298,7 @@ def tokenize(line: str) -> list:
     current_string = current_token = ""
     indentCount = 0
     current_line = 1
-    indentation_present = char_start = string_presence = comment = False
+    indentation_present = string_presence =  False
 
     # Try to skip parsing a comment since it will be ignored.
     if isComment(line[0]):
