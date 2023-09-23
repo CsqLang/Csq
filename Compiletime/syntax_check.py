@@ -6,8 +6,7 @@ in the Csq language. They check for violations of grammar rules and return wheth
 valid or not.
 """
 
-from Compiletime.error import (Error, IndentationError, NameError, SyntaxError,
-                               TypeError)
+
 from Tokenizer.tokenizer import TokenType
 
 def check_VarDecl(tokens):
