@@ -4,6 +4,7 @@ Module: Code Binding Functions
 This module contains functions for binding the parsed and visited code with C/C++ APIs.
 """
 
+
 def bind(current_path, code):
     """
     Bind the parsed and visited code with C/C++ APIs to create a complete C/C++ program.

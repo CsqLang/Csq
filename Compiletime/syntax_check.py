@@ -9,6 +9,7 @@ valid or not.
 
 from Tokenizer.tokenizer import TokenType
 
+
 def check_VarDecl(tokens):
     """
     Check the syntax of a variable declaration statement.
@@ -54,6 +55,7 @@ def check_VarAssign(tokens):
 
     return True
 
+
 def check_PrintStmt(tokens):
     """
     Check the syntax of a print statement.
@@ -69,4 +71,3 @@ def check_PrintStmt(tokens):
             return False
 
     return True
-

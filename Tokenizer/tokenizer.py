@@ -298,7 +298,7 @@ def tokenize(line: str) -> list:
     current_string = current_token = ""
     indentCount = 0
     current_line = 1
-    indentation_present = string_presence =  False
+    indentation_present = string_presence = False
 
     # Try to skip parsing a comment since it will be ignored.
     if isComment(line[0]):
@@ -333,11 +333,7 @@ def tokenize(line: str) -> list:
                 current_string = ""
             elif string_presence:
                 current_string += char
-            elif (
-                char == " "
-                or char == "\t"
-                or isSymbolLaterals(char)
-            ):
+            elif char == " " or char == "\t" or isSymbolLaterals(char):
                 if len(current_token) > 0:
                     # If non-empty string, check if it matches any operator, keyword, or value
                     tokens.append(check(current_token, current_line))
@@ -373,10 +369,21 @@ def tokenize(line: str) -> list:
     i = 0
     while i < len(tokens):
         token = tokens[i]
-        if token.token in compound_operators and i + 1 < len(tokens) and tokens[i + 1].token == "=":
+        if (
+            token.token in compound_operators
+            and i + 1 < len(tokens)
+            and tokens[i + 1].token == "="
+        ):
             # Use the mapping to get the compound operator
             compound_op = compound_operators[token.token]
-            resTokens.append(Token(compound_op, TokenType.ASOPERATOR if token.token in (":", "=") else TokenType.COPERATOR))
+            resTokens.append(
+                Token(
+                    compound_op,
+                    TokenType.ASOPERATOR
+                    if token.token in (":", "=")
+                    else TokenType.COPERATOR,
+                )
+            )
             i += 1
         else:
             resTokens.append(token)

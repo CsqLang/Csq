@@ -14,9 +14,8 @@ def readCode(path: str) -> str:
     """
     with open(path) as codefile:
         code = codefile.read()
-    
-    return code
 
+    return code
 
 
 def toTokens(code: str) -> list:
@@ -40,7 +39,6 @@ def toTokens(code: str) -> list:
 
     tokens.append(tokenize("ignore"))
     return tokens
-
 
 
 def writeCode(code: str, path: str) -> None:
