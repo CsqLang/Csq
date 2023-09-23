@@ -29,6 +29,7 @@ Memory view
 
 #include <string>
 #include <vector>
+#include <memory>
 using namespace std;
 
 
@@ -38,8 +39,14 @@ enum Type{
     STRING,
     FLOAT,
     COMPOUND,
+    CUSTYPE,
 };
 
+//Class to handle custom datatypes
+class CusType{
+    public:
+        virtual ~CusType() = default;
+};
 
 // Struct for a memory cell.
 struct Cell
@@ -50,6 +57,7 @@ struct Cell
     double fval;
     string sval;
     vector<Cell> array;
+    shared_ptr<CusType> cus_type;
 
     Cell operator+(Cell c){
         if(c.type == STRING && type == STRING){
@@ -206,6 +214,14 @@ void addCell(int val) {
     Cell cell;
     cell.ival = val;
     cell.type = INT;
+    cell.u_count = 0;
+    memory.emplace_back(cell);
+}
+
+void addCell(const CusType& object){
+    Cell cell;
+    cell.cus_type = make_shared<CusType>(object);
+    cell.type = CUSTYPE;
     cell.u_count = 0;
     memory.emplace_back(cell);
 }
