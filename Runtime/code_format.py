@@ -12,15 +12,11 @@ def readCode(path: str) -> str:
     Returns:
         str: The content of the code file as a string.
     """
-    code = str()
     with open(path) as codefile:
-        for line in codefile.readlines():
-            if line == "":
-                continue
-            else:
-                code += line
-
+        code = codefile.read()
+    
     return code
+
 
 
 def toTokens(code: str) -> list:
@@ -33,10 +29,9 @@ def toTokens(code: str) -> list:
     Returns:
         list: A list of token streams, where each stream is a list of tokens.
     """
-    tokens = list()
-    statements = code.split("\n")
+    tokens = []
 
-    for line in statements:
+    for line in code.split("\n"):
         try:
             tokenStream = tokenize(line)
             tokens.append(tokenStream)
@@ -45,6 +40,7 @@ def toTokens(code: str) -> list:
 
     tokens.append(tokenize("ignore"))
     return tokens
+
 
 
 def writeCode(code: str, path: str) -> None:
