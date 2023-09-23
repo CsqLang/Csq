@@ -350,11 +350,6 @@ def Compile(code: list) -> str:
     line_no = 1
     scope_stack = [Scope(0, NodeTypes.UNKNOWN_NODE, 0)]
 
-    # States
-    class_ = False
-    last_indent = 0
-    # Last statement type
-    last_statement = NodeTypes.UNKNOWN_NODE
 
     for line in code:
         # Get the current scope by finding indents
