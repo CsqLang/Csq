@@ -214,37 +214,34 @@ def parse_ExprNode(tokens) -> ExprNode:
     """
     node = ExprNode()
     i = 0
-    while i < len(tokens):
-        if tokens[i].type == TokenType.IDENTIFIER:
-            if i+1 < len(tokens):
-                if tokens[i+1].token == "(":
-                    # It's a function call
-                    node.tokens.append(Token(tokens[i].token + "(", TokenType.BLANK))
-                    i += 1
-                else:
-                    node.tokens.append(Token("id(\"" + tokens[i].token + "\")", TokenType.BLANK))
-            else:
-                node.tokens.append(Token("id(\"" + tokens[i].token + "\")", TokenType.BLANK))
 
-        elif tokens[i].type == TokenType.STR or tokens[i].type == TokenType.VALUE:
-            if tokens[i].type == TokenType.STR:
-                node.tokens.append(Token("s_val(" + tokens[i].token + ")", TokenType.BLANK))
+    while i < len(tokens):
+        current_token = tokens[i]
+
+        if current_token.type == TokenType.IDENTIFIER:
+            if i + 1 < len(tokens) and tokens[i + 1].token == "(":
+                node.tokens.append(Token(current_token.token + "(", TokenType.BLANK))
+                i += 1
             else:
-                if len(tokens) > i+2:
-                    if tokens[i+1].token == ".":
-                        node.tokens.append(Token("f_val(" + tokens[i].token + "." + tokens[i+2].token + ")", TokenType.BLANK))
-                        i += 2
-                    else:
-                        node.tokens.append(Token("f_val(" + tokens[i].token + ")", TokenType.BLANK))
-                else:
-                    node.tokens.append(Token("f_val(" + tokens[i].token + ")", TokenType.BLANK))
+                node.tokens.append(Token(f'id("{current_token.token}")', TokenType.BLANK))
+
+        elif current_token.type == TokenType.STR:
+            node.tokens.append(Token(f's_val({current_token.token})', TokenType.BLANK))
+
+        elif current_token.type == TokenType.VALUE:
+            if i + 2 < len(tokens) and tokens[i + 1].token == ".":
+                node.tokens.append(Token(f'f_val({current_token.token}.{tokens[i + 2].token})', TokenType.BLANK))
+                i += 2
+            else:
+                node.tokens.append(Token(f'f_val({current_token.token})', TokenType.BLANK))
 
         else:
-            node.tokens.append(tokens[i])
-        i+=1
+            node.tokens.append(current_token)
 
+        i += 1
 
     return node
+
 
 
 def parse_VarDecl(tokens) -> VarDeclNode:
