@@ -321,13 +321,22 @@ def parse_FunDecl(tokens) -> FunDeclNode:
     tokens = tokens[2:]  # Skip the function name and "("
     param = ""
 
-    for token in tokens[1:]:
-        if token.token == ",":
-            node.parameters.append(param)
-            param = ""
-        else:
-            param += token.token
-
+    if len(tokens) == 0:
+        pass
+    else:
+        
+        tokens.append(Token(',',TokenType.SYMBOL))
+        param_ = False
+        param = ''
+        
+        for token in tokens[1:]:
+            if param_ == False and token.token != ',':
+                param_ = True
+                param += token.token
+            elif param_ and token.token == ',':
+                param_ = False
+                node.parameters.append(param)
+                param = ''
     return node
 
 
