@@ -168,9 +168,18 @@ def isKeyword(val: str) -> bool:
 
 
 def check(val: str, line: int) -> Token:
-    """check token which type of this"""
-    token = Token("")
-    token.token = val
+    """
+    Check the type of a token and return a Token object.
+
+    Args:
+        val (str): The token value.
+        line (int): The line number where the token appears.
+
+    Returns:
+        Token: The token object with the determined type.
+    """
+    token = Token(val)
+
     if isKeyword(val):
         token.type = TokenType.KEYWORD
 
@@ -286,11 +295,10 @@ def tokenize(line: str) -> list:
         list: A list of Token objects representing the tokens in the line.
     """
     tokens = []
-    current_string = identifier = number = code_ = current_token = ""
-    identifier_ = value_end = indentCount = 0
+    current_string = current_token = ""
+    indentCount = 0
     current_line = 1
-    indent_ended = True
-    indentation_present = char_start = string_presence = comment = False
+    indentation_present = string_presence = False
 
     # Try to skip parsing a comment since it will be ignored.
     if isComment(line[0]):
@@ -325,11 +333,7 @@ def tokenize(line: str) -> list:
                 current_string = ""
             elif string_presence:
                 current_string += char
-            elif (
-                char == " "
-                or char == "\t"
-                or isSymbolLaterals(char)
-            ):
+            elif char == " " or char == "\t" or isSymbolLaterals(char):
                 if len(current_token) > 0:
                     # If non-empty string, check if it matches any operator, keyword, or value
                     tokens.append(check(current_token, current_line))
@@ -346,104 +350,43 @@ def tokenize(line: str) -> list:
         if string_presence:
             error.SyntaxError(current_line, "unclosed string")
 
+    # Mapping of single-character operators to compound operators
+    compound_operators = {
+        ":": ":=",
+        "=": "==",
+        "+": "+=",
+        "-": "-=",
+        "*": "*=",
+        "/": "/=",
+        ">": ">=",
+        "<": "<=",
+        "!": "!=",
+    }
+
     # Final tokens
     resTokens = []
 
     i = 0
     while i < len(tokens):
-        match tokens[i].token:
-            case ":":
-                if i + 1 != len(tokens):
-                    match tokens[i + 1].token:
-                        case "=":
-                            resTokens.append(Token(":=", TokenType.ASOPERATOR))
-                            i += 1
-                        case _:
-                            resTokens.append(tokens[i])
-                else:
-                    resTokens.append(tokens[i])
-            case "=":
-                if i + 1 != len(tokens):
-                    match tokens[i + 1].token:
-                        case "=":
-                            resTokens.append(Token("==", TokenType.COPERATOR))
-                            i += 1
-                        case _:
-                            resTokens.append(tokens[i])
-                else:
-                    resTokens.append(tokens[i])
-            case "+":
-                if i + 1 != len(tokens):
-                    match tokens[i + 1].token:
-                        case "=":
-                            resTokens.append(Token("+=", TokenType.ASOPERATOR))
-                            i += 1
-                        case _:
-                            resTokens.append(tokens[i])
-                else:
-                    resTokens.append(tokens[i])
-            case "-":
-                if i + 1 != len(tokens):
-                    match tokens[i + 1].token:
-                        case "=":
-                            resTokens.append(Token("-=", TokenType.ASOPERATOR))
-                            i += 1
-                        case _:
-                            resTokens.append(tokens[i])
-                else:
-                    resTokens.append(tokens[i])
-            case "*":
-                if i + 1 != len(tokens):
-                    match tokens[i + 1].token:
-                        case "=":
-                            resTokens.append(Token("*=", TokenType.ASOPERATOR))
-                            i += 1
-                        case _:
-                            resTokens.append(tokens[i])
-                else:
-                    resTokens.append(tokens[i])
-            case "/":
-                if i + 1 != len(tokens):
-                    match tokens[i + 1].token:
-                        case "=":
-                            resTokens.append(Token("/=", TokenType.ASOPERATOR))
-                            i += 1
-                        case _:
-                            resTokens.append(tokens[i])
-                else:
-                    resTokens.append(tokens[i])
-            case ">":
-                if i + 1 != len(tokens):
-                    match tokens[i + 1].token:
-                        case "=":
-                            resTokens.append(Token(">=", TokenType.COPERATOR))
-                            i += 1
-                        case _:
-                            resTokens.append(tokens[i])
-                else:
-                    resTokens.append(tokens[i])
-            case "<":
-                if i + 1 != len(tokens):
-                    match tokens[i + 1].token:
-                        case "=":
-                            resTokens.append(Token("<=", TokenType.COPERATOR))
-                            i += 1
-                        case _:
-                            resTokens.append(tokens[i])
-                else:
-                    resTokens.append(tokens[i])
-            case "!":
-                if i + 1 != len(tokens):
-                    match tokens[i + 1].token:
-                        case "=":
-                            resTokens.append(Token("!=", TokenType.COPERATOR))
-                            i += 1
-                        case _:
-                            resTokens.append(tokens[i])
-                else:
-                    resTokens.append(tokens[i])
-            case _:
-                resTokens.append(tokens[i])
+        token = tokens[i]
+        if (
+            token.token in compound_operators
+            and i + 1 < len(tokens)
+            and tokens[i + 1].token == "="
+        ):
+            # Use the mapping to get the compound operator
+            compound_op = compound_operators[token.token]
+            resTokens.append(
+                Token(
+                    compound_op,
+                    TokenType.ASOPERATOR
+                    if token.token in (":", "=")
+                    else TokenType.COPERATOR,
+                )
+            )
+            i += 1
+        else:
+            resTokens.append(token)
         i += 1
 
     return resTokens

@@ -6,9 +6,9 @@ in the Csq language. They check for violations of grammar rules and return wheth
 valid or not.
 """
 
-from Compiletime.error import (Error, IndentationError, NameError, SyntaxError,
-                               TypeError)
+
 from Tokenizer.tokenizer import TokenType
+
 
 def check_VarDecl(tokens):
     """
@@ -20,18 +20,18 @@ def check_VarDecl(tokens):
     Returns:
         bool: True if the syntax is valid, False otherwise.
     """
-    valid = False
-    if tokens[0].type == TokenType.IDENTIFIER:
-        valid = True
+    if tokens[0].type != TokenType.IDENTIFIER:
+        return False
 
-        if tokens[1].token == ":=":
-            for i in tokens[1:]:
-                if i.type == TokenType.KEYWORD:
-                    valid = False
-                    break
-        else:
-            valid = False
-    return valid
+    if len(tokens) < 3 or tokens[1].token != ":=":
+        return False
+
+    for token in tokens[2:]:
+        if token.type == TokenType.KEYWORD:
+            return False
+
+    return True
+
 
 def check_VarAssign(tokens):
     """
@@ -43,18 +43,18 @@ def check_VarAssign(tokens):
     Returns:
         bool: True if the syntax is valid, False otherwise.
     """
-    valid = False
-    if tokens[0].type == TokenType.IDENTIFIER:
-        valid = True
+    if len(tokens) < 3:
+        return False
 
-        if tokens[1].token == "=":
-            for i in tokens[1:]:
-                if i.type == TokenType.KEYWORD:
-                    valid = False
-                    break
-        else:
-            valid = False
-    return valid
+    if tokens[0].type != TokenType.IDENTIFIER or tokens[1].token != "=":
+        return False
+
+    for token in tokens[2:]:
+        if token.type == TokenType.KEYWORD:
+            return False
+
+    return True
+
 
 def check_PrintStmt(tokens):
     """
@@ -66,12 +66,8 @@ def check_PrintStmt(tokens):
     Returns:
         bool: True if the syntax is valid, False otherwise.
     """
-    valid = True
+    for token in tokens[1:]:
+        if token.token in (":=", "=") or token.type == TokenType.KEYWORD:
+            return False
 
-    for i in tokens[1:]:
-        if i.token == ":=" or i.token == "=":
-            valid = False
-        elif i.type == TokenType.KEYWORD:
-            valid = False
-
-    return valid
+    return True
