@@ -101,6 +101,11 @@ class FunDeclNode(ASTNode):
             pass
 
         code += "){"
+        code += "){"
+        for arg in self.parameters:
+            if arg != ' ':
+                code += 'allocateVar("' + arg + '","any",'+arg+');\n'
+
         return code
 
 
