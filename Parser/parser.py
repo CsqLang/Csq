@@ -448,6 +448,7 @@ def Compile(code: list) -> str:
                     )
 
             case _:
+                # The procedure to parse an expression is different if it's a return statement.
                 if is_return_stmt(line):
                     node = parse_ExprNode(line)
                     val = ""
@@ -455,8 +456,17 @@ def Compile(code: list) -> str:
                         val += tok.token + " "
                     code_string += val + ";\n"
                 else:
-                    node = parse_ExprNode(line)
-                    code_string += node.visit() + ";\n"
-
+                    if check_Expr(line)[0]:
+                        # Syntax is valid
+                        node = parse_ExprNode(line)
+                        code_string += node.visit() + ";\n"
+                    else:
+                        # Syntax is voilated
+                        print(
+                            SyntaxError(
+                                line_no,
+                                check_Expr(line)[1]
+                            )
+                        )
         line_no += 1
     return code_string
