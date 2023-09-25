@@ -16,4 +16,4 @@ short names which looks elegant.
 
 #define main int main(int argc, char** argv){
 #define endmain return 0;}
-
+#define class_memvVar(cname,obj, name) dynamic_pointer_cast<cname>(id(obj).cus_type)->getMember(name);
