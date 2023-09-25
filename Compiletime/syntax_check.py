@@ -100,16 +100,13 @@ def check_Expr(tokens):
         }
 
         for token in _tokens:
-            if token.token in bracket_map.keys():  # Use token.token as the key
-                # If it's an opening bracket, push it onto the stack
-                stack.append(token)
-            elif token.token in bracket_map.values():
-                # If it's a closing bracket, check if it matches the top of the stack
-                if not stack or bracket_map[stack.pop().token] != token.token:  # Use token.token as the key
-                    return True  # Mismatch means unclosed bracket
+            if token.token in bracket_map:
+                stack.append(token.token)
+            elif token.token in bracket_map.values() and (not stack or bracket_map[stack.pop()] != token.token):
+                return True
 
         # If the stack is not empty, there are unclosed opening brackets
-        return len(stack) > 0
+        return bool(stack)
 
     if has_unclosed_brackets(tokens):
         valid = False
