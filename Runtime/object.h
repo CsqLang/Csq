@@ -3,7 +3,6 @@ C/C++ codes to express objects
 */
 #if !defined(OBJRUNTIME_CSQ4)
 #define OBJRUNTIME_CSQ4
-#include "../AST/ast.h"
 
 //Struct for runtime variables
 struct Variable
