@@ -2,6 +2,7 @@
 #define basic_H
 #include "../Runtime/memory.h"
 #include "../Runtime/core.h"
+#include "codes.h"
 #include <iostream>
 
 
