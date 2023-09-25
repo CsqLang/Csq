@@ -2,10 +2,11 @@
 
 # The terminal should be refreshed for effects to take place
 # Can be written better, but this is just a concept
-
+cp csq.py csq
+chmod +x csq
 # Copy it to ~/.local/bin for it to be global
 local_bin="$HOME/.local/bin/"
-cp csq.py "$local_bin"
+mv csq "$local_bin"
 
 if [ $? -eq 0 ]; then
   # Destination folder for include files
@@ -20,6 +21,7 @@ if [ $? -eq 0 ]; then
       # Exclude the csq directory itself if present
       if [ "$dir" != "csq/" ]; then
         cp -r "$dir" "$local_include"
+        cp -r "$dir" "$local_bin"
       fi
     done
 
