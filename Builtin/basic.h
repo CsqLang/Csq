@@ -2,6 +2,7 @@
 #define basic_H
 #include "../Runtime/memory.h"
 #include "../Runtime/core.h"
+#include "codes.h"
 #include <iostream>
 
 
@@ -74,6 +75,6 @@ Cell input(Cell prompt){
     return c;
 }
 
-#define class_memvVar(cname,obj, name) dynamic_pointer_cast<cname>(id(obj).cus_type)->getMember(name);
+
 
 #endif // basic_H
