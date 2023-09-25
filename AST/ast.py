@@ -100,7 +100,14 @@ class FunDeclNode(ASTNode):
         else:
             pass
 
-        code += "){"
+        code += "){\n"
+
+        '''
+        As parameters are also in terms of variables so they should also
+        undergo the generation of variable allocation code so that it can
+        be used effectively by other species.
+        '''
+        
         for arg in self.parameters:
             if arg != ' ':
                 code += 'allocateVar("' + arg + '","any",'+arg+');\n'
