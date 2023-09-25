@@ -1,22 +1,10 @@
-# Csq 4.2
-
-Hey there,
-This is the updated version of 4.2 which is having more concise syntax than the 4.1 and better compiler handling provided by AST.
+# Csq 4.3
 
 ## Installation
-
-```bash
-make install
+```
+./build.sh 
 ```
 
-## Development
-
-```bash
-make dev # For .cpp code
-make format # For formatting and linting
-```
-
-Make sure that your code works properly before committing it.
 
 ## Usage
 
