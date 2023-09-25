@@ -75,6 +75,6 @@ Cell input(Cell prompt){
     return c;
 }
 
-#define class_memvVar(cname,obj, name) dynamic_pointer_cast<cname>(id(obj).cus_type)->getMember(name);
+
 
 #endif // basic_H
