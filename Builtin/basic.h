@@ -17,8 +17,11 @@ void print(Cell arg){
         }
         printf("\n");
     }
-    else{
+    else if(arg.type == FLOAT){
         printf("%lf",arg.fval);
+    }
+    else{
+        printf("%d",arg.ival);
     }
 }
 
