@@ -244,7 +244,7 @@ def parse_ExprNode(tokens) -> ExprNode:
                 i += 2
             else:
                 node.tokens.append(
-                    Token(f"f_val({current_token.token})", TokenType.BLANK)
+                    Token(f"i_val({current_token.token})", TokenType.BLANK)
                 )
 
         else:

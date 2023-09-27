@@ -72,10 +72,40 @@ struct Cell
             c1.sval = sval + to_string(c.fval);
             return c1;
         }
-        else{
+        else if(type == STRING && c.type == INT){
+            Cell c1;
+            c1.type = STRING;
+            c1.sval = sval + to_string(c.ival);
+            return c1;
+        }
+        else if(
+            (c.type == FLOAT && type == INT)
+            ||
+            (c.type == INT && type == FLOAT)
+        ){
+            if(c.type == FLOAT && type == INT){
+                Cell c1;
+                c1.type = FLOAT;
+                c1.fval = fval + c.ival;
+                return c1;
+            }
+            else{
+                Cell c1;
+                c1.type = FLOAT;
+                c1.fval = ival + c.fval;
+                return c1;
+            }
+        }
+        else if(c.type == FLOAT && type == FLOAT){
             Cell c1;
             c1.type = FLOAT;
             c1.fval = fval + c.fval;
+            return c1;
+        }
+        else{
+            Cell c1;
+            c1.type = INT;
+            c1.ival = ival + c.ival;
             return c1;
         }
     }
@@ -86,10 +116,16 @@ struct Cell
             printf("Error: invalid use of operator * between two strings.");
             return c1;
         }
-        else{
+        else if(c.type == FLOAT){
             Cell c1;
             c1.type = FLOAT;
             c1.fval = fval * c.fval;
+            return c1;
+        }
+        else{
+            Cell c1;
+            c1.type = INT;
+            c1.ival = ival * c.ival;
             return c1;
         }
     }
@@ -99,10 +135,16 @@ struct Cell
             printf("Error: invalid use of operator - between two strings.");
             return c1;
         }
-        else{
+        else if(c.type == FLOAT){
             Cell c1;
             c1.type = FLOAT;
             c1.fval = fval - c.fval;
+            return c1;
+        }
+        else{
+            Cell c1;
+            c1.type = INT;
+            c1.ival = ival - c.ival;
             return c1;
         }
     }
@@ -112,10 +154,16 @@ struct Cell
             printf("Error: invalid use of operator / between two strings.");
             return c1;
         }
-        else{
+        else if(c.type == FLOAT){
             Cell c1;
             c1.type = FLOAT;
             c1.fval = fval / c.fval;
+            return c1;
+        }
+        else{
+            Cell c1;
+            c1.type = INT;
+            c1.ival = ival / c.ival;
             return c1;
         }
     }
@@ -125,10 +173,16 @@ struct Cell
             printf("Error: invalid use of operator > between two strings.");
             return c1;
         }
-        else{
+        else if(c.type == FLOAT){
             Cell c1;
             c1.type = FLOAT;
             c1.fval = fval > c.fval;
+            return c1;
+        }
+        else{
+            Cell c1;
+            c1.type = INT;
+            c1.ival = ival > c.ival;
             return c1;
         }
     }
@@ -138,10 +192,16 @@ struct Cell
             printf("Error: invalid use of operator < between two strings.");
             return c1;
         }
-        else{
+        else if(c.type == FLOAT){
             Cell c1;
             c1.type = FLOAT;
             c1.fval = fval < c.fval;
+            return c1;
+        }
+        else{
+            Cell c1;
+            c1.type = INT;
+            c1.ival = ival < c.ival;
             return c1;
         }
     }
@@ -151,10 +211,16 @@ struct Cell
             printf("Error: invalid use of operator >= between two strings.");
             return c1;
         }
-        else{
+        else if(c.type == FLOAT){
             Cell c1;
             c1.type = FLOAT;
             c1.fval = fval >= c.fval;
+            return c1;
+        }
+        else{
+            Cell c1;
+            c1.type = INT;
+            c1.ival = ival >= c.ival;
             return c1;
         }
     }
@@ -164,11 +230,17 @@ struct Cell
             printf("Error: invalid use of operator <= between two strings.");
             return c1;
         }
-        else{
+        else if(c.type == FLOAT){
             Cell c1;
             c1.type = FLOAT;
             c1.fval = fval <= c.fval;
             return c1;
+        }
+        else{
+            Cell c1;
+            c1.type = INT;
+            c1.ival = ival <= c.ival;
+            return c1; 
         }
     }
     Cell operator==(Cell c){
@@ -178,10 +250,16 @@ struct Cell
             c1.fval = c.sval == sval;
             return c1;
         }
-        else{
+        else if(c.type == FLOAT){
             Cell c1;
             c1.type = FLOAT;
             c1.fval = fval == c.fval;
+            return c1;
+        }
+        else{
+            Cell c1;
+            c1.type = INT;
+            c1.ival = ival == c.ival;
             return c1;
         }
     }
@@ -192,10 +270,16 @@ struct Cell
             c1.fval = c.sval != sval;
             return c1;
         }
-        else{
+        else if(c.type == FLOAT){
             Cell c1;
             c1.type = FLOAT;
             c1.fval = fval != c.fval;
+            return c1;
+        }
+        else if(c.type == INT){
+            Cell c1;
+            c1.type = FLOAT;
+            c1.ival = ival != c.ival;
             return c1;
         }
     }
