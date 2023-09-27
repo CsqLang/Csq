@@ -10,6 +10,13 @@ Cell f_val(double val){
     return c;
 }
 
+Cell i_val(int val){
+    Cell c;
+    c.type = INT;
+    c.ival = val;
+    return c;
+}
+
 Cell s_val(string val){
     val.pop_back();
     Cell c;
