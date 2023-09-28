@@ -450,9 +450,16 @@ def Compile(code: list) -> str:
                 scope_stack.append(Scope(indent_level + 1, NodeTypes.FUN_DECL, 0))
 
             case NodeTypes.IMPORT:
-                node = parse_ImportStmt(line)
-                code_string += visit_ImportNode(node) + "\n"
-
+                if check_ImportStmt(line)[0]:
+                    node = parse_ImportStmt(line)
+                    code_string += visit_ImportNode(node) + "\n"
+                else:
+                    print(
+                        SyntaxError(
+                            line_no,
+                            check_ImportStmt(line)[1]
+                        )
+                    )
             case NodeTypes.PRINT:
                 if check_PrintStmt(line):
                     node = parse_PrintStmt(line)
