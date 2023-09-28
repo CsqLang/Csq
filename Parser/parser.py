@@ -8,8 +8,12 @@ from AST.ast import *
 from Compiletime.error import (Error, IndentationError, NameError, SyntaxError,
                                TypeError)
 from Compiletime.syntax_check import *
-from Tokenizer.tokenizer import Token, TokenType, to_str
+from Tokenizer.tokenizer import Token, TokenType, to_str, tokenize
 
+'''
+This variable will hold the current path of the file to be parsed.
+'''
+_curr_path = ''
 
 class Scope:
     def __init__(self, level: int, of_: NodeTypes, ended: bool) -> None:
@@ -350,6 +354,16 @@ def parse_ForStmt(tokens):
     return node
 
 
+'''
+Function to parse import statements
+'''
+def parse_ImportStmt(tokens) -> ImportNode:
+    node = ImportNode()
+    for tok in tokens[1:]:
+        node.path += tok.token
+    return node
+
+
 def Compile(code: list) -> str:
     """
     Compile Csq code into C/C++ code.
@@ -435,6 +449,10 @@ def Compile(code: list) -> str:
                 code_string += node.visit() + "\n"
                 scope_stack.append(Scope(indent_level + 1, NodeTypes.FUN_DECL, 0))
 
+            case NodeTypes.IMPORT:
+                node = parse_ImportStmt(line)
+                code_string += visit_ImportNode(node) + "\n"
+
             case NodeTypes.PRINT:
                 if check_PrintStmt(line):
                     node = parse_PrintStmt(line)
@@ -470,3 +488,20 @@ def Compile(code: list) -> str:
                         )
         line_no += 1
     return code_string
+
+'''
+Function to import code on the basis of given ImportNode
+'''
+def visit_ImportNode(node):
+    module = open(_curr_path + "/" + node.path + ".csq", "r")
+    # Read the file and process it
+    code_ = module.read()
+    # Convert it into stream of tokens
+    lines = []
+    for line in code_.split("\n"):
+        if line != "":
+            lines.append(tokenize(line))
+
+    # Moving forth to compilation
+    compiled_code = Compile(lines)
+    return compiled_code
