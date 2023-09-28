@@ -9,7 +9,8 @@ import sys
 
 from AST.ast import *
 from Compiletime.wrapper import bind
-from Parser.parser import *
+from Parser.parser import Compile
+import Parser.parser
 from Tokenizer.tokenizer import *
 
 """
@@ -38,7 +39,7 @@ path = sys.argv[1]
 
 # Current path
 curr_dir = os.getcwd()
-
+Parser.parser._curr_path = curr_dir[:-3]
 file = open(path, "r")
 # Read the file and process it
 raw_code = file.read()
