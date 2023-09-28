@@ -226,6 +226,7 @@ class ImportNode(ASTNode):
     def __init__(self):
         super().__init__()
         self.name = ""
+        self.path = ''
         self.type = NodeTypes.IMPORT
 
 
