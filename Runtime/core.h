@@ -74,7 +74,13 @@ void traverseSymTable(){
 
 
 Cell id(string identifier){
-    return memory[SymTable[identifier].var.value_address];
+    if(SymTable.find(identifier) != SymTable.end()){
+        return memory[SymTable[identifier].var.value_address];
+    }
+    else{
+        RuntimeError("Undefined identifier '" + identifier + "'.\n");
+        return memory[SymTable[identifier].var.value_address];
+    }
 }
 
 void allocateVar(string id_, string type, Cell c){

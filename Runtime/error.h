@@ -10,7 +10,7 @@ This file contains all types of error which can be returned during the execution
 */
 void RuntimeError(string error)
 {
-    printf("At line %d : %s\n", line_,error.c_str());
+    printf("%s\n", error.c_str());
     error_c++;
 }
 
