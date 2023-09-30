@@ -120,7 +120,7 @@ def check_Expr(tokens):
                 return [valid,reason]
         
     return [True,""]    
-
+ 
 def check_ImportStmt(tokens):
     '''
     this function will be checking the impl of the
@@ -132,5 +132,19 @@ def check_ImportStmt(tokens):
         if token.type == TokenType.KEYWORD and token.token != "import":
             valid = 0
             reason = f"Use of keyword '{token.token}' as path to the module."
+            break
+    return [valid, reason]
+
+def check_FuncDecl(tokens):
+    '''
+    This function will be checking the impl of the
+    syntax of function decl
+    '''
+    valid = True
+    reason = ''
+    for token in tokens:
+        if token.type == TokenType.KEYWORD and token.token != "def":
+            valid = False
+            reason = f"Use of keyword '{token.token}' in function decl."
             break
     return [valid, reason]
