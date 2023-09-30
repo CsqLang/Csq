@@ -445,9 +445,17 @@ def Compile(code: list) -> str:
                 scope_stack.append(Scope(indent_level + 1, NodeTypes.FOR_STMT, 0))
 
             case NodeTypes.FUN_DECL:
-                node = parse_FunDecl(line)
-                code_string += node.visit() + "\n"
-                scope_stack.append(Scope(indent_level + 1, NodeTypes.FUN_DECL, 0))
+                if check_FuncDecl(line)[0]:
+                    node = parse_FunDecl(line)
+                    code_string += node.visit() + "\n"
+                    scope_stack.append(Scope(indent_level + 1, NodeTypes.FUN_DECL, 0))
+                else:
+                    print(
+                        SyntaxError(
+                            line_no,
+                            check_FuncDecl(line)[1]
+                        )
+                    )
 
             case NodeTypes.IMPORT:
                 if check_ImportStmt(line)[0]:
