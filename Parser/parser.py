@@ -174,6 +174,11 @@ def is_import_stmt(tokens) -> bool:
     else:
         return False
 
+def is_cimport_stmt(tokens) -> bool:
+    if len(tokens) >= 1 and tokens[0].token == "cimport":
+        return True
+    else:
+        return False
 
 def statement_type(tokens) -> NodeTypes:
     if is_var_decl(tokens):
@@ -198,6 +203,8 @@ def statement_type(tokens) -> NodeTypes:
         return NodeTypes.RETURN
     elif is_import_stmt(tokens):
         return NodeTypes.IMPORT
+    elif is_cimport_stmt(tokens):
+        return NodeTypes.CIMPORT
     elif is_print_stmt(tokens):
         return NodeTypes.PRINT
     else:
@@ -363,6 +370,11 @@ def parse_ImportStmt(tokens) -> ImportNode:
         node.path += tok.token
     return node
 
+def parse_CImportStmt(tokens) -> CImportNode:
+    node = CImportNode()
+    for tok in tokens[1:]:
+        node.path += tok.token
+    return node
 
 def Compile(code: list) -> str:
     """
@@ -468,6 +480,17 @@ def Compile(code: list) -> str:
                             check_ImportStmt(line)[1]
                         )
                     )
+            case NodeTypes.CIMPORT:
+                if check_CImportStmt(line)[0]:
+                    node = parse_CImportStmt(line)
+                    code_string += "\n//" + node.path + "\n" + visit_CImportNode(node) + "\n"
+                else:
+                    print(
+                        SyntaxError(
+                            line_no,
+                            check_CImportStmt(line)[1]
+                        )
+                    )
             case NodeTypes.PRINT:
                 if check_PrintStmt(line):
                     node = parse_PrintStmt(line)
@@ -520,3 +543,11 @@ def visit_ImportNode(node):
     # Moving forth to compilation
     compiled_code = Compile(lines)
     return compiled_code
+'''
+Function to import C/C++ code on the basis of given CImportNode
+'''
+def visit_CImportNode(node):
+    module = open(_curr_path + "/" + node.path + ".cpp", "r")
+    # Read the file and process it
+    code_ = module.read()
+    return code_

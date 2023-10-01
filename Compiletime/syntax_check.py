@@ -135,6 +135,21 @@ def check_ImportStmt(tokens):
             break
     return [valid, reason]
 
+def check_CImportStmt(tokens):
+    '''
+    this function will be checking the impl of the
+    syntax of cimport statement.
+    '''
+    valid = True
+    reason = ''
+    for token in tokens:
+        if token.type == TokenType.KEYWORD and token.token != "cimport":
+            valid = 0
+            reason = f"Use of keyword '{token.token}' as path to the module."
+            break
+    return [valid, reason]
+
+
 def check_FuncDecl(tokens):
     '''
     This function will be checking the impl of the

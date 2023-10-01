@@ -8,7 +8,7 @@
 
 void print(Cell arg){
     if(arg.type == STRING){
-        printf("%s",arg.sval.c_str());
+        printf("%s\n",arg.sval.c_str());
     }
     else if(arg.type == COMPOUND){
         for(Cell c : arg.array){
@@ -18,10 +18,10 @@ void print(Cell arg){
         printf("\n");
     }
     else if(arg.type == FLOAT){
-        printf("%lf",arg.fval);
+        printf("%lf\n",arg.fval);
     }
     else{
-        printf("%d",arg.ival);
+        printf("%d\n",arg.ival);
     }
 }
 
