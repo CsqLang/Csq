@@ -22,8 +22,8 @@ python3.10 csq.py <path of file>
 # Path of file
 path = sys.argv[1]
 
-# Current path
-curr_dir = os.getcwd()
+# csq include path path
+csq_include_path = os.getenv("CSQ_INCLUDE")
 
 # Read the file and process it
 raw_code = readCode(path=path)
@@ -34,7 +34,7 @@ lines = toTokens(raw_code)
 # Moving forth to compilation
 compiled_code = Compile(lines)
 
-final_code = bind(curr_dir, compiled_code)
+final_code = bind(csq_include_path, compiled_code)
 name = path.replace(".csq", "")
 writeCode(final_code, name + ".cpp")
 
