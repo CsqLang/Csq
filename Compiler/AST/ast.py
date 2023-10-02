@@ -242,4 +242,5 @@ class ReturnNode(ASTNode):
         super().__init__()
         self.value = ExprNode()
         self.type = NodeTypes.RETURN
-        
+    def visit(self):
+        return "return " + self.value.visit() + ";"
