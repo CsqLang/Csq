@@ -8,10 +8,10 @@ This file does compile code and produces machine code.
 import os
 import sys
 
-from Compiletime.wrapper import bind
+from Compiler.Compiletime.wrapper import bind
 # from Tokenizer.tokenizer import *
-from Parser.parser import Compile
-from Runtime.code_format import readCode, toTokens, writeCode
+from Compiler.Parser.parser import Compile
+from Compiler.code_format import readCode, toTokens, writeCode
 
 """
 

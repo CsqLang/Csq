@@ -7,7 +7,7 @@ valid or not which will futher be used by parser where it will decide whether to
 """
 
 
-from Tokenizer.tokenizer import TokenType
+from Compiler.Tokenizer.tokenizer import TokenType
 
 
 def check_VarDecl(tokens):

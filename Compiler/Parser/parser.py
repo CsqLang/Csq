@@ -4,11 +4,11 @@ Parser for Csq
 This module contains the parser for the Csq programming language. It defines functions for parsing various language constructs and generating the corresponding abstract syntax tree (AST).
 """
 
-from AST.ast import *
-from Compiletime.error import (Error, IndentationError, NameError, SyntaxError,
+from Compiler.AST.ast import *
+from Compiler.Compiletime.error import (Error, IndentationError, NameError, SyntaxError,
                                TypeError)
-from Compiletime.syntax_check import *
-from Tokenizer.tokenizer import Token, TokenType, to_str, tokenize
+from Compiler.Compiletime.syntax_check import *
+from Compiler.Tokenizer.tokenizer import Token, TokenType, to_str, tokenize
 
 '''
 This variable will hold the current path of the file to be parsed.

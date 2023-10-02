@@ -1,7 +1,7 @@
 """
 Python implementation of Csq AST
 """
-from Tokenizer.tokenizer import to_str
+from Compiler.Tokenizer.tokenizer import to_str
 
 
 # Node Types
