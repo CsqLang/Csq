@@ -236,3 +236,11 @@ class CImportNode(ASTNode):
         self.name = ""
         self.path = ''
         self.type = NodeTypes.CIMPORT
+
+class ReturnNode(ASTNode):
+    def __init__(self):
+        super().__init__()
+        self.value = ExprNode()
+        self.type = NodeTypes.RETURN
+    def visit(self):
+        return "return " + self.value.visit() + ";"
