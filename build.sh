@@ -98,6 +98,7 @@ function uninstall_csq() {
     echo "Error: Shell configuration file $shell_config not found."
     exit 1
   fi
+  
 
   # Remove csq path from the shell configuration file
   if [ -f "$shell_config" ]; then
@@ -118,3 +119,6 @@ if [ "$1" == "uninstall" ]; then
 else
   install_csq
 fi
+
+# For making Csq API universal
+sudo cp -r Core/Runtime /usr/include/Csq/
