@@ -119,6 +119,3 @@ if [ "$1" == "uninstall" ]; then
 else
   install_csq
 fi
-
-# For making Csq API universal
-sudo cp -r Core/Runtime /usr/include/Csq/
