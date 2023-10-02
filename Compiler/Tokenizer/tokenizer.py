@@ -3,8 +3,8 @@ Python implementation of Csq Tokenizer
 """
 import re
 
-from Compiletime import error
-from Grammar.grammar import *
+from Compiler.Compiletime.error import *
+from Compiler.Grammar.grammar import *
 
 
 # Type of Tokens
@@ -348,7 +348,7 @@ def tokenize(line: str) -> list:
             # Process the last string
             tokens.append(check(current_token, current_line))
         if string_presence:
-            error.SyntaxError(current_line, "unclosed string")
+            SyntaxError(current_line, "unclosed string")
 
     # Mapping of single-character operators to compound operators
     compound_operators = {

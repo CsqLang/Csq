@@ -1,5 +1,5 @@
 """Read Write Tokens  Python implementation of Csq"""
-from Tokenizer.tokenizer import *
+from Compiler.Tokenizer.tokenizer import *
 
 
 def readCode(path: str) -> str:
