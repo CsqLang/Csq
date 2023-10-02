@@ -13,7 +13,7 @@ Cell i_val(int val){
 }
 
 Cell s_val(string val){
-    return {STRING, 0, 0, 0.0, val.substr(1, val.size() - 2)};
+    return {STRING, 0, 0, 0.0, val};
 }
 
 #endif // EVAL_H
