@@ -5,7 +5,7 @@ local_bin="$HOME/.local/bin/"
 local_include="$HOME/.local/include/csq"
 csq_bin="$local_bin/csq"
 csq_path="$local_include"
-shell_config="$HOME/.${SHELL##*/}rc"
+shell_config="$HOME/.bashrc"
 
 function install_csq() {
   # Copy csq.py to ~/.local/bin/
