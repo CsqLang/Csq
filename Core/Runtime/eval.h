@@ -4,27 +4,16 @@
 #include "core.h"
 
 Cell f_val(double val){
-    Cell c;
-    c.type = FLOAT;
-    c.fval = val;
-    return c;
+
+    return {FLOAT, 0, 0, val};
 }
 
 Cell i_val(int val){
-    Cell c;
-    c.type = INT;
-    c.ival = val;
-    return c;
+    return {INT, 0, val};
 }
 
 Cell s_val(string val){
-    val.pop_back();
-    Cell c;
-    c.type = STRING;
-    for(int i = 1;i<val.size();i++){
-        c.sval.push_back(val[i]);
-    }
-    return c;
+    return {STRING, 0, 0, 0.0, val.substr(1, val.size() - 2)};
 }
 
 #endif // EVAL_H
