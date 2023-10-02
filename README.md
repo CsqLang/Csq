@@ -1,22 +1,19 @@
-# Csq 4.2
+# Csq 4.3
 
 Hey there,
-This is the updated version of 4.2 which is having more concise syntax than the 4.1 and better compiler handling provided by AST.
+This is the updated version of 4.3 which is having more concise syntax than the 4.1 and better compiler handling provided by AST.
 
 ## Installation
 
-```bash
-make install
-```
-
-## Development
+To install Csq, run the following command:
 
 ```bash
-make dev # For .cpp code
-make format # For formatting and linting
+./build.sh
 ```
-
-Make sure that your code works properly before committing it.
+To uninstall Csq, run the following command:
+```
+./build.sh uninstall
+```
 
 ## Usage
 
