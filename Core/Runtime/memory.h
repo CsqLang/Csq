@@ -59,233 +59,199 @@ struct Cell
     vector<Cell> array;
     shared_ptr<CusType> cus_type;
 
-    Cell operator+(Cell c){
-        if(c.type == STRING && type == STRING){
-            Cell c1;
-            c1.type = STRING;
-            c1.sval = sval + c.sval;
-            return c1;
+
+    Cell operator+(const Cell& c) const {
+        /**
+             * Overloaded addition operator for Cell.
+             * Performs addition based on the types of operands.
+             * Supports string concatenation, numeric addition, and mixed-type addition.
+             * @param c The Cell to be added.
+             * @return Resulting Cell after addition.
+        */ 
+        Cell result;
+
+        if (type == STRING) {
+            // String concatenation
+            result.type = STRING;
+            result.sval = sval + (c.type == STRING ? c.sval : (c.type == FLOAT ? to_string(c.fval) : to_string(c.ival)));
+        } else if (type == FLOAT || c.type == FLOAT) {
+            // Numeric addition for floats
+            result.type = FLOAT;
+            result.fval = (type == FLOAT ? fval : ival) + (c.type == FLOAT ? c.fval : c.ival);
+        } else {
+            // Numeric addition for integers
+            result.type = INT;
+            result.ival = ival + c.ival;
         }
-        else if(type == STRING && c.type == FLOAT){
-            Cell c1;
-            c1.type = STRING;
-            c1.sval = sval + to_string(c.fval);
-            return c1;
-        }
-        else if(type == STRING && c.type == INT){
-            Cell c1;
-            c1.type = STRING;
-            c1.sval = sval + to_string(c.ival);
-            return c1;
-        }
-        else if(
-            (c.type == FLOAT && type == INT)
-            ||
-            (c.type == INT && type == FLOAT)
-        ){
-            if(c.type == FLOAT && type == INT){
-                Cell c1;
-                c1.type = FLOAT;
-                c1.fval = fval + c.ival;
-                return c1;
-            }
-            else{
-                Cell c1;
-                c1.type = FLOAT;
-                c1.fval = ival + c.fval;
-                return c1;
-            }
-        }
-        else if(c.type == FLOAT && type == FLOAT){
-            Cell c1;
-            c1.type = FLOAT;
-            c1.fval = fval + c.fval;
-            return c1;
-        }
-        else{
-            Cell c1;
-            c1.type = INT;
-            c1.ival = ival + c.ival;
-            return c1;
+
+        return result;
+    }
+
+
+    Cell operator*(const Cell& c) const {
+        /**
+             * Overloaded multiplication operator for Cell.
+             * Performs multiplication based on the types of operands.
+             * Supports numeric multiplication.
+             * @param c The Cell to be multiplied.
+             * @return Resulting Cell after multiplication or an error Cell for invalid operations.
+        */
+        if (c.type == STRING) {
+            printf("Error: invalid use of operator * between two strings.");
+            return Cell();  // Error cell
+        } else {
+            return (c.type == FLOAT) ? Cell{FLOAT, 0, 0,fval * c.fval} : Cell{INT, 0, ival * c.ival};
         }
     }
 
-    Cell operator*(Cell c){
-        if(c.type == STRING){
-            Cell c1;
-            printf("Error: invalid use of operator * between two strings.");
-            return c1;
-        }
-        else if(c.type == FLOAT){
-            Cell c1;
-            c1.type = FLOAT;
-            c1.fval = fval * c.fval;
-            return c1;
-        }
-        else{
-            Cell c1;
-            c1.type = INT;
-            c1.ival = ival * c.ival;
-            return c1;
-        }
-    }
-    Cell operator-(Cell c){
-        if(c.type == STRING){
-            Cell c1;
+    Cell operator-(const Cell& c) const {
+        /**
+             * Overloaded subtraction operator for Cell.
+             * Performs subtraction based on the types of operands.
+             * Supports numeric subtraction.
+             * @param c The Cell to be subtracted.
+             * @return Resulting Cell after subtraction or an error Cell for invalid operations.
+        */
+        if (c.type == STRING) {
             printf("Error: invalid use of operator - between two strings.");
-            return c1;
-        }
-        else if(c.type == FLOAT){
-            Cell c1;
-            c1.type = FLOAT;
-            c1.fval = fval - c.fval;
-            return c1;
-        }
-        else{
-            Cell c1;
-            c1.type = INT;
-            c1.ival = ival - c.ival;
-            return c1;
+            return Cell();  // Error cell
+        } else {
+            return (type == FLOAT || c.type == FLOAT) ? Cell{FLOAT, 0, 0,fval - c.fval} : Cell{INT, 0, ival - c.ival};
         }
     }
-    Cell operator/(Cell c){
-        if(c.type == STRING){
-            Cell c1;
+
+
+    Cell operator/(const Cell& c) const {
+        /**
+             * Overloaded division operator for Cell.
+             * Performs division based on the types of operands.
+             * Supports numeric division.
+             * @param c The Cell to be divided.
+             * @return Resulting Cell after division or an error Cell for invalid operations.
+        */
+        if (c.type == STRING) {
             printf("Error: invalid use of operator / between two strings.");
-            return c1;
-        }
-        else if(c.type == FLOAT){
-            Cell c1;
-            c1.type = FLOAT;
-            c1.fval = fval / c.fval;
-            return c1;
-        }
-        else{
-            Cell c1;
-            c1.type = INT;
-            c1.ival = ival / c.ival;
-            return c1;
+            return Cell();  // Error cell
+        } else if (c.type == FLOAT && (type == FLOAT || type == INT)) {
+            return Cell{FLOAT, 0, 0,fval / c.fval};
+        } else {
+            return Cell{INT, 0, ival / c.ival};
         }
     }
-    Cell operator>(Cell c){
-        if(c.type == STRING){
-            Cell c1;
+
+ 
+    Cell operator>(const Cell& c) const {
+        /**
+             * Overloaded greater-than operator for Cell.
+             * Performs comparison based on the types of operands.
+             * Supports numeric comparisons.
+             * @param c The Cell to compare with.
+             * @return Resulting Cell with a boolean value indicating the comparison result or an error Cell for invalid operations.
+        */
+        if (c.type == STRING) {
             printf("Error: invalid use of operator > between two strings.");
-            return c1;
-        }
-        else if(c.type == FLOAT){
-            Cell c1;
-            c1.type = FLOAT;
-            c1.fval = fval > c.fval;
-            return c1;
-        }
-        else{
-            Cell c1;
-            c1.type = INT;
-            c1.ival = ival > c.ival;
-            return c1;
+            return Cell();  // Error cell
+        } else {
+            return (type == FLOAT || c.type == FLOAT) ? Cell{FLOAT, 0, fval > c.fval} : Cell{INT, 0, ival > c.ival};
         }
     }
-    Cell operator<(Cell c){
-        if(c.type == STRING){
-            Cell c1;
+
+
+    Cell operator<(const Cell& c) const {
+        /**
+             * Overloaded less-than operator for Cell.
+             * Performs comparison based on the types of operands.
+             * Supports numeric comparisons.
+             * @param c The Cell to compare with.
+             * @return Resulting Cell with a boolean value indicating the comparison result or an error Cell for invalid operations.
+        */
+        if (c.type == STRING) {
             printf("Error: invalid use of operator < between two strings.");
-            return c1;
-        }
-        else if(c.type == FLOAT){
-            Cell c1;
-            c1.type = FLOAT;
-            c1.fval = fval < c.fval;
-            return c1;
-        }
-        else{
-            Cell c1;
-            c1.type = INT;
-            c1.ival = ival < c.ival;
-            return c1;
+            return Cell();  // Error cell
+        } else {
+            return (type == FLOAT || c.type == FLOAT) ? Cell{FLOAT, 0, fval < c.fval} : Cell{INT, 0, ival < c.ival};
         }
     }
-    Cell operator>=(Cell c){
-        if(c.type == STRING){
-            Cell c1;
-            printf("Error: invalid use of operator >= between two strings.");
-            return c1;
-        }
-        else if(c.type == FLOAT){
-            Cell c1;
-            c1.type = FLOAT;
-            c1.fval = fval >= c.fval;
-            return c1;
-        }
-        else{
-            Cell c1;
-            c1.type = INT;
-            c1.ival = ival >= c.ival;
-            return c1;
+
+    
+    Cell operator>=(const Cell& c) const {
+        /**
+             * Overloaded greater-than-or-equal-to operator for Cell.
+             * Performs comparison based on the types of operands.
+             * Supports numeric and string comparisons.
+             * @param c The Cell to compare with.
+             * @return Resulting Cell with a boolean value indicating the comparison result or an error Cell for invalid operations.
+        */
+        if (c.type == STRING) {
+            printf("Error: invalid use of operator >= between two strings." );
+            return Cell();  // Error cell
+        } else {
+            return (type == FLOAT || c.type == FLOAT) ? Cell{FLOAT, 0, fval >= c.fval} : Cell{INT, 0, ival >= c.ival};
         }
     }
-    Cell operator<=(Cell c){
-        if(c.type == STRING){
-            Cell c1;
+
+   
+    Cell operator<=(const Cell& c) const {
+        /**
+             * Overloaded less-than-or-equal-to operator for Cell.
+             * Performs comparison based on the types of operands.
+             * Supports numeric and string comparisons.
+             * @param c The Cell to compare with.
+             * @return Resulting Cell with a boolean value indicating the comparison result or an error Cell for invalid operations.
+        */
+        if (c.type == STRING) {
             printf("Error: invalid use of operator <= between two strings.");
-            return c1;
-        }
-        else if(c.type == FLOAT){
-            Cell c1;
-            c1.type = FLOAT;
-            c1.fval = fval <= c.fval;
-            return c1;
-        }
-        else{
-            Cell c1;
-            c1.type = INT;
-            c1.ival = ival <= c.ival;
-            return c1; 
+            return Cell();  // Error cell
+        } else {
+            return (type == FLOAT || c.type == FLOAT) ? Cell{FLOAT, 0, fval <= c.fval} : Cell{INT, 0, ival <= c.ival};
         }
     }
-    Cell operator==(Cell c){
-        if(c.type == STRING){
-            Cell c1;
-            c1.type = FLOAT;
-            c1.fval = c.sval == sval;
-            return c1;
-        }
-        else if(c.type == FLOAT){
-            Cell c1;
-            c1.type = FLOAT;
-            c1.fval = fval == c.fval;
-            return c1;
-        }
-        else{
-            Cell c1;
-            c1.type = INT;
-            c1.ival = ival == c.ival;
-            return c1;
+
+   
+    Cell operator==(const Cell& c) const {
+        /**
+             * Overloaded equality operator for Cell.
+             * Performs comparison based on the types of operands.
+             * Supports numeric and string equality comparisons.
+             * @param c The Cell to compare with.
+             * @return Resulting Cell with a boolean value indicating the comparison result or an error Cell for invalid operations.
+        */
+        if (c.type == STRING) {
+            return Cell{FLOAT, 0, 0,static_cast<float>(sval == c.sval)};
+        } else {
+            return (type == FLOAT || c.type == FLOAT) ? Cell{FLOAT, 0, fval == c.fval} : Cell{INT, 0, ival == c.ival};
         }
     }
-    Cell operator!=(Cell c){
-        if(c.type == STRING){
-            Cell c1;
-            c1.type = FLOAT;
-            c1.fval = c.sval != sval;
-            return c1;
-        }
-        else if(c.type == FLOAT){
-            Cell c1;
-            c1.type = FLOAT;
-            c1.fval = fval != c.fval;
-            return c1;
-        }
-        else if(c.type == INT){
-            Cell c1;
-            c1.type = FLOAT;
-            c1.ival = ival != c.ival;
-            return c1;
+
+    
+    Cell operator!=(const Cell& c) const {
+        /**
+             * Overloaded inequality operator for Cell.
+             * Performs comparison based on the types of operands.
+             * Supports numeric and string inequality comparisons.
+             * @param c The Cell to compare with.
+             * @return Resulting Cell with a boolean value indicating the comparison result or an error Cell for invalid operations.
+        */
+        if (c.type == STRING) {
+            return Cell{FLOAT, 0, 0,static_cast<float>(sval != c.sval)};
+        } else if (c.type == FLOAT) {
+            return Cell{FLOAT, 0, 0,static_cast<float>(fval != c.fval)};
+        } else {
+            return Cell{FLOAT, 0, 0,static_cast<float>(ival != c.ival)};
         }
     }
-    Cell operator[](Cell index){
-        return array[int(index.fval)];
+
+    
+    Cell operator[](const Cell& index) const {
+        /**
+         * Overloaded subscript operator for Cell.
+         * Retrieves the element at the specified index in the array.
+         * @param index The index Cell.
+         * @return Resulting Cell containing the array element or an error Cell for invalid operations.
+        */
+        return array[static_cast<int>(index.fval)];
     }
+
 };
 
 
