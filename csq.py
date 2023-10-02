@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 
 This file does compile code and produces machine code.
@@ -7,26 +8,10 @@ This file does compile code and produces machine code.
 import os
 import sys
 
-from AST.ast import *
 from Compiletime.wrapper import bind
+# from Tokenizer.tokenizer import *
 from Parser.parser import Compile
-import Parser.parser
-from Tokenizer.tokenizer import *
-
-"""
-Some useful functions
-"""
-
-
-def read_file_in_directory(directory, filename):
-    file_path = os.path.join(directory, filename)
-    if os.path.exists(file_path):
-        with open(file_path, "r") as file:
-            file_contents = file.read()
-        return file_contents
-    else:
-        return f"File '{filename}' not found in the directory '{directory}'."
-
+from Runtime.code_format import readCode, toTokens, writeCode
 
 """
 
@@ -39,25 +24,18 @@ path = sys.argv[1]
 
 # Current path
 curr_dir = os.getcwd()
-Parser.parser._curr_path = curr_dir[:-3]
-file = open(path, "r")
+
 # Read the file and process it
-raw_code = file.read()
+raw_code = readCode(path=path)
 
 # Convert it into stream of tokens
-lines = []
-for line in raw_code.split("\n"):
-    if line != "":
-        lines.append(tokenize(line))
+lines = toTokens(raw_code)
 
 # Moving forth to compilation
 compiled_code = Compile(lines)
 
 final_code = bind(curr_dir, compiled_code)
+name = path.replace(".csq", "")
+writeCode(final_code, name + ".cpp")
 
-name = ""
-if "/" in path:
-    name = path.split("/")[len(path.split("/")) - 1]
-
-fo = open(path.replace(name, "") + "/" + name.replace(".csq", ".cpp"), "w")
-fo.write(final_code)
+os.system("g++ " + name + ".cpp -o " + name)
