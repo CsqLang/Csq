@@ -350,6 +350,10 @@ def parse_FunDecl(tokens) -> FunDeclNode:
                 param = ''
     return node
 
+def parse_ReturnStmt(tokens):
+    node = ReturnNode()
+    node.value = parse_ExprNode(tokens)
+    return node
 
 def parse_ForStmt(tokens):
     tokens.pop(len(tokens) - 1)
@@ -503,14 +507,13 @@ def Compile(code: list) -> str:
                         )
                     )
 
+            case NodeTypes.RETURN:
+                node = parse_ReturnStmt(line[1:])
+                code_string += node.visit() + '\n'
             case _:
                 # The procedure to parse an expression is different if it's a return statement.
                 if is_return_stmt(line):
-                    node = parse_ExprNode(line)
-                    val = ""
-                    for tok in line:
-                        val += tok.token + " "
-                    code_string += val + ";\n"
+                    pass
                 else:
                     if check_Expr(line)[0]:
                         # Syntax is valid
