@@ -77,9 +77,11 @@ Cell id(string identifier){
     if(SymTable.find(identifier) != SymTable.end()){
         return memory[SymTable[identifier].var.value_address];
     }
-    else{
+    else if(identifier != "ignore"){
         RuntimeError("Undefined identifier '" + identifier + "'.\n");
         return memory[SymTable[identifier].var.value_address];
+    }else{
+        return f_val(0);
     }
 }
 
