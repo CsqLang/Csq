@@ -180,6 +180,13 @@ def is_cimport_stmt(tokens) -> bool:
     else:
         return False
 
+def is_class(tokens) -> bool:
+    if tokens[0].token == "class":
+        return True
+    else:
+        return False
+
+
 def statement_type(tokens) -> NodeTypes:
     if is_var_decl(tokens):
         return NodeTypes.VAR_DECL
@@ -205,6 +212,8 @@ def statement_type(tokens) -> NodeTypes:
         return NodeTypes.IMPORT
     elif is_cimport_stmt(tokens):
         return NodeTypes.CIMPORT
+    elif is_class(tokens):
+        return NodeTypes.CLASS
     elif is_print_stmt(tokens):
         return NodeTypes.PRINT
     else:
@@ -319,6 +328,12 @@ def parse_WhileStmt(tokens) -> WhileStmtNode:
     node.condition = parse_ExprNode(tokens[1:])
     return node
 
+def parse_Class(tokens) -> ClassNode:
+    tokens.pop(len(tokens) - 1)
+
+    node = ClassNode()
+    return node
+
 
 def parse_FunDecl(tokens) -> FunDeclNode:
     # Remove unnecessary tokens
@@ -394,7 +409,7 @@ def Compile(code: list) -> str:
     code.append([Token("0", TokenType.VALUE)])
     # Resulting code
     code_string = ""
-
+    _class = False
     # Scope properties
     line_no = 1
     scope_stack = [Scope(0, NodeTypes.UNKNOWN_NODE, 0)]
@@ -459,6 +474,12 @@ def Compile(code: list) -> str:
                 node = parse_ForStmt(line)
                 code_string += node.visit() + "\n"
                 scope_stack.append(Scope(indent_level + 1, NodeTypes.FOR_STMT, 0))
+
+            case NodeTypes.CLASS:
+                node = parse_Class(line)
+                code_string += node.visit() + "\n"
+                _class = True
+                scope_stack.append(Scope(indent_level + 1, NodeTypes.CLASS, 0))
 
             case NodeTypes.FUN_DECL:
                 if check_FuncDecl(line)[0]:
