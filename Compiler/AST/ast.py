@@ -24,6 +24,7 @@ class NodeTypes:
     IMPORT = 15
     UNKNOWN_NODE = 16
     CIMPORT = 17
+    CLASS = 18
 
 
 # Parent AST node type
@@ -244,3 +245,11 @@ class ReturnNode(ASTNode):
         self.type = NodeTypes.RETURN
     def visit(self):
         return "return " + self.value.visit() + ";"
+
+class ClassNode(ASTNode):
+    def __init__(self):
+        super().__init__()
+        self.name = ''
+        self.type = NodeTypes.CLASS
+    def visit(self):
+        return f'__classes__[{self.name}] = Class({self.name});'
