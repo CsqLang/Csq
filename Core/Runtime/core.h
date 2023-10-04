@@ -15,6 +15,7 @@ int line_ = 1;
 #include "memory.h"
 #include "function.h"
 #include "eval.h"
+#include "class.h"
 #include <unordered_map>
 /*
 Possible types of symbol for the symbol table.
@@ -159,5 +160,7 @@ Cell id(string identifier, int index){
 }
 
 
+//Ultimate class storage where a table of every class will be made.
+map<string, Class> __classes__;
 
 #endif // RUNTIME_CORE_CSQ
