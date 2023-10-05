@@ -550,6 +550,8 @@ def visit_ImportNode(node):
 Function to import C/C++ code on the basis of given CImportNode
 '''
 def visit_CImportNode(node):
+    import os
+    _curr_path = os.getcwd()
     module = open(_curr_path + "/" + node.path + ".cpp", "r")
     # Read the file and process it
     code_ = module.read()
