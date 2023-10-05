@@ -331,7 +331,11 @@ def parse_WhileStmt(tokens) -> WhileStmtNode:
 def parse_Class(tokens) -> ClassNode:
     tokens.pop(len(tokens) - 1)
 
+    '''
+    class <identifier>
+    '''
     node = ClassNode()
+    node.name = tokens[1].token
     return node
 
 
@@ -379,6 +383,18 @@ def parse_ForStmt(tokens):
 
     return node
 
+def parse_Methods(tokens):
+    tokens.pop(len(tokens) - 1)
+
+    '''
+    Syntax:
+        def <name>:
+    '''
+    node = MethodNode()
+    node.identifier = tokens[1].token
+    
+    return node
+
 
 '''
 Function to parse import statements
@@ -410,6 +426,7 @@ def Compile(code: list) -> str:
     # Resulting code
     code_string = ""
     _class = False
+    active_class = ''
     # Scope properties
     line_no = 1
     scope_stack = [Scope(0, NodeTypes.UNKNOWN_NODE, 0)]
@@ -419,10 +436,14 @@ def Compile(code: list) -> str:
         indent_level = get_indent_level(line)
 
         while indent_level != scope_stack[-1].indent_level:
-            if scope_stack[-1].of == NodeTypes.FUN_DECL:
-                code_string += "};\n"
-                scope_stack.pop()
-
+            if scope_stack[-1].of == NodeTypes.FUN_DECL or  scope_stack[-1].of == NodeTypes.CLASS:
+                if scope_stack[-1].of == NodeTypes.CLASS:
+                    _class = False
+                    active_class = ''
+                    scope_stack.pop()    
+                else:
+                    code_string += "};\n"
+                    scope_stack.pop()
             else:
                 code_string += "}\n"
                 # Pop the previous scope since it's now closed.
@@ -479,20 +500,28 @@ def Compile(code: list) -> str:
                 node = parse_Class(line)
                 code_string += node.visit() + "\n"
                 _class = True
+                active_class = node.name
                 scope_stack.append(Scope(indent_level + 1, NodeTypes.CLASS, 0))
 
             case NodeTypes.FUN_DECL:
-                if check_FuncDecl(line)[0]:
-                    node = parse_FunDecl(line)
-                    code_string += node.visit() + "\n"
+                if _class:
+                    node = parse_Methods(line)
+                    node.classname = active_class
+                    code_string += node.visit()
                     scope_stack.append(Scope(indent_level + 1, NodeTypes.FUN_DECL, 0))
+
                 else:
-                    print(
-                        SyntaxError(
-                            line_no,
-                            check_FuncDecl(line)[1]
+                    if check_FuncDecl(line)[0]:
+                        node = parse_FunDecl(line)
+                        code_string += node.visit() + "\n"
+                        scope_stack.append(Scope(indent_level + 1, NodeTypes.FUN_DECL, 0))
+                    else:
+                        print(
+                            SyntaxError(
+                                line_no,
+                                check_FuncDecl(line)[1]
+                            )
                         )
-                    )
 
             case NodeTypes.IMPORT:
                 if check_ImportStmt(line)[0]:
