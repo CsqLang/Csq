@@ -252,7 +252,7 @@ class ClassNode(ASTNode):
         self.name = ''
         self.type = NodeTypes.CLASS
     def visit(self):
-        return f'__classes__[{self.name}] = Class({self.name});'
+        return f'__classes__["{self.name}"] = Class();'
 
 '''
 This class is very much similar to FunDeclNode but this is decl as a method of a class.
@@ -264,6 +264,5 @@ class MethodNode(ASTNode):
         self.parameters = []
 
     def visit(self):
-        code = f'__classes__["{self.classname}"].methods["{self.identifier}"] = [](Cell& args)' + "{\n"
-
+        code = f'__classes__["{self.classname}"].methods["{self.identifier}"] = [](Cell args)' + "{\n" + 'allocateVar("arg", "any", args);\n'
         return code
