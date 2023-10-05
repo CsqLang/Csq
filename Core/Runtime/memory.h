@@ -43,10 +43,6 @@ enum Type{
 };
 
 //Class to handle custom datatypes
-class CusType{
-    public:
-        virtual ~CusType() = default;
-};
 
 // Struct for a memory cell.
 struct Cell
@@ -57,7 +53,8 @@ struct Cell
     double fval;
     string sval;
     vector<Cell> array;
-    shared_ptr<CusType> cus_type;
+    //for custom type
+    string __class__;
 
 
     Cell operator+(const Cell& c) const {
@@ -268,9 +265,9 @@ void addCell(int val) {
     memory.emplace_back(cell);
 }
 
-void addCell(const CusType& object){
+void addCell(string class_){
     Cell cell;
-    cell.cus_type = make_shared<CusType>(object);
+    cell.__class__ = class_;
     cell.type = CUSTYPE;
     cell.u_count = 0;
     memory.emplace_back(cell);
