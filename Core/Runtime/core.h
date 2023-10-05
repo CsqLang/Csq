@@ -114,8 +114,11 @@ void allocateVar(string id_){
     SymTable[id_] = sym;
 }
 
-void allocateVar(string id_,string type, const CusType& val){
-    addCell(val);
+void allocateVar(string id_,string type){
+    Cell c;
+    c.type = CUSTYPE;
+    c.__class__ = type;
+    memory.push_back(c);
     Symbol sym;
     sym.var.name = id_;
     sym.type = VARIABLE;
