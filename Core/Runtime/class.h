@@ -11,8 +11,8 @@ This in every case will be representing a class
 class Class {
 public:
     string name;
-    map<string, function<void(vector<Cell>&)>> methods;
-    map<string, Cell&> methods;
+    map<string, function<void(Cell)>> methods;
+    map<string, Cell> members;
 };
 
 #endif // CLASSCSQ_H
