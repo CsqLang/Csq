@@ -1,4 +1,15 @@
 # Define a base Error class for handling different types of errors.
+
+import logging
+
+FORMATTER = '[+] [%(asctime)s] [%(levelname)s] %(message)s'
+logging.basicConfig(format=FORMATTER)
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.DEBUG)
+
+from Compiler._log import log_style
+
+
 class Error:
     """Base class for handling errors in the Csq language."""
 
@@ -18,12 +29,13 @@ class Error:
 
     def __str__(self) -> str:
         """
-        Return a string representation of the error.
+        Return a logging representation of the error.
 
         Returns:
-            str: A string containing the error message and line number.
+            str: A logging containing the error message and line number.
         """
-        return f"At Line {self.line}\n{self.__class__.__name__}: {self.msg}"
+        return log_style(
+            f'At Line {self.line}\n{self.__class__.__name__}: {self.msg}', log='error')
 
 
 # Define a SyntaxError class that inherits from the base Error class.
