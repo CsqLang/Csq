@@ -265,13 +265,13 @@ void addCell(int val) {
     memory.emplace_back(cell);
 }
 
-void addCell(string class_){
-    Cell cell;
-    cell.__class__ = class_;
-    cell.type = CUSTYPE;
-    cell.u_count = 0;
-    memory.emplace_back(cell);
-}
+// void addCell(string class_){
+//     Cell cell;
+//     cell.__class__ = class_;
+//     cell.type = CUSTYPE;
+//     cell.u_count = 0;
+//     memory.emplace_back(cell);
+// }
 
 void addCell(double val) {
     Cell cell;
