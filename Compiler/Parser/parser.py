@@ -219,7 +219,6 @@ def statement_type(tokens) -> NodeTypes:
     else:
         return NodeTypes.EXPR
 
-
 """
 Parsing units
 """
@@ -244,6 +243,9 @@ def parse_ExprNode(tokens) -> ExprNode:
         if current_token.type == TokenType.IDENTIFIER:
             if i + 1 < len(tokens) and tokens[i + 1].token == "(":
                 node.tokens.append(Token(current_token.token + "(", TokenType.BLANK))
+                i += 1
+            elif i + 1 < len(tokens) and tokens[i + 1].token == ".":
+                Token(f'methodId("{current_token.token}","{tokens[i+2].token}")', TokenType.BLANK)
                 i += 1
             else:
                 node.tokens.append(
