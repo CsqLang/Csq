@@ -95,6 +95,18 @@ void allocateVar(string id_, string type, Cell c){
     SymTable[id_] = sym;
 }
 
+void allocateVar(string id_, string type, string c_){
+    Cell c;
+    c.type = CUSTYPE;
+    c.__class__ = c_;
+    memory.push_back(c);
+    Symbol sym;
+    sym.var.name = id_;
+    sym.type = VARIABLE;
+    sym.var.value_address = TopCellAddress();
+    SymTable[id_] = sym;
+}
+
 //This is only for the impl of OOP
 // template <typename T>
 // void allocateVar(const string& name, const string& type, T value) {
