@@ -245,7 +245,6 @@ def parse_ExprNode(tokens) -> ExprNode:
                 node.tokens.append(Token(current_token.token + "(", TokenType.BLANK))
                 i += 1
             elif i + 1 < len(tokens) and tokens[i + 1].token == ".":
-                print(4)
                 node.tokens.append(Token(f'methodId("{current_token.token}","{tokens[i+2].token}")', TokenType.BLANK))
                 i += 2
             else:
