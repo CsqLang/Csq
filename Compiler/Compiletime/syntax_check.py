@@ -163,3 +163,36 @@ def check_FuncDecl(tokens):
             reason = f"Use of keyword '{token.token}' in function decl."
             break
     return [valid, reason]
+
+def check_IfStmt(tokens):
+    '''
+    This function will be checking the impl of the syntax of if stmt
+    '''
+    valid = True
+    reason = ''
+    if tokens[len(tokens)-1].token != ":":
+        valid = False
+        reason = 'Missing colon at the end in the used if stmt.'
+    return [valid, reason]
+
+def check_ElifStmt(tokens):
+    '''
+    This function will be checking the impl of the syntax of elif stmt
+    '''
+    valid = True
+    reason = ''
+    if tokens[len(tokens)-1].token != ":":
+        valid = False
+        reason = 'Missing colon at the end in the used elif stmt.'
+    return [valid, reason]
+
+def check_ElseStmt(tokens):
+    '''
+    This function will be checking the impl of the syntax of else stmt
+    '''
+    valid = True
+    reason = ''
+    if tokens[len(tokens)-1].token != ":":
+        valid = False
+        reason = 'Missing colon at the end in the used else stmt.'
+    return [valid, reason]

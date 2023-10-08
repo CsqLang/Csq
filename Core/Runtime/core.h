@@ -15,6 +15,7 @@ int line_ = 1;
 #include "memory.h"
 #include "function.h"
 #include "eval.h"
+#include "class.h"
 #include <unordered_map>
 /*
 Possible types of symbol for the symbol table.
@@ -94,6 +95,18 @@ void allocateVar(string id_, string type, Cell c){
     SymTable[id_] = sym;
 }
 
+void allocateVar(string id_, string type, string c_){
+    Cell c;
+    c.type = CUSTYPE;
+    c.__class__ = c_;
+    memory.push_back(c);
+    Symbol sym;
+    sym.var.name = id_;
+    sym.type = VARIABLE;
+    sym.var.value_address = TopCellAddress();
+    SymTable[id_] = sym;
+}
+
 //This is only for the impl of OOP
 // template <typename T>
 // void allocateVar(const string& name, const string& type, T value) {
@@ -113,8 +126,11 @@ void allocateVar(string id_){
     SymTable[id_] = sym;
 }
 
-void allocateVar(string id_,string type, const CusType& val){
-    addCell(val);
+void allocateVar(string id_,string type){
+    Cell c;
+    c.type = CUSTYPE;
+    c.__class__ = type;
+    memory.push_back(c);
     Symbol sym;
     sym.var.name = id_;
     sym.type = VARIABLE;
@@ -159,5 +175,7 @@ Cell id(string identifier, int index){
 }
 
 
+//Ultimate class storage where a table of every class will be made.
+map<string, Class> __classes__;
 
 #endif // RUNTIME_CORE_CSQ

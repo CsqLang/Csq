@@ -17,3 +17,7 @@ short names which looks elegant.
 #define main int main(int argc, char** argv){
 #define endmain return 0;}
 #define class_memvVar(cname,obj, name) dynamic_pointer_cast<cname>(id(obj).cus_type)->getMember(name);
+#define methodId(obj, methodname) __classes__[id(obj).__class__].methods[methodname]
+string object(Cell class_){
+    return class_.sval;
+}
