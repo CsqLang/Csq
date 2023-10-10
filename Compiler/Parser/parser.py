@@ -284,6 +284,13 @@ def parse_VarDecl(tokens) -> VarDeclNode:
     node.value = parse_ExprNode(node.value.tokens)
     return node
 
+def parse_MemberVarDecl(tokens) -> MemberVarDeclNode:
+    node = MemberVarDeclNode()
+    node.identifier = tokens[0].token
+    node.value.tokens = tokens[2:]
+    node.value = parse_ExprNode(node.value.tokens)
+    return node
+
 
 def parse_VarAssign(tokens) -> VarAssignNode:
     node = VarAssignNode()
@@ -456,11 +463,18 @@ def Compile(code: list) -> str:
 
         match statement_type(line):
             case NodeTypes.VAR_DECL:
-                if check_VarDecl(line):
-                    node = parse_VarDecl(line)
-                    code_string += node.visit() + "\n"
+                if not _class:
+                    if check_VarDecl(line):
+                        node = parse_VarDecl(line)
+                        code_string += node.visit() + "\n"
+                    else:
+                        print(SyntaxError(line_no, "invalid variable decl " + to_str(line)))
                 else:
-                    print(SyntaxError(line_no, "invalid variable decl " + to_str(line)))
+                    node = parse_MemberVarDecl(line)
+                    node._class_ = active_class
+                    code_string += node.visit() + "\n"
+                    
+                
 
             case NodeTypes.VAR_ASSIGN:
                 if check_VarAssign(line):
