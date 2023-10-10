@@ -245,8 +245,12 @@ def parse_ExprNode(tokens) -> ExprNode:
                 node.tokens.append(Token(current_token.token + "(", TokenType.BLANK))
                 i += 1
             elif i + 1 < len(tokens) and tokens[i + 1].token == ".":
-                node.tokens.append(Token(f'methodId("{current_token.token}","{tokens[i+2].token}")', TokenType.BLANK))
-                i += 2
+                if i + 3 < len(tokens) and tokens[i+3].token == "(":
+                    node.tokens.append(Token(f'methodId("{current_token.token}","{tokens[i+2].token}")', TokenType.BLANK))
+                    i += 2
+                else:
+                    node.tokens.append(Token(f'memberId("{current_token.token}","{tokens[i+2].token}")', TokenType.BLANK))
+                    i += 2
             else:
                 node.tokens.append(
                     Token(f'id("{current_token.token}")', TokenType.BLANK)
