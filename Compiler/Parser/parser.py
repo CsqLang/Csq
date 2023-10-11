@@ -14,6 +14,9 @@ from Compiler.Tokenizer.tokenizer import Token, TokenType, to_str, tokenize
 This variable will hold the current path of the file to be parsed.
 '''
 _curr_path = ''
+'''
+This list will be holding all the errors tracked during parsing
+'''
 error_list = []
 
 class Scope:
@@ -632,19 +635,26 @@ def Compile(code: list) -> str:
                         code_string += node.visit() + ";\n"
                     else:
                         # Syntax is voilated
-                        print(
+                        error_list.append(
                             SyntaxError(
                                 line_no,
                                 check_Expr(line)[1]
                             )
                         )
-                        exit(0)
         line_no += 1
+    '''
+    Even if a single error is there in a code whole converted C++ code will be deformed.
+    '''
     if len(error_list) > 0:
         code_string = ''
+    '''
+    Like a typical compiler give all errors found at once.
+    '''
     for error in error_list:
         print(error)
+
     return code_string
+
 
 '''
 Function to import code on the basis of given ImportNode
