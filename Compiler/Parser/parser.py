@@ -4,6 +4,7 @@ Parser for Csq
 This module contains the parser for the Csq programming language. It defines functions for parsing various language constructs and generating the corresponding abstract syntax tree (AST).
 """
 
+from Compiler._log import *
 from Compiler.AST.ast import *
 from Compiler.Compiletime.error import (Error, IndentationError, NameError, SyntaxError,
                                TypeError)
@@ -472,7 +473,7 @@ def Compile(code: list) -> str:
                         node = parse_VarDecl(line)
                         code_string += node.visit() + "\n"
                     else:
-                        print(SyntaxError(line_no, "invalid variable decl " + to_str(line)))
+                        warning(SyntaxError(line_no, "invalid variable decl " + to_str(line)))
                 else:
                     node = parse_MemberVarDecl(line)
                     node._class_ = active_class
@@ -485,7 +486,7 @@ def Compile(code: list) -> str:
                     node = parse_VarAssign(line)
                     code_string += node.visit() + "\n"
                 else:
-                    print(
+                    warning(
                         SyntaxError(
                             line_no, "invalid variable assignment " + to_str(line)
                         )
@@ -497,7 +498,7 @@ def Compile(code: list) -> str:
                     code_string += node.visit() + "\n"
                     scope_stack.append(Scope(indent_level + 1, NodeTypes.IF_STMT, 0))
                 else:
-                    print(
+                    warning(
                         SyntaxError(
                             line_no, check_IfStmt(line)[1]
                         )
@@ -509,7 +510,7 @@ def Compile(code: list) -> str:
                     code_string += node.visit() + "\n"
                     scope_stack.append(Scope(indent_level + 1, NodeTypes.ELIF_STMT, 0))
                 else:
-                    print(
+                    warning(
                         SyntaxError(
                             line_no, check_ElifStmt(line)[1]
                         )
@@ -521,7 +522,7 @@ def Compile(code: list) -> str:
                     code_string += node.visit() + "\n"
                     scope_stack.append(Scope(indent_level + 1, NodeTypes.ELSE_STMT, 0))
                 else:
-                    print(
+                    warning(
                         SyntaxError(
                             line_no, check_ElseStmt(line)[1]
                         )
@@ -557,7 +558,7 @@ def Compile(code: list) -> str:
                         code_string += node.visit() + "\n"
                         scope_stack.append(Scope(indent_level + 1, NodeTypes.FUN_DECL, 0))
                     else:
-                        print(
+                        warning(
                             SyntaxError(
                                 line_no,
                                 check_FuncDecl(line)[1]
@@ -569,7 +570,7 @@ def Compile(code: list) -> str:
                     node = parse_ImportStmt(line)
                     code_string += visit_ImportNode(node) + "\n"
                 else:
-                    print(
+                    warning(
                         SyntaxError(
                             line_no,
                             check_ImportStmt(line)[1]
@@ -580,7 +581,7 @@ def Compile(code: list) -> str:
                     node = parse_CImportStmt(line)
                     code_string += "\n//" + node.path + "\n" + visit_CImportNode(node) + "\n"
                 else:
-                    print(
+                    warning(
                         SyntaxError(
                             line_no,
                             check_CImportStmt(line)[1]
@@ -591,7 +592,7 @@ def Compile(code: list) -> str:
                     node = parse_PrintStmt(line)
                     code_string += node.visit() + "\n"
                 else:
-                    print(
+                    warning(
                         SyntaxError(
                             line_no,
                             "invalid syntax for print statement\n(keywords and assignment operators arent allowed)",
@@ -612,7 +613,7 @@ def Compile(code: list) -> str:
                         code_string += node.visit() + ";\n"
                     else:
                         # Syntax is voilated
-                        print(
+                        warning(
                             SyntaxError(
                                 line_no,
                                 check_Expr(line)[1]
