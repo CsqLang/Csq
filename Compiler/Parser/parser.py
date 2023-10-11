@@ -14,6 +14,10 @@ from Compiler.Tokenizer.tokenizer import Token, TokenType, to_str, tokenize
 This variable will hold the current path of the file to be parsed.
 '''
 _curr_path = ''
+'''
+This list will be holding all the errors tracked during parsing
+'''
+error_list = []
 
 class Scope:
     def __init__(self, level: int, of_: NodeTypes, ended: bool) -> None:
@@ -472,7 +476,9 @@ def Compile(code: list) -> str:
                         node = parse_VarDecl(line)
                         code_string += node.visit() + "\n"
                     else:
-                        print(SyntaxError(line_no, "invalid variable decl " + to_str(line)))
+                        error_list.append(SyntaxError(line_no, "invalid variable decl " + to_str(line)))
+                        node = parse_VarDecl(line)
+                        code_string += node.visit() + "\n"
                 else:
                     node = parse_MemberVarDecl(line)
                     node._class_ = active_class
@@ -485,11 +491,13 @@ def Compile(code: list) -> str:
                     node = parse_VarAssign(line)
                     code_string += node.visit() + "\n"
                 else:
-                    print(
+                    error_list.append(
                         SyntaxError(
                             line_no, "invalid variable assignment " + to_str(line)
                         )
                     )
+                    node = parse_VarAssign(line)
+                    code_string += node.visit() + "\n"
 
             case NodeTypes.IF_STMT:
                 if check_IfStmt(line)[0] != False:
@@ -497,11 +505,15 @@ def Compile(code: list) -> str:
                     code_string += node.visit() + "\n"
                     scope_stack.append(Scope(indent_level + 1, NodeTypes.IF_STMT, 0))
                 else:
-                    print(
+                    error_list.append(
                         SyntaxError(
                             line_no, check_IfStmt(line)[1]
                         )
                     )
+                    node = parse_IfStmt(line)
+                    code_string += node.visit() + "\n"
+                    scope_stack.append(Scope(indent_level + 1, NodeTypes.IF_STMT, 0))
+                    
 
             case NodeTypes.ELIF_STMT:
                 if check_ElifStmt(line)[0] != False:
@@ -509,11 +521,14 @@ def Compile(code: list) -> str:
                     code_string += node.visit() + "\n"
                     scope_stack.append(Scope(indent_level + 1, NodeTypes.ELIF_STMT, 0))
                 else:
-                    print(
+                    error_list.append(
                         SyntaxError(
                             line_no, check_ElifStmt(line)[1]
                         )
                     )
+                    node = parse_ElifStmt(line)
+                    code_string += node.visit() + "\n"
+                    scope_stack.append(Scope(indent_level + 1, NodeTypes.ELIF_STMT, 0))
 
             case NodeTypes.ELSE_STMT:
                 if check_ElseStmt(line)[0] != False:
@@ -521,11 +536,15 @@ def Compile(code: list) -> str:
                     code_string += node.visit() + "\n"
                     scope_stack.append(Scope(indent_level + 1, NodeTypes.ELSE_STMT, 0))
                 else:
-                    print(
+                    error_list.append(
                         SyntaxError(
                             line_no, check_ElseStmt(line)[1]
                         )
                     )
+                    node = parse_ElseStmt()
+                    code_string += node.visit() + "\n"
+                    scope_stack.append(Scope(indent_level + 1, NodeTypes.ELSE_STMT, 0))
+                    
 
             case NodeTypes.WHILE_STMT:
                 node = parse_WhileStmt(line)
@@ -557,30 +576,35 @@ def Compile(code: list) -> str:
                         code_string += node.visit() + "\n"
                         scope_stack.append(Scope(indent_level + 1, NodeTypes.FUN_DECL, 0))
                     else:
-                        print(
+                        error_list.append(
                             SyntaxError(
                                 line_no,
                                 check_FuncDecl(line)[1]
                             )
                         )
+                        node = parse_FunDecl(line)
+                        code_string += node.visit() + "\n"
+                        scope_stack.append(Scope(indent_level + 1, NodeTypes.FUN_DECL, 0))
+                        
 
             case NodeTypes.IMPORT:
                 if check_ImportStmt(line)[0]:
                     node = parse_ImportStmt(line)
                     code_string += visit_ImportNode(node) + "\n"
                 else:
-                    print(
+                    error_list.append(
                         SyntaxError(
                             line_no,
                             check_ImportStmt(line)[1]
                         )
                     )
+                    
             case NodeTypes.CIMPORT:
                 if check_CImportStmt(line)[0]:
                     node = parse_CImportStmt(line)
                     code_string += "\n//" + node.path + "\n" + visit_CImportNode(node) + "\n"
                 else:
-                    print(
+                    error_list.append(
                         SyntaxError(
                             line_no,
                             check_CImportStmt(line)[1]
@@ -591,13 +615,12 @@ def Compile(code: list) -> str:
                     node = parse_PrintStmt(line)
                     code_string += node.visit() + "\n"
                 else:
-                    print(
+                    error_list.append(
                         SyntaxError(
                             line_no,
                             "invalid syntax for print statement\n(keywords and assignment operators arent allowed)",
                         )
                     )
-
             case NodeTypes.RETURN:
                 node = parse_ReturnStmt(line[1:])
                 code_string += node.visit() + '\n'
@@ -612,14 +635,28 @@ def Compile(code: list) -> str:
                         code_string += node.visit() + ";\n"
                     else:
                         # Syntax is voilated
-                        print(
+                        error_list.append(
                             SyntaxError(
                                 line_no,
                                 check_Expr(line)[1]
                             )
                         )
         line_no += 1
+    '''
+    Even if a single error is there in a code whole converted C++ code will be deformed.
+    '''
+    if len(error_list) > 0:
+        code_string = ''
+        for error in error_list:
+            print(error)
+        exit()
+    '''
+    Like a typical compiler give all errors found at once.
+    '''
+    
+
     return code_string
+
 
 '''
 Function to import code on the basis of given ImportNode
