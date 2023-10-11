@@ -473,6 +473,7 @@ def Compile(code: list) -> str:
                         code_string += node.visit() + "\n"
                     else:
                         print(SyntaxError(line_no, "invalid variable decl " + to_str(line)))
+                        exit(0)
                 else:
                     node = parse_MemberVarDecl(line)
                     node._class_ = active_class
@@ -490,6 +491,7 @@ def Compile(code: list) -> str:
                             line_no, "invalid variable assignment " + to_str(line)
                         )
                     )
+                    exit(0)
 
             case NodeTypes.IF_STMT:
                 if check_IfStmt(line)[0] != False:
@@ -502,6 +504,7 @@ def Compile(code: list) -> str:
                             line_no, check_IfStmt(line)[1]
                         )
                     )
+                    exit(0)
 
             case NodeTypes.ELIF_STMT:
                 if check_ElifStmt(line)[0] != False:
@@ -514,6 +517,7 @@ def Compile(code: list) -> str:
                             line_no, check_ElifStmt(line)[1]
                         )
                     )
+                    exit(0)
 
             case NodeTypes.ELSE_STMT:
                 if check_ElseStmt(line)[0] != False:
@@ -526,6 +530,7 @@ def Compile(code: list) -> str:
                             line_no, check_ElseStmt(line)[1]
                         )
                     )
+                    exit(0)
 
             case NodeTypes.WHILE_STMT:
                 node = parse_WhileStmt(line)
@@ -563,6 +568,7 @@ def Compile(code: list) -> str:
                                 check_FuncDecl(line)[1]
                             )
                         )
+                        exit(0)
 
             case NodeTypes.IMPORT:
                 if check_ImportStmt(line)[0]:
@@ -575,6 +581,7 @@ def Compile(code: list) -> str:
                             check_ImportStmt(line)[1]
                         )
                     )
+                    exit(0)
             case NodeTypes.CIMPORT:
                 if check_CImportStmt(line)[0]:
                     node = parse_CImportStmt(line)
@@ -586,6 +593,7 @@ def Compile(code: list) -> str:
                             check_CImportStmt(line)[1]
                         )
                     )
+                    exit(0)
             case NodeTypes.PRINT:
                 if check_PrintStmt(line):
                     node = parse_PrintStmt(line)
@@ -597,7 +605,7 @@ def Compile(code: list) -> str:
                             "invalid syntax for print statement\n(keywords and assignment operators arent allowed)",
                         )
                     )
-
+                    exit(0)
             case NodeTypes.RETURN:
                 node = parse_ReturnStmt(line[1:])
                 code_string += node.visit() + '\n'
@@ -618,6 +626,7 @@ def Compile(code: list) -> str:
                                 check_Expr(line)[1]
                             )
                         )
+                        exit(0)
         line_no += 1
     return code_string
 
