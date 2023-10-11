@@ -266,3 +266,16 @@ class MethodNode(ASTNode):
     def visit(self):
         code = f'__classes__["{self.classname}"].methods["{self.identifier}"] = [](Cell args)' + "{\n" + 'allocateVar("arg", "any", args);\n'
         return code
+
+class MemberVarDeclNode(ASTNode):
+    def __init__(self):
+        super().__init__()
+        self.identifier = ""
+        self._class_ = ''
+        self.value = ExprNode()
+        self.type = NodeTypes.VAR_DECL
+
+    def visit(self):
+        return (
+            f'__classes__["{self._class_}"].members["{self.identifier}"] = ' + self.value.visit() + ";"
+        )
