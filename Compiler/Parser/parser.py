@@ -647,11 +647,13 @@ def Compile(code: list) -> str:
     '''
     if len(error_list) > 0:
         code_string = ''
+        for error in error_list:
+            print(error)
+        exit()
     '''
     Like a typical compiler give all errors found at once.
     '''
-    for error in error_list:
-        print(error)
+    
 
     return code_string
 
