@@ -196,3 +196,18 @@ def check_ElseStmt(tokens):
         valid = False
         reason = 'Missing colon at the end in the used else stmt.'
     return [valid, reason]
+
+def check_ClassStmt(tokens):
+    '''
+    This function will be checking the impl of the syntax of class
+    '''
+    valid = True
+    reason = ''
+    if tokens[len(tokens)-1].token != ":":
+        valid = False
+        reason = 'Missing colon at the end in the used class stmt.'
+        
+    if tokens[1].type != TokenType.IDENTIFIER:
+        valid = False
+        reason = 'Expected an identifier after class keyword.'
+    return [valid, reason]

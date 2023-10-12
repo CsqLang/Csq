@@ -557,11 +557,25 @@ def Compile(code: list) -> str:
                 scope_stack.append(Scope(indent_level + 1, NodeTypes.FOR_STMT, 0))
 
             case NodeTypes.CLASS:
-                node = parse_Class(line)
-                code_string += node.visit() + "\n"
-                _class = True
-                active_class = node.name
-                scope_stack.append(Scope(indent_level + 1, NodeTypes.CLASS, 0))
+                
+
+                if check_ClassStmt(line)[0]:
+                    node = parse_Class(line)
+                    code_string += node.visit() + "\n"
+                    _class = True
+                    active_class = node.name
+                    scope_stack.append(Scope(indent_level + 1, NodeTypes.CLASS, 0))
+                else:
+                    error_list.append(
+                        SyntaxError(
+                            line_no,
+                            check_ClassStmt(line)[1]
+                        )
+                    )
+                    code_string += "\n"
+                    _class = True
+                    active_class = ""
+                    scope_stack.append(Scope(indent_level + 1, NodeTypes.CLASS, 0))
 
             case NodeTypes.FUN_DECL:
                 if _class:
@@ -650,10 +664,7 @@ def Compile(code: list) -> str:
         for error in error_list:
             print(error)
         exit()
-    '''
-    Like a typical compiler give all errors found at once.
-    '''
-    
+
 
     return code_string
 
