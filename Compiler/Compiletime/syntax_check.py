@@ -206,8 +206,7 @@ def check_ClassStmt(tokens):
     if tokens[len(tokens)-1].token != ":":
         valid = False
         reason = 'Missing colon at the end in the used class stmt.'
-    else:
-        pass
+        
     if tokens[1].type != TokenType.IDENTIFIER:
         valid = False
         reason = 'Expected an identifier after class keyword.'
