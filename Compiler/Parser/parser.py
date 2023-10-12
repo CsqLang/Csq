@@ -480,12 +480,14 @@ def Compile(code: list) -> str:
                         node = parse_VarDecl(line)
                         code_string += node.visit() + "\n"
                 else:
-                    node = parse_MemberVarDecl(line)
-                    node._class_ = active_class
-                    code_string += node.visit() + "\n"
-                    
-                
 
+                    if check_VarDecl(line):
+                        node = parse_MemberVarDecl(line)
+                        node._class_ = active_class
+                        code_string += node.visit() + "\n"
+                    else:
+                        error_list.append(SyntaxError(line_no, "invalid variable decl " + to_str(line)))
+                    
             case NodeTypes.VAR_ASSIGN:
                 if check_VarAssign(line):
                     node = parse_VarAssign(line)
@@ -557,8 +559,6 @@ def Compile(code: list) -> str:
                 scope_stack.append(Scope(indent_level + 1, NodeTypes.FOR_STMT, 0))
 
             case NodeTypes.CLASS:
-                
-
                 if check_ClassStmt(line)[0]:
                     node = parse_Class(line)
                     code_string += node.visit() + "\n"
@@ -673,7 +673,7 @@ def Compile(code: list) -> str:
 Function to import code on the basis of given ImportNode
 '''
 def visit_ImportNode(node):
-    module = open(_curr_path + "/" + node.path + ".csq", "r")
+    module = open(_curr_path + node.path + ".csq", "r")
     # Read the file and process it
     code_ = module.read()
     # Convert it into stream of tokens
@@ -689,7 +689,7 @@ def visit_ImportNode(node):
 Function to import C/C++ code on the basis of given CImportNode
 '''
 def visit_CImportNode(node):
-    module = open(_curr_path + "/" + node.path + ".cpp", "r")
+    module = open( node.path + ".cpp", "r")
     # Read the file and process it
     code_ = module.read()
     return code_
