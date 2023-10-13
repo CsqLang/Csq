@@ -16,6 +16,10 @@ def bind(current_path, code):
     Returns:
         str: The complete C/C++ program including necessary headers and main function.
     """
-    res = '#include "' + current_path + '/Core/Builtin/basic.h"\n\n//Code starts from here.\n'
+    res = (
+        '#include "'
+        + current_path
+        + '/Core/Builtin/basic.h"\n\n//Code starts from here.\n'
+    )
     res += "main\n\n" + code + "\nendmain\n"
     return res

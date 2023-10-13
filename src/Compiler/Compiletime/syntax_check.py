@@ -72,6 +72,7 @@ def check_PrintStmt(tokens):
 
     return True
 
+
 def check_Expr(tokens):
     """
     Check whether the given expr is a valid expr or not.
@@ -87,22 +88,24 @@ def check_Expr(tokens):
     * An expression should not contain any unclosed bracket.
     """
     valid = True
-    reason = ''
+    reason = ""
 
     def has_unclosed_brackets(_tokens):
         stack = []
 
         # Define mappings for opening and closing brackets
         bracket_map = {
-            '(': ')',
-            '[': ']',
-            '{': '}',
+            "(": ")",
+            "[": "]",
+            "{": "}",
         }
 
         for token in _tokens:
             if token.token in bracket_map:
                 stack.append(token.token)
-            elif token.token in bracket_map.values() and (not stack or bracket_map[stack.pop()] != token.token):
+            elif token.token in bracket_map.values() and (
+                not stack or bracket_map[stack.pop()] != token.token
+            ):
                 return True
 
         # If the stack is not empty, there are unclosed opening brackets
@@ -110,24 +113,29 @@ def check_Expr(tokens):
 
     if has_unclosed_brackets(tokens):
         valid = False
-        reason = 'Contains unclosed bracket'
-        return [valid,reason]
+        reason = "Contains unclosed bracket"
+        return [valid, reason]
 
     if valid:
         for token in tokens:
             if token.type == TokenType.KEYWORD:
-                reason = 'An expression must not contain a keyword which is in this case "' + token.token + '"'
-                return [valid,reason]
-        
-    return [True,""]    
- 
+                reason = (
+                    'An expression must not contain a keyword which is in this case "'
+                    + token.token
+                    + '"'
+                )
+                return [valid, reason]
+
+    return [True, ""]
+
+
 def check_ImportStmt(tokens):
-    '''
+    """
     this function will be checking the impl of the
     syntax of import statement.
-    '''
+    """
     valid = True
-    reason = ''
+    reason = ""
     for token in tokens:
         if token.type == TokenType.KEYWORD and token.token != "import":
             valid = 0
@@ -135,13 +143,14 @@ def check_ImportStmt(tokens):
             break
     return [valid, reason]
 
+
 def check_CImportStmt(tokens):
-    '''
+    """
     this function will be checking the impl of the
     syntax of cimport statement.
-    '''
+    """
     valid = True
-    reason = ''
+    reason = ""
     for token in tokens:
         if token.type == TokenType.KEYWORD and token.token != "cimport":
             valid = 0
@@ -151,12 +160,12 @@ def check_CImportStmt(tokens):
 
 
 def check_FuncDecl(tokens):
-    '''
+    """
     This function will be checking the impl of the
     syntax of function decl
-    '''
+    """
     valid = True
-    reason = ''
+    reason = ""
     for token in tokens:
         if token.type == TokenType.KEYWORD and token.token != "def":
             valid = False
@@ -164,50 +173,54 @@ def check_FuncDecl(tokens):
             break
     return [valid, reason]
 
+
 def check_IfStmt(tokens):
-    '''
+    """
     This function will be checking the impl of the syntax of if stmt
-    '''
+    """
     valid = True
-    reason = ''
-    if tokens[len(tokens)-1].token != ":":
+    reason = ""
+    if tokens[len(tokens) - 1].token != ":":
         valid = False
-        reason = 'Missing colon at the end in the used if stmt.'
+        reason = "Missing colon at the end in the used if stmt."
     return [valid, reason]
+
 
 def check_ElifStmt(tokens):
-    '''
+    """
     This function will be checking the impl of the syntax of elif stmt
-    '''
+    """
     valid = True
-    reason = ''
-    if tokens[len(tokens)-1].token != ":":
+    reason = ""
+    if tokens[len(tokens) - 1].token != ":":
         valid = False
-        reason = 'Missing colon at the end in the used elif stmt.'
+        reason = "Missing colon at the end in the used elif stmt."
     return [valid, reason]
+
 
 def check_ElseStmt(tokens):
-    '''
+    """
     This function will be checking the impl of the syntax of else stmt
-    '''
+    """
     valid = True
-    reason = ''
-    if tokens[len(tokens)-1].token != ":":
+    reason = ""
+    if tokens[len(tokens) - 1].token != ":":
         valid = False
-        reason = 'Missing colon at the end in the used else stmt.'
+        reason = "Missing colon at the end in the used else stmt."
     return [valid, reason]
 
+
 def check_ClassStmt(tokens):
-    '''
+    """
     This function will be checking the impl of the syntax of class
-    '''
+    """
     valid = True
-    reason = ''
-    if tokens[len(tokens)-1].token != ":":
+    reason = ""
+    if tokens[len(tokens) - 1].token != ":":
         valid = False
-        reason = 'Missing colon at the end in the used class stmt.'
-        
+        reason = "Missing colon at the end in the used class stmt."
+
     if tokens[1].type != TokenType.IDENTIFIER:
         valid = False
-        reason = 'Expected an identifier after class keyword.'
+        reason = "Expected an identifier after class keyword."
     return [valid, reason]

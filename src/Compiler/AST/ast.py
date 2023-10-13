@@ -103,15 +103,15 @@ class FunDeclNode(ASTNode):
 
         code += "){\n"
 
-        '''
+        """
         As parameters are also in terms of variables so they should also
         undergo the generation of variable allocation code so that it can
         be used effectively by other species.
-        '''
-        
+        """
+
         for arg in self.parameters:
-            if arg != ' ':
-                code += 'allocateVar("' + arg + '","any",'+arg+');\n'
+            if arg != " ":
+                code += 'allocateVar("' + arg + '","any",' + arg + ");\n"
 
         return code
 
@@ -227,7 +227,7 @@ class ImportNode(ASTNode):
     def __init__(self):
         super().__init__()
         self.name = ""
-        self.path = ''
+        self.path = ""
         self.type = NodeTypes.IMPORT
 
 
@@ -235,47 +235,61 @@ class CImportNode(ASTNode):
     def __init__(self):
         super().__init__()
         self.name = ""
-        self.path = ''
+        self.path = ""
         self.type = NodeTypes.CIMPORT
+
 
 class ReturnNode(ASTNode):
     def __init__(self):
         super().__init__()
         self.value = ExprNode()
         self.type = NodeTypes.RETURN
+
     def visit(self) -> str:
         return "return " + self.value.visit() + ";"
+
 
 class ClassNode(ASTNode):
     def __init__(self):
         super().__init__()
-        self.name = ''
+        self.name = ""
         self.type = NodeTypes.CLASS
+
     def visit(self) -> str:
         return f'__classes__["{self.name}"] = Class();'
 
-'''
+
+"""
 This class is very much similar to FunDeclNode but this is decl as a method of a class.
-'''
+"""
+
+
 class MethodNode(ASTNode):
     def __init__(self):
         self.identifier = ""
-        self.classname = ''
+        self.classname = ""
         self.parameters = []
 
     def visit(self) -> str:
-        code = f'__classes__["{self.classname}"].methods["{self.identifier}"] = [](Cell args)' + "{\n" + 'allocateVar("arg", "any", args);\n'
+        code = (
+            f'__classes__["{self.classname}"].methods["{self.identifier}"] = [](Cell args)'
+            + "{\n"
+            + 'allocateVar("arg", "any", args);\n'
+        )
         return code
+
 
 class MemberVarDeclNode(ASTNode):
     def __init__(self):
         super().__init__()
         self.identifier = ""
-        self._class_ = ''
+        self._class_ = ""
         self.value = ExprNode()
         self.type = NodeTypes.VAR_DECL
 
     def visit(self) -> str:
         return (
-            f'__classes__["{self._class_}"].members["{self.identifier}"] = ' + self.value.visit() + ";"
+            f'__classes__["{self._class_}"].members["{self.identifier}"] = '
+            + self.value.visit()
+            + ";"
         )
