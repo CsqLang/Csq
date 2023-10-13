@@ -31,4 +31,5 @@ KEYWORDS_TABLE = [
     "import",
     "cimport",
     "print",
+    "break",
 ]

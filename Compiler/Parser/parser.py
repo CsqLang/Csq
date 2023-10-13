@@ -136,6 +136,10 @@ def is_return_stmt(tokens) -> bool:
         return True
     return False
 
+def is_break_stmt(tokens) -> bool:
+    if len(tokens) >= 1 and tokens[0].token == "break":
+        return True
+    return False
 
 def is_while_stmt(tokens) -> bool:
     if len(tokens) >= 1 and tokens[0].token == "while":
@@ -212,6 +216,8 @@ def statement_type(tokens) -> NodeTypes:
         return NodeTypes.FUN_DECL
     elif is_return_stmt(tokens):
         return NodeTypes.RETURN
+    elif is_break_stmt(tokens):
+        return NodeTypes.BREAK
     elif is_import_stmt(tokens):
         return NodeTypes.IMPORT
     elif is_cimport_stmt(tokens):
@@ -577,6 +583,10 @@ def Compile(code: list) -> str:
                     active_class = ""
                     scope_stack.append(Scope(indent_level + 1, NodeTypes.CLASS, 0))
 
+            case NodeTypes.BREAK:
+                #Didn't use any parsing function since there is no need of it in case of break statement
+                node = BreakNode()
+                code_string += node.visit() + "\n"
             case NodeTypes.FUN_DECL:
                 if _class:
                     node = parse_Methods(line)
