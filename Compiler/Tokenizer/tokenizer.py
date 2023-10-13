@@ -385,6 +385,19 @@ def tokenize(line: str) -> list:
                 )
             )
             i += 1
+        elif (
+            token.token == "-" 
+            and i + 1 < len(tokens) 
+            and tokens[i + 1].type == TokenType.VALUE
+            and tokens[i - 1].type != TokenType.VALUE
+        ):
+            resTokens.append(
+                Token(
+                    "-" + tokens[i + 1].token, TokenType.VALUE
+                )
+            )
+            i+=1
+
         else:
             resTokens.append(token)
         i += 1
