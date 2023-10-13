@@ -104,6 +104,13 @@ def is_var_assign(tokens) -> bool:
         and tokens[1].token == "="
     ):
         return True
+    elif(
+            len(tokens) >= 2 and tokens[0].type == TokenType.IDENTIFIER
+            and tokens[1].type == TokenType.IDENTIFIER
+            and "=" in to_str(tokens)
+        ):
+        return True
+
     return False
 
 
@@ -194,6 +201,13 @@ def is_class(tokens) -> bool:
     else:
         return False
 
+def is_MemberVarAssign(tokens) -> bool:
+    if  (   tokens[0].type == TokenType.IDENTIFIER
+            and tokens[1].type == TokenType.IDENTIFIER
+            and "=" in to_str(tokens)
+        ):
+        return True
+    return False
 
 def statement_type(tokens) -> NodeTypes:
     if is_var_decl(tokens):
@@ -313,6 +327,21 @@ def parse_VarAssign(tokens) -> VarAssignNode:
     node.value = parse_ExprNode(node.value.tokens)
     return node
 
+def parse_MemberVarAssign(tokens) -> MemberVarAssignNode:
+    node = MemberVarAssignNode()
+    id_bef_dot = ''
+    pos = 0
+    for token in tokens:
+        if token.token != "=":
+            if token.token == ".":
+                node.identifier.append(id_bef_dot)
+            else:
+                id_bef_dot += token.token
+        else:
+            node.identifier.append(id_bef_dot)
+        pos += 1
+    node.value = tokens[pos:]
+    return node    
 
 def parse_PrintStmt(tokens) -> PrintNode:
     node = PrintNode()
@@ -496,8 +525,12 @@ def Compile(code: list) -> str:
                     
             case NodeTypes.VAR_ASSIGN:
                 if check_VarAssign(line):
-                    node = parse_VarAssign(line)
-                    code_string += node.visit() + "\n"
+                    if is_MemberVarAssign(line):
+                        node = parse_MemberVarAssign(line)
+                        code_string += node.visit() + "\n"
+                    else:
+                        node = parse_VarAssign(line)
+                        code_string += node.visit() + "\n"
                 else:
                     error_list.append(
                         SyntaxError(

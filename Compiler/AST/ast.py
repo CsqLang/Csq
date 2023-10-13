@@ -281,6 +281,19 @@ class MemberVarDeclNode(ASTNode):
             f'__classes__["{self._class_}"].members["{self.identifier}"] = ' + self.value.visit() + ";"
         )
 
+class MemberVarAssignNode(ASTNode):
+    def __init__(self):
+        super().__init__()
+        self.identifier = []
+        self._class_ = ''
+        self.value = ExprNode()
+        self.type = NodeTypes.VAR_ASSIGN
+
+    def visit(self) -> str:
+        result = ''
+        result += f'__classes__["{self.identifier[0]}"].members["{self.identifier[1]}"] = {self.value.visit()}'
+        return result
+
 class BreakNode(ASTNode):
     def __init__(self):
         super().__init__()
