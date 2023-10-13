@@ -28,14 +28,17 @@ void print(Cell arg){
 Cell range(Cell lim){
     Cell vals;
     vals.type = COMPOUND;
-    for(int i = 0;i<lim.fval;i++)
-        vals.array.push_back(f_val(i));
+    for(int i = 0;i<lim.ival;i++)
+        vals.array.push_back(i_val(i));
     return vals;
 }
 
 bool _cond_(Cell arg){
     if(arg.type == FLOAT){
         return arg.fval;
+    }
+    else if(arg.type == INT){
+        return arg.ival;
     }
     else{
         printf("Error: couldn't use a string value as condition.\n");
@@ -45,12 +48,12 @@ bool _cond_(Cell arg){
 
 Cell len(Cell arg){
     Cell c;
-    c.type = FLOAT;
+    c.type = INT;
     if(arg.type == STRING){
-        c.fval = arg.sval.size();    
+        c.ival = arg.sval.size();    
     }
     else if(arg.type == COMPOUND){
-        c.fval = arg.array.size();    
+        c.ival = arg.array.size();    
     }
     return c;
 }

@@ -107,16 +107,6 @@ void allocateVar(string id_, string type, string c_){
     SymTable[id_] = sym;
 }
 
-//This is only for the impl of OOP
-// template <typename T>
-// void allocateVar(const string& name, const string& type, T value) {
-//     Symbol sym;
-//     sym.type = VARIABLE;
-//     sym.var.name = name;
-//     sym.var.type = "custom_class";
-//     SymTable[name] = sym;
-// }
-
 void allocateVar(string id_){
     memory.push_back(Cell(f_val(0)));
     Symbol sym;
