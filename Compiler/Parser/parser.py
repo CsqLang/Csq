@@ -506,11 +506,11 @@ def Compile(code: list) -> str:
 
         match statement_type(line):
             case NodeTypes.VAR_DECL:
-                if not _class:
+                if not _class or (_class == True and scope_stack[-1].of == NodeTypes.FUN_DECL):
                     if check_VarDecl(line):
                         node = parse_VarDecl(line)
                         code_string += node.visit() + "\n"
-                    else:
+                    else :
                         error_list.append(SyntaxError(line_no, "invalid variable decl " + to_str(line)))
                         node = parse_VarDecl(line)
                         code_string += node.visit() + "\n"

@@ -128,9 +128,12 @@ void allocateVar(string id_,string type){
     SymTable[id_] = sym;
 }
 
-void allocateVar(string id_, string type, vector<Cell> c){
+void allocateVar(string id_, string type, const vector<Cell>& c){
     int cell_addr = TopCellAddress();
-    addCell(c);
+    Cell c_;
+    c_.array = c;
+    c_.type = COMPOUND;
+    memory.push_back(c_);
     Symbol sym;
     sym.var.name = id_;
     sym.type = VARIABLE;

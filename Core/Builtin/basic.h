@@ -81,6 +81,12 @@ Cell input(Cell prompt){
     return c;
 }
 
-
+Cell push(Cell array_, Cell value){
+    Cell arr;
+    arr.array = array_.array;
+    arr.array.push_back(value);
+    arr.type = COMPOUND;
+    return arr;
+}
 
 #endif // basic_H

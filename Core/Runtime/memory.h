@@ -35,11 +35,11 @@ using namespace std;
 
 //Value types
 enum Type{
-    INT,
-    STRING,
-    FLOAT,
-    COMPOUND,
-    CUSTYPE,
+    INT=1,
+    STRING=2,
+    FLOAT=3,
+    COMPOUND=4,
+    CUSTYPE=5,
 };
 
 //Class to handle custom datatypes
@@ -132,7 +132,7 @@ struct Cell
         } else if (c.type == FLOAT && (type == FLOAT || type == INT)) {
             return Cell{FLOAT, 0, 0,fval / c.fval};
         } else {
-            return Cell{INT, 0, ival / c.ival};
+            return Cell{FLOAT, 0,0, float(float(ival) / float(c.ival))};
         }
     }
 
@@ -286,21 +286,7 @@ void addCell(const vector<Cell>& array) {
     }
     memory.push_back(c);
 }
-//This function will dump all data in the memory.
-void dump(){
-    for(int i=0; i<memory.size(); i++){
-        printf("[%d] => type : %d used : %d  value : ",i,memory[i].type,memory[i].u_count);
-        if(memory[i].type == STRING){
-            printf("%s\n",memory[i].sval.c_str());
-        }
-        else if(memory[i].type == FLOAT){
-            printf("%lf\n",memory[i].fval);
-        }
-        else{
-            printf("%d\n",memory[i].ival);
-        }
-    }
-}
+
 
 // Read the value of at address
 string readCell(int address){
@@ -311,11 +297,45 @@ string readCell(int address){
         case STRING:{
             return "\"" + memory[address].sval + "\"";
         }
+        case COMPOUND:{
+            return "{}";
+        }
         default:{
             return to_string(memory[address].fval);
         }
     }
 }
+
+//This function will dump all data in the memory.
+void dump(){
+    for(int i=0; i<memory.size(); i++){
+        printf("[%d] => type : %d used : %d  value : ",i,memory[i].type,memory[i].u_count);
+        if(memory[i].type == STRING){
+            printf("%s\n",memory[i].sval.c_str());
+        }
+        else if(memory[i].type == FLOAT){
+            printf("%lf\n",memory[i].fval);
+        }
+        else if(memory[i].type == COMPOUND){
+            for(Cell arg : memory[i].array){
+                if(arg.type == STRING){
+                    printf("%s\n",arg.sval.c_str());
+                }
+                else if(arg.type == FLOAT){
+                    printf("%lf\n",arg.fval);
+                }
+                else{
+                    printf("%d\n",arg.ival);
+                }               
+                        }
+                    }
+                    else{
+                        printf("%d\n",memory[i].ival);
+                    }
+                }
+        }
+
+
 
 Cell* getCellPtr(int address){
     return &memory[address];
