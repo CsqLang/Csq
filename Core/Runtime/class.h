@@ -3,15 +3,16 @@
 
 #include <functional>
 #include <map>
+#include <any>
 #include "memory.h"
-
+using LambdaType = function<Cell(Cell)>;
 /*
 This in every case will be representing a class
 */
 class Class {
 public:
     string name;
-    map<string, function<Cell(Cell)>> methods;
+    map<string, LambdaType> methods;
     map<string, Cell> members;
 };
 
