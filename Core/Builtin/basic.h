@@ -70,6 +70,9 @@ Cell type(Cell arg){
     else if(arg.type == FLOAT){
         c.sval = "float";
     }
+    else{
+        c.sval = c.__class__;
+    }
     return c;
 }
 
