@@ -158,6 +158,15 @@ void assignVar(string id_, Cell c) {
     int oldAddress = SymTable[id_].var.value_address;
     memory[oldAddress] = c;
 }
+
+void assignVar(string id_, vector<Cell> c){
+    Cell mem;
+    mem.type = COMPOUND;
+    mem.array = c;
+    int oldAddress = SymTable[id_].var.value_address;
+    memory[oldAddress] = mem;
+}
+
 void assignVar(string id_, string c_) {
     Cell c;
     c.type = CUSTYPE;
