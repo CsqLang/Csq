@@ -19,6 +19,11 @@ Format for how this file should recieve args
 python3.10 csq.py <path of file>
 
 """
+
+if len(sys.argv) < 2:
+    print("No file provided")
+    exit(1)
+
 # Path of file
 path = sys.argv[1]
 

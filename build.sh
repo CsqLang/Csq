@@ -33,7 +33,7 @@ function install_csq(){
 	fi
 
 	# Copy the files to the csq directory, update if they already exist
-	cp -ur ./* "$CSQ_OPT_DIR"
+	cp -ur . "$CSQ_OPT_DIR"
 
 	# Make the entry point executable
 
@@ -76,7 +76,7 @@ function update_csq(){
 	fi
 
 	# Copy the files to the csq directory, update if they already exist
-	cp -ur ./* "$CSQ_OPT_DIR"
+	cp -ur . "$CSQ_OPT_DIR"
 
 	# Make the entry point executable
 	chmod +x "$CSQ_ENTRY_POINT"
@@ -109,7 +109,7 @@ while [ "$1" != "" ]; do
 		-U | --update )         update_csq
 								;;
 		-h | --help )           print_help
-								exit 1
+								exit 0
 								;;
 		* )                     print_help
 								exit 1
