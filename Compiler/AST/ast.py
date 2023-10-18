@@ -47,6 +47,8 @@ class ExprNode(ASTNode):
         val = ""
         for tok in self.tokens:
             val += tok.token
+        if val[0] == '{' and val[len(val)-1] == '}':
+            val = "vector<Cell>" + val 
         return val
 
 

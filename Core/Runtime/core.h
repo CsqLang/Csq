@@ -10,7 +10,7 @@ This will be used by parser to resemble current line.
 */
 int line_ = 1;
 
-#include "error.h" 
+#include "error.h"
 #include "object.h"
 #include "memory.h"
 #include "function.h"
@@ -20,7 +20,8 @@ int line_ = 1;
 /*
 Possible types of symbol for the symbol table.
 */
-enum SYMBOL_TYPE{
+enum SYMBOL_TYPE
+{
     FUNCTION,
     VARIABLE,
 };
@@ -28,7 +29,8 @@ enum SYMBOL_TYPE{
 This struct stores a object of both Variable and Function which are to be used
 as a symbol and make it easy to traverse the symbol table
 */
-struct Symbol{
+struct Symbol
+{
     Variable var;
     Function fun;
     SYMBOL_TYPE type;
@@ -42,10 +44,13 @@ unordered_map<string, Symbol> SymTable;
 
 vector<string> var_names;
 
-int inTable(string name){
+int inTable(string name)
+{
     int s = 0;
-    for(pair<string, Symbol> p : SymTable){
-        if(p.first == name){
+    for (pair<string, Symbol> p : SymTable)
+    {
+        if (p.first == name)
+        {
             s = 1;
             break;
         }
@@ -53,10 +58,13 @@ int inTable(string name){
     return s;
 }
 
-int isVar(string name){
+int isVar(string name)
+{
     int s = 0;
-    for(string p : var_names){
-        if(p == name){
+    for (string p : var_names)
+    {
+        if (p == name)
+        {
             s = 1;
             break;
         }
@@ -64,29 +72,39 @@ int isVar(string name){
     return s;
 }
 
-void traverseSymTable(){
-    for(pair<string,Symbol> p : SymTable){
-        if(p.second.type == VARIABLE){
-            printf("%s : { %d Name: %s Type: %s Value : %d }\n",p.first.c_str(),p.second.type, p.second.var.name.c_str(), p.second.var.type.c_str(), p.second.var.value_address);
+void traverseSymTable()
+{
+    for (pair<string, Symbol> p : SymTable)
+    {
+        if (p.second.type == VARIABLE)
+        {
+            printf("%s : { %d Name: %s Type: %s Value : %d }\n", p.first.c_str(), p.second.type, p.second.var.name.c_str(), p.second.var.type.c_str(), p.second.var.value_address);
         }
-        else{}
+        else
+        {
+        }
     }
 }
 
-
-Cell id(string identifier){
-    if(SymTable.find(identifier) != SymTable.end()){
+Cell id(string identifier)
+{
+    if (SymTable.find(identifier) != SymTable.end())
+    {
         return memory[SymTable[identifier].var.value_address];
     }
-    else if(identifier != "ignore"){
+    else if (identifier != "ignore")
+    {
         RuntimeError("Undefined identifier '" + identifier + "'.\n");
         return memory[SymTable[identifier].var.value_address];
-    }else{
+    }
+    else
+    {
         return f_val(0);
     }
 }
 
-void allocateVar(string id_, string type, Cell c){
+void allocateVar(string id_, string type, Cell c)
+{
     memory.push_back(c);
     Symbol sym;
     sym.var.name = id_;
@@ -95,7 +113,8 @@ void allocateVar(string id_, string type, Cell c){
     SymTable[id_] = sym;
 }
 
-void allocateVar(string id_, string type, string c_){
+void allocateVar(string id_, string type, string c_)
+{
     Cell c;
     c.type = CUSTYPE;
     c.__class__ = c_;
@@ -107,7 +126,8 @@ void allocateVar(string id_, string type, string c_){
     SymTable[id_] = sym;
 }
 
-void allocateVar(string id_){
+void allocateVar(string id_)
+{
     memory.push_back(Cell(f_val(0)));
     Symbol sym;
     sym.var.name = id_;
@@ -116,7 +136,8 @@ void allocateVar(string id_){
     SymTable[id_] = sym;
 }
 
-void allocateVar(string id_,string type){
+void allocateVar(string id_, string type)
+{
     Cell c;
     c.type = CUSTYPE;
     c.__class__ = type;
@@ -128,22 +149,27 @@ void allocateVar(string id_,string type){
     SymTable[id_] = sym;
 }
 
-void allocateVar(string id_, string type, vector<Cell> c){
+void allocateVar(string id_, string type, const vector<Cell> &c)
+{
     int cell_addr = TopCellAddress();
-    addCell(c);
+    Cell c_;
+    c_.array = c;
+    c_.type = COMPOUND;
+    memory.push_back(c_);
     Symbol sym;
     sym.var.name = id_;
     sym.type = VARIABLE;
     sym.var.isCollection = true;
-    sym.var.value_address = cell_addr+1;
+    sym.var.value_address = cell_addr + 1;
 
     SymTable[id_] = sym;
-    
 }
 
-vector<Cell> removeItemAt(vector<Cell>& vec, int itemNum) {
+vector<Cell> removeItemAt(vector<Cell> &vec, int itemNum)
+{
     // Check if the itemNum is valid (within the range of vector's size)
-    if (itemNum >= 0 && itemNum < vec.size()) {
+    if (itemNum >= 0 && itemNum < vec.size())
+    {
         // Erase the element at the specified position
         vec.erase(vec.begin() + itemNum);
     }
@@ -151,11 +177,23 @@ vector<Cell> removeItemAt(vector<Cell>& vec, int itemNum) {
     return vec;
 }
 
-void assignVar(string id_, Cell c) {
+void assignVar(string id_, Cell c)
+{
     int oldAddress = SymTable[id_].var.value_address;
     memory[oldAddress] = c;
 }
-void assignVar(string id_, string c_) {
+
+void assignVar(string id_, vector<Cell> c)
+{
+    Cell mem;
+    mem.type = COMPOUND;
+    mem.array = c;
+    int oldAddress = SymTable[id_].var.value_address;
+    memory[oldAddress] = mem;
+}
+
+void assignVar(string id_, string c_)
+{
     Cell c;
     c.type = CUSTYPE;
     c.__class__ = c_;
@@ -163,16 +201,17 @@ void assignVar(string id_, string c_) {
     int oldAddress = SymTable[id_].var.value_address;
     memory[oldAddress] = c;
 }
-void assignVar(string id, int index, Cell c){
+void assignVar(string id, int index, Cell c)
+{
     memory[SymTable[id].var.value_address + index] = c;
 }
 
-Cell id(string identifier, int index){
+Cell id(string identifier, int index)
+{
     return memory[SymTable[identifier].var.value_address].array[index];
 }
 
-
-//Ultimate class storage where a table of every class will be made.
+// Ultimate class storage where a table of every class will be made.
 map<string, Class> __classes__;
 
 #endif // RUNTIME_CORE_CSQ
