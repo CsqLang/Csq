@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.10
+#!/usr/bin/env python3
 """
 
 This file does compile code and produces machine code.
@@ -19,6 +19,14 @@ Format for how this file should recieve args
 python3.10 csq.py <path of file>
 
 """
+
+# Check if the user entered more than one argument
+
+if len(sys.argv) < 2:
+    print("Error: Invalid number of arguments")
+    print("Format: csq <path of file>")
+    exit(1)
+
 # Path of file
 path = sys.argv[1]
 
