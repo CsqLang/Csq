@@ -46,13 +46,38 @@ enum Type
 struct Cell
 {
     Type type;
-    int u_count;
-    int ival;
-    double fval;
-    string sval;
-    vector<Cell> array;
-    // for custom type
-    string __class__;
+    union {
+        int ival;
+        double fval;
+    };
+    std::string sval;
+    std::vector<Cell> array;
+    std::string __class__;
+
+    Cell(){}
+    Cell(const Cell& c){
+        type = c.type;
+        ival = c.ival;
+        fval = c.fval;
+        sval = c.sval;
+        array = c.array;
+        __class__ = c.__class__;
+    }
+
+    Cell(Type type_, int ival_){
+        ival = ival_;
+        type = INT ;
+    }
+
+    Cell(double fval_){
+        fval = fval_;
+        type = FLOAT;
+    }
+
+    Cell(string sval_){
+        sval = sval_;
+        type = STRING;
+    }
 
     Cell operator+(const Cell &c) const
     {
@@ -103,7 +128,7 @@ struct Cell
         }
         else
         {
-            return (c.type == FLOAT) ? Cell{FLOAT, 0, 0, fval * c.fval} : Cell{INT, 0, ival * c.ival};
+            return (c.type == FLOAT) ? Cell{fval * c.fval} : Cell{INT, ival * c.ival};
         }
     }
 
@@ -123,7 +148,7 @@ struct Cell
         }
         else
         {
-            return (type == FLOAT || c.type == FLOAT) ? Cell{FLOAT, 0, 0, fval - c.fval} : Cell{INT, 0, ival - c.ival};
+            return (type == FLOAT || c.type == FLOAT) ? Cell{fval - c.fval} : Cell{INT, ival - c.ival};
         }
     }
 
@@ -143,11 +168,11 @@ struct Cell
         }
         else if (c.type == FLOAT && (type == FLOAT || type == INT))
         {
-            return Cell{FLOAT, 0, 0, fval / c.fval};
+            return Cell{fval / c.fval};
         }
         else
         {
-            return Cell{FLOAT, 0, 0, float(float(ival) / float(c.ival))};
+            return Cell{float(float(ival) / float(c.ival))};
         }
     }
 
@@ -167,7 +192,7 @@ struct Cell
         }
         else
         {
-            return (type == FLOAT || c.type == FLOAT) ? Cell{FLOAT, 0, fval > c.fval} : Cell{INT, 0, ival > c.ival};
+            return (type == FLOAT || c.type == FLOAT) ? Cell{INT, fval > c.fval} : Cell{INT, ival > c.ival};
         }
     }
 
@@ -187,7 +212,7 @@ struct Cell
         }
         else
         {
-            return (type == FLOAT || c.type == FLOAT) ? Cell{FLOAT, 0, fval < c.fval} : Cell{INT, 0, ival < c.ival};
+            return (type == FLOAT || c.type == FLOAT) ? Cell{INT, fval < c.fval} : Cell{INT, ival < c.ival};
         }
     }
 
@@ -207,7 +232,7 @@ struct Cell
         }
         else
         {
-            return (type == FLOAT || c.type == FLOAT) ? Cell{FLOAT, 0, fval >= c.fval} : Cell{INT, 0, ival >= c.ival};
+            return (type == FLOAT || c.type == FLOAT) ? Cell{INT, fval >= c.fval} : Cell{INT, ival >= c.ival};
         }
     }
 
@@ -227,7 +252,7 @@ struct Cell
         }
         else
         {
-            return (type == FLOAT || c.type == FLOAT) ? Cell{FLOAT, 0, fval <= c.fval} : Cell{INT, 0, ival <= c.ival};
+            return (type == FLOAT || c.type == FLOAT) ? Cell{INT, fval <= c.fval} : Cell{INT, ival <= c.ival};
         }
     }
 
@@ -242,11 +267,11 @@ struct Cell
          */
         if (c.type == STRING)
         {
-            return Cell{FLOAT, 0, 0, static_cast<float>(sval == c.sval)};
+            return Cell{INT, static_cast<int>(sval == c.sval)};
         }
         else
         {
-            return (type == FLOAT || c.type == FLOAT) ? Cell{FLOAT, 0, fval == c.fval} : Cell{INT, 0, ival == c.ival};
+            return (type == FLOAT || c.type == FLOAT) ? Cell{INT, fval == c.fval} : Cell{INT, ival == c.ival};
         }
     }
 
@@ -261,15 +286,15 @@ struct Cell
          */
         if (c.type == STRING)
         {
-            return Cell{FLOAT, 0, 0, static_cast<float>(sval != c.sval)};
+            return Cell{INT, static_cast<int>(sval != c.sval)};
         }
         else if (c.type == FLOAT)
         {
-            return Cell{FLOAT, 0, 0, static_cast<float>(fval != c.fval)};
+            return Cell{INT, static_cast<int>(fval != c.fval)};
         }
         else
         {
-            return Cell{FLOAT, 0, 0, static_cast<float>(ival != c.ival)};
+            return Cell{INT, static_cast<int>(ival != c.ival)};
         }
     }
 
@@ -290,71 +315,13 @@ vector<Cell> memory;
 // Function to get the number of cells in the memory.
 int memory_size() { return memory.size(); }
 
-void addCell(int val)
-{
-    Cell cell;
-    cell.ival = val;
-    cell.type = INT;
-    cell.u_count = 0;
-    memory.emplace_back(cell);
-}
-
-void addCell(double val)
-{
-    Cell cell;
-    cell.fval = val;
-    cell.type = FLOAT;
-    cell.u_count = 0;
-    memory.emplace_back(cell);
-}
-
-void addCell(const string &val)
-{
-    memory.emplace_back(Cell{STRING, 0, 0, 0.0, val});
-}
-
-void addCell(const vector<Cell> &array)
-{
-    // memory.insert(memory.end(), array.begin(), array.end());
-    Cell c;
-    c.type = COMPOUND;
-    for (Cell e : array)
-    {
-        c.array.push_back(e);
-    }
-    memory.push_back(c);
-}
-
-// Read the value of at address
-string readCell(int address)
-{
-    switch (memory[address].type)
-    {
-    case INT:
-    {
-        return to_string(memory[address].ival);
-    }
-    case STRING:
-    {
-        return "\"" + memory[address].sval + "\"";
-    }
-    case COMPOUND:
-    {
-        return "{}";
-    }
-    default:
-    {
-        return to_string(memory[address].fval);
-    }
-    }
-}
 
 // This function will dump all data in the memory.
 void dump()
 {
     for (int i = 0; i < memory.size(); i++)
     {
-        printf("[%d] => type : %d used : %d  value : ", i, memory[i].type, memory[i].u_count);
+        printf("[%d] => type : %d   value : ", i, memory[i].type);
         if (memory[i].type == STRING)
         {
             printf("%s\n", memory[i].sval.c_str());
@@ -388,29 +355,6 @@ void dump()
     }
 }
 
-Cell *getCellPtr(int address)
-{
-    return &memory[address];
-}
-
-void modifyCell(Cell *cell, const string &value)
-{
-    cell->sval = value;
-    cell->type = Type::STRING;
-}
-
-void modifyCell(Cell *cell, int value)
-{
-    cell->ival = value;
-    cell->type = INT;
-}
-
-void modifyCell(Cell *cell, float value)
-{
-    cell->fval = value;
-    cell->type = FLOAT;
-}
-
 // This function will clear all the memory allocated.
 void freeMemory()
 {
@@ -421,19 +365,6 @@ void freeMemory()
 int TopCellAddress()
 {
     return memory.size() - 1;
-}
-
-// GC----------------------------------------------->
-void Free()
-{
-    for (int i = 0; i < memory.size(); i++)
-    {
-        if (memory[i].u_count == 0)
-        {
-            // Free its a garbage cell
-            memory.erase(memory.begin() + i);
-        }
-    }
 }
 
 #endif // MEMORY_CSQ4

@@ -44,7 +44,7 @@ unordered_map<string, Symbol> SymTable;
 
 vector<string> var_names;
 
-int inTable(string name)
+inline int inTable(string name)
 {
     int s = 0;
     for (pair<string, Symbol> p : SymTable)
@@ -58,7 +58,7 @@ int inTable(string name)
     return s;
 }
 
-int isVar(string name)
+inline int isVar(string name)
 {
     int s = 0;
     for (string p : var_names)
@@ -72,7 +72,7 @@ int isVar(string name)
     return s;
 }
 
-void traverseSymTable()
+inline void traverseSymTable()
 {
     for (pair<string, Symbol> p : SymTable)
     {
@@ -86,7 +86,7 @@ void traverseSymTable()
     }
 }
 
-Cell id(string identifier)
+inline Cell id(string identifier)
 {
     if (SymTable.find(identifier) != SymTable.end())
     {
@@ -103,9 +103,9 @@ Cell id(string identifier)
     }
 }
 
-void allocateVar(string id_, string type, Cell c)
+inline void allocateVar(string id_, string type, Cell c)
 {
-    memory.push_back(c);
+    memory.emplace_back(c);
     Symbol sym;
     sym.var.name = id_;
     sym.type = VARIABLE;
@@ -113,12 +113,12 @@ void allocateVar(string id_, string type, Cell c)
     SymTable[id_] = sym;
 }
 
-void allocateVar(string id_, string type, string c_)
+inline void allocateVar(string id_, string type, string c_)
 {
     Cell c;
     c.type = CUSTYPE;
     c.__class__ = c_;
-    memory.push_back(c);
+    memory.emplace_back(c);
     Symbol sym;
     sym.var.name = id_;
     sym.type = VARIABLE;
@@ -126,9 +126,9 @@ void allocateVar(string id_, string type, string c_)
     SymTable[id_] = sym;
 }
 
-void allocateVar(string id_)
+inline void allocateVar(string id_)
 {
-    memory.push_back(Cell(f_val(0)));
+    memory.emplace_back(0);
     Symbol sym;
     sym.var.name = id_;
     sym.type = VARIABLE;
@@ -136,12 +136,12 @@ void allocateVar(string id_)
     SymTable[id_] = sym;
 }
 
-void allocateVar(string id_, string type)
+inline void allocateVar(string id_, string type)
 {
     Cell c;
     c.type = CUSTYPE;
     c.__class__ = type;
-    memory.push_back(c);
+    memory.emplace_back(c);
     Symbol sym;
     sym.var.name = id_;
     sym.type = VARIABLE;
@@ -149,13 +149,13 @@ void allocateVar(string id_, string type)
     SymTable[id_] = sym;
 }
 
-void allocateVar(string id_, string type, const vector<Cell> &c)
+inline void allocateVar(string id_, string type, const vector<Cell> &c)
 {
     int cell_addr = TopCellAddress();
     Cell c_;
     c_.array = c;
     c_.type = COMPOUND;
-    memory.push_back(c_);
+    memory.emplace_back(c_);
     Symbol sym;
     sym.var.name = id_;
     sym.type = VARIABLE;
@@ -165,7 +165,7 @@ void allocateVar(string id_, string type, const vector<Cell> &c)
     SymTable[id_] = sym;
 }
 
-vector<Cell> removeItemAt(vector<Cell> &vec, int itemNum)
+inline vector<Cell> removeItemAt(vector<Cell> &vec, int itemNum)
 {
     // Check if the itemNum is valid (within the range of vector's size)
     if (itemNum >= 0 && itemNum < vec.size())
@@ -177,13 +177,13 @@ vector<Cell> removeItemAt(vector<Cell> &vec, int itemNum)
     return vec;
 }
 
-void assignVar(string id_, Cell c)
+inline void assignVar(string id_, Cell c)
 {
     int oldAddress = SymTable[id_].var.value_address;
     memory[oldAddress] = c;
 }
 
-void assignVar(string id_, vector<Cell> c)
+inline void assignVar(string id_, vector<Cell> c)
 {
     Cell mem;
     mem.type = COMPOUND;
@@ -192,16 +192,16 @@ void assignVar(string id_, vector<Cell> c)
     memory[oldAddress] = mem;
 }
 
-void assignVar(string id_, string c_)
+inline void assignVar(string id_, string c_)
 {
     Cell c;
     c.type = CUSTYPE;
     c.__class__ = c_;
-    memory.push_back(c);
+    memory.emplace_back(c);
     int oldAddress = SymTable[id_].var.value_address;
     memory[oldAddress] = c;
 }
-void assignVar(string id, int index, Cell c)
+inline void assignVar(string id, int index, Cell c)
 {
     memory[SymTable[id].var.value_address + index] = c;
 }
