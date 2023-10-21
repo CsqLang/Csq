@@ -3,17 +3,19 @@
 
 #include "core.h"
 
-Cell f_val(double val){
-
-    return {val};
+Cell f_val(double val) {
+    Cell c;
+    c.floatVal = val;
+    c.type = Type::FLOAT;
+    return c;
 }
 
-Cell i_val(int val){
-    return {INT, val};
+Cell i_val(int val) {
+    return Cell(val);
 }
 
-Cell s_val(string val){
-    return {val.substr(1, val.size() - 2)};
+Cell s_val(const std::string& val) {
+    return Cell(val);
 }
 
 #endif // EVAL_H

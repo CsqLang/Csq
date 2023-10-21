@@ -62,7 +62,7 @@ class VarDeclNode(ASTNode):
 
     def visit(self) -> str:
         return (
-            'allocateVar("' + self.identifier + '","any",' + self.value.visit() + ");"
+            'allocateVar("' + self.identifier + '",' + self.value.visit() + ");"
         )
 
 
@@ -114,7 +114,7 @@ class FunDeclNode(ASTNode):
         
         for arg in self.parameters:
             if arg != ' ':
-                code += 'allocateVar("' + arg + '","any",'+arg+');\n'
+                code += 'allocateVar("' + arg + '",'+arg+');\n'
 
         return code
 
@@ -159,12 +159,15 @@ class ForStmtNode(ASTNode):
     def visit(self) -> str:
         return (
             "for("
-            + "Cell "
+            + "int "
             + self.iter_name
-            + "9019 : "
+            + "901;"
+            + self.iter_name + "901 < "
             + self.condition.visit()
-            + ".array){"
-            + f'allocateVar("{self.iter_name}","any",{self.iter_name + "9019"});'
+            + ".vectorVal->size();"
+            + self.iter_name
+            + "901++){"
+            + f'allocateVar("{self.iter_name}",{self.condition.visit()}[{self.iter_name + "901"}]);'
         )
 
 

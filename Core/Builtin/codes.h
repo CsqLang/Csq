@@ -20,5 +20,5 @@ short names which looks elegant.
 #define methodId(obj, methodname) __classes__[id(obj).__class__].methods[methodname]
 #define memberId(obj, membername) __classes__[id(obj).__class__].members[membername]
 string object(Cell class_){
-    return class_.sval;
+    return *class_.stringVal;
 }
