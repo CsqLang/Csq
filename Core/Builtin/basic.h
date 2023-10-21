@@ -31,5 +31,8 @@ void print(const Cell& cell) {
     }
 }
 
+bool _cond_(bool state){
+    return state;
+}
 
 #endif // basic_H
