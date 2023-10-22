@@ -12,6 +12,7 @@ enum class Type {
     FLOAT,
     STRING,
     COMPOUND,
+    CUSTYPE,
 };
 
 struct Cell {
@@ -21,26 +22,27 @@ struct Cell {
         float floatVal;
         std::string* stringVal;
         std::vector<Cell>* vectorVal;
+        std::string* __class__;
     };
-    
-    alignas(float) char smallBuffer[sizeof(std::string)];  // Size of float for alignment
-    
+
     Cell() : type(Type::INT), intVal(0) {}
-    
+
     explicit Cell(int val) : type(Type::INT), intVal(val) {}
+
     explicit Cell(float val) : type(Type::FLOAT), floatVal(val) {}
+
     Cell(const std::string& val) : type(Type::STRING) {
-        stringVal = new (smallBuffer) std::string(val);
+        stringVal = new std::string(val);
     }
+
     Cell(const std::vector<Cell>& val) : type(Type::COMPOUND) {
         vectorVal = new std::vector<Cell>(val);
     }
-    
+
     ~Cell() {
-        if (type == Type::STRING) {
-            stringVal->~basic_string();
-        }
-        else if (type == Type::COMPOUND) {
+        if (type == Type::STRING && stringVal != nullptr) {
+            delete stringVal;
+        } else if (type == Type::COMPOUND) {
             delete vectorVal;
         }
     }
@@ -54,10 +56,13 @@ struct Cell {
                 floatVal = other.floatVal;
                 break;
             case Type::STRING:
-                stringVal = new (smallBuffer) std::string(*other.stringVal);
+                stringVal = new std::string(*other.stringVal);
                 break;
             case Type::COMPOUND:
                 vectorVal = new std::vector<Cell>(*other.vectorVal);
+                break;
+            case Type::CUSTYPE:
+                __class__ = new std::string(*other.__class__);
                 break;
         }
     }
@@ -82,8 +87,9 @@ struct Cell {
         }
     }
 
+
     // Assignment operator
-    Cell& operator=(const Cell& other) {
+    inline Cell& operator=(const Cell& other) {
         if (this != &other) {
             if (this->type == other.type) {
                 // Same type, directly copy the values
@@ -110,7 +116,7 @@ struct Cell {
     }
 
     // Move assignment operator
-    Cell& operator=(Cell&& other) {
+    inline Cell& operator=(Cell&& other) {
         if (this != &other) {
             this->~Cell();  // Destroy current data
             new (this) Cell(std::move(other));  // Move construct
@@ -118,7 +124,7 @@ struct Cell {
         return *this;
     }
 
-    Cell& operator[](size_t index) {
+    inline Cell& operator[](size_t index) {
         if (type == Type::COMPOUND && vectorVal != nullptr && index < vectorVal->size()) {
             return (*vectorVal)[index];
         } else {
@@ -129,7 +135,7 @@ struct Cell {
     }
 
     // Overload the + operator
-    Cell operator+(const Cell& other) const {
+    inline Cell operator+(const Cell& other) const {
         if (type == Type::INT && other.type == Type::INT) {
             return Cell(intVal + other.intVal);
         } else if (type == Type::FLOAT && other.type == Type::FLOAT) {
@@ -139,7 +145,7 @@ struct Cell {
     }
 
     // Overload the - operator
-    Cell operator-(const Cell& other) const {
+    inline Cell operator-(const Cell& other) const {
         if (type == Type::INT && other.type == Type::INT) {
             return Cell(intVal - other.intVal);
         } else if (type == Type::FLOAT && other.type == Type::FLOAT) {
@@ -149,7 +155,7 @@ struct Cell {
     }
 
     // Member function to overload the * operator for multiplication
-    Cell operator*(const Cell& other) const {
+    inline Cell operator*(const Cell& other) const {
         if (type == Type::INT && other.type == Type::INT) {
             return Cell(intVal * other.intVal);
         } else if (type == Type::FLOAT && other.type == Type::FLOAT) {
@@ -159,7 +165,7 @@ struct Cell {
     }
 
     // Overload the / operator
-    Cell operator/(const Cell& other) const {
+    inline Cell operator/(const Cell& other) const {
         if (type == Type::INT && other.type == Type::INT) {
             if (other.intVal != 0) {
                 return Cell(intVal / other.intVal);
@@ -181,7 +187,7 @@ struct Cell {
     }
 
     // Overload the == operator
-    bool operator==(const Cell& other) const {
+    inline bool operator==(const Cell& other) const {
         // Define your equality comparison logic based on the types
         if (type == other.type) {
             switch (type) {
@@ -203,13 +209,13 @@ struct Cell {
     }
 
     // Overload the != operator
-    bool operator!=(const Cell& other) const {
+    inline bool operator!=(const Cell& other) const {
         // Define your inequality comparison logic here based on the types
         return !(*this == other);
     }
 
     // Overload the >= operator
-    bool operator>=(const Cell& other) const {
+    inline bool operator>=(const Cell& other) const {
         // Define your greater than or equal to comparison logic here based on the types
         if (type == Type::INT && other.type == Type::INT) {
             return intVal >= other.intVal;
@@ -220,7 +226,7 @@ struct Cell {
     }
 
     // Overload the > operator
-    bool operator>(const Cell& other) const {
+    inline bool operator>(const Cell& other) const {
         // Define your greater than comparison logic here based on the types
         if (type == Type::INT && other.type == Type::INT) {
             return intVal > other.intVal;
@@ -242,7 +248,7 @@ struct Cell {
     }
 
     // Overload the <= operator
-    bool operator<=(const Cell& other) const {
+    inline bool operator<=(const Cell& other) const {
         // Define your less than or equal to comparison logic here based on the types
         if (type == Type::INT && other.type == Type::INT) {
             return intVal <= other.intVal;
@@ -255,5 +261,10 @@ struct Cell {
 
 //Storing overall programs memory
 vector<Cell> memory;
+
+inline void freeMemory(){
+    memory.clear();
+}
+
 
 #endif // MEMORY_CSQ4

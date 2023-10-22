@@ -126,7 +126,7 @@ class IfStmtNode(ASTNode):
         self.type = NodeTypes.IF_STMT
 
     def visit(self) -> str:
-        return "if(_cond_(" + self.condition.visit() + ")){"
+        return "if(" + self.condition.visit() + "){"
 
 
 class ElseStmtNode(ASTNode):
@@ -145,7 +145,7 @@ class ElifStmtNode(ASTNode):
         self.type = NodeTypes.ELIF_STMT
 
     def visit(self) -> str:
-        return "else if(_cond_(" + self.condition.visit() + ")){"
+        return "else if(" + self.condition.visit() + "){"
 
 
 class ForStmtNode(ASTNode):
@@ -178,7 +178,7 @@ class WhileStmtNode(ASTNode):
         self.type = NodeTypes.WHILE_STMT
 
     def visit(self) -> str:
-        return "while(_cond_(" + self.condition.visit() + ")){"
+        return "while(" + self.condition.visit() + "){"
 
 
 class CallNode(ASTNode):

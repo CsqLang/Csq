@@ -35,4 +35,12 @@ bool _cond_(bool state){
     return state;
 }
 
+Cell object(Cell name){
+    Cell obj;
+    obj.__class__ = name.stringVal;
+    obj.type = Type::CUSTYPE;
+    return obj;
+}
+
+
 #endif // basic_H

@@ -9,15 +9,12 @@ using namespace std;
 struct Variable
 {
     string name;
-    string type;
     // string value; instead of directly storing the value it should store address of the value.
     int value_address;
-    bool isCollection;
     Variable(){}
-    Variable(string name_, string type_, int value_)
+    Variable(string name_, int value_)
     {
         name = name_;
-        type = type_;
         value_address = value_;
     }
 };

@@ -4,14 +4,12 @@
 
 #include "core.h"
 //Error counts
-int error_c = 0;
 /*
 This file contains all types of error which can be returned during the execution.
 */
 void RuntimeError(string error)
 {
     printf("%s\n", error.c_str());
-    error_c++;
 }
 
 
