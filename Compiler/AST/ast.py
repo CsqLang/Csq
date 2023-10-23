@@ -62,7 +62,7 @@ class VarDeclNode(ASTNode):
 
     def visit(self) -> str:
         return (
-            'allocateVar("' + self.identifier + '","any",' + self.value.visit() + ");"
+            'allocateVar("' + self.identifier + '",Cell(' + self.value.visit() + "));"
         )
 
 
@@ -74,7 +74,7 @@ class VarAssignNode(ASTNode):
         self.type = NodeTypes.VAR_ASSIGN
 
     def visit(self) -> str:
-        return 'assignVar("' + self.identifier + '",' + self.value.visit() + ");"
+        return 'assignVar("' + self.identifier + '",Cell(' + self.value.visit() + "));"
 
 
 class BlockNode(ASTNode):
@@ -114,7 +114,7 @@ class FunDeclNode(ASTNode):
         
         for arg in self.parameters:
             if arg != ' ':
-                code += 'allocateVar("' + arg + '","any",'+arg+');\n'
+                code += 'allocateVar("' + arg + '",Cell('+arg+'));\n'
 
         return code
 
@@ -126,7 +126,7 @@ class IfStmtNode(ASTNode):
         self.type = NodeTypes.IF_STMT
 
     def visit(self) -> str:
-        return "if(_cond_(" + self.condition.visit() + ")){"
+        return "if(" + self.condition.visit() + "){"
 
 
 class ElseStmtNode(ASTNode):
@@ -145,7 +145,7 @@ class ElifStmtNode(ASTNode):
         self.type = NodeTypes.ELIF_STMT
 
     def visit(self) -> str:
-        return "else if(_cond_(" + self.condition.visit() + ")){"
+        return "else if(" + self.condition.visit() + "){"
 
 
 class ForStmtNode(ASTNode):
@@ -159,12 +159,15 @@ class ForStmtNode(ASTNode):
     def visit(self) -> str:
         return (
             "for("
-            + "Cell "
+            + "int "
             + self.iter_name
-            + "9019 : "
+            + "901;"
+            + self.iter_name + "901 < "
             + self.condition.visit()
-            + ".array){"
-            + f'allocateVar("{self.iter_name}","any",{self.iter_name + "9019"});'
+            + ".vectorVal->size();"
+            + self.iter_name
+            + "901++){"
+            + f'allocateVar("{self.iter_name}",{self.condition.visit()}[{self.iter_name + "901"}]);'
         )
 
 
@@ -175,7 +178,7 @@ class WhileStmtNode(ASTNode):
         self.type = NodeTypes.WHILE_STMT
 
     def visit(self) -> str:
-        return "while(_cond_(" + self.condition.visit() + ")){"
+        return "while(" + self.condition.visit() + "){"
 
 
 class CallNode(ASTNode):

@@ -38,4 +38,4 @@ final_code = bind(csq_include_path, compiled_code)
 name = path.replace(".csq", "")
 writeCode(final_code, name + ".cpp")
 
-os.system("g++ -std=c++17 " + name + ".cpp -o " + name)
+os.system("g++ -O4 -std=c++17 " + name + ".cpp -o " + name)

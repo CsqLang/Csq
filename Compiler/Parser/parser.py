@@ -281,20 +281,20 @@ def parse_ExprNode(tokens) -> ExprNode:
                 )
 
         elif current_token.type == TokenType.STR:
-            node.tokens.append(Token(f"s_val({current_token.token})", TokenType.BLANK))
+            node.tokens.append(Token(f"Cell({current_token.token})", TokenType.BLANK))
 
         elif current_token.type == TokenType.VALUE:
             if i + 2 < len(tokens) and tokens[i + 1].token == ".":
                 node.tokens.append(
                     Token(
-                        f"f_val({current_token.token}.{tokens[i + 2].token})",
+                        f"Cell({current_token.token}.{tokens[i + 2].token})",
                         TokenType.BLANK,
                     )
                 )
                 i += 2
             else:
                 node.tokens.append(
-                    Token(f"i_val({current_token.token})", TokenType.BLANK)
+                    Token(f"Cell({current_token.token})", TokenType.BLANK)
                 )
 
         else:
@@ -689,7 +689,10 @@ def Compile(code: list) -> str:
                     if check_Expr(line)[0]:
                         # Syntax is valid
                         node = parse_ExprNode(line)
-                        code_string += node.visit() + ";\n"
+                        if node.visit() == 'id("ignore")' or node.visit() == 'Cell(0)' :
+                            pass
+                        else:
+                            code_string += node.visit() + ";\n"
                     else:
                         # Syntax is voilated
                         error_list.append(

@@ -1,439 +1,252 @@
 #if !defined(MEMORY_CSQ4)
 #define MEMORY_CSQ4
-
-/*
-Memory Layout of Csq code:
-
-The memory used by the Csq code is in the form of array which contains the values and
-an address.
-So how it will be used by C++ compiler?
-The Csq code is :
-a:=83
-
-
-Memory view
- -----------------
- Value       address
-|83 ----------> 0   |
-|                   |
-|                   |
-|                   |
-|                   |
- --------------------
-
-***********************
-
-*/
-
+#include <iostream>
 #include <string>
 #include <vector>
-#include <memory>
+#include <unordered_map>
+
 using namespace std;
 
-// Value types
-enum Type
-{
-    INT = 1,
-    STRING = 2,
-    FLOAT = 3,
-    COMPOUND = 4,
-    CUSTYPE = 5,
+enum class Type {
+    INT,
+    FLOAT,
+    STRING,
+    COMPOUND,
+    CUSTYPE,
 };
 
-// Class to handle custom datatypes
-
-// Struct for a memory cell.
-struct Cell
-{
+struct Cell {
     Type type;
-    int u_count;
-    int ival;
-    double fval;
-    string sval;
-    vector<Cell> array;
-    // for custom type
-    string __class__;
+    union {
+        int intVal;
+        float floatVal;
+        string* stringVal;
+        vector<Cell>* vectorVal;
+        string* __class__;
+    };
 
-    Cell operator+(const Cell &c) const
-    {
-        /**
-         * Overloaded addition operator for Cell.
-         * Performs addition based on the types of operands.
-         * Supports string concatenation, numeric addition, and mixed-type addition.
-         * @param c The Cell to be added.
-         * @return Resulting Cell after addition.
-         */
-        Cell result;
+    inline Cell() : type(Type::INT), intVal(0) {}
 
-        if (type == STRING)
-        {
-            // String concatenation
-            result.type = STRING;
-            result.sval = sval + (c.type == STRING ? c.sval : (c.type == FLOAT ? to_string(c.fval) : to_string(c.ival)));
-        }
-        else if (type == FLOAT || c.type == FLOAT)
-        {
-            // Numeric addition for floats
-            result.type = FLOAT;
-            result.fval = (type == FLOAT ? fval : ival) + (c.type == FLOAT ? c.fval : c.ival);
-        }
-        else
-        {
-            // Numeric addition for integers
-            result.type = INT;
-            result.ival = ival + c.ival;
-        }
+    inline explicit Cell(int val) : type(Type::INT), intVal(val) {}
 
-        return result;
+    inline explicit Cell(float val) : type(Type::FLOAT), floatVal(val) {}
+
+    inline Cell(const string& val) : type(Type::STRING) {
+        stringVal = new string(val);
     }
 
-    Cell operator*(const Cell &c) const
-    {
-        /**
-         * Overloaded multiplication operator for Cell.
-         * Performs multiplication based on the types of operands.
-         * Supports numeric multiplication.
-         * @param c The Cell to be multiplied.
-         * @return Resulting Cell after multiplication or an error Cell for invalid operations.
-         */
-        if (c.type == STRING)
-        {
-            printf("Error: invalid use of operator * between two strings.");
-            return Cell(); // Error cell
-        }
-        else
-        {
-            return (c.type == FLOAT) ? Cell{FLOAT, 0, 0, fval * c.fval} : Cell{INT, 0, ival * c.ival};
+    inline Cell(const vector<Cell>& val) : type(Type::COMPOUND) {
+        vectorVal = new vector<Cell>(val);
+    }
+
+    inline ~Cell() {
+        if (type == Type::STRING && stringVal) {
+            delete stringVal;
+        } else if (type == Type::COMPOUND) {
+            delete vectorVal;
         }
     }
 
-    Cell operator-(const Cell &c) const
-    {
-        /**
-         * Overloaded subtraction operator for Cell.
-         * Performs subtraction based on the types of operands.
-         * Supports numeric subtraction.
-         * @param c The Cell to be subtracted.
-         * @return Resulting Cell after subtraction or an error Cell for invalid operations.
-         */
-        if (c.type == STRING)
-        {
-            printf("Error: invalid use of operator - between two strings.");
-            return Cell(); // Error cell
-        }
-        else
-        {
-            return (type == FLOAT || c.type == FLOAT) ? Cell{FLOAT, 0, 0, fval - c.fval} : Cell{INT, 0, ival - c.ival};
-        }
-    }
-
-    Cell operator/(const Cell &c) const
-    {
-        /**
-         * Overloaded division operator for Cell.
-         * Performs division based on the types of operands.
-         * Supports numeric division.
-         * @param c The Cell to be divided.
-         * @return Resulting Cell after division or an error Cell for invalid operations.
-         */
-        if (c.type == STRING)
-        {
-            printf("Error: invalid use of operator / between two strings.");
-            return Cell(); // Error cell
-        }
-        else if (c.type == FLOAT && (type == FLOAT || type == INT))
-        {
-            return Cell{FLOAT, 0, 0, fval / c.fval};
-        }
-        else
-        {
-            return Cell{FLOAT, 0, 0, float(float(ival) / float(c.ival))};
+    inline Cell(const Cell& other) : type(other.type) {
+        switch (other.type) {
+            case Type::INT:
+                intVal = other.intVal;
+                break;
+            case Type::FLOAT:
+                floatVal = other.floatVal;
+                break;
+            case Type::STRING:
+                stringVal = new string(*other.stringVal);
+                break;
+            case Type::COMPOUND:
+                vectorVal = new vector<Cell>(*other.vectorVal);
+                break;
+            case Type::CUSTYPE:
+                __class__ = new string(*other.__class__);
+                break;
         }
     }
 
-    Cell operator>(const Cell &c) const
-    {
-        /**
-         * Overloaded greater-than operator for Cell.
-         * Performs comparison based on the types of operands.
-         * Supports numeric comparisons.
-         * @param c The Cell to compare with.
-         * @return Resulting Cell with a boolean value indicating the comparison result or an error Cell for invalid operations.
-         */
-        if (c.type == STRING)
-        {
-            printf("Error: invalid use of operator > between two strings.");
-            return Cell(); // Error cell
-        }
-        else
-        {
-            return (type == FLOAT || c.type == FLOAT) ? Cell{FLOAT, 0, fval > c.fval} : Cell{INT, 0, ival > c.ival};
-        }
-    }
-
-    Cell operator<(const Cell &c) const
-    {
-        /**
-         * Overloaded less-than operator for Cell.
-         * Performs comparison based on the types of operands.
-         * Supports numeric comparisons.
-         * @param c The Cell to compare with.
-         * @return Resulting Cell with a boolean value indicating the comparison result or an error Cell for invalid operations.
-         */
-        if (c.type == STRING)
-        {
-            printf("Error: invalid use of operator < between two strings.");
-            return Cell(); // Error cell
-        }
-        else
-        {
-            return (type == FLOAT || c.type == FLOAT) ? Cell{FLOAT, 0, fval < c.fval} : Cell{INT, 0, ival < c.ival};
+    // Move constructor
+    inline Cell(Cell&& other) : type(other.type) {
+        switch (other.type) {
+            case Type::INT:
+                intVal = other.intVal;
+                break;
+            case Type::FLOAT:
+                floatVal = other.floatVal;
+                break;
+            case Type::STRING:
+                stringVal = other.stringVal;
+                other.stringVal = nullptr;
+                break;
+            case Type::COMPOUND:
+                vectorVal = other.vectorVal;
+                other.vectorVal = nullptr;
+                break;
         }
     }
 
-    Cell operator>=(const Cell &c) const
-    {
-        /**
-         * Overloaded greater-than-or-equal-to operator for Cell.
-         * Performs comparison based on the types of operands.
-         * Supports numeric and string comparisons.
-         * @param c The Cell to compare with.
-         * @return Resulting Cell with a boolean value indicating the comparison result or an error Cell for invalid operations.
-         */
-        if (c.type == STRING)
-        {
-            printf("Error: invalid use of operator >= between two strings.");
-            return Cell(); // Error cell
-        }
-        else
-        {
-            return (type == FLOAT || c.type == FLOAT) ? Cell{FLOAT, 0, fval >= c.fval} : Cell{INT, 0, ival >= c.ival};
-        }
-    }
-
-    Cell operator<=(const Cell &c) const
-    {
-        /**
-         * Overloaded less-than-or-equal-to operator for Cell.
-         * Performs comparison based on the types of operands.
-         * Supports numeric and string comparisons.
-         * @param c The Cell to compare with.
-         * @return Resulting Cell with a boolean value indicating the comparison result or an error Cell for invalid operations.
-         */
-        if (c.type == STRING)
-        {
-            printf("Error: invalid use of operator <= between two strings.");
-            return Cell(); // Error cell
-        }
-        else
-        {
-            return (type == FLOAT || c.type == FLOAT) ? Cell{FLOAT, 0, fval <= c.fval} : Cell{INT, 0, ival <= c.ival};
-        }
-    }
-
-    Cell operator==(const Cell &c) const
-    {
-        /**
-         * Overloaded equality operator for Cell.
-         * Performs comparison based on the types of operands.
-         * Supports numeric and string equality comparisons.
-         * @param c The Cell to compare with.
-         * @return Resulting Cell with a boolean value indicating the comparison result or an error Cell for invalid operations.
-         */
-        if (c.type == STRING)
-        {
-            return Cell{FLOAT, 0, 0, static_cast<float>(sval == c.sval)};
-        }
-        else
-        {
-            return (type == FLOAT || c.type == FLOAT) ? Cell{FLOAT, 0, fval == c.fval} : Cell{INT, 0, ival == c.ival};
-        }
-    }
-
-    Cell operator!=(const Cell &c) const
-    {
-        /**
-         * Overloaded inequality operator for Cell.
-         * Performs comparison based on the types of operands.
-         * Supports numeric and string inequality comparisons.
-         * @param c The Cell to compare with.
-         * @return Resulting Cell with a boolean value indicating the comparison result or an error Cell for invalid operations.
-         */
-        if (c.type == STRING)
-        {
-            return Cell{FLOAT, 0, 0, static_cast<float>(sval != c.sval)};
-        }
-        else if (c.type == FLOAT)
-        {
-            return Cell{FLOAT, 0, 0, static_cast<float>(fval != c.fval)};
-        }
-        else
-        {
-            return Cell{FLOAT, 0, 0, static_cast<float>(ival != c.ival)};
-        }
-    }
-
-    Cell operator[](const Cell &index) const
-    {
-        /**
-         * Overloaded subscript operator for Cell.
-         * Retrieves the element at the specified index in the array.
-         * @param index The index Cell.
-         * @return Resulting Cell containing the array element or an error Cell for invalid operations.
-         */
-        return array[static_cast<int>(index.fval)];
-    }
-};
-
-// This is the ultimate memory where everything will be stored.
-vector<Cell> memory;
-// Function to get the number of cells in the memory.
-int memory_size() { return memory.size(); }
-
-void addCell(int val)
-{
-    Cell cell;
-    cell.ival = val;
-    cell.type = INT;
-    cell.u_count = 0;
-    memory.emplace_back(cell);
-}
-
-void addCell(double val)
-{
-    Cell cell;
-    cell.fval = val;
-    cell.type = FLOAT;
-    cell.u_count = 0;
-    memory.emplace_back(cell);
-}
-
-void addCell(const string &val)
-{
-    memory.emplace_back(Cell{STRING, 0, 0, 0.0, val});
-}
-
-void addCell(const vector<Cell> &array)
-{
-    // memory.insert(memory.end(), array.begin(), array.end());
-    Cell c;
-    c.type = COMPOUND;
-    for (Cell e : array)
-    {
-        c.array.push_back(e);
-    }
-    memory.push_back(c);
-}
-
-// Read the value of at address
-string readCell(int address)
-{
-    switch (memory[address].type)
-    {
-    case INT:
-    {
-        return to_string(memory[address].ival);
-    }
-    case STRING:
-    {
-        return "\"" + memory[address].sval + "\"";
-    }
-    case COMPOUND:
-    {
-        return "{}";
-    }
-    default:
-    {
-        return to_string(memory[address].fval);
-    }
-    }
-}
-
-// This function will dump all data in the memory.
-void dump()
-{
-    for (int i = 0; i < memory.size(); i++)
-    {
-        printf("[%d] => type : %d used : %d  value : ", i, memory[i].type, memory[i].u_count);
-        if (memory[i].type == STRING)
-        {
-            printf("%s\n", memory[i].sval.c_str());
-        }
-        else if (memory[i].type == FLOAT)
-        {
-            printf("%lf\n", memory[i].fval);
-        }
-        else if (memory[i].type == COMPOUND)
-        {
-            for (Cell arg : memory[i].array)
-            {
-                if (arg.type == STRING)
-                {
-                    printf("%s\n", arg.sval.c_str());
+    // Assignment operator
+    inline Cell& operator=(const Cell& other) {
+        if (this != &other) {
+            if (type == other.type) {
+                switch (type) {
+                    case Type::INT:
+                        intVal = other.intVal;
+                        break;
+                    case Type::FLOAT:
+                        floatVal = other.floatVal;
+                        break;
+                    case Type::STRING:
+                        *stringVal = *other.stringVal;
+                        break;
+                    case Type::COMPOUND:
+                        *vectorVal = *other.vectorVal;
+                        break;
                 }
-                else if (arg.type == FLOAT)
-                {
-                    printf("%lf\n", arg.fval);
-                }
-                else
-                {
-                    printf("%d\n", arg.ival);
-                }
+            } else {
+                this->~Cell();
+                new (this) Cell(other);
             }
         }
-        else
-        {
-            printf("%d\n", memory[i].ival);
+        return *this;
+    }
+
+    // Move assignment operator
+    inline Cell& operator=(Cell&& other) {
+        if (this != &other) {
+            this->~Cell();
+            new (this) Cell(std::move(other));
+        }
+        return *this;
+    }
+
+    inline Cell& operator[](size_t index) {
+        if (type == Type::COMPOUND && vectorVal && index < vectorVal->size()) {
+            return (*vectorVal)[index];
+        } else {
+            return *this; // You can change this to return a default value if needed.
         }
     }
-}
 
-Cell *getCellPtr(int address)
-{
-    return &memory[address];
-}
-
-void modifyCell(Cell *cell, const string &value)
-{
-    cell->sval = value;
-    cell->type = Type::STRING;
-}
-
-void modifyCell(Cell *cell, int value)
-{
-    cell->ival = value;
-    cell->type = INT;
-}
-
-void modifyCell(Cell *cell, float value)
-{
-    cell->fval = value;
-    cell->type = FLOAT;
-}
-
-// This function will clear all the memory allocated.
-void freeMemory()
-{
-    memory.clear();
-}
-
-// Top cell address of memory
-int TopCellAddress()
-{
-    return memory.size() - 1;
-}
-
-// GC----------------------------------------------->
-void Free()
-{
-    for (int i = 0; i < memory.size(); i++)
-    {
-        if (memory[i].u_count == 0)
-        {
-            // Free its a garbage cell
-            memory.erase(memory.begin() + i);
+    inline Cell operator+(const Cell& other) const {
+        switch(other.type) {
+            case Type::INT:
+                return Cell(intVal + other.intVal);
+            case Type::FLOAT:
+                return Cell(floatVal + other.floatVal);
+            default:
+                return Cell(); // Default case
         }
     }
+
+    inline Cell operator-(const Cell& other) const {
+        switch(other.type) {
+            case Type::INT:
+                return Cell(intVal - other.intVal);
+            case Type::FLOAT:
+                return Cell(floatVal - other.floatVal);
+            default:
+                return Cell(); // Default case
+        }
+    }
+
+    inline Cell operator*(const Cell& other) const {
+        switch(other.type) {
+            case Type::INT:
+                return Cell(intVal * other.intVal);
+            case Type::FLOAT:
+                return Cell(floatVal * other.floatVal);
+            default:
+                return Cell(); // Default case
+        }
+    }
+
+    inline Cell operator/(const Cell& other) const {
+        if (type == Type::INT && other.type == Type::INT) {
+            if (other.intVal != 0) {
+                return Cell(intVal / other.intVal);
+            } else {
+                return Cell(); // Handle division by zero error.
+            }
+        } else if (type == Type::FLOAT && other.type == Type::FLOAT) {
+            if (other.floatVal != 0.0f) {
+                return Cell(floatVal / other.floatVal);
+            } else {
+                return Cell(); // Handle division by zero error.
+            }
+        }
+        return Cell(); // Default case
+    }
+
+    inline bool operator==(const Cell& other) const {
+        if (type == other.type) {
+            switch (type) {
+                case Type::INT:
+                    return intVal == other.intVal;
+                case Type::FLOAT:
+                    return floatVal == other.floatVal;
+                case Type::STRING:
+                    return *stringVal == *other.stringVal;
+                case Type::COMPOUND:
+                    return *vectorVal == *other.vectorVal; // Implement proper comparison for vectors
+                default:
+                    return false;
+            }
+        }
+        return false;
+    }
+
+    inline bool operator!=(const Cell& other) const {
+        return !(*this == other);
+    }
+
+    inline bool operator>=(const Cell& other) const {
+        if (type == Type::INT && other.type == Type::INT) {
+            return intVal >= other.intVal;
+        } else if (type == Type::FLOAT && other.type == Type::FLOAT) {
+            return floatVal >= other.floatVal;
+        }
+        return false;
+    }
+
+    inline bool operator>(const Cell& other) const {
+        switch(other.type) {
+            case Type::INT:
+                return intVal > other.intVal;
+            case Type::FLOAT:
+                return floatVal > other.floatVal;
+            default:
+                return false; // Default case
+        }
+    }
+
+    inline bool operator<(const Cell& other) const {
+        switch(other.type) {
+            case Type::INT:
+                return intVal < other.intVal;
+            case Type::FLOAT:
+                return floatVal < other.floatVal;
+            default:
+                return false; // Default case
+        }
+    }
+
+    inline bool operator<=(const Cell& other) const {
+        if (type == Type::INT && other.type == Type::INT) {
+            return intVal <= other.intVal;
+        } else if (type == Type::FLOAT && other.type == Type::FLOAT) {
+            return floatVal <= other.floatVal;
+        }
+        return false;
+    }
+};
+
+vector<Cell> memory;
+
+inline void freeMemory() {
+    memory = {};
 }
 
 #endif // MEMORY_CSQ4

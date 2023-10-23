@@ -4,112 +4,43 @@
 #include "../Runtime/core.h"
 #include "codes.h"
 #include <iostream>
+#include <iomanip>
 
-void print(Cell arg)
-{
-    if (arg.type == STRING)
-    {
-        printf("%s\n", arg.sval.c_str());
-    }
-    else if (arg.type == COMPOUND)
-    {
-        for (Cell c : arg.array)
-        {
-            print(c);
-            printf(" ");
-        }
-        printf("\n");
-    }
-    else if (arg.type == FLOAT)
-    {
-        printf("%lf\n", arg.fval);
-    }
-    else
-    {
-        printf("%d\n", arg.ival);
-    }
+void print(const Cell& cell) {
+    switch (cell.type) {
+        case Type::INT:
+            std::cout << cell.intVal;
+            break;
+        case Type::FLOAT:
+            std::cout << std::fixed << std::setprecision(6) << cell.floatVal; // Print floats with 6 decimal places
+            break;
+        case Type::STRING:
+            std::cout << *cell.stringVal; // Assuming stringVal is a pointer to a std::string
+            break;
+        case Type::COMPOUND:
+            std::cout << "[ ";
+            for (const Cell& item : *cell.vectorVal) {
+                print(item); // Recursively print elements of the compound type
+                std::cout << " ";
+            }
+            std::cout << "]";
+            break;
+        default:
+            std::cout << "Unknown type"; // Handle unknown types
+            break;
+    }printf("\n");
 }
 
-Cell range(Cell lim)
-{
-    Cell vals;
-    vals.type = COMPOUND;
-    for (int i = 0; i < lim.ival; i++)
-        vals.array.push_back(i_val(i));
-    return vals;
+bool _cond_(bool state){
+    return state;
 }
 
-bool _cond_(Cell arg)
-{
-    if (arg.type == FLOAT)
-    {
-        return arg.fval;
-    }
-    else if (arg.type == INT)
-    {
-        return arg.ival;
-    }
-    else
-    {
-        printf("Error: couldn't use a string value as condition.\n");
-        exit(0);
-    }
+Cell object(Cell name){
+    Cell obj;
+    obj.__class__ = name.stringVal;
+    obj.type = Type::CUSTYPE;
+    return obj;
 }
 
-Cell len(Cell arg)
-{
-    Cell c;
-    c.type = INT;
-    if (arg.type == STRING)
-    {
-        c.ival = arg.sval.size();
-    }
-    else if (arg.type == COMPOUND)
-    {
-        c.ival = arg.array.size();
-    }
-    return c;
-}
-
-Cell type(Cell arg)
-{
-    Cell c;
-    c.type = STRING;
-    if (arg.type == STRING)
-    {
-        c.sval = "string";
-    }
-    else if (arg.type == COMPOUND)
-    {
-        c.sval = "compound";
-    }
-    else if (arg.type == FLOAT)
-    {
-        c.sval = "float";
-    }
-    else
-    {
-        c.sval = c.__class__;
-    }
-    return c;
-}
-
-Cell input(Cell prompt)
-{
-    Cell c;
-    c.type = STRING;
-    print(prompt);
-    cin >> c.sval;
-    return c;
-}
-
-Cell push(Cell array_, Cell value)
-{
-    Cell arr;
-    arr.array = array_.array;
-    arr.array.push_back(value);
-    arr.type = COMPOUND;
-    return arr;
-}
 
 #endif // basic_H
