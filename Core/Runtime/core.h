@@ -40,7 +40,7 @@ inline Cell id(const string& identifier) {
 
 inline void allocateVar(string id_, const Cell& c)
 {
-    memory.push_back(c);
+    memory.emplace_back(c);
     SymTable[id_] = memory.size()-1;
 }
 

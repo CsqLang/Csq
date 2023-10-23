@@ -689,7 +689,10 @@ def Compile(code: list) -> str:
                     if check_Expr(line)[0]:
                         # Syntax is valid
                         node = parse_ExprNode(line)
-                        code_string += node.visit() + ";\n"
+                        if node.visit() == 'id("ignore")' or node.visit() == 'Cell(0)' :
+                            pass
+                        else:
+                            code_string += node.visit() + ";\n"
                     else:
                         # Syntax is voilated
                         error_list.append(

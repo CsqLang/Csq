@@ -62,7 +62,7 @@ class VarDeclNode(ASTNode):
 
     def visit(self) -> str:
         return (
-            'allocateVar("' + self.identifier + '",' + self.value.visit() + ");"
+            'allocateVar("' + self.identifier + '",Cell(' + self.value.visit() + "));"
         )
 
 
@@ -74,7 +74,7 @@ class VarAssignNode(ASTNode):
         self.type = NodeTypes.VAR_ASSIGN
 
     def visit(self) -> str:
-        return 'assignVar("' + self.identifier + '",' + self.value.visit() + ");"
+        return 'assignVar("' + self.identifier + '",Cell(' + self.value.visit() + "));"
 
 
 class BlockNode(ASTNode):
@@ -114,7 +114,7 @@ class FunDeclNode(ASTNode):
         
         for arg in self.parameters:
             if arg != ' ':
-                code += 'allocateVar("' + arg + '",'+arg+');\n'
+                code += 'allocateVar("' + arg + '",Cell('+arg+'));\n'
 
         return code
 

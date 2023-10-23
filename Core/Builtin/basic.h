@@ -28,7 +28,7 @@ void print(const Cell& cell) {
         default:
             std::cout << "Unknown type"; // Handle unknown types
             break;
-    }
+    }printf("\n");
 }
 
 bool _cond_(bool state){
