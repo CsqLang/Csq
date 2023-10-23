@@ -11,7 +11,10 @@ inline Cell f_val(double val) {
 }
 
 inline Cell i_val(int val) {
-    return Cell(val);
+    Cell c;
+    c.intVal = val;
+    c.type = Type::INT;
+    return c;
 }
 
 inline Cell s_val(const string& val) {

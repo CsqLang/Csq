@@ -20,34 +20,34 @@ struct Cell {
     union {
         int intVal;
         float floatVal;
-        std::string* stringVal;
-        std::vector<Cell>* vectorVal;
-        std::string* __class__;
+        string* stringVal;
+        vector<Cell>* vectorVal;
+        string* __class__;
     };
 
-    Cell() : type(Type::INT), intVal(0) {}
+    inline Cell() : type(Type::INT), intVal(0) {}
 
-    explicit Cell(int val) : type(Type::INT), intVal(val) {}
+    inline explicit Cell(int val) : type(Type::INT), intVal(val) {}
 
-    explicit Cell(float val) : type(Type::FLOAT), floatVal(val) {}
+    inline explicit Cell(float val) : type(Type::FLOAT), floatVal(val) {}
 
-    Cell(const std::string& val) : type(Type::STRING) {
-        stringVal = new std::string(val);
+    inline Cell(const string& val) : type(Type::STRING) {
+        stringVal = new string(val);
     }
 
-    Cell(const std::vector<Cell>& val) : type(Type::COMPOUND) {
-        vectorVal = new std::vector<Cell>(val);
+    inline Cell(const vector<Cell>& val) : type(Type::COMPOUND) {
+        vectorVal = new vector<Cell>(val);
     }
 
-    ~Cell() {
-        if (type == Type::STRING && stringVal != nullptr) {
+    inline ~Cell() {
+        if (type == Type::STRING && stringVal) {
             delete stringVal;
         } else if (type == Type::COMPOUND) {
             delete vectorVal;
         }
     }
-    
-    Cell(const Cell& other) : type(other.type) {
+
+    inline Cell(const Cell& other) : type(other.type) {
         switch (other.type) {
             case Type::INT:
                 intVal = other.intVal;
@@ -56,19 +56,19 @@ struct Cell {
                 floatVal = other.floatVal;
                 break;
             case Type::STRING:
-                stringVal = new std::string(*other.stringVal);
+                stringVal = new string(*other.stringVal);
                 break;
             case Type::COMPOUND:
-                vectorVal = new std::vector<Cell>(*other.vectorVal);
+                vectorVal = new vector<Cell>(*other.vectorVal);
                 break;
             case Type::CUSTYPE:
-                __class__ = new std::string(*other.__class__);
+                __class__ = new string(*other.__class__);
                 break;
         }
     }
 
     // Move constructor
-    Cell(Cell&& other) : type(other.type) {
+    inline Cell(Cell&& other) : type(other.type) {
         switch (other.type) {
             case Type::INT:
                 intVal = other.intVal;
@@ -87,12 +87,10 @@ struct Cell {
         }
     }
 
-
     // Assignment operator
     inline Cell& operator=(const Cell& other) {
         if (this != &other) {
-            if (this->type == other.type) {
-                // Same type, directly copy the values
+            if (type == other.type) {
                 switch (type) {
                     case Type::INT:
                         intVal = other.intVal;
@@ -108,8 +106,8 @@ struct Cell {
                         break;
                 }
             } else {
-                this->~Cell();  // Destroy current data
-                new (this) Cell(other);  // Copy construct
+                this->~Cell();
+                new (this) Cell(other);
             }
         }
         return *this;
@@ -118,77 +116,71 @@ struct Cell {
     // Move assignment operator
     inline Cell& operator=(Cell&& other) {
         if (this != &other) {
-            this->~Cell();  // Destroy current data
-            new (this) Cell(std::move(other));  // Move construct
+            this->~Cell();
+            new (this) Cell(std::move(other));
         }
         return *this;
     }
 
     inline Cell& operator[](size_t index) {
-        if (type == Type::COMPOUND && vectorVal != nullptr && index < vectorVal->size()) {
+        if (type == Type::COMPOUND && vectorVal && index < vectorVal->size()) {
             return (*vectorVal)[index];
         } else {
-            // Handle the case where the cell is not a vector or the index is out of bounds.
-            // You can return a default value or handle this case as needed.
-            return *this; // Return the current cell, you can change this to a default value if needed.
+            return *this; // You can change this to return a default value if needed.
         }
     }
 
-    // Overload the + operator
     inline Cell operator+(const Cell& other) const {
-        if (type == Type::INT && other.type == Type::INT) {
-            return Cell(intVal + other.intVal);
-        } else if (type == Type::FLOAT && other.type == Type::FLOAT) {
-            return Cell(floatVal + other.floatVal);
+        switch(other.type) {
+            case Type::INT:
+                return Cell(intVal + other.intVal);
+            case Type::FLOAT:
+                return Cell(floatVal + other.floatVal);
+            default:
+                return Cell(); // Default case
         }
-        return Cell(); // Default case
     }
 
-    // Overload the - operator
     inline Cell operator-(const Cell& other) const {
-        if (type == Type::INT && other.type == Type::INT) {
-            return Cell(intVal - other.intVal);
-        } else if (type == Type::FLOAT && other.type == Type::FLOAT) {
-            return Cell(floatVal - other.floatVal);
+        switch(other.type) {
+            case Type::INT:
+                return Cell(intVal - other.intVal);
+            case Type::FLOAT:
+                return Cell(floatVal - other.floatVal);
+            default:
+                return Cell(); // Default case
         }
-        return Cell(); // Default case
     }
 
-    // Member function to overload the * operator for multiplication
     inline Cell operator*(const Cell& other) const {
-        if (type == Type::INT && other.type == Type::INT) {
-            return Cell(intVal * other.intVal);
-        } else if (type == Type::FLOAT && other.type == Type::FLOAT) {
-            return Cell(floatVal * other.floatVal);
+        switch(other.type) {
+            case Type::INT:
+                return Cell(intVal * other.intVal);
+            case Type::FLOAT:
+                return Cell(floatVal * other.floatVal);
+            default:
+                return Cell(); // Default case
         }
-        return Cell(); // Default case
     }
 
-    // Overload the / operator
     inline Cell operator/(const Cell& other) const {
         if (type == Type::INT && other.type == Type::INT) {
             if (other.intVal != 0) {
                 return Cell(intVal / other.intVal);
             } else {
-                // Handle division by zero error here
-                // You can return a specific value or throw an exception.
-                return Cell(); // Default case
+                return Cell(); // Handle division by zero error.
             }
         } else if (type == Type::FLOAT && other.type == Type::FLOAT) {
             if (other.floatVal != 0.0f) {
                 return Cell(floatVal / other.floatVal);
             } else {
-                // Handle division by zero error here
-                // You can return a specific value or throw an exception.
-                return Cell(); // Default case
+                return Cell(); // Handle division by zero error.
             }
         }
         return Cell(); // Default case
     }
 
-    // Overload the == operator
     inline bool operator==(const Cell& other) const {
-        // Define your equality comparison logic based on the types
         if (type == other.type) {
             switch (type) {
                 case Type::INT:
@@ -196,75 +188,65 @@ struct Cell {
                 case Type::FLOAT:
                     return floatVal == other.floatVal;
                 case Type::STRING:
-                    return (*stringVal) == (*other.stringVal);
+                    return *stringVal == *other.stringVal;
                 case Type::COMPOUND:
-                    // Define equality comparison for compound types
-                    // You may need to iterate through the vectors, comparing elements.
-                    return false; // Default case
+                    return *vectorVal == *other.vectorVal; // Implement proper comparison for vectors
                 default:
-                    return false; // Default case
+                    return false;
             }
         }
-        return false; // Default case
+        return false;
     }
 
-    // Overload the != operator
     inline bool operator!=(const Cell& other) const {
-        // Define your inequality comparison logic here based on the types
         return !(*this == other);
     }
 
-    // Overload the >= operator
     inline bool operator>=(const Cell& other) const {
-        // Define your greater than or equal to comparison logic here based on the types
         if (type == Type::INT && other.type == Type::INT) {
             return intVal >= other.intVal;
         } else if (type == Type::FLOAT && other.type == Type::FLOAT) {
             return floatVal >= other.floatVal;
         }
-        return false; // Default case
+        return false;
     }
 
-    // Overload the > operator
     inline bool operator>(const Cell& other) const {
-        // Define your greater than comparison logic here based on the types
-        if (type == Type::INT && other.type == Type::INT) {
-            return intVal > other.intVal;
-        } else if (type == Type::FLOAT && other.type == Type::FLOAT) {
-            return floatVal > other.floatVal;
+        switch(other.type) {
+            case Type::INT:
+                return intVal > other.intVal;
+            case Type::FLOAT:
+                return floatVal > other.floatVal;
+            default:
+                return false; // Default case
         }
-        return false; // Default case
     }
 
-    // Overload the < operator
-    bool operator<(const Cell& other) const {
-        // Define your less than comparison logic here based on the types
-        if (type == Type::INT && other.type == Type::INT) {
-            return intVal < other.intVal;
-        } else if (type == Type::FLOAT && other.type == Type::FLOAT) {
-            return floatVal < other.floatVal;
+    inline bool operator<(const Cell& other) const {
+        switch(other.type) {
+            case Type::INT:
+                return intVal < other.intVal;
+            case Type::FLOAT:
+                return floatVal < other.floatVal;
+            default:
+                return false; // Default case
         }
-        return false; // Default case
     }
 
-    // Overload the <= operator
     inline bool operator<=(const Cell& other) const {
-        // Define your less than or equal to comparison logic here based on the types
         if (type == Type::INT && other.type == Type::INT) {
             return intVal <= other.intVal;
         } else if (type == Type::FLOAT && other.type == Type::FLOAT) {
             return floatVal <= other.floatVal;
         }
-        return false; // Default case
+        return false;
     }
 };
 
-//Storing overall programs memory
 vector<Cell> memory;
 
-inline void freeMemory(){
-    memory.clear();
+inline void freeMemory() {
+    memory = {};
 }
-
 
 #endif // MEMORY_CSQ4

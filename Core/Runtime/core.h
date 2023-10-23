@@ -28,18 +28,15 @@ inline int inTable(string name)
 }
 
 
-
-inline Cell id(string identifier)
-{
-    if (identifier != "ignore")
-    {
-        return f_val(0);  // Assuming f_val creates a Cell of the desired type
+inline Cell id(const string& identifier) {
+    auto it = SymTable.find(identifier);
+    if (it != SymTable.end()) {
+        return memory[it->second];
     }
-    else
-    {
-        return memory[SymTable[identifier]];
-    }
+    // Handle the case when the identifier is not found
+    return f_val(0); // Provide an appropriate default value
 }
+
 
 inline void allocateVar(string id_, const Cell& c)
 {
@@ -47,11 +44,14 @@ inline void allocateVar(string id_, const Cell& c)
     SymTable[id_] = memory.size()-1;
 }
 
-inline void assignVar(string id_, const Cell& c)
-{
-    memory[SymTable[id_]] = c;
+inline void assignVar(const string& id_, const Cell& c) {
+    auto it = SymTable.find(id_);
+    if (it != SymTable.end()) {
+        memory[it->second] = c; // Update the existing value
+    } else {
+        // Handle the case when the identifier is not found
+    }
 }
-
 // Ultimate class storage where a table of every class will be made.
 unordered_map<string, Class> __classes__;
 
