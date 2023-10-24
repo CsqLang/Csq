@@ -287,7 +287,7 @@ def parse_ExprNode(tokens) -> ExprNode:
             if i + 2 < len(tokens) and tokens[i + 1].token == ".":
                 node.tokens.append(
                     Token(
-                        f"Cell({current_token.token}.{tokens[i + 2].token})",
+                        f"Cell(float({current_token.token}.{tokens[i + 2].token}))",
                         TokenType.BLANK,
                     )
                 )

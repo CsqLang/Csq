@@ -131,51 +131,37 @@ struct Cell {
     }
 
     inline Cell operator+(const Cell& other) const {
-        switch(other.type) {
-            case Type::INT:
-                return Cell(intVal + other.intVal);
-            case Type::FLOAT:
-                return Cell(floatVal + other.floatVal);
-            default:
-                return Cell(); // Default case
+        if (type == Type::INT && other.type == Type::INT) {
+            return Cell(intVal + other.intVal);
+        } else if (type == Type::FLOAT && other.type == Type::FLOAT) {
+            return Cell(floatVal + other.floatVal);
         }
+        return Cell(); // Default case
     }
 
     inline Cell operator-(const Cell& other) const {
-        switch(other.type) {
-            case Type::INT:
-                return Cell(intVal - other.intVal);
-            case Type::FLOAT:
-                return Cell(floatVal - other.floatVal);
-            default:
-                return Cell(); // Default case
+        if (type == Type::INT && other.type == Type::INT) {
+            return Cell(intVal - other.intVal);
+        } else if (type == Type::FLOAT && other.type == Type::FLOAT) {
+            return Cell(floatVal - other.floatVal);
         }
+        return Cell(); // Default case
     }
 
     inline Cell operator*(const Cell& other) const {
-        switch(other.type) {
-            case Type::INT:
-                return Cell(intVal * other.intVal);
-            case Type::FLOAT:
-                return Cell(floatVal * other.floatVal);
-            default:
-                return Cell(); // Default case
+        if (type == Type::INT && other.type == Type::INT) {
+            return Cell(intVal * other.intVal);
+        } else if (type == Type::FLOAT && other.type == Type::FLOAT) {
+            return Cell(floatVal * other.floatVal);
         }
+        return Cell(); // Default case
     }
 
     inline Cell operator/(const Cell& other) const {
-        if (type == Type::INT && other.type == Type::INT) {
-            if (other.intVal != 0) {
-                return Cell(intVal / other.intVal);
-            } else {
-                return Cell(); // Handle division by zero error.
-            }
-        } else if (type == Type::FLOAT && other.type == Type::FLOAT) {
-            if (other.floatVal != 0.0f) {
-                return Cell(floatVal / other.floatVal);
-            } else {
-                return Cell(); // Handle division by zero error.
-            }
+        if (type == Type::INT && other.type == Type::INT && other.intVal != 0) {
+            return Cell(intVal / other.intVal);
+        } else if (type == Type::FLOAT && other.type == Type::FLOAT && other.floatVal != 0.0f) {
+            return Cell(floatVal / other.floatVal);
         }
         return Cell(); // Default case
     }
@@ -226,8 +212,10 @@ struct Cell {
         switch(other.type) {
             case Type::INT:
                 return intVal < other.intVal;
+                break;
             case Type::FLOAT:
                 return floatVal < other.floatVal;
+                break;
             default:
                 return false; // Default case
         }
