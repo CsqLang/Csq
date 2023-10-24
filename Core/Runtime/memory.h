@@ -1,9 +1,10 @@
 #if !defined(MEMORY_CSQ4)
 #define MEMORY_CSQ4
+
 #include <iostream>
 #include <string>
 #include <vector>
-#include <unordered_map>
+#include <map>
 
 using namespace std;
 
@@ -19,34 +20,33 @@ struct Cell {
     Type type;
     union {
         int intVal;
-        float floatVal;
+        double floatVal;
         string* stringVal;
         vector<Cell>* vectorVal;
         string* __class__;
     };
 
+    // Constructors
     inline Cell() : type(Type::INT), intVal(0) {}
 
-    inline explicit Cell(int val) : type(Type::INT), intVal(val) {}
+    inline Cell(int val) : type(Type::INT), intVal(val) {}
 
-    inline explicit Cell(float val) : type(Type::FLOAT), floatVal(val) {}
+    inline Cell(double val) : type(Type::FLOAT), floatVal(val) {}
 
-    inline Cell(const string& val) : type(Type::STRING) {
-        stringVal = new string(val);
-    }
+    inline Cell(const string& val) : type(Type::STRING), stringVal(new string(val)) {}
 
-    inline Cell(const vector<Cell>& val) : type(Type::COMPOUND) {
-        vectorVal = new vector<Cell>(val);
-    }
+    inline Cell(const vector<Cell>& val) : type(Type::COMPOUND), vectorVal(new vector<Cell>(val)) {}
 
-    inline ~Cell() {
-        if (type == Type::STRING && stringVal) {
-            delete stringVal;
-        } else if (type == Type::COMPOUND) {
-            delete vectorVal;
-        }
-    }
+    // Destructor
+    // inline ~Cell() {
+    //     if (type == Type::STRING) {
+    //         delete stringVal;
+    //     } else if (type == Type::COMPOUND) {
+    //         delete vectorVal;
+    //     }
+    // }
 
+    // Copy Constructor
     inline Cell(const Cell& other) : type(other.type) {
         switch (other.type) {
             case Type::INT:
@@ -67,7 +67,7 @@ struct Cell {
         }
     }
 
-    // Move constructor
+    // Move Constructor
     inline Cell(Cell&& other) : type(other.type) {
         switch (other.type) {
             case Type::INT:
@@ -84,10 +84,12 @@ struct Cell {
                 vectorVal = other.vectorVal;
                 other.vectorVal = nullptr;
                 break;
+            default:
+                break;
         }
     }
 
-    // Assignment operator
+    // Assignment Operator
     inline Cell& operator=(const Cell& other) {
         if (this != &other) {
             if (type == other.type) {
@@ -104,19 +106,21 @@ struct Cell {
                     case Type::COMPOUND:
                         *vectorVal = *other.vectorVal;
                         break;
+                    default:
+                        break;
                 }
             } else {
-                this->~Cell();
+                // this->~Cell();
                 new (this) Cell(other);
             }
         }
         return *this;
     }
 
-    // Move assignment operator
+    // Move Assignment Operator
     inline Cell& operator=(Cell&& other) {
         if (this != &other) {
-            this->~Cell();
+            // this->~Cell();
             new (this) Cell(std::move(other));
         }
         return *this;
@@ -231,10 +235,11 @@ struct Cell {
     }
 };
 
+// map<int, Cell> memory;
+// Collection for values
 vector<Cell> memory;
-
 inline void freeMemory() {
-    memory = {};
+    memory.clear();
 }
 
 #endif // MEMORY_CSQ4
