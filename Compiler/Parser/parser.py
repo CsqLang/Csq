@@ -493,13 +493,20 @@ def Compile(code: list) -> str:
                     _class = False
                     active_class = ''
                     scope_stack.pop()    
+                elif scope_stack[-1].of == NodeTypes.FOR_STMT:
+                    code_string += "}\n"
+                    scope_stack.pop()
                 else:
                     code_string += "};\n"
                     scope_stack.pop()
             else:
-                code_string += "}\n"
-                # Pop the previous scope since it's now closed.
-                scope_stack.pop()
+                if scope_stack[-1].of == NodeTypes.FOR_STMT:
+                    code_string += "}\n"
+                    scope_stack.pop()
+                else:
+                    code_string += "}\n"
+                    # Pop the previous scope since it's now closed.
+                    scope_stack.pop()
 
         # Removing all indentation from the stream
         line = remove_indent(line)

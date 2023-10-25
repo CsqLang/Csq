@@ -39,4 +39,55 @@ inline void assignVar(const std::string& id_, const Cell& c) {
     }
 }
 
+// inline void forLoop(int start, int end, int step, std::function<void(int)> action) {
+//     int count = (end - start) / step + 1;
+//     int current = start;
+    
+//     for (int i = 0; i < count; i += 4) {
+//         action(current);
+//         current += step;
+        
+//         if (i + 1 < count) {
+//             action(current);
+//             current += step;
+//         }
+        
+//         if (i + 2 < count) {
+//             action(current);
+//             current += step;
+//         }
+        
+//         if (i + 3 < count) {
+//             action(current);
+//             current += step;
+//         }
+//     }
+// }
+
+// inline void forLoop(int start, int end, int step, std::function<void(int)> action) {
+//     int i = start;
+//     int unrollCount = 8;  // Unroll the loop by a factor of 8
+
+//     // Process groups of 8 elements in each iteration
+//     for (; i <= end - unrollCount * step; i += unrollCount * step) {
+//         action(i);
+//         action(i + step);
+//         action(i + 2 * step);
+//         action(i + 3 * step);
+//         action(i + 4 * step);
+//         action(i + 5 * step);
+//         action(i + 6 * step);
+//         action(i + 7 * step);
+//     }
+
+//     // Handle remaining iterations
+//     for (; i <= end; i += step) {
+//         action(i);
+//     }
+// }
+
+
+
+
+
 #endif // RUNTIME_CORE_CSQ

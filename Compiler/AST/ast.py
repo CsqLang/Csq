@@ -157,17 +157,28 @@ class ForStmtNode(ASTNode):
         self.type = NodeTypes.FOR_STMT
 
     def visit(self) -> str:
+        # return (
+        #     "for("
+        #     + "int "
+        #     + self.iter_name
+        #     + "901;"
+        #     + self.iter_name + "901 < "
+        #     + self.condition.visit()
+        #     + ".vectorVal->size();"
+        #     + self.iter_name
+        #     + "901++){"
+        #     + f'allocateVar("{self.iter_name}",{self.condition.visit()}[{self.iter_name + "901"}]);'
+        # )
+        # return (f"forLoop({self.condition.tokens[0].token}, {self.condition.tokens[3].token}, Cell(1),[](Cell {self.iter_name}__iter)"+"{\n")
         return (
-            "for("
-            + "int "
-            + self.iter_name
-            + "901;"
-            + self.iter_name + "901 < "
-            + self.condition.visit()
-            + ".vectorVal->size();"
-            + self.iter_name
-            + "901++){"
-            + f'allocateVar("{self.iter_name}",{self.condition.visit()}[{self.iter_name + "901"}]);'
+            f'allocateVar("{self.iter_name}",0);' 
+            + "\n"
+            +  f'for(int {self.iter_name}__iter = {self.condition.tokens[0].token[5:-1]};'
+            +  f'{self.iter_name}__iter < {self.condition.tokens[3].token[5:-1]};'
+            +  f'{self.iter_name}__iter++)' 
+            + "{\n"
+            + f"memory[memory.size()-1] = {self.iter_name}__iter;"
+            + "\n"
         )
 
 
