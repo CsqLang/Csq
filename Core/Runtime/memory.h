@@ -1,9 +1,10 @@
 #if !defined(MEMORY_CSQ4)
 #define MEMORY_CSQ4
+
 #include <iostream>
 #include <string>
 #include <vector>
-#include <unordered_map>
+#include <map>
 
 using namespace std;
 
@@ -19,34 +20,33 @@ struct Cell {
     Type type;
     union {
         int intVal;
-        float floatVal;
+        double floatVal;
         string* stringVal;
         vector<Cell>* vectorVal;
         string* __class__;
     };
 
+    // Constructors
     inline Cell() : type(Type::INT), intVal(0) {}
 
-    inline explicit Cell(int val) : type(Type::INT), intVal(val) {}
+    inline Cell(int val) : type(Type::INT), intVal(val) {}
 
-    inline explicit Cell(float val) : type(Type::FLOAT), floatVal(val) {}
+    inline Cell(double val) : type(Type::FLOAT), floatVal(val) {}
 
-    inline Cell(const string& val) : type(Type::STRING) {
-        stringVal = new string(val);
-    }
+    inline Cell(const string& val) : type(Type::STRING), stringVal(new string(val)) {}
 
-    inline Cell(const vector<Cell>& val) : type(Type::COMPOUND) {
-        vectorVal = new vector<Cell>(val);
-    }
+    inline Cell(const vector<Cell>& val) : type(Type::COMPOUND), vectorVal(new vector<Cell>(val)) {}
 
-    inline ~Cell() {
-        if (type == Type::STRING && stringVal) {
-            delete stringVal;
-        } else if (type == Type::COMPOUND) {
-            delete vectorVal;
-        }
-    }
+    // Destructor
+    // inline ~Cell() {
+    //     if (type == Type::STRING) {
+    //         delete stringVal;
+    //     } else if (type == Type::COMPOUND) {
+    //         delete vectorVal;
+    //     }
+    // }
 
+    // Copy Constructor
     inline Cell(const Cell& other) : type(other.type) {
         switch (other.type) {
             case Type::INT:
@@ -67,7 +67,7 @@ struct Cell {
         }
     }
 
-    // Move constructor
+    // Move Constructor
     inline Cell(Cell&& other) : type(other.type) {
         switch (other.type) {
             case Type::INT:
@@ -84,10 +84,12 @@ struct Cell {
                 vectorVal = other.vectorVal;
                 other.vectorVal = nullptr;
                 break;
+            default:
+                break;
         }
     }
 
-    // Assignment operator
+    // Assignment Operator
     inline Cell& operator=(const Cell& other) {
         if (this != &other) {
             if (type == other.type) {
@@ -104,19 +106,21 @@ struct Cell {
                     case Type::COMPOUND:
                         *vectorVal = *other.vectorVal;
                         break;
+                    default:
+                        break;
                 }
             } else {
-                this->~Cell();
+                // this->~Cell();
                 new (this) Cell(other);
             }
         }
         return *this;
     }
 
-    // Move assignment operator
+    // Move Assignment Operator
     inline Cell& operator=(Cell&& other) {
         if (this != &other) {
-            this->~Cell();
+            // this->~Cell();
             new (this) Cell(std::move(other));
         }
         return *this;
@@ -131,51 +135,37 @@ struct Cell {
     }
 
     inline Cell operator+(const Cell& other) const {
-        switch(other.type) {
-            case Type::INT:
-                return Cell(intVal + other.intVal);
-            case Type::FLOAT:
-                return Cell(floatVal + other.floatVal);
-            default:
-                return Cell(); // Default case
+        if (type == Type::INT && other.type == Type::INT) {
+            return Cell(intVal + other.intVal);
+        } else if (type == Type::FLOAT && other.type == Type::FLOAT) {
+            return Cell(floatVal + other.floatVal);
         }
+        return Cell(); // Default case
     }
 
     inline Cell operator-(const Cell& other) const {
-        switch(other.type) {
-            case Type::INT:
-                return Cell(intVal - other.intVal);
-            case Type::FLOAT:
-                return Cell(floatVal - other.floatVal);
-            default:
-                return Cell(); // Default case
+        if (type == Type::INT && other.type == Type::INT) {
+            return Cell(intVal - other.intVal);
+        } else if (type == Type::FLOAT && other.type == Type::FLOAT) {
+            return Cell(floatVal - other.floatVal);
         }
+        return Cell(); // Default case
     }
 
     inline Cell operator*(const Cell& other) const {
-        switch(other.type) {
-            case Type::INT:
-                return Cell(intVal * other.intVal);
-            case Type::FLOAT:
-                return Cell(floatVal * other.floatVal);
-            default:
-                return Cell(); // Default case
+        if (type == Type::INT && other.type == Type::INT) {
+            return Cell(intVal * other.intVal);
+        } else if (type == Type::FLOAT && other.type == Type::FLOAT) {
+            return Cell(floatVal * other.floatVal);
         }
+        return Cell(); // Default case
     }
 
     inline Cell operator/(const Cell& other) const {
-        if (type == Type::INT && other.type == Type::INT) {
-            if (other.intVal != 0) {
-                return Cell(intVal / other.intVal);
-            } else {
-                return Cell(); // Handle division by zero error.
-            }
-        } else if (type == Type::FLOAT && other.type == Type::FLOAT) {
-            if (other.floatVal != 0.0f) {
-                return Cell(floatVal / other.floatVal);
-            } else {
-                return Cell(); // Handle division by zero error.
-            }
+        if (type == Type::INT && other.type == Type::INT && other.intVal != 0) {
+            return Cell(intVal / other.intVal);
+        } else if (type == Type::FLOAT && other.type == Type::FLOAT && other.floatVal != 0.0f) {
+            return Cell(floatVal / other.floatVal);
         }
         return Cell(); // Default case
     }
@@ -226,8 +216,10 @@ struct Cell {
         switch(other.type) {
             case Type::INT:
                 return intVal < other.intVal;
+                break;
             case Type::FLOAT:
                 return floatVal < other.floatVal;
+                break;
             default:
                 return false; // Default case
         }
@@ -243,10 +235,11 @@ struct Cell {
     }
 };
 
+// map<int, Cell> memory;
+// Collection for values
 vector<Cell> memory;
-
 inline void freeMemory() {
-    memory = {};
+    memory.clear();
 }
 
 #endif // MEMORY_CSQ4
