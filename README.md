@@ -4,11 +4,8 @@ Hey there,
 This is the updated version of 4.3 which is having more concise syntax than the 4.1 and better compiler handling provided by AST.
 
 ### Benchmarking
-#### Csq IR code
-![Screenshot_20231023_221706](https://github.com/CsqLang/.github/assets/90708238/8edc3bc3-1b9e-4b30-b57d-a404cfa8c643)
-#### Python3
-![Screenshot_20231023_222021](https://github.com/CsqLang/.github/assets/90708238/ceff0c68-9562-42e4-b58d-68981df07ad6)
-
+#### Csq vs Python3.9
+![Screenshot_20231024_193740](https://github.com/CsqLang/Csq/assets/90708238/5e5499dc-5db0-43c5-a65c-615285f05109)
 
 ## Installation
 
