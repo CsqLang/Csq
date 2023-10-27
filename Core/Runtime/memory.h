@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <initializer_list>
 
 using namespace std;
 
@@ -36,6 +37,14 @@ struct Cell {
     inline Cell(const string& val) : type(Type::STRING), stringVal(new string(val)) {}
 
     inline Cell(const vector<Cell>& val) : type(Type::COMPOUND), vectorVal(new vector<Cell>(val)) {}
+    inline Cell(initializer_list<Cell> val){
+        vector<Cell> v;
+        for(Cell c : val){
+            v.push_back(c);
+        }
+        vectorVal = new vector<Cell>(v);
+        type = Type::COMPOUND;
+    }
 
     // Destructor
     // inline ~Cell() {
