@@ -126,12 +126,8 @@ struct Cell {
         return *this;
     }
 
-    inline Cell& operator[](size_t index) {
-        if (type == Type::COMPOUND && vectorVal && index < vectorVal->size()) {
-            return (*vectorVal)[index];
-        } else {
-            return *this; // You can change this to return a default value if needed.
-        }
+    const Cell& operator[](const Cell& index) const{
+        return (*vectorVal)[index.intVal];
     }
 
     inline Cell operator+(const Cell& other) const {

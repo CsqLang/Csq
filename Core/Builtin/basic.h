@@ -3,6 +3,8 @@
 #include "../Runtime/memory.h"
 #include "../Runtime/core.h"
 #include "codes.h"
+#include <cmath>
+#include <algorithm>
 #include <iostream>
 
 void print(const Cell& cell) {
@@ -32,6 +34,10 @@ void print(const Cell& cell) {
 
 bool _cond_(bool state){
     return state;
+}
+
+Cell len(Cell arr){
+    return Cell(int(arr.vectorVal->size()));
 }
 
 Cell object(Cell name){
