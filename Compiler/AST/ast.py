@@ -1,7 +1,7 @@
 """
 Python implementation of Csq AST
 """
-from Compiler.Tokenizer.tokenizer import to_str
+from Compiler.Tokenizer.tokenizer import to_str,Token,TokenType,tokenize
 
 
 # Node Types
@@ -157,29 +157,25 @@ class ForStmtNode(ASTNode):
         self.type = NodeTypes.FOR_STMT
 
     def visit(self) -> str:
-        # return (
-        #     "for("
-        #     + "int "
-        #     + self.iter_name
-        #     + "901;"
-        #     + self.iter_name + "901 < "
-        #     + self.condition.visit()
-        #     + ".vectorVal->size();"
-        #     + self.iter_name
-        #     + "901++){"
-        #     + f'allocateVar("{self.iter_name}",{self.condition.visit()}[{self.iter_name + "901"}]);'
-        # )
-        # return (f"forLoop({self.condition.tokens[0].token}, {self.condition.tokens[3].token}, Cell(1),[](Cell {self.iter_name}__iter)"+"{\n")
-        return (
+        s =(
             f'allocateVar("{self.iter_name}",0);' 
             + "\n"
-            +  f'for(int {self.iter_name}__iter = {self.condition.tokens[0].token[5:-1]};'
-            +  f'{self.iter_name}__iter < {self.condition.tokens[3].token[5:-1]};'
-            +  f'{self.iter_name}__iter++)' 
-            + "{\n"
-            + f"memory[memory.size()-1] = {self.iter_name}__iter;"
-            + "\n"
         )
+        if tokenize(self.condition.tokens[0].token[5:-1])[0].type == TokenType.VALUE:
+            
+            s += f'for(int {self.iter_name}__iter = {self.condition.tokens[0].token[5:-1]};'
+            if tokenize(self.condition.tokens[3].token[5:-1])[0].type == TokenType.VALUE:
+                s += f'{self.iter_name}__iter < {self.condition.tokens[3].token[5:-1]};'
+            else:
+                s += f'{self.iter_name}__iter < {self.condition.tokens[3].token}.intVal;'
+        else:
+            s += f'for(int {self.iter_name}__iter = {self.condition.tokens[0].token}.intVal;'
+            if Token(self.condition.tokens[3].token[5:-1]).type == TokenType.VALUE:
+                s += f'{self.iter_name}__iter < {self.condition.tokens[3].token[5:-1]};'
+            else:
+                s += f'{self.iter_name}__iter < {self.condition.tokens[3].token}.intVal;'
+        s +=  f'{self.iter_name}__iter++)' + "{\n" + f"memory[memory.size()-1] = {self.iter_name}__iter;"+ "\n"
+        return s
 
 
 class WhileStmtNode(ASTNode):
