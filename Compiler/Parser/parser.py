@@ -10,6 +10,7 @@ from Compiler.Compiletime.error import (Error, IndentationError, NameError, Synt
 from Compiler.Compiletime.syntax_check import *
 from Compiler.Tokenizer.tokenizer import Token, TokenType, to_str, tokenize
 
+import os
 '''
 This variable will hold the current path of the file to be parsed.
 '''
@@ -726,7 +727,17 @@ def Compile(code: list) -> str:
 Function to import code on the basis of given ImportNode
 '''
 def visit_ImportNode(node):
-    module = open(_curr_path + node.path + ".csq", "r")
+    csq_include_path = os.getenv("CSQ_INCLUDE")
+    importPath = os.path.join(csq_include_path, "Core", "Include", "Import")
+   
+    modulePath = None
+
+    if os.path.isfile(os.path.join(_curr_path , node.path+".csq")):
+        modulePath = os.path.join(_curr_path , node.path+".csq")
+    else:
+        modulePath = os.path.join(importPath , node.path+".csq")
+    
+    module = open(modulePath, "r")
     # Read the file and process it
     code_ = module.read()
     # Convert it into stream of tokens
@@ -742,7 +753,18 @@ def visit_ImportNode(node):
 Function to import C/C++ code on the basis of given CImportNode
 '''
 def visit_CImportNode(node):
-    module = open( node.path + ".cpp", "r")
+    csq_include_path = os.getenv("CSQ_INCLUDE")
+    cimportPath = os.path.join(csq_include_path, "Core", "Include", "Cimport")
+   
+    modulePath = None
+
+    if os.path.isfile(os.path.join(_curr_path , node.path+".cpp")):
+        modulePath = os.path.join(_curr_path , node.path+".cpp")
+    else:
+        modulePath = os.path.join(cimportPath , node.path+".cpp")
+    
+    module = open(modulePath, "r")
+
     # Read the file and process it
     code_ = module.read()
     return code_
