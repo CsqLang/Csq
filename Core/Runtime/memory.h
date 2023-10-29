@@ -24,9 +24,9 @@ struct Cell {
         double floatVal;
         string* stringVal;
         vector<Cell>* vectorVal;
-        string* __class__;
+        
     };
-
+    string __class__;
     // Constructors
     inline Cell() : type(Type::INT), intVal(0) {}
 
@@ -71,7 +71,7 @@ struct Cell {
                 vectorVal = new vector<Cell>(*other.vectorVal);
                 break;
             case Type::CUSTYPE:
-                __class__ = new string(*other.__class__);
+                __class__ = (other.__class__);
                 break;
         }
     }

@@ -78,7 +78,8 @@ Cell len(Cell arr){
 
 Cell object(Cell name){
     Cell obj;
-    obj.__class__ = (name.stringVal);
+    obj.__class__ = *(name.stringVal);
+    cout << obj.__class__;
     obj.type = Type::CUSTYPE;
     return obj;
 }
