@@ -753,7 +753,18 @@ def visit_ImportNode(node):
 Function to import C/C++ code on the basis of given CImportNode
 '''
 def visit_CImportNode(node):
-    module = open( node.path + ".cpp", "r")
+    csq_include_path = os.getenv("CSQ_INCLUDE")
+    cimportPath = os.path.join(csq_include_path, "Core", "Include", "Cimport")
+   
+    modulePath = None
+
+    if os.path.isfile(os.path.join(_curr_path , node.path+".cpp")):
+        modulePath = os.path.join(_curr_path , node.path+".cpp")
+    else:
+        modulePath = os.path.join(cimportPath , node.path+".cpp")
+    
+    module = open(modulePath, "r")
+
     # Read the file and process it
     code_ = module.read()
     return code_
