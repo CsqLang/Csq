@@ -7,6 +7,32 @@
 #include <algorithm>
 #include <iostream>
 
+
+void print_(const Cell& cell) {
+    switch (cell.type) {
+        case Type::INT:
+            std::cout << cell.intVal;
+            break;
+        case Type::FLOAT:
+            std::cout <<  cell.floatVal;
+            break;
+        case Type::STRING:
+            std::cout << *cell.stringVal;
+            break;
+        case Type::COMPOUND:
+            std::cout << "[ ";
+            for (const Cell& item : *cell.vectorVal) {
+                print_(item);
+                std::cout << " ";
+            }
+            std::cout << "]";
+            break;
+        default:
+            std::cout << "Unknown type";
+            break;
+    }
+}
+
 void print(const Cell& cell) {
     switch (cell.type) {
         case Type::INT:
@@ -21,7 +47,7 @@ void print(const Cell& cell) {
         case Type::COMPOUND:
             std::cout << "[ ";
             for (const Cell& item : *cell.vectorVal) {
-                print(item);
+                print_(item);
                 std::cout << " ";
             }
             std::cout << "]";
