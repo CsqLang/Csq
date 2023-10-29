@@ -36,13 +36,23 @@ bool _cond_(bool state){
     return state;
 }
 
+Cell _push_elem(Cell ls, Cell elem){
+    ls.vectorVal->push_back(elem);
+    return ls;
+}
+
+Cell _pop_elem(Cell ls){
+    ls.vectorVal->pop_back();
+    return ls;
+}
+
 Cell len(Cell arr){
     return Cell(int(arr.vectorVal->size()));
 }
 
 Cell object(Cell name){
     Cell obj;
-    obj.__class__ = name.stringVal;
+    obj.__class__ = (name.stringVal);
     obj.type = Type::CUSTYPE;
     return obj;
 }

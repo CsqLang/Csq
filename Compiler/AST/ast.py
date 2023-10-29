@@ -277,7 +277,7 @@ class MethodNode(ASTNode):
         self.parameters = []
 
     def visit(self) -> str:
-        code = f'__classes__["{self.classname}"].methods["{self.identifier}"] = [](Cell args)' + "{\n" + 'allocateVar("arg", "any", args);\n'
+        code = f'__classes__["{self.classname}"].methods["{self.identifier}"] = [](Cell args)' + "{\n" + 'allocateVar("arg", args);\n'
         return code
 
 class MemberVarDeclNode(ASTNode):
