@@ -59,7 +59,6 @@ function install_csq() {
       exit 1
     fi
   fi
-  sudo cp -r Core /usr/include/Csq/
 }
 
 function uninstall_csq() {
