@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <initializer_list>
 
 using namespace std;
 
@@ -23,9 +24,9 @@ struct Cell {
         double floatVal;
         string* stringVal;
         vector<Cell>* vectorVal;
-        string* __class__;
+        
     };
-
+    string __class__;
     // Constructors
     inline Cell() : type(Type::INT), intVal(0) {}
 
@@ -36,6 +37,14 @@ struct Cell {
     inline Cell(const string& val) : type(Type::STRING), stringVal(new string(val)) {}
 
     inline Cell(const vector<Cell>& val) : type(Type::COMPOUND), vectorVal(new vector<Cell>(val)) {}
+    inline Cell(initializer_list<Cell> val){
+        vector<Cell> v;
+        for(Cell c : val){
+            v.push_back(c);
+        }
+        vectorVal = new vector<Cell>(v);
+        type = Type::COMPOUND;
+    }
 
     // Destructor
     // inline ~Cell() {
@@ -62,7 +71,7 @@ struct Cell {
                 vectorVal = new vector<Cell>(*other.vectorVal);
                 break;
             case Type::CUSTYPE:
-                __class__ = new string(*other.__class__);
+                __class__ = (other.__class__);
                 break;
         }
     }
@@ -126,12 +135,8 @@ struct Cell {
         return *this;
     }
 
-    inline Cell& operator[](size_t index) {
-        if (type == Type::COMPOUND && vectorVal && index < vectorVal->size()) {
-            return (*vectorVal)[index];
-        } else {
-            return *this; // You can change this to return a default value if needed.
-        }
+    const Cell& operator[](const Cell& index) const{
+        return (*vectorVal)[index.intVal];
     }
 
     inline Cell operator+(const Cell& other) const {

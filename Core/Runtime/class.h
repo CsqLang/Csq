@@ -12,7 +12,7 @@ This in every case will be representing a class
 class Class {
 public:
     string name;
-    map<string, LambdaType> methods;
+    map<string, function<Cell(Cell)>> methods;
     map<string, Cell> members;
 };
 
