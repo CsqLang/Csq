@@ -7,3 +7,9 @@ def sum(list):
 
 def mean(list):
  return sum(list)/len(list)
+
+def power(x,y):
+ r := x
+ for i in 1->y:
+  r = r * x
+ return r
