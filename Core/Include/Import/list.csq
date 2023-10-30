@@ -1,0 +1,24 @@
+def push(list, elem):
+ return _push_elem(list,elem)
+
+def pop(list):
+ return _pop_elem(list)
+
+def isEmpty(list):
+ if len(list) > 0:
+  return 0
+ else:
+  return 1
+
+def search(list, key):
+ n := len(list)
+ for i in 0->n:
+  if list[i] == key:
+   return i
+ return -1
+
+def isPresent(list, key):
+ if search(list,key) > -1:
+  return 1
+ else:
+  return 0
