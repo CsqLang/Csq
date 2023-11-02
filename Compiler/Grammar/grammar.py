@@ -1,5 +1,5 @@
-# Regular expression for identifying valid identifiers
-IDENTIFIERS = r"^[a-zA-Z_][a-zA-Z0-9_]*$"
+# Regular expression for identifying valid identifiers, including specific emojis and mathematical symbols
+IDENTIFIERS = r"^[a-zA-Z_😀-😁😎👍Σπαβθγ][a-zA-Z0-9_😀-😁😎👍Σπαβθγ]*$"
 
 # Regular expressions for matching integer and decimal number literals
 INTEGER = r"[+-]?\d+"
