@@ -110,4 +110,24 @@ Cell object(Cell name){
 }
 
 
+Cell input(){
+    Cell obj;
+    obj.type = Type::STRING;
+    string inp;
+    cin >> inp;
+    obj.stringVal = new string(inp);
+    return obj;
+}
+
+//Function to return the number of memory cells allocated
+Cell allocatedMemory(){
+    return Cell(int(memory.size()));
+}
+
+//Manually delete or allocate a cell like new and delete
+void alloc(Cell mem){
+    memory.push_back(mem);
+}
+
+
 #endif // basic_H
