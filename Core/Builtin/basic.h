@@ -62,6 +62,31 @@ bool _cond_(bool state){
     return state;
 }
 
+Cell type(Cell val){
+    switch(val.type){
+        case Type::INT:{
+            return Cell("int");
+            break;
+        }
+        case Type::FLOAT:{
+            return Cell("float");
+            break;
+        }
+        case Type::COMPOUND:{
+            return Cell("compound");
+            break;
+        }
+        case Type::STRING:{
+            return Cell("string");
+            break;
+        }
+        default:{
+            return Cell("custype");
+            break;
+        }
+    }
+}
+
 Cell _push_elem(Cell ls, Cell elem){
     ls.vectorVal->push_back(elem);
     return ls;
