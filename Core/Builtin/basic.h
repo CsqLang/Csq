@@ -6,7 +6,7 @@
 #include <cmath>
 #include <algorithm>
 #include <iostream>
-
+#include <bits/stdc++.h>
 
 void print_(const Cell& cell) {
     switch (cell.type) {
@@ -25,7 +25,7 @@ void print_(const Cell& cell) {
                 print_(item);
                 std::cout << " ";
             }
-            std::cout << "]";
+            std::cout << "]\n";
             break;
         default:
             std::cout << "Unknown type";

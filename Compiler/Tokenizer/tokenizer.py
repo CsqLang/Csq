@@ -244,10 +244,10 @@ def tokenize(line: str) -> list:
                     tokens.append(Token("\n", TokenType.NEWLINE))
             elif char == "'" and string_presence == 0:
                 string_presence = 1
-                current_string += char
+                # current_string += char
             elif char == "'" and string_presence:
                 string_presence = 0
-                current_string += char
+                # current_string += char
                 tokens.append(Token('"' + current_string + '"', TokenType.STR))
                 current_string = ""
             elif string_presence:
