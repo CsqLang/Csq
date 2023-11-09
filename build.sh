@@ -18,6 +18,7 @@ function install_csq() {
   cp csq.py csq
   chmod +x csq
   mv csq "$local_bin"
+  sudo cp -r Core "/usr/include/Csq/"
   if [ $? -ne 0 ]; then
     echo "Error: Failed to copy csq.py to $local_bin."
     exit 1

@@ -6,7 +6,7 @@
 #include <cmath>
 #include <algorithm>
 #include <iostream>
-
+#include <bits/stdc++.h>
 
 void print_(const Cell& cell) {
     switch (cell.type) {
@@ -25,7 +25,7 @@ void print_(const Cell& cell) {
                 print_(item);
                 std::cout << " ";
             }
-            std::cout << "]";
+            std::cout << "]\n";
             break;
         default:
             std::cout << "Unknown type";
@@ -62,6 +62,31 @@ bool _cond_(bool state){
     return state;
 }
 
+Cell type(Cell val){
+    switch(val.type){
+        case Type::INT:{
+            return Cell("int");
+            break;
+        }
+        case Type::FLOAT:{
+            return Cell("float");
+            break;
+        }
+        case Type::COMPOUND:{
+            return Cell("compound");
+            break;
+        }
+        case Type::STRING:{
+            return Cell("string");
+            break;
+        }
+        default:{
+            return Cell("custype");
+            break;
+        }
+    }
+}
+
 Cell _push_elem(Cell ls, Cell elem){
     ls.vectorVal->push_back(elem);
     return ls;
@@ -82,6 +107,26 @@ Cell object(Cell name){
     cout << obj.__class__;
     obj.type = Type::CUSTYPE;
     return obj;
+}
+
+
+Cell input(){
+    Cell obj;
+    obj.type = Type::STRING;
+    string inp;
+    cin >> inp;
+    obj.stringVal = new string(inp);
+    return obj;
+}
+
+//Function to return the number of memory cells allocated
+Cell allocatedMemory(){
+    return Cell(int(memory.size()));
+}
+
+//Manually delete or allocate a cell like new and delete
+void alloc(Cell mem){
+    memory.push_back(mem);
 }
 
 
