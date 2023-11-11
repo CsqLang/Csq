@@ -142,8 +142,14 @@ struct Cell {
     inline Cell operator+(const Cell& other) const {
         if (type == Type::INT && other.type == Type::INT) {
             return Cell(intVal + other.intVal);
+        } else if(type == Type::STRING){
+            return Cell((*stringVal) + (*other.stringVal));
         } else if (type == Type::FLOAT && other.type == Type::FLOAT) {
             return Cell(floatVal + other.floatVal);
+        } else if(type == Type::FLOAT && other.type == Type::INT){
+            return Cell(floatVal + float(other.intVal));
+        } else if(type == Type::INT && other.type == Type::FLOAT){
+            return Cell(float(intVal) + (other.floatVal));
         }
         return Cell(); // Default case
     }
@@ -153,6 +159,10 @@ struct Cell {
             return Cell(intVal - other.intVal);
         } else if (type == Type::FLOAT && other.type == Type::FLOAT) {
             return Cell(floatVal - other.floatVal);
+        } else if(type == Type::FLOAT && other.type == Type::INT){
+            return Cell(floatVal - float(other.intVal));
+        } else if(type == Type::INT && other.type == Type::FLOAT){
+            return Cell(float(intVal) - (other.floatVal));
         }
         return Cell(); // Default case
     }
@@ -162,6 +172,10 @@ struct Cell {
             return Cell(intVal * other.intVal);
         } else if (type == Type::FLOAT && other.type == Type::FLOAT) {
             return Cell(floatVal * other.floatVal);
+        } else if(type == Type::FLOAT && other.type == Type::INT){
+            return Cell(floatVal * float(other.intVal));
+        } else if(type == Type::INT && other.type == Type::FLOAT){
+            return Cell(float(intVal) * (other.floatVal));
         }
         return Cell(); // Default case
     }
@@ -171,6 +185,10 @@ struct Cell {
             return Cell(intVal / other.intVal);
         } else if (type == Type::FLOAT && other.type == Type::FLOAT && other.floatVal != 0.0f) {
             return Cell(floatVal / other.floatVal);
+        } else if(type == Type::FLOAT && other.type == Type::INT){
+            return Cell(floatVal / float(other.intVal));
+        } else if(type == Type::INT && other.type == Type::FLOAT){
+            return Cell(float(intVal) / (other.floatVal));
         }
         return Cell(); // Default case
     }
