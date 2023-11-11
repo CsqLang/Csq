@@ -17,7 +17,7 @@ void print_(const Cell& cell) {
             std::cout <<  cell.floatVal;
             break;
         case Type::STRING:
-            std::cout << *cell.stringVal;
+            std::cout << "'" <<*cell.stringVal << "'";
             break;
         case Type::COMPOUND:
             std::cout << "[ ";
