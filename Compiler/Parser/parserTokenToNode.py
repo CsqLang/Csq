@@ -1,5 +1,11 @@
-
 from Compiler.AST.ast import *
+from Compiler.Compiletime.stack import Compiletime_Objects, pushVariable, in_Compiletime_Objects, Variable
+from Compiler.Compiletime import stack
+from Compiler.Compiletime import error
+
+
+line_no = 1
+
 def parse_ExprNode(tokens) -> ExprNode:
     """
     Parse an expression node from a list of tokens.
@@ -28,9 +34,22 @@ def parse_ExprNode(tokens) -> ExprNode:
                     node.tokens.append(Token(f'memberId("{current_token.token}","{tokens[i+2].token}")', TokenType.BLANK))
                     i += 2
             else:
-                node.tokens.append(
-                    Token(f'id("{current_token.token}")', TokenType.BLANK)
-                )
+                if stack.hasCimport == False:
+                    if in_Compiletime_Objects(current_token.token):
+                        node.tokens.append(
+                            Token(f'id("{current_token.token}")', TokenType.BLANK)
+                        )
+                    else:
+                        print(
+                            error.NameError(line_no, f"undefined name {current_token.token}")
+                        )
+                        node.tokens.append(
+                            Token(f'id("{current_token.token}")', TokenType.BLANK)
+                        )
+                else:
+                    node.tokens.append(
+                        Token(f'id("{current_token.token}")', TokenType.BLANK)
+                    )
 
         elif current_token.type == TokenType.STR:
             node.tokens.append(Token(f"Cell({current_token.token})", TokenType.BLANK))
@@ -209,7 +228,9 @@ def parse_ImportStmt(tokens) -> ImportNode:
         node.path += tok.token
     return node
 
+
 def parse_CImportStmt(tokens) -> CImportNode:
+    hasCimport = True
     node = CImportNode()
     for tok in tokens[1:]:
         node.path += tok.token

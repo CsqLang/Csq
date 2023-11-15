@@ -45,16 +45,6 @@ struct Cell {
         vectorVal = new vector<Cell>(v);
         type = Type::COMPOUND;
     }
-
-    // Destructor
-    // inline ~Cell() {
-    //     if (type == Type::STRING) {
-    //         delete stringVal;
-    //     } else if (type == Type::COMPOUND) {
-    //         delete vectorVal;
-    //     }
-    // }
-
     // Copy Constructor
     inline Cell(const Cell& other) : type(other.type) {
         switch (other.type) {
@@ -194,12 +184,49 @@ struct Cell {
     }
 
     inline bool operator==(const Cell& other) const {
-        if (type == other.type) {
             switch (type) {
                 case Type::INT:
-                    return intVal == other.intVal;
+                    if(other.type == Type::FLOAT){
+                        return intVal == int(other.floatVal);
+                    }
+                    else if(other.type == Type::INT){
+                        return intVal == other.intVal;
+                    }else{
+                        //Throw runtime error
+                        switch(other.type){
+                            case Type::STRING:{
+                                printf("%s\n", string("Csq TypeError: couldn't compare the values of type int and string").c_str());
+                                return 0;
+                            }
+                            case Type::COMPOUND:{
+                                printf("%s\n", string("Csq TypeError: couldn't compare the values of type int and compound").c_str());
+                                return 0;
+                            }default:{
+                                return 0;
+                            }
+                        }
+                    }
                 case Type::FLOAT:
-                    return floatVal == other.floatVal;
+                    if(other.type == Type::FLOAT){
+                        return floatVal == int(other.floatVal);
+                    }
+                    else if(other.type == Type::INT){
+                        return floatVal == float(other.intVal);
+                    }else{
+                        //Throw runtime error
+                        switch(other.type){
+                            case Type::STRING:{
+                                printf("%s\n", string("Csq TypeError: couldn't compare the values of type float and string").c_str());
+                                return 0;
+                            }
+                            case Type::COMPOUND:{
+                                printf("%s\n", string("Csq TypeError: couldn't compare the values of type float and compound").c_str());
+                                return 0;
+                            }default:{
+                                return 0;
+                            }
+                        }
+                    }
                 case Type::STRING:
                     return *stringVal == *other.stringVal;
                 case Type::COMPOUND:
@@ -207,7 +234,6 @@ struct Cell {
                 default:
                     return false;
             }
-        }
         return false;
     }
 
@@ -228,10 +254,13 @@ struct Cell {
         switch(other.type) {
             case Type::INT:
                 return intVal > other.intVal;
+                break;
             case Type::FLOAT:
                 return floatVal > other.floatVal;
+                break;
             default:
                 return false; // Default case
+                break;
         }
     }
 
@@ -264,5 +293,6 @@ vector<Cell> memory;
 inline void freeMemory() {
     memory.clear();
 }
+
 
 #endif // MEMORY_CSQ4
