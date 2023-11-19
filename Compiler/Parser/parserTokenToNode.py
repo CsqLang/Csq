@@ -190,6 +190,9 @@ def parse_FunDecl(tokens) -> FunDeclNode:
                 param_ = False
                 node.parameters.append(param)
                 param = ''
+    if len(node.parameters) > 0:
+        for var in node.parameters:
+            stack.pushVariable(var)
     return node
 
 def parse_ReturnStmt(tokens):
