@@ -11,6 +11,7 @@ from Compiler.Compiletime.syntax_check import *
 from Compiler.Tokenizer.tokenizer import Token, TokenType, to_str, tokenize
 from Compiler.Parser.parserChecker import *
 from Compiler.Parser.parserTokenToNode import *
+from Compiler.Parser import parserTokenToNode
 from Compiler.utils import error_list,_curr_path
 import os
 
@@ -129,9 +130,8 @@ def Compile(code: list) -> str:
     _class = False
     active_class = ''
     # Scope properties
-    line_no = 1
     scope_stack = [Scope(0, NodeTypes.UNKNOWN_NODE, 0)]
-
+    # line_no = 1
     for line in code:
         # Get the current scope by finding indents
         indent_level = get_indent_level(line)
@@ -165,19 +165,22 @@ def Compile(code: list) -> str:
                 if not _class or (_class == True and scope_stack[-1].of == NodeTypes.FUN_DECL):
                     if check_VarDecl(line):
                         node = parse_VarDecl(line)
+                        pushVariable(node.identifier)
                         code_string += node.visit() + "\n"
                     else :
-                        error_list.append(SyntaxError(line_no, "invalid variable decl " + to_str(line)))
+                        error_list.append(SyntaxError(parserTokenToNode.line_no, "invalid variable decl " + to_str(line)))
                         node = parse_VarDecl(line)
+                        pushVariable(node.identifier)
                         code_string += node.visit() + "\n"
                 else:
 
                     if check_VarDecl(line):
                         node = parse_MemberVarDecl(line)
                         node._class_ = active_class
+                        pushVariable(node.identifier)
                         code_string += node.visit() + "\n"
                     else:
-                        error_list.append(SyntaxError(line_no, "invalid variable decl " + to_str(line)))
+                        error_list.append(SyntaxError(parserTokenToNode.line_no, "invalid variable decl " + to_str(line)))
                     
             case NodeTypes.VAR_ASSIGN:
                 if check_VarAssign(line):
@@ -190,7 +193,7 @@ def Compile(code: list) -> str:
                 else:
                     error_list.append(
                         SyntaxError(
-                            line_no, "invalid variable assignment " + to_str(line)
+                            parserTokenToNode.line_no, "invalid variable assignment " + to_str(line)
                         )
                     )
                     node = parse_VarAssign(line)
@@ -204,7 +207,7 @@ def Compile(code: list) -> str:
                 else:
                     error_list.append(
                         SyntaxError(
-                            line_no, check_IfStmt(line)[1]
+                            parserTokenToNode.line_no, check_IfStmt(line)[1]
                         )
                     )
                     node = parse_IfStmt(line)
@@ -220,7 +223,7 @@ def Compile(code: list) -> str:
                 else:
                     error_list.append(
                         SyntaxError(
-                            line_no, check_ElifStmt(line)[1]
+                            parserTokenToNode.line_no, check_ElifStmt(line)[1]
                         )
                     )
                     node = parse_ElifStmt(line)
@@ -235,7 +238,7 @@ def Compile(code: list) -> str:
                 else:
                     error_list.append(
                         SyntaxError(
-                            line_no, check_ElseStmt(line)[1]
+                            parserTokenToNode.line_no, check_ElseStmt(line)[1]
                         )
                     )
                     node = parse_ElseStmt()
@@ -263,7 +266,7 @@ def Compile(code: list) -> str:
                 else:
                     error_list.append(
                         SyntaxError(
-                            line_no,
+                            parserTokenToNode.line_no,
                             check_ClassStmt(line)[1]
                         )
                     )
@@ -291,7 +294,7 @@ def Compile(code: list) -> str:
                     else:
                         error_list.append(
                             SyntaxError(
-                                line_no,
+                                parserTokenToNode.line_no,
                                 check_FuncDecl(line)[1]
                             )
                         )
@@ -307,22 +310,24 @@ def Compile(code: list) -> str:
                 else:
                     error_list.append(
                         SyntaxError(
-                            line_no,
+                            parserTokenToNode.line_no,
                             check_ImportStmt(line)[1]
                         )
                     )
                     
             case NodeTypes.CIMPORT:
+                stack.hasCimport = True
                 if check_CImportStmt(line)[0]:
                     node = parse_CImportStmt(line)
                     code_string += "\n//" + node.path + "\n" + visit_CImportNode(node) + "\n"
                 else:
                     error_list.append(
                         SyntaxError(
-                            line_no,
+                            parserTokenToNode.line_no,
                             check_CImportStmt(line)[1]
                         )
                     )
+                
             case NodeTypes.PRINT:
                 if check_PrintStmt(line):
                     node = parse_PrintStmt(line)
@@ -330,7 +335,7 @@ def Compile(code: list) -> str:
                 else:
                     error_list.append(
                         SyntaxError(
-                            line_no,
+                            parserTokenToNode.line_no,
                             "invalid syntax for print statement\n(keywords and assignment operators arent allowed)",
                         )
                     )
@@ -353,11 +358,11 @@ def Compile(code: list) -> str:
                         # Syntax is voilated
                         error_list.append(
                             SyntaxError(
-                                line_no,
+                                parserTokenToNode.line_no,
                                 check_Expr(line)[1]
                             )
                         )
-        line_no += 1
+        parserTokenToNode.line_no+=1
     '''
     Even if a single error is there in a code whole converted C++ code will be deformed.
     '''

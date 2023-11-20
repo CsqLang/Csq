@@ -1,4 +1,6 @@
 from Compiler.Tokenizer.tokenizer import TokenType,to_str
+from Compiler.Compiletime.stack import Compiletime_Objects, pushVariable, in_Compiletime_Objects, Variable
+from Compiler.Compiletime import stack
 
 def is_var_decl(tokens) -> bool:
     if (
