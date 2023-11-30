@@ -1,17 +1,16 @@
 #!/bin/bash
 
-# Installation path
-local_bin="$HOME/.local/bin/"
-local_include="$HOME/.local/include/csq"
-csq_bin="$local_bin/csq"
-csq_path="$local_include"
-
-if [ -f "$HOME/.bashrc" ]; then
-    shell_config="$HOME/.bashrc"
-else
-    shell_config="$HOME/.${SHELL##*/}rc"
+if [ "$EUID" -ne 0 ]
+  then echo "Please run as root"
+  exit 1
 fi
 
+OPT_DIR="/opt/"
+CSQ_OPT_DIR="${OPT_DIR}csq/"
+CSQ_ENTRY_POINT="${CSQ_OPT_DIR}src/csq.py"
+CSQ_EXECUTABLE_PATH="/usr/local/bin/csq"
+INSTALL_DIR_EXISTS=true
+CSQ_INSTALL_DIR_EXISTS=true
 
 function install_csq() {
   # Copy csq.py to ~/.local/bin/
@@ -62,66 +61,83 @@ function install_csq() {
   fi
 }
 
-function uninstall_csq() {
-  # Remove csq.py from ~/.local/bin/
-  rm -f "$csq_bin"
 
-  # Remove specific folders from ~/.local/include/csq
-  rm -rf "$local_bin/Compiler"
-  rm -rf "$csq_path/Core"
+	chmod +x "$CSQ_ENTRY_POINT"
 
-  # Remove CSQ_INCLUDE from the shell configuration file
-  #sed -i '/CSQ_INCLUDE/d' "$shell_config"
+	# Create the symbolic link
+	# If the file already exists do nothing
+	if ! test -f "$CSQ_EXECUTABLE_PATH"; then
+	    ln -s "$CSQ_ENTRY_POINT" "$CSQ_EXECUTABLE_PATH"
+	fi
 
-  #echo "✅ Csq has been successfully uninstalled."
- 
- 
-  # Check if the shell configuration file exists before attempting to modify it
-  if [ -f "$shell_config" ]; then
-    # Remove CSQ_INCLUDE from the shell configuration file
-    sed -i '/CSQ_INCLUDE/d' "$shell_config"
-    echo "✅ Csq has been successfully uninstalled."
-  else
-    echo "Error: Shell configuration file $shell_config not found."
-    exit 1
-  fi
-
-
+	# Echo success message
+	echo "CSQ has been installed"
 }
 
-function uninstall_csq() {
-  # Remove csq.py from ~/.local/bin/
-  rm -f "$csq_bin"
+function uninstall_csq(){
+	# Check if the folders exists
 
-  # Remove specific folders from ~/.local/include/csq
-  rm -rf "$local_bin/Compiler"
-  rm -rf "$csq_path/Core"
+	if [[ $CSQ_INSTALL_DIR_EXISTS == false ]]; then
+		echo "CSQ is not installed"
+		exit 1
+	fi
 
-  # Remove CSQ_INCLUDE from the shell configuration file
-  if [ -f "$shell_config" ]; then
-    sed -i '/CSQ_INCLUDE/d' "$shell_config"
-    echo "✅ CSQ_INCLUDE removed from $shell_config."
-  else
-    echo "Error: Shell configuration file $shell_config not found."
-    exit 1
-  fi
+	# Remove the symbolic link
+	unlink "$CSQ_EXECUTABLE_PATH"
 
-  # Remove csq path from the shell configuration file
-  if [ -f "$shell_config" ]; then
-    sed -i '/csq/d' "$shell_config"
-    echo "✅ CSQ_PATH removed from $shell_config."
-  else
-    echo "Error: .bashrc file not found."
-    exit 1
-  fi
+	# Remove the csq directory
+	rm -rf "$CSQ_OPT_DIR"
 
-  echo "✅ Csq has been successfully uninstalled."
+	# Echo success message
+	echo "CSQ has been uninstalled"
 }
 
+function update_csq(){
+	# Check if the folders exists
 
-# Check command-line argument
-if [ "$1" == "uninstall" ]; then
-  uninstall_csq
-else
-  install_csq
+	if [[ $CSQ_INSTALL_DIR_EXISTS == false ]]; then
+		echo "CSQ is not installed"
+		exit 1
+	fi
+
+	# Copy the files to the csq directory, update if they already exist
+	cp -ur ./* "$CSQ_OPT_DIR"
+
+	# Make the entry point executable
+	chmod +x "$CSQ_ENTRY_POINT"
+
+	# Echo success message
+	echo "CSQ has been updated"
+}
+
+function print_help(){
+	echo "Usage: ./build.sh [OPTION]"
+	echo "Options:"
+	echo "	-i, --install		Install CSQ"
+	echo "	-u, --uninstall		Uninstall CSQ"
+	echo "	-U, --update		Update CSQ"
+	echo "	-h, --help		Print this help message"
+}
+
+# Check if the user wants to install or uninstall
+if [ $# -eq 0 ]; then
+	print_help
+	exit 1
 fi
+
+while [ "$1" != "" ]; do
+	case $1 in
+		-i | --install )        install_csq
+								;;
+		-u | --uninstall )      uninstall_csq
+								;;
+		-U | --update )         update_csq
+								;;
+		-h | --help )           print_help
+								exit 1
+								;;
+		* )                     print_help
+								exit 1
+	esac
+	shift
+done
