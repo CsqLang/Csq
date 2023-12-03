@@ -33,7 +33,7 @@ def printHelp():
     print("  -E, --preprocess\t\tGenerate preprocessed code")
     print("  -g, --debug\t\t\tGenerate debug symbols")
 
-def isFileValid():
+def isFileValid(file):
     """Check if the file is valid
         Check if the arguments passed are enough or and valid
     """
@@ -44,7 +44,7 @@ def isFileValid():
 
     # Check if the file exists
     try:
-        open(arguments[1], "r")
+        open(file, "r")
     except FileNotFoundError:
         printHelp()
         return False
@@ -170,6 +170,7 @@ def handleArguments():
     args_passed = len(arguments)
     isFilePassed = False
     keepFile = False
+    file_name = ""
 
     options = ["-h", "--help", "-v", "--version", "-u", "--uninstall", "-k", "--keep", "-o", "--output", "-O", "--optimize", "-c", "--compile", "-S", "--assembly", "-E", "--preprocess", "-g", "--debug"]
     compiler_flags = "-std=c++17" # Default compiler flags
@@ -179,8 +180,14 @@ def handleArguments():
     if args_passed == 1:
         printHelp()
         exit(1)
-    elif args_passed > 1 and arguments[1] not in options and isFileValid():
-        isFilePassed = True
+    else:
+        # Find the filename by checking all the arguments passed and checking if it is a file
+        # If more than one the first one with .csq extension is taken
+        for arg in arguments:
+            if arg.endswith(".csq"):
+                file_name = arg
+                isFilePassed = True
+                break
 
     # Populate the compiler flags
     if "-O" in arguments or "--optimize" in arguments:
@@ -202,8 +209,10 @@ def handleArguments():
     if "-o" in arguments or "--output" in arguments:
         index = arguments.index("-o") if "-o" in arguments else arguments.index("--output")
         compiler_flags += " -o " + arguments[index + 1]
+    elif ("-c" in arguments or "--compile" in arguments) and "-o" not in arguments and "--output" not in arguments and file_name != "":
+        compiler_flags += " -o " + file_name.replace(".csq", ".o")
     else:
-        compiler_flags += " -o " + arguments[1].replace(".csq", "")
+        compiler_flags += " -o " + file_name.replace(".csq", "")
 
     # Handle the options
     if "-h" in arguments or "--help" in arguments:
@@ -218,8 +227,8 @@ def handleArguments():
         keepFile = True
 
     # If the file is passed, compile it
-    if isFilePassed:
-        compileFile(arguments[1], compiler_flags, keepFile)
+    if isFilePassed and isFileValid(file_name):
+        compileFile(file_name, compiler_flags, keepFile)
     else:
         printHelp()
         exit(1)
