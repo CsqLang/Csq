@@ -74,7 +74,7 @@ def findIncludePath():
         Sometimes the environment variables are not set (or shell incorrectly configured)
 
     Check for the following locations:
-        1. $HOME/.csq/include/csq
+        1. $HOME/.local/include/csq
         2. /usr/local/include/csq
         3. /opt/csq
         4. /usr/include/csq
@@ -84,7 +84,7 @@ def findIncludePath():
     # Check for $HOME/.csq/include/csq
     home = getenv("HOME")
     if home is not None:
-        csq_include_path = home + "/.csq/include/csq"
+        csq_include_path = home + "/.local/include/csq"
         if path.exists(csq_include_path):
             return csq_include_path
 
