@@ -6,7 +6,7 @@ This file is to be treated as an entry point to the program
 Arguments passed to the program are checked here
 """
 
-from sys import argv as arguments
+from sys import argv as arguments, version_info
 from os import getenv, system, getcwd as pwd, path
 from Compiler.Compiletime.wrapper import bind
 from Compiler.Parser.parser import Compile
@@ -14,7 +14,21 @@ from Compiler.code_format import readCode, toTokens, writeCode
 
 VERSION = "4.3"
 
-def printHelp():
+def check_python_version():
+    """Check python version
+        Check if the python version is 3.10 or above
+        If not, print an error message and exit
+    """
+
+    if version_info.major < 3:
+        print("Error: Python version 3.10 or above required")
+        exit(1)
+
+    if version_info.minor < 10:
+        print("Error: Python version 3.10 or above required")
+        exit(1)
+
+def printHelp(exit_code = 1):
     """Print help
         Print the help message for the program
     """
@@ -32,6 +46,8 @@ def printHelp():
     print("  -S, --assembly\t\tGenerate assembly code")
     print("  -E, --preprocess\t\tGenerate preprocessed code")
     print("  -g, --debug\t\t\tGenerate debug symbols")
+
+    exit(exit_code)
 
 def isFileValid(file):
     """Check if the file is valid
@@ -116,7 +132,6 @@ def compileFile(file, options, keep = False):
     cpp_file = file.replace(".csq", ".cpp")
 
     final_code = bind(csq_include_path, compiled_code)
-    name = file.replace(".csq", "")
     writeCode(final_code, cpp_file)
 
     print("g++ {} {}".format(options, cpp_file))
@@ -150,6 +165,10 @@ def uninstall():
 
     # Remove the executable
     paths = system("whereis csq")
+    # Check if the paths are returned
+    if paths == 0:
+        print("Error: csq executable not installed, nothing to uninstall")
+        exit(1)
     paths = paths.split(" ")
     for path in paths:
         if path != "csq:":
@@ -178,13 +197,12 @@ def handleArguments():
     # The first argument passed should be either a filename or an option that doesn't require a filename
 
     if args_passed == 1:
-        printHelp()
-        exit(1)
+        printHelp(1)
     else:
         # Find the filename by checking all the arguments passed and checking if it is a file
         # If more than one the first one with .csq extension is taken
         for arg in arguments:
-            if arg.endswith(".csq"):
+            if arg.endswith(".csq") and arg not in options:
                 file_name = arg
                 isFilePassed = True
                 break
@@ -216,13 +234,12 @@ def handleArguments():
 
     # Handle the options
     if "-h" in arguments or "--help" in arguments:
-        printHelp()
-        exit(0)
+        printHelp(0)
     elif "-v" in arguments or "--version" in arguments:
         print("csq version {}".format(VERSION))
         exit(0)
     elif "-u" in arguments or "--uninstall" in arguments:
-        pass
+        uninstall()
     elif "-k" in arguments or "--keep" in arguments:
         keepFile = True
 
@@ -230,10 +247,10 @@ def handleArguments():
     if isFilePassed and isFileValid(file_name):
         compileFile(file_name, compiler_flags, keepFile)
     else:
-        printHelp()
-        exit(1)
+        printHelp(1)
 
 
 if __name__ == "__main__":
     # Handle the arguments passed
+    check_python_version()
     handleArguments()
