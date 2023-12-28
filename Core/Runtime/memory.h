@@ -45,6 +45,21 @@ struct Cell {
         vectorVal = new vector<Cell>(v);
         type = Type::COMPOUND;
     }
+    ~Cell() {
+    switch (type) {
+        case Type::STRING:
+            if (stringVal != nullptr) {
+                delete stringVal;
+            }
+            break;
+        case Type::COMPOUND:
+            if (vectorVal != nullptr) {
+                delete vectorVal;
+            }
+            break;
+        // Add cases for other types as needed
+    }
+}
     // Copy Constructor
     inline Cell(const Cell& other) : type(other.type) {
         switch (other.type) {
@@ -286,6 +301,7 @@ struct Cell {
         return false;
     }
 };
+
 
 // map<int, Cell> memory;
 // Collection for values
