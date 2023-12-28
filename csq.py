@@ -32,6 +32,7 @@ def printHelp():
     print("  -S, --assembly\t\tGenerate assembly code")
     print("  -E, --preprocess\t\tGenerate preprocessed code")
     print("  -g, --debug\t\t\tGenerate debug symbols")
+    print("  -l, --leaks\t\t\tCompile and find memory leaks in the code.")
 
 
 def isFileValid(file):
@@ -174,7 +175,7 @@ def handleArguments():
     keepFile = False
     file_name = ""
 
-    options = ["-h", "--help", "-v", "--version", "-u", "--uninstall", "-k", "--keep", "-o", "--output", "-O", "--optimize", "-c", "--compile", "-S", "--assembly", "-E", "--preprocess", "-g", "--debug"]
+    options = ["-h","-l","--leaks" "--help", "-v", "--version", "-u", "--uninstall", "-k", "--keep", "-o", "--output", "-O", "--optimize", "-c", "--compile", "-S", "--assembly", "-E", "--preprocess", "-g", "--debug"]
     compiler_flags = "-std=c++17" # Default compiler flags
 
     # The first argument passed should be either a filename or an option that doesn't require a filename
@@ -208,6 +209,9 @@ def handleArguments():
     if "-E" in arguments or "--preprocess" in arguments:
         compiler_flags += " -E"
 
+    if "-l" in arguments or "--leaks" in arguments:
+        compiler_flags += " -g -fsanitize=address"
+
     if "-o" in arguments or "--output" in arguments:
         index = arguments.index("-o") if "-o" in arguments else arguments.index("--output")
         compiler_flags += " -o " + arguments[index + 1]
@@ -220,6 +224,7 @@ def handleArguments():
     if "-h" in arguments or "--help" in arguments:
         printHelp()
         exit(0)
+    
     elif "-v" in arguments or "--version" in arguments:
         print("csq version {}".format(VERSION))
         exit(0)
