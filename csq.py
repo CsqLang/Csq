@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.10
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """ Program entry point
@@ -6,13 +6,27 @@ This file is to be treated as an entry point to the program
 Arguments passed to the program are checked here
 """
 
-from sys import argv as arguments
+from sys import argv as arguments, version_info
 from os import getenv, system, getcwd as pwd, path
 from Compiler.Compiletime.wrapper import bind
 from Compiler.Parser.parser import Compile
 from Compiler.code_format import readCode, toTokens, writeCode
 
 VERSION = "4.3"
+
+def check_python_version():
+    """Check python version
+        Check if the python version is 3.10 or above
+        If not, print an error message and exit
+    """
+
+    if version_info.major < 3:
+        print("Error: Python version 3.10 or above required")
+        exit(1)
+
+    if version_info.minor < 10:
+        print("Error: Python version 3.10 or above required")
+        exit(1)
 
 def printHelp():
     """Print help
@@ -243,4 +257,7 @@ def handleArguments():
 
 if __name__ == "__main__":
     # Handle the arguments passed
+	# Check the version first, then continue if
+	# 	all is good
+    check_python_version()
     handleArguments()
