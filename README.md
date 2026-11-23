@@ -1,7 +1,7 @@
 # Csq 4.3
 
 Hey there,
-This is the updated version of 4.3 which is having more concise syntax than the 4.1 and better compiler handling provided by AST.
+This is the updated version of 4.3 which has more concise syntax than the 4.1 and better compiler handling provided by AST.
 
 ### Benchmarking
 #### Csq vs Python3.9
@@ -25,12 +25,12 @@ To uninstall Csq, run the following command:
 csq <filename>
 ```
 
-## Rules.
+## Rules
 
--   Make sure that your code work properly.
+-   Make sure that your code works properly.
 -   After writing your code you should commit it.
 -   Don't commit two different things together.
--   After all things push your code to our **main branch**.
+-   After everything, push your code to our **main branch**.
 
 ## Versioning
 
@@ -46,7 +46,7 @@ This project follows Semantic Versioning (SemVer) for version numbering.
 - Going from `1.3.0` to `2.0.0`: Breaking change.
 
 
-## Contributing:
+## Contributing
 We welcome contributions from the open-source community. Feel free to fork the repository, make enhancements, and submit pull requests. Additionally, if you encounter any issues or have suggestions, please report them using the provided issue tracker.
 ## Contribution Workflow
  - https://csqlang.github.io/docs/Contribution_Workflow.html
